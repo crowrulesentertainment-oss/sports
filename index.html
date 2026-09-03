@@ -1,221 +1,5122 @@
 <!doctype html>
 <html lang="en">
 <head>
+
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#05070b">
-<meta name="description" content="CrowRules Sports — live sports, scores, schedules, Tacoma sports, original programming and more.">
+
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1">
+
+<meta
+  name="theme-color"
+  content="#05070b">
+
+<meta
+  name="description"
+  content="CrowRules Sports — live sports, scores, schedules, Tacoma sports, original programming and on-demand episodes.">
+
 <title>CrowRules Sports</title>
-<style>
-:root{
-  --bg:#05070b;--panel:#0b1018;--panel2:#101722;--line:#202a37;--text:#f4f7fb;
-  --muted:#8d99aa;--accent:#35b9ff;--accent2:#8b5cff;--danger:#ff4d6d;--good:#55e6a5;
-  --shadow:0 18px 50px rgba(0,0,0,.35);--radius:18px
-}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 80% 0%,rgba(53,185,255,.11),transparent 32%),radial-gradient(circle at 0% 30%,rgba(139,92,255,.09),transparent 30%),var(--bg);color:var(--text);font-family:Montserrat,Arial,sans-serif}
-a{text-decoration:none;color:inherit}button{font:inherit}
-.topline{height:3px;background:linear-gradient(90deg,var(--accent2),var(--accent),transparent)}
-.nav{position:sticky;top:0;z-index:50;background:rgba(5,7,11,.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
-.navin{max-width:1400px;margin:auto;padding:14px 22px;display:flex;align-items:center;gap:22px}
-.logo{font-family:Orbitron,Arial,sans-serif;font-weight:900;letter-spacing:1px;font-size:19px;white-space:nowrap}.logo span{color:var(--accent)}
-.links{display:flex;gap:5px;flex:1;overflow:auto}.links a{padding:9px 11px;color:var(--muted);font-size:13px;border-radius:9px;white-space:nowrap}.links a:hover,.links a.active{background:var(--panel2);color:var(--text)}
-.navbtn{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:9px 12px;border-radius:10px;cursor:pointer}
-.wrap{max-width:1400px;margin:auto;padding:28px 22px 70px}
-.hero{min-height:430px;border:1px solid var(--line);border-radius:28px;overflow:hidden;position:relative;display:grid;place-items:end;box-shadow:var(--shadow);background:linear-gradient(135deg,rgba(12,20,32,.88),rgba(4,7,12,.55)),radial-gradient(circle at 75% 30%,rgba(53,185,255,.28),transparent 28%),linear-gradient(125deg,#111a28,#05070b)}
-.hero:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,transparent 0 38px,rgba(255,255,255,.025) 39px 40px);opacity:.7}
-.hero:after{content:"";position:absolute;width:500px;height:500px;border:1px solid rgba(53,185,255,.14);border-radius:50%;right:-140px;top:-120px;box-shadow:0 0 0 70px rgba(53,185,255,.025),0 0 0 140px rgba(53,185,255,.02)}
-.heroContent{position:relative;z-index:2;padding:48px;max-width:760px}.eyebrow{font:700 12px Orbitron,Arial;letter-spacing:3px;color:var(--accent);text-transform:uppercase}.hero h1{font:900 clamp(42px,7vw,86px) Orbitron,Arial;margin:12px 0;line-height:.98}.hero p{color:#c0c9d5;max-width:650px;line-height:1.7}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.btn{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:13px 18px;border-radius:12px;font-weight:800;cursor:pointer}.btn.primary{background:var(--accent);color:#031019;border-color:var(--accent)}.btn:hover{transform:translateY(-1px)}
-.section{margin-top:34px}.sectionHead{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:15px}.sectionHead h2{font:800 23px Orbitron,Arial;margin:0}.sectionHead p{margin:5px 0 0;color:var(--muted);font-size:13px}.tiny{font-size:12px;color:var(--accent);font-weight:800}
-.liveGrid{display:grid;grid-template-columns:1.65fr .85fr;gap:18px}.player{min-height:360px;background:#020407;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;position:relative}.player iframe{width:100%;height:100%;min-height:360px;border:0}.playerEmpty{min-height:360px;display:grid;place-items:center;text-align:center;padding:30px;background:radial-gradient(circle,rgba(53,185,255,.1),transparent 42%)}.playIcon{font-size:48px}.sidePanel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px}.liveBadge{display:inline-flex;gap:7px;align-items:center;color:#fff;background:rgba(255,77,109,.14);border:1px solid rgba(255,77,109,.4);padding:7px 10px;border-radius:999px;font-size:11px;font-weight:900}.dot{width:7px;height:7px;border-radius:50%;background:var(--danger);box-shadow:0 0 12px var(--danger)}.sidePanel h3{font:800 21px Orbitron;margin:18px 0 8px}.meta{color:var(--muted);font-size:13px;line-height:1.7}.divider{height:1px;background:var(--line);margin:18px 0}.statrow{display:flex;justify-content:space-between;padding:8px 0;font-size:13px}.statrow b{font-family:Orbitron}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:var(--radius);padding:17px;min-height:150px;transition:.2s}.card:hover{transform:translateY(-3px);border-color:#354455}.card .tag{font-size:10px;color:var(--accent);font-weight:900;letter-spacing:1.5px}.card h3{margin:12px 0 7px;font-size:16px}.card p{margin:0;color:var(--muted);font-size:12px;line-height:1.55}
-.scores{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.score{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:17px}.scoreTop{display:flex;justify-content:space-between;color:var(--muted);font-size:11px}.teams{display:grid;gap:9px;margin-top:16px}.team{display:flex;align-items:center;justify-content:space-between;font-weight:800}.team span:last-child{font:900 21px Orbitron}.status{color:var(--good);font-size:10px;font-weight:900;text-transform:uppercase}
-.schedule{overflow:auto;border:1px solid var(--line);border-radius:var(--radius)}table{width:100%;border-collapse:collapse;min-width:720px}th,td{text-align:left;padding:15px;border-bottom:1px solid var(--line);font-size:13px}th{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1px}tr:last-child td{border:0}.time{font-family:Orbitron;font-weight:800}.liveText{color:var(--danger);font-weight:900}
-.poll{background:linear-gradient(120deg,rgba(53,185,255,.1),rgba(139,92,255,.08));border:1px solid var(--line);border-radius:var(--radius);padding:25px;display:grid;grid-template-columns:1fr 1fr;gap:25px;align-items:center}.poll h2{font:800 24px Orbitron;margin:0 0 8px}.poll p{color:var(--muted);font-size:13px}.pollBtns{display:grid;gap:9px}.pollBtn{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:11px;padding:13px;text-align:left;cursor:pointer}.pollBtn:hover{border-color:var(--accent)}.bar{height:6px;background:#1a2330;border-radius:99px;overflow:hidden;margin-top:8px}.fill{height:100%;width:50%;background:linear-gradient(90deg,var(--accent2),var(--accent))}
-.footer{border-top:1px solid var(--line);padding:25px 22px;color:var(--muted);font-size:12px;text-align:center}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:none;place-items:center;z-index:100;padding:20px}.modal.show{display:grid}.modalBox{width:min(620px,100%);background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:24px}.modalBox h2{font-family:Orbitron}.close{float:right;background:none;border:0;color:var(--muted);font-size:22px;cursor:pointer}
-@media(max-width:950px){.cards{grid-template-columns:repeat(2,1fr)}.scores{grid-template-columns:1fr}.liveGrid{grid-template-columns:1fr}.poll{grid-template-columns:1fr}.heroContent{padding:34px}}
-@media(max-width:600px){.wrap{padding:18px 14px 50px}.navin{padding:12px 14px}.links{display:none}.hero{min-height:510px}.heroContent{padding:25px}.hero h1{font-size:42px}.cards{grid-template-columns:1fr}.player iframe,.playerEmpty{min-height:250px}}
-</style>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Orbitron:wght@500;700;800;900&display=swap" rel="stylesheet">
+
+<link
+  href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Orbitron:wght@500;700;800;900&display=swap"
+  rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+/* =========================================================
+   CROWRULES SPORTS v2.2
+   CINEMATIC BROADCAST EDITION
+========================================================= */
+
+:root{
+
+  --bg:#05070b;
+  --bg2:#070b11;
+
+  --panel:#0b1018;
+  --panel2:#101722;
+  --panel3:#151d29;
+
+  --line:#202a37;
+  --line2:#344253;
+
+  --text:#f4f7fb;
+  --muted:#8d99aa;
+
+  --accent:#35b9ff;
+  --accent2:#8b5cff;
+
+  --danger:#ff4d6d;
+  --good:#55e6a5;
+  --warning:#ffc857;
+
+  --shadow:
+    0 18px 50px rgba(0,0,0,.35);
+
+  --radius:18px;
+
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+
+  margin:0;
+
+  background:
+
+    radial-gradient(
+      circle at 80% 0%,
+      rgba(53,185,255,.11),
+      transparent 32%
+    ),
+
+    radial-gradient(
+      circle at 0% 30%,
+      rgba(139,92,255,.09),
+      transparent 30%
+    ),
+
+    var(--bg);
+
+  color:var(--text);
+
+  font-family:
+    Montserrat,
+    Arial,
+    sans-serif;
+
+}
+
+body.introLock{
+  overflow:hidden;
+}
+
+a{
+  text-decoration:none;
+  color:inherit;
+}
+
+button,
+input,
+select,
+textarea{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+.topline{
+
+  height:3px;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--accent2),
+      var(--accent),
+      transparent
+    );
+
+}
+
+
+/* =========================================================
+   CINEMATIC INTRO
+========================================================= */
+
+.sportsIntro{
+
+  position:fixed;
+
+  inset:0;
+
+  z-index:9999;
+
+  overflow:hidden;
+
+  display:grid;
+
+  place-items:center;
+
+  background:
+
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(53,185,255,.10),
+      transparent 35%
+    ),
+
+    #020407;
+
+  transition:
+    opacity 1s ease,
+    visibility 1s ease;
+
+}
+
+.sportsIntro.hide{
+
+  opacity:0;
+
+  visibility:hidden;
+
+  pointer-events:none;
+
+}
+
+.introNoise{
+
+  position:absolute;
+
+  inset:-50%;
+
+  opacity:.055;
+
+  background:
+    repeating-radial-gradient(
+      circle,
+      transparent 0 2px,
+      rgba(255,255,255,.3) 3px 4px
+    );
+
+  animation:
+    introNoiseMove .15s infinite;
+
+}
+
+@keyframes introNoiseMove{
+
+  0%{
+    transform:translate(0,0);
+  }
+
+  25%{
+    transform:translate(2%,-1%);
+  }
+
+  50%{
+    transform:translate(-1%,2%);
+  }
+
+  75%{
+    transform:translate(1%,1%);
+  }
+
+  100%{
+    transform:translate(0,0);
+  }
+
+}
+
+.introScanlines{
+
+  position:absolute;
+
+  inset:0;
+
+  opacity:.12;
+
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 3px,
+      rgba(255,255,255,.08) 4px
+    );
+
+}
+
+.introLight{
+
+  position:absolute;
+
+  width:70vw;
+
+  height:70vw;
+
+  border-radius:50%;
+
+  filter:blur(90px);
+
+  opacity:.13;
+
+}
+
+.introLightOne{
+
+  left:-30vw;
+
+  top:-20vw;
+
+  background:var(--accent);
+
+  animation:
+    introLightOne 4s ease-in-out infinite;
+
+}
+
+.introLightTwo{
+
+  right:-30vw;
+
+  bottom:-20vw;
+
+  background:var(--accent2);
+
+  animation:
+    introLightTwo 4s ease-in-out infinite;
+
+}
+
+@keyframes introLightOne{
+
+  0%,100%{
+    transform:translate(0,0);
+  }
+
+  50%{
+    transform:translate(20vw,10vh);
+  }
+
+}
+
+@keyframes introLightTwo{
+
+  0%,100%{
+    transform:translate(0,0);
+  }
+
+  50%{
+    transform:translate(-20vw,-10vh);
+  }
+
+}
+
+.introContent{
+
+  position:relative;
+
+  z-index:3;
+
+  text-align:center;
+
+  animation:
+    introReveal 3.8s cubic-bezier(.2,.7,.2,1)
+    forwards;
+
+}
+
+@keyframes introReveal{
+
+  0%{
+
+    opacity:0;
+
+    transform:
+      scale(1.35);
+
+    filter:blur(18px);
+
+  }
+
+  20%{
+
+    opacity:1;
+
+    filter:blur(0);
+
+  }
+
+  75%{
+
+    opacity:1;
+
+    transform:scale(1);
+
+  }
+
+  100%{
+
+    opacity:1;
+
+    transform:scale(1);
+
+  }
+
+}
+
+.introPre{
+
+  color:var(--muted);
+
+  font:
+    700 10px Orbitron;
+
+  letter-spacing:4px;
+
+  margin-bottom:25px;
+
+}
+
+.introLogo{
+
+  font:
+    900 clamp(48px,11vw,130px)
+    Orbitron;
+
+  letter-spacing:-4px;
+
+  line-height:.85;
+
+  text-shadow:
+
+    0 0 25px
+    rgba(53,185,255,.35),
+
+    0 0 80px
+    rgba(53,185,255,.18);
+
+}
+
+.introLogo span{
+  color:var(--accent);
+}
+
+.introSports{
+
+  margin-top:12px;
+
+  font:
+    900 clamp(22px,4vw,52px)
+    Orbitron;
+
+  letter-spacing:12px;
+
+}
+
+.introLine{
+
+  width:min(420px,70vw);
+
+  height:1px;
+
+  margin:30px auto;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      var(--accent),
+      transparent
+    );
+
+  box-shadow:
+    0 0 20px var(--accent);
+
+}
+
+.introTagline{
+
+  font:
+    800 clamp(15px,2vw,25px)
+    Orbitron;
+
+  letter-spacing:3px;
+
+}
+
+.introSub{
+
+  margin-top:14px;
+
+  color:var(--muted);
+
+  font-size:9px;
+
+  font-weight:900;
+
+  letter-spacing:4px;
+
+}
+
+.skipIntro{
+
+  position:absolute;
+
+  z-index:5;
+
+  right:25px;
+
+  bottom:25px;
+
+  padding:10px 14px;
+
+  border:1px solid var(--line2);
+
+  border-radius:9px;
+
+  background:
+    rgba(11,16,24,.8);
+
+  color:var(--muted);
+
+  font-size:10px;
+
+  font-weight:900;
+
+  letter-spacing:1px;
+
+}
+
+.skipIntro:hover{
+
+  color:white;
+
+  border-color:var(--accent);
+
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+.nav{
+
+  position:sticky;
+
+  top:0;
+
+  z-index:50;
+
+  background:
+    rgba(5,7,11,.88);
+
+  backdrop-filter:
+    blur(16px);
+
+  border-bottom:
+    1px solid var(--line);
+
+}
+
+.navin{
+
+  max-width:1400px;
+
+  margin:auto;
+
+  padding:14px 22px;
+
+  display:flex;
+
+  align-items:center;
+
+  gap:22px;
+
+}
+
+.logo{
+
+  font:
+    900 19px Orbitron;
+
+  letter-spacing:1px;
+
+  white-space:nowrap;
+
+}
+
+.logo span{
+  color:var(--accent);
+}
+
+.links{
+
+  display:flex;
+
+  gap:5px;
+
+  flex:1;
+
+  overflow:auto;
+
+}
+
+.links a{
+
+  padding:9px 11px;
+
+  color:var(--muted);
+
+  font-size:13px;
+
+  border-radius:9px;
+
+  white-space:nowrap;
+
+}
+
+.links a:hover,
+.links a.active{
+
+  background:var(--panel2);
+
+  color:var(--text);
+
+}
+
+.navbtn{
+
+  border:
+    1px solid var(--line);
+
+  background:
+    var(--panel);
+
+  color:var(--text);
+
+  padding:9px 12px;
+
+  border-radius:10px;
+
+}
+
+
+/* =========================================================
+   LAYOUT
+========================================================= */
+
+.wrap{
+
+  max-width:1400px;
+
+  margin:auto;
+
+  padding:
+    28px 22px 70px;
+
+}
+
+.section{
+  margin-top:34px;
+}
+
+.sectionHead{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:end;
+
+  gap:12px;
+
+  margin-bottom:15px;
+
+}
+
+.sectionHead h2{
+
+  font:
+    800 23px Orbitron;
+
+  margin:0;
+
+}
+
+.sectionHead p{
+
+  margin:
+    5px 0 0;
+
+  color:var(--muted);
+
+  font-size:13px;
+
+}
+
+.tiny{
+
+  font-size:12px;
+
+  color:var(--accent);
+
+  font-weight:800;
+
+}
+
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.hero{
+
+  min-height:430px;
+
+  border:
+    1px solid var(--line);
+
+  border-radius:28px;
+
+  overflow:hidden;
+
+  position:relative;
+
+  display:grid;
+
+  place-items:end;
+
+  box-shadow:var(--shadow);
+
+  background:
+
+    linear-gradient(
+      135deg,
+      rgba(12,20,32,.88),
+      rgba(4,7,12,.55)
+    ),
+
+    radial-gradient(
+      circle at 75% 30%,
+      rgba(53,185,255,.28),
+      transparent 28%
+    ),
+
+    linear-gradient(
+      125deg,
+      #111a28,
+      #05070b
+    );
+
+}
+
+.hero:before{
+
+  content:"";
+
+  position:absolute;
+
+  inset:0;
+
+  background:
+    repeating-linear-gradient(
+      115deg,
+      transparent 0 38px,
+      rgba(255,255,255,.025)
+      39px 40px
+    );
+
+  opacity:.7;
+
+}
+
+.hero:after{
+
+  content:"";
+
+  position:absolute;
+
+  width:500px;
+
+  height:500px;
+
+  border:
+    1px solid
+    rgba(53,185,255,.14);
+
+  border-radius:50%;
+
+  right:-140px;
+
+  top:-120px;
+
+  box-shadow:
+
+    0 0 0 70px
+    rgba(53,185,255,.025),
+
+    0 0 0 140px
+    rgba(53,185,255,.02);
+
+}
+
+.heroContent{
+
+  position:relative;
+
+  z-index:2;
+
+  padding:48px;
+
+  max-width:760px;
+
+}
+
+.eyebrow{
+
+  font:
+    700 12px Orbitron;
+
+  letter-spacing:3px;
+
+  color:var(--accent);
+
+  text-transform:uppercase;
+
+}
+
+.hero h1{
+
+  font:
+    900 clamp(42px,7vw,86px)
+    Orbitron;
+
+  margin:12px 0;
+
+  line-height:.98;
+
+}
+
+.hero p{
+
+  color:#c0c9d5;
+
+  max-width:650px;
+
+  line-height:1.7;
+
+}
+
+.actions{
+
+  display:flex;
+
+  gap:10px;
+
+  flex-wrap:wrap;
+
+  margin-top:24px;
+
+}
+
+.btn{
+
+  border:
+    1px solid var(--line);
+
+  background:
+    var(--panel);
+
+  color:var(--text);
+
+  padding:13px 18px;
+
+  border-radius:12px;
+
+  font-weight:800;
+
+}
+
+.btn:hover{
+
+  transform:translateY(-1px);
+
+  border-color:var(--accent);
+
+}
+
+.btn.primary{
+
+  background:var(--accent);
+
+  color:#031019;
+
+  border-color:var(--accent);
+
+}
+
+.btn.danger{
+
+  border-color:
+    rgba(255,77,109,.4);
+
+  color:#ff8ba0;
+
+}
+
+
+/* =========================================================
+   LIVE
+========================================================= */
+
+.liveGrid{
+
+  display:grid;
+
+  grid-template-columns:
+    1.65fr .85fr;
+
+  gap:18px;
+
+}
+
+.player{
+
+  min-height:360px;
+
+  background:#020407;
+
+  border:
+    1px solid var(--line);
+
+  border-radius:var(--radius);
+
+  overflow:hidden;
+
+  position:relative;
+
+}
+
+.player iframe{
+
+  width:100%;
+
+  height:100%;
+
+  min-height:360px;
+
+  border:0;
+
+}
+
+.player video{
+
+  width:100%;
+
+  min-height:360px;
+
+  background:#000;
+
+}
+
+.playerEmpty{
+
+  min-height:360px;
+
+  display:grid;
+
+  place-items:center;
+
+  text-align:center;
+
+  padding:30px;
+
+  background:
+
+    radial-gradient(
+      circle,
+      rgba(53,185,255,.1),
+      transparent 42%
+    );
+
+}
+
+.playIcon{
+  font-size:48px;
+}
+
+.sidePanel{
+
+  background:var(--panel);
+
+  border:
+    1px solid var(--line);
+
+  border-radius:var(--radius);
+
+  padding:20px;
+
+}
+
+.liveBadge{
+
+  display:inline-flex;
+
+  gap:7px;
+
+  align-items:center;
+
+  color:#fff;
+
+  background:
+    rgba(255,77,109,.14);
+
+  border:
+    1px solid
+    rgba(255,77,109,.4);
+
+  padding:7px 10px;
+
+  border-radius:999px;
+
+  font-size:11px;
+
+  font-weight:900;
+
+}
+
+.dot{
+
+  width:7px;
+
+  height:7px;
+
+  border-radius:50%;
+
+  background:var(--danger);
+
+  box-shadow:
+    0 0 12px var(--danger);
+
+}
+
+.sidePanel h3{
+
+  font:
+    800 21px Orbitron;
+
+  margin:18px 0 8px;
+
+}
+
+.meta{
+
+  color:var(--muted);
+
+  font-size:13px;
+
+  line-height:1.7;
+
+}
+
+.divider{
+
+  height:1px;
+
+  background:var(--line);
+
+  margin:18px 0;
+
+}
+
+.statrow{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  padding:8px 0;
+
+  font-size:13px;
+
+}
+
+.statrow b{
+  font-family:Orbitron;
+}
+
+
+/* =========================================================
+   SCORE CARDS
+========================================================= */
+
+.scores{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(3,1fr);
+
+  gap:14px;
+
+}
+
+.score{
+
+  background:var(--panel);
+
+  border:
+    1px solid var(--line);
+
+  border-radius:16px;
+
+  padding:17px;
+
+}
+
+.scoreTop{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  color:var(--muted);
+
+  font-size:11px;
+
+}
+
+.teams{
+
+  display:grid;
+
+  gap:9px;
+
+  margin-top:16px;
+
+}
+
+.team{
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:space-between;
+
+  font-weight:800;
+
+}
+
+.team span:last-child{
+
+  font:
+    900 21px Orbitron;
+
+}
+
+.status{
+
+  color:var(--good);
+
+  font-size:10px;
+
+  font-weight:900;
+
+  text-transform:uppercase;
+
+}
+
+
+/* =========================================================
+   CARDS
+========================================================= */
+
+.cards{
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(4,1fr);
+
+  gap:14px;
+
+}
+
+.card{
+
+  background:
+    linear-gradient(
+      180deg,
+      var(--panel2),
+      var(--panel)
+    );
+
+  border:
+    1px solid var(--line);
+
+  border-radius:var(--radius);
+
+  padding:17px;
+
+  min-height:150px;
+
+  transition:.2s;
+
+}
+
+.card:hover{
+
+  transform:translateY(-3px);
+
+  border-color:#354455;
+
+}
+
+.cardVisual{
+
+  height:110px;
+
+  margin:-17px -17px 15px;
+
+  background:
+
+    radial-gradient(
+      circle at 70% 30%,
+      rgba(53,185,255,.24),
+      transparent 30%
+    ),
+
+    linear-gradient(
+      135deg,
+      #111a28,
+      #06090e
+    );
+
+  border-bottom:
+    1px solid var(--line);
+
+}
+
+.card .tag,
+.tag{
+
+  font-size:10px;
+
+  color:var(--accent);
+
+  font-weight:900;
+
+  letter-spacing:1.5px;
+
+}
+
+.card h3{
+
+  margin:12px 0 7px;
+
+  font-size:16px;
+
+}
+
+.card p{
+
+  margin:0;
+
+  color:var(--muted);
+
+  font-size:12px;
+
+  line-height:1.55;
+
+}
+
+.cardAction{
+
+  display:inline-block;
+
+  margin-top:15px;
+
+  color:var(--accent);
+
+  font-size:11px;
+
+  font-weight:900;
+
+}
+
+
+/* =========================================================
+   SCHEDULE
+========================================================= */
+
+.schedule{
+
+  overflow:auto;
+
+  border:
+    1px solid var(--line);
+
+  border-radius:var(--radius);
+
+}
+
+table{
+
+  width:100%;
+
+  border-collapse:collapse;
+
+  min-width:720px;
+
+}
+
+th,
+td{
+
+  text-align:left;
+
+  padding:15px;
+
+  border-bottom:
+    1px solid var(--line);
+
+  font-size:13px;
+
+}
+
+th{
+
+  color:var(--muted);
+
+  font-size:10px;
+
+  text-transform:uppercase;
+
+  letter-spacing:1px;
+
+}
+
+tr:last-child td{
+  border:0;
+}
+
+.time{
+
+  font-family:Orbitron;
+
+  font-weight:800;
+
+}
+
+.liveText{
+
+  color:var(--danger);
+
+  font-weight:900;
+
+}
+
+
+/* =========================================================
+   EPISODE UPLOAD CENTER
+========================================================= */
+
+.episodeAdmin{
+
+  padding:25px;
+
+  background:
+
+    linear-gradient(
+      135deg,
+      rgba(53,185,255,.07),
+      rgba(139,92,255,.06)
+    ),
+
+    var(--panel);
+
+  border:
+    1px solid var(--line);
+
+  border-radius:var(--radius);
+
+}
+
+.uploadHeader{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+  gap:20px;
+
+  margin-bottom:25px;
+
+}
+
+.uploadHeader h3{
+
+  margin:8px 0;
+
+  font:
+    800 20px Orbitron;
+
+}
+
+.uploadHeader p{
+
+  margin:0;
+
+  color:var(--muted);
+
+  font-size:12px;
+
+}
+
+.uploadIcon{
+
+  width:65px;
+
+  height:65px;
+
+  display:grid;
+
+  place-items:center;
+
+  border-radius:16px;
+
+  background:
+    rgba(53,185,255,.08);
+
+  border:
+    1px solid
+    rgba(53,185,255,.25);
+
+  color:var(--accent);
+
+  font:
+    900 28px Orbitron;
+
+}
+
+.formGrid{
+
+  display:grid;
+
+  grid-template-columns:
+    2fr 2fr 1fr 1fr;
+
+  gap:12px;
+
+}
+
+.episodeForm{
+
+  display:grid;
+
+  gap:15px;
+
+}
+
+.episodeForm label{
+
+  display:grid;
+
+  gap:7px;
+
+}
+
+.episodeForm label > span{
+
+  color:var(--muted);
+
+  font-size:10px;
+
+  font-weight:900;
+
+  text-transform:uppercase;
+
+  letter-spacing:1px;
+
+}
+
+.episodeForm input,
+.episodeForm textarea,
+.episodeForm select{
+
+  width:100%;
+
+  border:
+    1px solid var(--line);
+
+  outline:none;
+
+  background:var(--bg2);
+
+  color:var(--text);
+
+  border-radius:10px;
+
+  padding:12px;
+
+}
+
+.episodeForm input:focus,
+.episodeForm textarea:focus,
+.episodeForm select:focus{
+
+  border-color:var(--accent);
+
+}
+
+.fileDrop{
+
+  min-height:110px;
+
+  display:grid!important;
+
+  place-items:center;
+
+  text-align:center;
+
+  border:
+    1px dashed var(--line2);
+
+  border-radius:14px;
+
+  background:
+    rgba(255,255,255,.015);
+
+  cursor:pointer;
+
+}
+
+.fileDrop:hover{
+
+  border-color:var(--accent);
+
+  background:
+    rgba(53,185,255,.035);
+
+}
+
+.fileDrop input{
+  display:none;
+}
+
+.fileDrop strong{
+
+  display:block;
+
+  color:var(--accent);
+
+  font:
+    800 13px Orbitron;
+
+}
+
+.fileDrop small{
+
+  display:block;
+
+  margin-top:7px;
+
+  color:var(--muted);
+
+  font-size:10px;
+
+}
+
+.uploadProgress{
+
+  height:7px;
+
+  overflow:hidden;
+
+  border-radius:99px;
+
+  background:#17202c;
+
+}
+
+.uploadProgress div{
+
+  width:0%;
+
+  height:100%;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--accent2),
+      var(--accent)
+    );
+
+  transition:width .25s;
+
+}
+
+.uploadStatus{
+
+  color:var(--muted);
+
+  font-size:11px;
+
+}
+
+.episodeLibraryHead{
+  margin-top:30px;
+}
+
+
+/* =========================================================
+   AUTH
+========================================================= */
+
+.authBox{
+
+  padding:20px;
+
+  background:var(--panel);
+
+  border:
+    1px solid var(--line);
+
+  border-radius:var(--radius);
+
+}
+
+.authGrid{
+
+  display:grid;
+
+  grid-template-columns:
+    1fr 1fr auto;
+
+  gap:10px;
+
+}
+
+.authBox input{
+
+  border:
+    1px solid var(--line);
+
+  background:var(--bg2);
+
+  color:var(--text);
+
+  padding:12px;
+
+  border-radius:10px;
+
+  outline:none;
+
+}
+
+.authBox input:focus{
+
+  border-color:var(--accent);
+
+}
+
+.authState{
+
+  margin-top:10px;
+
+  color:var(--muted);
+
+  font-size:11px;
+
+}
+
+.hidden{
+  display:none!important;
+}
+
+
+/* =========================================================
+   POLL
+========================================================= */
+
+.poll{
+
+  background:
+
+    linear-gradient(
+      120deg,
+      rgba(53,185,255,.1),
+      rgba(139,92,255,.08)
+    );
+
+  border:
+    1px solid var(--line);
+
+  border-radius:var(--radius);
+
+  padding:25px;
+
+  display:grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap:25px;
+
+  align-items:center;
+
+}
+
+.poll h2{
+
+  font:
+    800 24px Orbitron;
+
+  margin:0 0 8px;
+
+}
+
+.poll p{
+
+  color:var(--muted);
+
+  font-size:13px;
+
+}
+
+.pollBtns{
+
+  display:grid;
+
+  gap:9px;
+
+}
+
+.pollBtn{
+
+  background:var(--panel);
+
+  border:
+    1px solid var(--line);
+
+  color:var(--text);
+
+  border-radius:11px;
+
+  padding:13px;
+
+  text-align:left;
+
+}
+
+.pollBtn:hover{
+
+  border-color:var(--accent);
+
+}
+
+.bar{
+
+  height:6px;
+
+  background:#1a2330;
+
+  border-radius:99px;
+
+  overflow:hidden;
+
+  margin-top:8px;
+
+}
+
+.fill{
+
+  height:100%;
+
+  width:0%;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--accent2),
+      var(--accent)
+    );
+
+}
+
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.modal{
+
+  position:fixed;
+
+  inset:0;
+
+  background:
+    rgba(0,0,0,.7);
+
+  backdrop-filter:
+    blur(8px);
+
+  display:none;
+
+  place-items:center;
+
+  z-index:100;
+
+  padding:20px;
+
+}
+
+.modal.show{
+  display:grid;
+}
+
+.modalBox{
+
+  width:min(680px,100%);
+
+  max-height:90vh;
+
+  overflow:auto;
+
+  background:var(--panel);
+
+  border:
+    1px solid var(--line);
+
+  border-radius:20px;
+
+  padding:24px;
+
+}
+
+.modalBox h2{
+  font-family:Orbitron;
+}
+
+.close{
+
+  float:right;
+
+  background:none;
+
+  border:0;
+
+  color:var(--muted);
+
+  font-size:22px;
+
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+.toast{
+
+  position:fixed;
+
+  right:20px;
+
+  bottom:20px;
+
+  z-index:500;
+
+  max-width:350px;
+
+  padding:14px 17px;
+
+  background:var(--panel3);
+
+  border:
+    1px solid var(--line2);
+
+  border-radius:12px;
+
+  box-shadow:var(--shadow);
+
+  color:white;
+
+  font-size:12px;
+
+  opacity:0;
+
+  transform:translateY(15px);
+
+  pointer-events:none;
+
+  transition:.25s;
+
+}
+
+.toast.show{
+
+  opacity:1;
+
+  transform:translateY(0);
+
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.footer{
+
+  border-top:
+    1px solid var(--line);
+
+  padding:25px 22px;
+
+  color:var(--muted);
+
+  font-size:12px;
+
+  text-align:center;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:950px){
+
+  .cards{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .scores{
+    grid-template-columns:1fr;
+  }
+
+  .liveGrid{
+    grid-template-columns:1fr;
+  }
+
+  .poll{
+    grid-template-columns:1fr;
+  }
+
+  .formGrid{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .authGrid{
+    grid-template-columns:1fr 1fr;
+  }
+
+}
+
+@media(max-width:600px){
+
+  .wrap{
+    padding:18px 14px 50px;
+  }
+
+  .navin{
+    padding:12px 14px;
+  }
+
+  .links{
+    display:none;
+  }
+
+  .hero{
+    min-height:510px;
+  }
+
+  .heroContent{
+    padding:25px;
+  }
+
+  .hero h1{
+    font-size:42px;
+  }
+
+  .cards{
+    grid-template-columns:1fr;
+  }
+
+  .player iframe,
+  .player video,
+  .playerEmpty{
+    min-height:250px;
+  }
+
+  .formGrid{
+    grid-template-columns:1fr;
+  }
+
+  .authGrid{
+    grid-template-columns:1fr;
+  }
+
+  .uploadHeader{
+    align-items:flex-start;
+  }
+
+}
+
+</style>
 </head>
+
 <body>
+
 <div class="topline"></div>
-<header class="nav">
-  <div class="navin">
-    <a class="logo" href="index.html">CROW<span>RULES</span> SPORTS</a>
-    <nav class="links">
-      <a class="active" href="#home">Home</a><a href="#live">Live</a><a href="#scores">Scores</a><a href="#schedule">Schedule</a>
-      <a href="#news">News</a><a href="#shows">Shows</a><a href="#tacoma">Tacoma Sports</a>
-    </nav>
-    <button class="navbtn" onclick="openInfo()">☰</button>
-  </div>
-</header>
 
-<main class="wrap" id="home">
-<section class="hero">
-  <div class="heroContent">
-    <div class="eyebrow">CrowRules Entertainment • Sports Division</div>
-    <h1>THE GAME<br>IS ALWAYS ON.</h1>
-    <p>Welcome to CrowRules Sports — an independent sports hub for live coverage, scores, schedules, local sports, original programming, interviews and the stories beyond the scoreboard.</p>
-    <div class="actions">
-      <a class="btn primary" href="#live">WATCH LIVE</a>
-      <a class="btn" href="#scores">TODAY'S SCORES</a>
-      <a class="btn" href="#shows">ORIGINAL SHOWS</a>
+
+<!-- =========================================================
+     CINEMATIC INTRO
+========================================================= -->
+
+<div
+  id="sportsIntro"
+  class="sportsIntro">
+
+  <div class="introNoise"></div>
+
+  <div class="introScanlines"></div>
+
+  <div class="introLight introLightOne"></div>
+
+  <div class="introLight introLightTwo"></div>
+
+  <div class="introContent">
+
+    <div class="introPre">
+      CROW RULES ENTERTAINMENT PRESENTS
     </div>
-  </div>
-</section>
 
-<section class="section" id="live">
-  <div class="sectionHead"><div><h2>LIVE SPORTS</h2><p>Your live broadcast center.</p></div><span class="liveBadge"><i class="dot"></i> LIVE READY</span></div>
-  <div class="liveGrid">
-    <div class="player" id="player">
-      <div class="playerEmpty"><div><div class="playIcon">▶</div><h2>CrowRules Sports Live</h2><p class="meta">Add a YouTube Live video ID in the JavaScript settings to activate the player.</p><button class="btn primary" onclick="configureDemo()">LOAD DEMO PLAYER</button></div></div>
+    <div class="introLogo">
+      CROW<span>RULES</span>
     </div>
-    <aside class="sidePanel">
-      <span class="liveBadge"><i class="dot"></i> BROADCAST CENTER</span>
-      <h3>Live Sports</h3>
-      <p class="meta">Designed for CrowRules Sports broadcasts, pop-up events, watch-alongs, local coverage and future 24/7 programming.</p>
-      <div class="divider"></div>
-      <div class="statrow"><span>Network</span><b>CROWSPORTS</b></div>
-      <div class="statrow"><span>Player</span><b>YouTube</b></div>
-      <div class="statrow"><span>Data</span><b>SUPABASE READY</b></div>
-      <div class="divider"></div>
-      <button class="btn" style="width:100%" onclick="openInfo()">Broadcast Info</button>
-    </aside>
-  </div>
-</section>
 
-<section class="section" id="scores">
-  <div class="sectionHead"><div><h2>TODAY'S SCORES</h2><p>Demo data — ready to connect to Supabase or a sports data provider.</p></div><span class="tiny">LIVE SCOREBOARD</span></div>
-  <div class="scores" id="scoreGrid"></div>
-</section>
-
-<section class="section" id="schedule">
-  <div class="sectionHead"><div><h2>CROWRULES SCHEDULE</h2><p>Build your own sports-network programming grid.</p></div></div>
-  <div class="schedule"><table><thead><tr><th>Time</th><th>Program</th><th>Category</th><th>Status</th></tr></thead><tbody id="scheduleRows"></tbody></table></div>
-</section>
-
-<section class="section" id="news">
-  <div class="sectionHead"><div><h2>LATEST SPORTS</h2><p>News, commentary and stories beyond the score.</p></div></div>
-  <div class="cards">
-    <article class="card"><span class="tag">LOCAL</span><h3>Tacoma Sports Weekly</h3><p>Local teams, athletes and events across the South Sound.</p></article>
-    <article class="card"><span class="tag">COMMENTARY</span><h3>The Sports Crow</h3><p>Independent opinions, reactions and conversations about the biggest games.</p></article>
-    <article class="card"><span class="tag">FEATURE</span><h3>Beyond the Score</h3><p>Meet the people whose stories make sports matter.</p></article>
-    <article class="card"><span class="tag">HIGHLIGHTS</span><h3>Game Recap</h3><p>Quick recaps, standout moments and what happens next.</p></article>
-  </div>
-</section>
-
-<section class="section" id="shows">
-  <div class="sectionHead"><div><h2>ORIGINAL SHOWS</h2><p>CrowRules Sports programming.</p></div></div>
-  <div class="cards">
-    <article class="card"><span class="tag">WEEKLY</span><h3>CrowRules Sports Tonight</h3><p>Sports news, headlines and conversation.</p></article>
-    <article class="card"><span class="tag">ANALYSIS</span><h3>The Breakdown</h3><p>Breaking down games, players, decisions and trends.</p></article>
-    <article class="card"><span class="tag">LOCAL</span><h3>Tacoma Sports Weekly</h3><p>A dedicated spotlight on the local sports scene.</p></article>
-    <article class="card"><span class="tag">LATE NIGHT</span><h3>Overtime</h3><p>When the game ends, the conversation begins.</p></article>
-  </div>
-</section>
-
-<section class="section" id="tacoma">
-  <div class="sectionHead"><div><h2>TACOMA SPORTS</h2><p>Local coverage is at the heart of CrowRules Sports.</p></div></div>
-  <div class="cards">
-    <article class="card"><span class="tag">PRO</span><h3>Professional Sports</h3><p>Regional professional teams and South Sound connections.</p></article>
-    <article class="card"><span class="tag">COLLEGE</span><h3>College Sports</h3><p>Local college teams, athletes and stories.</p></article>
-    <article class="card"><span class="tag">COMMUNITY</span><h3>High School Sports</h3><p>Give local athletes a place to be seen and heard.</p></article>
-    <article class="card"><span class="tag">EVENTS</span><h3>Local Events</h3><p>Tournaments, showcases and independent sporting events.</p></article>
-  </div>
-</section>
-
-<section class="section">
-  <div class="poll">
-    <div><h2>FAN ZONE</h2><p id="pollQuestion">Who should CrowRules Sports cover next?</p><div class="bar"><div class="fill" id="pollFill"></div></div></div>
-    <div class="pollBtns" id="pollBtns">
-      <button class="pollBtn" onclick="vote(0)">Tacoma Sports</button>
-      <button class="pollBtn" onclick="vote(1)">Seattle Pro Sports</button>
-      <button class="pollBtn" onclick="vote(2)">College Sports</button>
+    <div class="introSports">
+      SPORTS
     </div>
-  </div>
-</section>
-</main>
 
-<footer class="footer">© <span id="year"></span> CrowRules Entertainment • CrowRules Sports • <a href="index.html">Back to CrowRules Entertainment</a></footer>
+    <div class="introLine"></div>
 
-<div class="modal" id="modal" onclick="if(event.target===this)closeInfo()">
-  <div class="modalBox">
-    <button class="close" onclick="closeInfo()">×</button>
-    <h2>CROWRULES SPORTS</h2>
-    <p class="meta">This v1.0 front end is built to become a full sports network. The data layer can be connected to Supabase for teams, players, games, schedules, scores, articles, videos, shows, polls and events.</p>
-    <div class="divider"></div>
-    <p><b>Next upgrades:</b></p>
-    <p class="meta">Supabase authentication • live score feeds • YouTube Live detection • team pages • player profiles • standings • video archive • sports news CMS • fan accounts • predictions • push notifications.</p>
+    <div class="introTagline">
+      THE GAME IS ALWAYS ON.
+    </div>
+
+    <div class="introSub">
+      LIVE • LOCAL • INDEPENDENT
+    </div>
+
   </div>
+
+  <button
+    class="skipIntro"
+    onclick="skipSportsIntro()">
+
+    SKIP INTRO
+
+  </button>
+
 </div>
 
+
+<!-- =========================================================
+     NAV
+========================================================= -->
+
+<header class="nav">
+
+  <div class="navin">
+
+    <a
+      class="logo"
+      href="index.html">
+
+      CROW<span>RULES</span> SPORTS
+
+    </a>
+
+    <nav class="links">
+
+      <a
+        class="active"
+        href="#home">
+        Home
+      </a>
+
+      <a href="#live">
+        Live
+      </a>
+
+      <a href="#scores">
+        Scores
+      </a>
+
+      <a href="#schedule">
+        Schedule
+      </a>
+
+      <a href="#news">
+        News
+      </a>
+
+      <a href="#shows">
+        Shows
+      </a>
+
+      <a href="#episodes">
+        Episodes
+      </a>
+
+      <a href="#tacoma">
+        Tacoma Sports
+      </a>
+
+      <a href="#creator">
+        Creator Studio
+      </a>
+
+    </nav>
+
+    <button
+      class="navbtn"
+      onclick="openInfo()">
+
+      ☰
+
+    </button>
+
+  </div>
+
+</header>
+
+
+<main
+  class="wrap"
+  id="home">
+
+
+<!-- =========================================================
+     HERO
+========================================================= -->
+
+<section class="hero">
+
+  <div class="heroContent">
+
+    <div class="eyebrow">
+      CrowRules Entertainment • Sports Division
+    </div>
+
+    <h1>
+      THE GAME<br>
+      IS ALWAYS ON.
+    </h1>
+
+    <p>
+
+      Welcome to CrowRules Sports —
+      an independent sports hub for live
+      coverage, scores, schedules, Tacoma
+      sports, original programming,
+      interviews and stories beyond
+      the scoreboard.
+
+    </p>
+
+    <div class="actions">
+
+      <a
+        class="btn primary"
+        href="#live">
+        WATCH LIVE
+      </a>
+
+      <a
+        class="btn"
+        href="#scores">
+        TODAY'S SCORES
+      </a>
+
+      <a
+        class="btn"
+        href="#episodes">
+        WATCH EPISODES
+      </a>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     LIVE SPORTS
+========================================================= -->
+
+<section
+  class="section"
+  id="live">
+
+  <div class="sectionHead">
+
+    <div>
+
+      <h2>
+        LIVE SPORTS
+      </h2>
+
+      <p>
+        Your live broadcast center.
+      </p>
+
+    </div>
+
+    <span class="liveBadge">
+      <i class="dot"></i>
+      LIVE READY
+    </span>
+
+  </div>
+
+
+  <div class="liveGrid">
+
+    <div
+      class="player"
+      id="player">
+
+      <div class="playerEmpty">
+
+        <div>
+
+          <div class="playIcon">
+            ▶
+          </div>
+
+          <h2>
+            CrowRules Sports Live
+          </h2>
+
+          <p class="meta">
+
+            Add your YouTube Live ID
+            to activate the broadcast.
+
+          </p>
+
+          <button
+            class="btn primary"
+            onclick="loadLivePlayer()">
+
+            LOAD LIVE PLAYER
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <aside class="sidePanel">
+
+      <span class="liveBadge">
+
+        <i class="dot"></i>
+
+        BROADCAST CENTER
+
+      </span>
+
+      <h3>
+        CrowRules Sports Live
+      </h3>
+
+      <p class="meta">
+
+        Built for CrowRules Sports
+        broadcasts, watch-alongs,
+        local coverage, special events
+        and future network programming.
+
+      </p>
+
+      <div class="divider"></div>
+
+      <div class="statrow">
+
+        <span>
+          Network
+        </span>
+
+        <b>
+          CROWSPORTS
+        </b>
+
+      </div>
+
+      <div class="statrow">
+
+        <span>
+          Player
+        </span>
+
+        <b>
+          YOUTUBE
+        </b>
+
+      </div>
+
+      <div class="statrow">
+
+        <span>
+          Database
+        </span>
+
+        <b>
+          SUPABASE
+        </b>
+
+      </div>
+
+      <div class="statrow">
+
+        <span>
+          Episodes
+        </span>
+
+        <b id="episodeCount">
+          —
+        </b>
+
+      </div>
+
+      <div class="divider"></div>
+
+      <button
+        class="btn"
+        style="width:100%"
+        onclick="openInfo()">
+
+        Broadcast Info
+
+      </button>
+
+    </aside>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     SCORES
+========================================================= -->
+
+<section
+  class="section"
+  id="scores">
+
+  <div class="sectionHead">
+
+    <div>
+
+      <h2>
+        TODAY'S SCORES
+      </h2>
+
+      <p>
+        Scores loaded from CrowRules Sports data.
+      </p>
+
+    </div>
+
+    <span class="tiny">
+      SCOREBOARD
+    </span>
+
+  </div>
+
+  <div
+    class="scores"
+    id="scoreGrid">
+
+    <article class="score">
+
+      <div class="scoreTop">
+        Loading scores...
+      </div>
+
+    </article>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     SCHEDULE
+========================================================= -->
+
+<section
+  class="section"
+  id="schedule">
+
+  <div class="sectionHead">
+
+    <div>
+
+      <h2>
+        CROWRULES SCHEDULE
+      </h2>
+
+      <p>
+        Your sports-network programming grid.
+      </p>
+
+    </div>
+
+  </div>
+
+  <div class="schedule">
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>
+            Time
+          </th>
+
+          <th>
+            Program
+          </th>
+
+          <th>
+            Category
+          </th>
+
+          <th>
+            Status
+          </th>
+
+        </tr>
+
+      </thead>
+
+      <tbody
+        id="scheduleRows">
+
+        <tr>
+          <td colspan="4">
+            Loading schedule...
+          </td>
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     NEWS
+========================================================= -->
+
+<section
+  class="section"
+  id="news">
+
+  <div class="sectionHead">
+
+    <div>
+
+      <h2>
+        LATEST SPORTS
+      </h2>
+
+      <p>
+        News, commentary and stories beyond the score.
+      </p>
+
+    </div>
+
+  </div>
+
+  <div
+    class="cards"
+    id="newsGrid">
+
+    <article class="card">
+
+      <span class="tag">
+        LOCAL
+      </span>
+
+      <h3>
+        Tacoma Sports Weekly
+      </h3>
+
+      <p>
+        Local teams, athletes and events
+        across the South Sound.
+      </p>
+
+    </article>
+
+    <article class="card">
+
+      <span class="tag">
+        COMMENTARY
+      </span>
+
+      <h3>
+        The Sports Crow
+      </h3>
+
+      <p>
+        Independent opinions, reactions
+        and conversations about sports.
+      </p>
+
+    </article>
+
+    <article class="card">
+
+      <span class="tag">
+        FEATURE
+      </span>
+
+      <h3>
+        Beyond the Score
+      </h3>
+
+      <p>
+        Meet the people whose stories
+        make sports matter.
+      </p>
+
+    </article>
+
+    <article class="card">
+
+      <span class="tag">
+        HIGHLIGHTS
+      </span>
+
+      <h3>
+        Game Recap
+      </h3>
+
+      <p>
+        Quick recaps, standout moments
+        and what happens next.
+      </p>
+
+    </article>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     ORIGINAL SHOWS
+========================================================= -->
+
+<section
+  class="section"
+  id="shows">
+
+  <div class="sectionHead">
+
+    <div>
+
+      <h2>
+        ORIGINAL SHOWS
+      </h2>
+
+      <p>
+        CrowRules Sports programming.
+      </p>
+
+    </div>
+
+  </div>
+
+  <div class="cards">
+
+    <article class="card">
+
+      <span class="tag">
+        WEEKLY
+      </span>
+
+      <h3>
+        CrowRules Sports Tonight
+      </h3>
+
+      <p>
+        Sports news, headlines and conversation.
+      </p>
+
+    </article>
+
+
+    <article class="card">
+
+      <span class="tag">
+        ANALYSIS
+      </span>
+
+      <h3>
+        The Breakdown
+      </h3>
+
+      <p>
+        Games, players, decisions and trends.
+      </p>
+
+    </article>
+
+
+    <article class="card">
+
+      <span class="tag">
+        LOCAL
+      </span>
+
+      <h3>
+        Tacoma Sports Weekly
+      </h3>
+
+      <p>
+        A dedicated spotlight on the local
+        sports scene.
+      </p>
+
+    </article>
+
+
+    <article class="card">
+
+      <span class="tag">
+        LATE NIGHT
+      </span>
+
+      <h3>
+        Overtime
+      </h3>
+
+      <p>
+        When the game ends,
+        the conversation begins.
+      </p>
+
+    </article>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     EPISODES
+========================================================= -->
+
+<section
+  class="section"
+  id="episodes">
+
+  <div class="sectionHead">
+
+    <div>
+
+      <h2>
+        SPORTS EPISODES
+      </h2>
+
+      <p>
+        Pre-recorded CrowRules Sports programming.
+      </p>
+
+    </div>
+
+    <span class="tiny">
+      ON DEMAND
+    </span>
+
+  </div>
+
+
+  <div
+    class="cards"
+    id="episodeLibrary">
+
+    <article class="card">
+
+      <div class="cardVisual"></div>
+
+      <span class="tag">
+        LOADING
+      </span>
+
+      <h3>
+        Episode Library
+      </h3>
+
+      <p>
+        Loading published episodes...
+      </p>
+
+    </article>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     TACOMA SPORTS
+========================================================= -->
+
+<section
+  class="section"
+  id="tacoma">
+
+  <div class="sectionHead">
+
+    <div>
+
+      <h2>
+        TACOMA SPORTS
+      </h2>
+
+      <p>
+        Local coverage is at the heart
+        of CrowRules Sports.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <div class="cards">
+
+    <article class="card">
+
+      <span class="tag">
+        PRO
+      </span>
+
+      <h3>
+        Professional Sports
+      </h3>
+
+      <p>
+        Regional professional teams
+        and South Sound connections.
+      </p>
+
+    </article>
+
+
+    <article class="card">
+
+      <span class="tag">
+        COLLEGE
+      </span>
+
+      <h3>
+        College Sports
+      </h3>
+
+      <p>
+        Local college teams,
+        athletes and stories.
+      </p>
+
+    </article>
+
+
+    <article class="card">
+
+      <span class="tag">
+        COMMUNITY
+      </span>
+
+      <h3>
+        High School Sports
+      </h3>
+
+      <p>
+        Give local athletes a place
+        to be seen and heard.
+      </p>
+
+    </article>
+
+
+    <article class="card">
+
+      <span class="tag">
+        EVENTS
+      </span>
+
+      <h3>
+        Local Events
+      </h3>
+
+      <p>
+        Tournaments, showcases
+        and independent sporting events.
+      </p>
+
+    </article>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     CREATOR STUDIO
+========================================================= -->
+
+<section
+  class="section"
+  id="creator">
+
+  <div class="sectionHead">
+
+    <div>
+
+      <h2>
+        CREATOR STUDIO
+      </h2>
+
+      <p>
+        Sign in to upload CrowRules Sports episodes.
+      </p>
+
+    </div>
+
+    <span class="tiny">
+      SUPABASE AUTH
+    </span>
+
+  </div>
+
+
+  <!-- AUTH -->
+
+  <div
+    class="authBox"
+    id="authBox">
+
+    <div class="authGrid">
+
+      <input
+        id="authEmail"
+        type="email"
+        placeholder="Email address">
+
+      <input
+        id="authPassword"
+        type="password"
+        placeholder="Password">
+
+      <button
+        class="btn primary"
+        onclick="signIn()">
+
+        SIGN IN
+
+      </button>
+
+    </div>
+
+    <div
+      class="authState"
+      id="authState">
+
+      Sign in with your CrowRules account
+      to upload episodes.
+
+    </div>
+
+  </div>
+
+
+  <!-- UPLOADER -->
+
+  <div
+    class="episodeAdmin hidden"
+    id="uploadCenter">
+
+    <div class="uploadHeader">
+
+      <div>
+
+        <span class="tag">
+          CREATOR STUDIO
+        </span>
+
+        <h3>
+          UPLOAD PRE-RECORDED EPISODE
+        </h3>
+
+        <p>
+          Upload an MP4 or WebM episode
+          to the CrowRules Sports library.
+        </p>
+
+      </div>
+
+      <div class="uploadIcon">
+        ↑
+      </div>
+
+    </div>
+
+
+    <form
+      id="episodeUploadForm"
+      class="episodeForm">
+
+
+      <div class="formGrid">
+
+        <label>
+
+          <span>
+            Show
+          </span>
+
+          <select
+            id="episodeShow"
+            required>
+
+            <option value="">
+              Select a show
+            </option>
+
+            <option>
+              CrowRules Sports Tonight
+            </option>
+
+            <option>
+              The Breakdown
+            </option>
+
+            <option>
+              Tacoma Sports Weekly
+            </option>
+
+            <option>
+              Overtime
+            </option>
+
+            <option>
+              Other
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <label>
+
+          <span>
+            Episode Title
+          </span>
+
+          <input
+            id="episodeTitle"
+            type="text"
+            placeholder="Episode title"
+            required>
+
+        </label>
+
+
+        <label>
+
+          <span>
+            Season
+          </span>
+
+          <input
+            id="episodeSeason"
+            type="number"
+            min="1"
+            value="1">
+
+        </label>
+
+
+        <label>
+
+          <span>
+            Episode #
+          </span>
+
+          <input
+            id="episodeNumber"
+            type="number"
+            min="1"
+            placeholder="1">
+
+        </label>
+
+      </div>
+
+
+      <label>
+
+        <span>
+          Description
+        </span>
+
+        <textarea
+          id="episodeDescription"
+          rows="4"
+          placeholder="Describe this episode..."></textarea>
+
+      </label>
+
+
+      <label
+        class="fileDrop">
+
+        <input
+          id="episodeFile"
+          type="file"
+          accept="video/mp4,video/webm"
+          required>
+
+        <div>
+
+          <strong>
+            SELECT VIDEO FILE
+          </strong>
+
+          <small>
+            MP4 or WebM • Maximum 5 GB
+          </small>
+
+        </div>
+
+      </label>
+
+
+      <div
+        class="uploadProgress">
+
+        <div
+          id="uploadProgressBar">
+        </div>
+
+      </div>
+
+
+      <div
+        class="uploadStatus"
+        id="uploadStatus">
+
+        Ready for upload.
+
+      </div>
+
+
+      <button
+        class="btn primary"
+        type="submit"
+        id="uploadEpisodeBtn">
+
+        UPLOAD EPISODE
+
+      </button>
+
+
+      <button
+        type="button"
+        class="btn danger"
+        onclick="signOut()">
+
+        SIGN OUT
+
+      </button>
+
+    </form>
+
+  </div>
+
+</section>
+
+
+<!-- =========================================================
+     FAN ZONE
+========================================================= -->
+
+<section class="section">
+
+  <div class="poll">
+
+    <div>
+
+      <h2>
+        FAN ZONE
+      </h2>
+
+      <p id="pollQuestion">
+        Who should CrowRules Sports cover next?
+      </p>
+
+      <div class="bar">
+
+        <div
+          class="fill"
+          id="pollFill">
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div
+      class="pollBtns"
+      id="pollBtns">
+
+      <button
+        class="pollBtn"
+        onclick="vote(0)">
+
+        Tacoma Sports
+
+      </button>
+
+      <button
+        class="pollBtn"
+        onclick="vote(1)">
+
+        Seattle Pro Sports
+
+      </button>
+
+      <button
+        class="pollBtn"
+        onclick="vote(2)">
+
+        College Sports
+
+      </button>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+</main>
+
+
+<!-- =========================================================
+     FOOTER
+========================================================= -->
+
+<footer class="footer">
+
+  ©
+  <span id="year"></span>
+
+  CrowRules Entertainment
+  • CrowRules Sports
+
+  •
+  <a href="index.html">
+    Back to CrowRules Entertainment
+  </a>
+
+</footer>
+
+
+<!-- =========================================================
+     INFO MODAL
+========================================================= -->
+
+<div
+  class="modal"
+  id="modal"
+  onclick="if(event.target===this)closeInfo()">
+
+  <div class="modalBox">
+
+    <button
+      class="close"
+      onclick="closeInfo()">
+
+      ×
+
+    </button>
+
+    <h2>
+      CROWRULES SPORTS
+    </h2>
+
+    <p class="meta">
+
+      CrowRules Sports is being built as
+      an independent sports network with
+      live broadcasts, original shows,
+      local Tacoma coverage, on-demand
+      episodes, scores, schedules,
+      sports news and fan interaction.
+
+    </p>
+
+    <div class="divider"></div>
+
+    <p>
+      <b>
+        Current platform:
+      </b>
+    </p>
+
+    <p class="meta">
+
+      Supabase database • Supabase Storage
+      • Supabase Authentication •
+      on-demand video • live YouTube player
+      • sports schedule • scores • polls
+
+    </p>
+
+    <div class="divider"></div>
+
+    <p>
+      <b>
+        Future upgrades:
+      </b>
+    </p>
+
+    <p class="meta">
+
+      Live score APIs • standings • team
+      pages • player profiles • automatic
+      YouTube Live detection • thumbnails
+      • creator dashboards • episode
+      analytics • watch history •
+      memberships • notifications
+
+    </p>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     VIDEO MODAL
+========================================================= -->
+
+<div
+  class="modal"
+  id="videoModal"
+  onclick="if(event.target===this)closeVideo()">
+
+  <div class="modalBox">
+
+    <button
+      class="close"
+      onclick="closeVideo()">
+
+      ×
+
+    </button>
+
+    <h2
+      id="videoTitle">
+
+      Episode
+
+    </h2>
+
+    <p
+      class="meta"
+      id="videoDescription">
+    </p>
+
+    <div
+      id="videoContainer">
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<div
+  class="toast"
+  id="toast">
+
+</div>
+
+
 <script>
+
 /* =========================================================
-   CROWRULES SPORTS v1.0
-   Supabase-ready data architecture
-   ========================================================= */
+   CROWRULES SPORTS v2.2
+   APPLICATION CONFIGURATION
+========================================================= */
 
 const CONFIG = {
-  demoYoutubeId: "dQw4w9WgXcQ", // Replace with a real CrowRules Sports video/live ID.
-  useDemoPlayer: false
+
+  SUPABASE_URL:
+    "https://zauxdqyssratvzmomozf.supabase.co",
+
+  /*
+    Replace this with your existing
+    Supabase publishable key.
+  */
+
+  SUPABASE_KEY:
+    "sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9",
+
+  YOUTUBE_LIVE_ID:
+    "",
+
+  INTRO_DURATION:
+    6500
+
 };
 
-const scores = [
-  {league:"NFL", away:"Seattle", awayScore:"24", home:"San Francisco", homeScore:"21", status:"FINAL"},
-  {league:"MLB", away:"Tacoma", awayScore:"3", home:"Rival City", homeScore:"5", status:"7TH"},
-  {league:"MLS", away:"Tacoma", awayScore:"1", home:"Portland", homeScore:"0", status:"LIVE 72'"},
-];
 
-const schedule = [
-  ["12:00 PM","CrowRules Sports News","NEWS","UP NEXT"],
-  ["2:00 PM","Classic Game Replay","REPLAY","UP NEXT"],
-  ["3:00 PM","CrowRules Sports Live","LIVE","LIVE READY"],
-  ["5:00 PM","Tacoma Sports Weekly","LOCAL","UP NEXT"],
-  ["7:00 PM","The Breakdown","ANALYSIS","UP NEXT"],
-  ["8:00 PM","Game Night","LIVE","UP NEXT"],
-  ["10:00 PM","Overtime","ORIGINAL","UP NEXT"]
-];
+/* =========================================================
+   SUPABASE CLIENT
+========================================================= */
 
-document.getElementById("year").textContent = new Date().getFullYear();
+let supabaseClient = null;
 
-document.getElementById("scoreGrid").innerHTML = scores.map(s => `
-  <article class="score">
-    <div class="scoreTop"><span>${s.league}</span><span class="${s.status.includes("LIVE") ? "status" : ""}">${s.status}</span></div>
-    <div class="teams">
-      <div class="team"><span>${s.away}</span><span>${s.awayScore}</span></div>
-      <div class="team"><span>${s.home}</span><span>${s.homeScore}</span></div>
-    </div>
-  </article>
-`).join("");
+try{
 
-document.getElementById("scheduleRows").innerHTML = schedule.map(row => `
-  <tr><td class="time">${row[0]}</td><td><b>${row[1]}</b></td><td>${row[2]}</td><td class="${row[3].includes("LIVE") ? "liveText" : ""}">${row[3]}</td></tr>
-`).join("");
+  if(
+    CONFIG.SUPABASE_URL &&
+    CONFIG.SUPABASE_KEY &&
+    !CONFIG.SUPABASE_KEY.includes("YOUR_")
+  ){
 
-function configureDemo(){
-  const id = CONFIG.demoYoutubeId;
-  if(!id || !CONFIG.useDemoPlayer){
-    alert("Set CONFIG.useDemoPlayer = true and replace CONFIG.demoYoutubeId with your CrowRules Sports YouTube video/live ID.");
-    return;
+    supabaseClient =
+      window.supabase.createClient(
+        CONFIG.SUPABASE_URL,
+        CONFIG.SUPABASE_KEY
+      );
+
   }
-  document.getElementById("player").innerHTML =
-    `<iframe src="https://www.youtube.com/embed/${encodeURIComponent(id)}?autoplay=1&rel=0&modestbranding=1"
-      title="CrowRules Sports Live" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+
+}catch(error){
+
+  console.error(
+    "Supabase initialization failed:",
+    error
+  );
+
 }
 
-function openInfo(){document.getElementById("modal").classList.add("show")}
-function closeInfo(){document.getElementById("modal").classList.remove("show")}
+
+/* =========================================================
+   GLOBAL STATE
+========================================================= */
+
+let currentUser = null;
+
+let currentEpisodes = [];
 
 let votes = [50,30,20];
-function vote(index){
-  votes[index] += 5;
-  const total = votes.reduce((a,b)=>a+b,0);
-  document.getElementById("pollFill").style.width = ((votes[index]/total)*100) + "%";
-  document.getElementById("pollQuestion").textContent = "Thanks for voting — CrowRules Sports is listening.";
+
+
+/* =========================================================
+   YEAR
+========================================================= */
+
+document.getElementById(
+  "year"
+).textContent =
+  new Date().getFullYear();
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+let toastTimer = null;
+
+function showToast(message){
+
+  const toast =
+    document.getElementById("toast");
+
+  toast.textContent = message;
+
+  toast.classList.add("show");
+
+  clearTimeout(toastTimer);
+
+  toastTimer =
+    setTimeout(() => {
+
+      toast.classList.remove("show");
+
+    },3500);
+
 }
 
-window.addEventListener("keydown", e => { if(e.key==="Escape") closeInfo(); });
+
+/* =========================================================
+   CINEMATIC INTRO
+========================================================= */
+
+function skipSportsIntro(){
+
+  const intro =
+    document.getElementById(
+      "sportsIntro"
+    );
+
+  if(!intro) return;
+
+  intro.classList.add("hide");
+
+  document.body.classList.remove(
+    "introLock"
+  );
+
+  sessionStorage.setItem(
+    "crowrulesSportsIntroSeen",
+    "true"
+  );
+
+}
+
+
+window.addEventListener(
+  "load",
+  () => {
+
+    const intro =
+      document.getElementById(
+        "sportsIntro"
+      );
+
+    if(!intro) return;
+
+    if(
+      sessionStorage.getItem(
+        "crowrulesSportsIntroSeen"
+      ) === "true"
+    ){
+
+      skipSportsIntro();
+
+      return;
+
+    }
+
+    document.body.classList.add(
+      "introLock"
+    );
+
+    setTimeout(
+      skipSportsIntro,
+      CONFIG.INTRO_DURATION
+    );
+
+  }
+);
+
+
+/* =========================================================
+   LIVE PLAYER
+========================================================= */
+
+function loadLivePlayer(){
+
+  const id =
+    CONFIG.YOUTUBE_LIVE_ID.trim();
+
+  if(!id){
+
+    showToast(
+      "Add your YouTube Live video ID in CONFIG.YOUTUBE_LIVE_ID."
+    );
+
+    return;
+
+  }
+
+  document.getElementById(
+    "player"
+  ).innerHTML = `
+
+    <iframe
+
+      src="https://www.youtube.com/embed/${encodeURIComponent(id)}?autoplay=1&rel=0&modestbranding=1"
+
+      title="CrowRules Sports Live"
+
+      allow="autoplay; encrypted-media; picture-in-picture"
+
+      allowfullscreen>
+
+    </iframe>
+
+  `;
+
+}
+
+
+/* =========================================================
+   AUTH
+========================================================= */
+
+async function checkAuth(){
+
+  if(!supabaseClient){
+
+    document.getElementById(
+      "authState"
+    ).textContent =
+      "Supabase is not configured yet.";
+
+    return;
+
+  }
+
+  const result =
+    await supabaseClient.auth.getSession();
+
+  currentUser =
+    result.data.session?.user || null;
+
+  updateAuthUI();
+
+}
+
+
+function updateAuthUI(){
+
+  const authBox =
+    document.getElementById(
+      "authBox"
+    );
+
+  const uploadCenter =
+    document.getElementById(
+      "uploadCenter"
+    );
+
+  const state =
+    document.getElementById(
+      "authState"
+    );
+
+  if(currentUser){
+
+    authBox.classList.add(
+      "hidden"
+    );
+
+    uploadCenter.classList.remove(
+      "hidden"
+    );
+
+    state.textContent =
+      `Signed in as ${currentUser.email}`;
+
+  }else{
+
+    authBox.classList.remove(
+      "hidden"
+    );
+
+    uploadCenter.classList.add(
+      "hidden"
+    );
+
+    state.textContent =
+      "Sign in with your CrowRules account to upload episodes.";
+
+  }
+
+}
+
+
+async function signIn(){
+
+  if(!supabaseClient){
+
+    showToast(
+      "Supabase is not configured."
+    );
+
+    return;
+
+  }
+
+  const email =
+    document.getElementById(
+      "authEmail"
+    ).value.trim();
+
+  const password =
+    document.getElementById(
+      "authPassword"
+    ).value;
+
+  if(!email || !password){
+
+    showToast(
+      "Enter your email and password."
+    );
+
+    return;
+
+  }
+
+  const result =
+    await supabaseClient.auth.signInWithPassword({
+
+      email,
+      password
+
+    });
+
+  if(result.error){
+
+    showToast(
+      result.error.message
+    );
+
+    return;
+
+  }
+
+  currentUser =
+    result.data.user;
+
+  updateAuthUI();
+
+  showToast(
+    "Signed in successfully."
+  );
+
+}
+
+
+async function signOut(){
+
+  if(!supabaseClient) return;
+
+  await supabaseClient.auth.signOut();
+
+  currentUser = null;
+
+  updateAuthUI();
+
+  showToast(
+    "Signed out."
+  );
+
+}
+
+
+/* =========================================================
+   AUTH STATE LISTENER
+========================================================= */
+
+if(supabaseClient){
+
+  supabaseClient.auth.onAuthStateChange(
+    (_event,session) => {
+
+      currentUser =
+        session?.user || null;
+
+      updateAuthUI();
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   LOAD EPISODES
+========================================================= */
+
+async function loadEpisodes(){
+
+  const library =
+    document.getElementById(
+      "episodeLibrary"
+    );
+
+  if(!supabaseClient){
+
+    library.innerHTML = `
+
+      <article class="card">
+
+        <span class="tag">
+          SUPABASE
+        </span>
+
+        <h3>
+          Episode Library Ready
+        </h3>
+
+        <p>
+          Add your Supabase publishable key
+          to activate the episode library.
+        </p>
+
+      </article>
+
+    `;
+
+    return;
+
+  }
+
+
+  const result =
+    await supabaseClient
+      .from("sports_episodes")
+      .select(`
+        id,
+        title,
+        description,
+        season_number,
+        episode_number,
+        video_path,
+        thumbnail_url,
+        show_name,
+        published_at,
+        is_featured,
+        is_published
+      `)
+      .eq(
+        "is_published",
+        true
+      )
+      .order(
+        "created_at",
+        {
+          ascending:false
+        }
+      );
+
+
+  if(result.error){
+
+    console.error(
+      result.error
+    );
+
+    library.innerHTML = `
+
+      <article class="card">
+
+        <span class="tag">
+          DATABASE
+        </span>
+
+        <h3>
+          Episode Library
+        </h3>
+
+        <p>
+          Unable to load episodes right now.
+        </p>
+
+      </article>
+
+    `;
+
+    return;
+
+  }
+
+
+  currentEpisodes =
+    result.data || [];
+
+
+  document.getElementById(
+    "episodeCount"
+  ).textContent =
+    currentEpisodes.length;
+
+
+  if(!currentEpisodes.length){
+
+    library.innerHTML = `
+
+      <article class="card">
+
+        <span class="tag">
+          ON DEMAND
+        </span>
+
+        <h3>
+          No Published Episodes
+        </h3>
+
+        <p>
+          Your published CrowRules Sports
+          episodes will appear here.
+        </p>
+
+      </article>
+
+    `;
+
+    return;
+
+  }
+
+
+  library.innerHTML =
+    currentEpisodes
+      .map(episode => {
+
+        const number =
+          episode.episode_number
+            ? `S${episode.season_number} E${episode.episode_number}`
+            : `Season ${episode.season_number}`;
+
+        return `
+
+          <article class="card">
+
+            <div
+              class="cardVisual"
+              style="
+                background-image:
+                  ${
+                    episode.thumbnail_url
+                    ?
+                    `url('${escapeAttribute(episode.thumbnail_url)}')`
+                    :
+                    `radial-gradient(circle at 70% 30%,rgba(53,185,255,.24),transparent 30%),linear-gradient(135deg,#111a28,#06090e)`
+                  };
+                background-size:cover;
+                background-position:center;
+              ">
+
+            </div>
+
+            <span class="tag">
+              ${escapeHtml(
+                episode.show_name || "SPORTS"
+              )}
+            </span>
+
+            <h3>
+              ${escapeHtml(
+                episode.title
+              )}
+            </h3>
+
+            <p>
+              ${escapeHtml(
+                episode.description || "CrowRules Sports episode."
+              )}
+            </p>
+
+            <p
+              style="
+                margin-top:10px;
+                color:var(--accent);
+                font-size:10px;
+                font-weight:900;
+              ">
+
+              ${number}
+
+            </p>
+
+            <a
+              class="cardAction"
+              href="#"
+              onclick="
+                playEpisode('${episode.id}');
+                return false;
+              ">
+
+              WATCH EPISODE →
+
+            </a>
+
+          </article>
+
+        `;
+
+      })
+      .join("");
+
+}
+
+
+/* =========================================================
+   PLAY EPISODE
+========================================================= */
+
+async function playEpisode(id){
+
+  const episode =
+    currentEpisodes.find(
+      item =>
+        String(item.id) === String(id)
+    );
+
+  if(!episode){
+
+    showToast(
+      "Episode not found."
+    );
+
+    return;
+
+  }
+
+
+  if(!episode.video_path){
+
+    showToast(
+      "This episode has no uploaded video."
+    );
+
+    return;
+
+  }
+
+
+  if(!supabaseClient){
+
+    showToast(
+      "Supabase is not configured."
+    );
+
+    return;
+
+  }
+
+
+  const signed =
+    await supabaseClient.storage
+      .from("sports-episodes")
+      .createSignedUrl(
+        episode.video_path,
+        3600
+      );
+
+
+  if(signed.error){
+
+    console.error(
+      signed.error
+    );
+
+    showToast(
+      "Unable to access episode video."
+    );
+
+    return;
+
+  }
+
+
+  document.getElementById(
+    "videoTitle"
+  ).textContent =
+    episode.title;
+
+
+  document.getElementById(
+    "videoDescription"
+  ).textContent =
+    episode.description || "";
+
+
+  document.getElementById(
+    "videoContainer"
+  ).innerHTML = `
+
+    <video
+      controls
+      autoplay
+      playsinline
+      style="
+        width:100%;
+        max-height:70vh;
+        background:#000;
+        border-radius:12px;
+      ">
+
+      <source
+        src="${escapeAttribute(
+          signed.data.signedUrl
+        )}">
+
+      Your browser does not support
+      HTML5 video.
+
+    </video>
+
+  `;
+
+
+  document.getElementById(
+    "videoModal"
+  ).classList.add(
+    "show"
+  );
+
+}
+
+
+function closeVideo(){
+
+  document.getElementById(
+    "videoContainer"
+  ).innerHTML = "";
+
+  document.getElementById(
+    "videoModal"
+  ).classList.remove(
+    "show"
+  );
+
+}
+
+
+/* =========================================================
+   EPISODE UPLOAD
+========================================================= */
+
+const uploadForm =
+  document.getElementById(
+    "episodeUploadForm"
+  );
+
+
+if(uploadForm){
+
+  uploadForm.addEventListener(
+    "submit",
+    uploadEpisode
+  );
+
+}
+
+
+async function uploadEpisode(event){
+
+  event.preventDefault();
+
+
+  if(!supabaseClient){
+
+    showToast(
+      "Supabase is not configured."
+    );
+
+    return;
+
+  }
+
+
+  if(!currentUser){
+
+    showToast(
+      "You must sign in before uploading."
+    );
+
+    return;
+
+  }
+
+
+  const show =
+    document.getElementById(
+      "episodeShow"
+    ).value.trim();
+
+
+  const title =
+    document.getElementById(
+      "episodeTitle"
+    ).value.trim();
+
+
+  const description =
+    document.getElementById(
+      "episodeDescription"
+    ).value.trim();
+
+
+  const season =
+    Number(
+      document.getElementById(
+        "episodeSeason"
+      ).value || 1
+    );
+
+
+  const episodeNumber =
+    Number(
+      document.getElementById(
+        "episodeNumber"
+      ).value || 0
+    );
+
+
+  const file =
+    document.getElementById(
+      "episodeFile"
+    ).files[0];
+
+
+  const status =
+    document.getElementById(
+      "uploadStatus"
+    );
+
+
+  const progress =
+    document.getElementById(
+      "uploadProgressBar"
+    );
+
+
+  const button =
+    document.getElementById(
+      "uploadEpisodeBtn"
+    );
+
+
+  if(!file){
+
+    showToast(
+      "Select a video first."
+    );
+
+    return;
+
+  }
+
+
+  if(
+    ![
+      "video/mp4",
+      "video/webm"
+    ].includes(file.type)
+  ){
+
+    showToast(
+      "Only MP4 and WebM files are supported."
+    );
+
+    return;
+
+  }
+
+
+  const MAX_SIZE =
+    5 * 1024 * 1024 * 1024;
+
+
+  if(file.size > MAX_SIZE){
+
+    showToast(
+      "The video exceeds the 5 GB limit."
+    );
+
+    return;
+
+  }
+
+
+  try{
+
+    button.disabled = true;
+
+    progress.style.width =
+      "5%";
+
+    status.textContent =
+      "Preparing upload...";
+
+
+    const safeName =
+      file.name
+        .replace(
+          /[^a-zA-Z0-9._-]/g,
+          "_"
+        );
+
+
+    const timestamp =
+      Date.now();
+
+
+    const path =
+      `${currentUser.id}/${timestamp}_${safeName}`;
+
+
+    status.textContent =
+      "Uploading video...";
+
+
+    progress.style.width =
+      "35%";
+
+
+    const upload =
+      await supabaseClient.storage
+        .from("sports-episodes")
+        .upload(
+          path,
+          file,
+          {
+            cacheControl:"3600",
+            upsert:false,
+            contentType:file.type
+          }
+        );
+
+
+    if(upload.error){
+
+      throw upload.error;
+
+    }
+
+
+    progress.style.width =
+      "75%";
+
+
+    status.textContent =
+      "Saving episode metadata...";
+
+
+    const slug =
+      createSlug(
+        `${show}-${title}-${timestamp}`
+      );
+
+
+    const insert =
+      await supabaseClient
+        .from("sports_episodes")
+        .insert({
+
+          show_name:
+            show,
+
+          title:
+            title,
+
+          slug:
+            slug,
+
+          description:
+            description || null,
+
+          season_number:
+            season,
+
+          episode_number:
+            episodeNumber || null,
+
+          video_path:
+            path,
+
+          status:
+            "draft",
+
+          is_published:
+            false,
+
+          is_featured:
+            false,
+
+          uploaded_by:
+            currentUser.id
+
+        })
+        .select()
+        .single();
+
+
+    if(insert.error){
+
+      await supabaseClient.storage
+        .from("sports-episodes")
+        .remove([path]);
+
+      throw insert.error;
+
+    }
+
+
+    progress.style.width =
+      "100%";
+
+
+    status.textContent =
+      "Episode uploaded as a draft.";
+
+
+    uploadForm.reset();
+
+
+    showToast(
+      "Episode uploaded. It is currently a draft."
+    );
+
+
+    /*
+      Refresh the public library.
+      The new episode will appear once
+      an administrator publishes it.
+    */
+
+    await loadEpisodes();
+
+
+  }catch(error){
+
+    console.error(
+      "Episode upload failed:",
+      error
+    );
+
+    progress.style.width =
+      "0%";
+
+
+    status.textContent =
+      error.message ||
+      "Upload failed.";
+
+
+    showToast(
+      error.message ||
+      "Episode upload failed."
+    );
+
+  }finally{
+
+    button.disabled = false;
+
+  }
+
+}
+
+
+/* =========================================================
+   SCORES
+========================================================= */
+
+async function loadScores(){
+
+  const grid =
+    document.getElementById(
+      "scoreGrid"
+    );
+
+
+  if(!supabaseClient){
+
+    renderDemoScores();
+
+    return;
+
+  }
+
+
+  const today =
+    new Date();
+
+  const start =
+    new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+
+
+  const end =
+    new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()+1
+    );
+
+
+  const result =
+    await supabaseClient
+      .from("sports_games")
+      .select("*")
+      .gte(
+        "game_date",
+        start.toISOString().slice(0,10)
+      )
+      .lt(
+        "game_date",
+        end.toISOString().slice(0,10)
+      )
+      .order(
+        "game_time",
+        {
+          ascending:true
+        }
+      );
+
+
+  if(result.error){
+
+    renderDemoScores();
+
+    return;
+
+  }
+
+
+  const games =
+    result.data || [];
+
+
+  if(!games.length){
+
+    renderDemoScores();
+
+    return;
+
+  }
+
+
+  grid.innerHTML =
+    games
+      .map(game => `
+
+        <article class="score">
+
+          <div class="scoreTop">
+
+            <span>
+              ${escapeHtml(
+                game.sport || "SPORTS"
+              )}
+            </span>
+
+            <span
+              class="${
+                String(game.status || "")
+                  .toLowerCase()
+                  .includes("live")
+                  ? "status"
+                  : ""
+              }">
+
+              ${escapeHtml(
+                game.status || "SCHEDULED"
+              )}
+
+            </span>
+
+          </div>
+
+          <div class="teams">
+
+            <div class="team">
+
+              <span>
+                ${escapeHtml(
+                  game.away_team ||
+                  game.away_name ||
+                  "Away"
+                )}
+              </span>
+
+              <span>
+                ${
+                  game.away_score ?? "-"
+                }
+              </span>
+
+            </div>
+
+            <div class="team">
+
+              <span>
+                ${escapeHtml(
+                  game.home_team ||
+                  game.home_name ||
+                  "Home"
+                )}
+              </span>
+
+              <span>
+                ${
+                  game.home_score ?? "-"
+                }
+              </span>
+
+            </div>
+
+          </div>
+
+        </article>
+
+      `)
+      .join("");
+
+}
+
+
+function renderDemoScores(){
+
+  document.getElementById(
+    "scoreGrid"
+  ).innerHTML = `
+
+    <article class="score">
+
+      <div class="scoreTop">
+        <span>SPORTS</span>
+        <span>READY</span>
+      </div>
+
+      <div class="teams">
+
+        <div class="team">
+
+          <span>
+            CrowRules Sports
+          </span>
+
+          <span>
+            —
+          </span>
+
+        </div>
+
+        <div class="team">
+
+          <span>
+            Score Feed
+          </span>
+
+          <span>
+            —
+          </span>
+
+        </div>
+
+      </div>
+
+    </article>
+
+    <article class="score">
+
+      <div class="scoreTop">
+        <span>TACOMA</span>
+        <span>LOCAL</span>
+      </div>
+
+      <div class="teams">
+
+        <div class="team">
+
+          <span>
+            Tacoma Coverage
+          </span>
+
+          <span>
+            —
+          </span>
+
+        </div>
+
+        <div class="team">
+
+          <span>
+            Coming Soon
+          </span>
+
+          <span>
+            —
+          </span>
+
+        </div>
+
+      </div>
+
+    </article>
+
+    <article class="score">
+
+      <div class="scoreTop">
+        <span>NETWORK</span>
+        <span>LIVE READY</span>
+      </div>
+
+      <div class="teams">
+
+        <div class="team">
+
+          <span>
+            CrowRules Sports
+          </span>
+
+          <span>
+            TV
+          </span>
+
+        </div>
+
+        <div class="team">
+
+          <span>
+            Data Layer
+          </span>
+
+          <span>
+            ✓
+          </span>
+
+        </div>
+
+      </div>
+
+    </article>
+
+  `;
+
+}
+
+
+/* =========================================================
+   SCHEDULE
+========================================================= */
+
+async function loadSchedule(){
+
+  const rows =
+    document.getElementById(
+      "scheduleRows"
+    );
+
+
+  if(!supabaseClient){
+
+    renderDemoSchedule();
+
+    return;
+
+  }
+
+
+  const result =
+    await supabaseClient
+      .from("sports_schedule")
+      .select(`
+        id,
+        title,
+        category,
+        starts_at,
+        status,
+        is_published
+      `)
+      .eq(
+        "is_published",
+        true
+      )
+      .order(
+        "starts_at",
+        {
+          ascending:true
+        }
+      )
+      .limit(20);
+
+
+  if(result.error){
+
+    renderDemoSchedule();
+
+    return;
+
+  }
+
+
+  const schedule =
+    result.data || [];
+
+
+  if(!schedule.length){
+
+    renderDemoSchedule();
+
+    return;
+
+  }
+
+
+  rows.innerHTML =
+    schedule
+      .map(item => {
+
+        const date =
+          new Date(
+            item.starts_at
+          );
+
+
+        const time =
+          date.toLocaleTimeString(
+            [],
+            {
+              hour:"numeric",
+              minute:"2-digit"
+            }
+          );
+
+
+        return `
+
+          <tr>
+
+            <td class="time">
+              ${time}
+            </td>
+
+            <td>
+              <b>
+                ${escapeHtml(
+                  item.title
+                )}
+              </b>
+            </td>
+
+            <td>
+              ${escapeHtml(
+                item.category ||
+                "SPORTS"
+              )}
+            </td>
+
+            <td
+              class="${
+                String(item.status || "")
+                  .toLowerCase()
+                  .includes("live")
+                  ? "liveText"
+                  : ""
+              }">
+
+              ${escapeHtml(
+                item.status ||
+                "UP NEXT"
+              )}
+
+            </td>
+
+          </tr>
+
+        `;
+
+      })
+      .join("");
+
+}
+
+
+function renderDemoSchedule(){
+
+  const schedule = [
+
+    [
+      "12:00 PM",
+      "CrowRules Sports News",
+      "NEWS",
+      "UP NEXT"
+    ],
+
+    [
+      "2:00 PM",
+      "Classic Game Replay",
+      "REPLAY",
+      "UP NEXT"
+    ],
+
+    [
+      "3:00 PM",
+      "CrowRules Sports Live",
+      "LIVE",
+      "LIVE READY"
+    ],
+
+    [
+      "5:00 PM",
+      "Tacoma Sports Weekly",
+      "LOCAL",
+      "UP NEXT"
+    ],
+
+    [
+      "7:00 PM",
+      "The Breakdown",
+      "ANALYSIS",
+      "UP NEXT"
+    ],
+
+    [
+      "8:00 PM",
+      "Game Night",
+      "LIVE",
+      "UP NEXT"
+    ],
+
+    [
+      "10:00 PM",
+      "Overtime",
+      "ORIGINAL",
+      "UP NEXT"
+    ]
+
+  ];
+
+
+  document.getElementById(
+    "scheduleRows"
+  ).innerHTML =
+    schedule
+      .map(row => `
+
+        <tr>
+
+          <td class="time">
+            ${row[0]}
+          </td>
+
+          <td>
+            <b>
+              ${row[1]}
+            </b>
+          </td>
+
+          <td>
+            ${row[2]}
+          </td>
+
+          <td
+            class="${
+              row[3]
+                .includes("LIVE")
+                ? "liveText"
+                : ""
+            }">
+
+            ${row[3]}
+
+          </td>
+
+        </tr>
+
+      `)
+      .join("");
+
+}
+
+
+/* =========================================================
+   NEWS
+========================================================= */
+
+async function loadNews(){
+
+  if(!supabaseClient) return;
+
+
+  const grid =
+    document.getElementById(
+      "newsGrid"
+    );
+
+
+  const result =
+    await supabaseClient
+      .from("sports_news")
+      .select("*")
+      .eq(
+        "is_published",
+        true
+      )
+      .order(
+        "published_at",
+        {
+          ascending:false
+        }
+      )
+      .limit(4);
+
+
+  if(result.error ||
+     !result.data?.length){
+
+    return;
+
+  }
+
+
+  grid.innerHTML =
+    result.data
+      .map(article => `
+
+        <article class="card">
+
+          <span class="tag">
+            ${escapeHtml(
+              article.category ||
+              "SPORTS"
+            )}
+          </span>
+
+          <h3>
+            ${escapeHtml(
+              article.title
+            )}
+          </h3>
+
+          <p>
+            ${escapeHtml(
+              article.excerpt ||
+              article.content ||
+              ""
+            )}
+          </p>
+
+        </article>
+
+      `)
+      .join("");
+
+}
+
+
+/* =========================================================
+   POLL
+========================================================= */
+
+function vote(index){
+
+  votes[index] += 5;
+
+  const total =
+    votes.reduce(
+      (a,b) => a+b,
+      0
+    );
+
+
+  const percentage =
+    (
+      votes[index] /
+      total
+    ) * 100;
+
+
+  document.getElementById(
+    "pollFill"
+  ).style.width =
+    percentage + "%";
+
+
+  document.getElementById(
+    "pollQuestion"
+  ).textContent =
+    "Thanks for voting — CrowRules Sports is listening.";
+
+
+  showToast(
+    "Vote recorded."
+  );
+
+}
+
+
+/* =========================================================
+   INFO MODAL
+========================================================= */
+
+function openInfo(){
+
+  document.getElementById(
+    "modal"
+  ).classList.add(
+    "show"
+  );
+
+}
+
+
+function closeInfo(){
+
+  document.getElementById(
+    "modal"
+  ).classList.remove(
+    "show"
+  );
+
+}
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function createSlug(value){
+
+  return String(value)
+
+    .toLowerCase()
+
+    .trim()
+
+    .replace(
+      /[^a-z0-9]+/g,
+      "-"
+    )
+
+    .replace(
+      /^-+|-+$/g,
+      ""
+    );
+
+}
+
+
+function escapeHtml(value){
+
+  return String(
+    value ?? ""
+  )
+
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+
+    .replace(
+      /</g,
+      "&lt;"
+    )
+
+    .replace(
+      />/g,
+      "&gt;"
+    )
+
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+
+}
+
+
+function escapeAttribute(value){
+
+  return escapeHtml(
+    value
+  );
+
+}
+
+
+/* =========================================================
+   KEYBOARD
+========================================================= */
+
+window.addEventListener(
+  "keydown",
+  event => {
+
+    if(event.key === "Escape"){
+
+      closeInfo();
+
+      closeVideo();
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   INITIALIZATION
+========================================================= */
+
+async function initializeSports(){
+
+  await checkAuth();
+
+  await Promise.all([
+
+    loadEpisodes(),
+
+    loadScores(),
+
+    loadSchedule(),
+
+    loadNews()
+
+  ]);
+
+}
+
+
+initializeSports();
+
 </script>
+
 </body>
 </html>
