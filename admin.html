@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#05060a">
+<title>CrowRules Sports — Admin Sync Center v1.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#05060a;--panel:#0c0f16;--panel2:#111621;--line:#242b38;--text:#eef2f7;--muted:#8993a4;--accent:#7c5cff;--accent2:#00d4ff;--good:#25d366;--bad:#ff5577;--warn:#ffb84d}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 15% 0%,#17112c 0,#05060a 42%),#05060a;color:var(--text);font-family:Montserrat,Arial,sans-serif}
+.wrap{max-width:1500px;margin:auto;padding:28px}.brand{font-family:Orbitron;font-weight:900;letter-spacing:2px}.top{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:24px}.top h1{margin:0;font-size:28px}.status{padding:9px 13px;border:1px solid var(--line);border-radius:999px;background:#0a0d13;color:var(--muted);font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}.card{background:linear-gradient(180deg,#10141d,#0a0d13);border:1px solid var(--line);border-radius:16px;padding:18px}.num{font:800 28px Orbitron}.label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:5px}
+.layout{display:grid;grid-template-columns:1.35fr .65fr;gap:18px}.panel{background:rgba(12,15,22,.94);border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:18px}.panel h2{font:700 18px Orbitron;margin:0 0 8px}.sub{color:var(--muted);font-size:13px;line-height:1.5}
+button,select,input{font:inherit}button{border:0;border-radius:11px;padding:12px 15px;background:#171d29;color:#fff;cursor:pointer;font-weight:800}button:hover{filter:brightness(1.15)}button.primary{background:linear-gradient(135deg,var(--accent),#4a8dff)}button.good{background:#135d35}button.stop{background:#63243a}.controls{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}.controls select{background:#090c12;color:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px}.progress{height:13px;background:#07090d;border:1px solid var(--line);border-radius:99px;overflow:hidden}.bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:.25s}.log{height:260px;overflow:auto;background:#05070b;border:1px solid var(--line);border-radius:12px;padding:12px;font:12px/1.55 monospace;white-space:pre-wrap}.row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #1a202b;font-size:13px}.row:last-child{border-bottom:0}.pill{font-size:10px;padding:4px 7px;border-radius:99px;background:#171d29;color:#aeb8c8}.success{color:var(--good)}.error{color:var(--bad)}.warn{color:var(--warn)}table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;padding:9px;border-bottom:1px solid #1b212c}th{color:#9aa4b5;font-size:10px;text-transform:uppercase}.leaderboards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.lb{background:#090c12;border:1px solid var(--line);border-radius:13px;padding:14px}.lb h3{margin:0 0 8px;font-size:13px}.danger{border-color:#5a2535}.footer{color:#697486;font-size:11px;text-align:center;padding:10px}
+@media(max-width:1050px){.grid{grid-template-columns:repeat(3,1fr)}.layout{grid-template-columns:1fr}}
+@media(max-width:650px){.wrap{padding:14px}.grid{grid-template-columns:repeat(2,1fr)}.leaderboards{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div><div class="brand">CROWRULES SPORTS</div><h1>Full Sports Database Sync Center</h1></div>
+    <div id="authStatus" class="status">Checking Supabase session…</div>
+  </div>
+
+  <div class="grid">
+    <div class="card"><div id="teams" class="num">—</div><div class="label">Active Teams</div></div>
+    <div class="card"><div id="players" class="num">—</div><div class="label">Active Players</div></div>
+    <div class="card"><div id="stats" class="num">—</div><div class="label">Player Stat Rows</div></div>
+    <div class="card"><div id="leagues" class="num">—</div><div class="label">Leagues</div></div>
+    <div class="card"><div id="synced" class="num">0%</div><div class="label">Sync Progress</div></div>
+  </div>
+
+  <div class="layout">
+    <main>
+      <section class="panel">
+        <h2>FULL SPORTS DATABASE SYNC</h2>
+        <div class="sub">Runs protected roster synchronization first, then processes every active player in batches for the selected season. The browser uses the currently logged-in Supabase administrator session; no service-role key is placed in this page.</div>
+        <div class="controls">
+          <select id="season"><option>2026</option><option>2025</option><option>2024</option></select>
+          <button class="primary" id="fullBtn">▶ FULL SYNC — TEAMS → ROSTERS → PLAYERS → STATS</button>
+          <button id="refreshBtn">↻ Refresh Counts</button>
+          <button class="stop" id="stopBtn">■ Stop After Current Batch</button>
+        </div>
+        <div class="progress"><div id="bar" class="bar"></div></div>
+        <div id="progressText" class="sub" style="margin:8px 0 14px">Ready.</div>
+        <div id="log" class="log"></div>
+      </section>
+
+      <section class="panel">
+        <h2>PLAYER LEADERBOARDS</h2>
+        <div class="sub">Season-filtered leaderboards read directly from the Supabase sports_player_leaderboard view.</div>
+        <div class="controls"><button id="lbBtn">↻ Refresh Leaderboards</button></div>
+        <div id="leaderboards" class="leaderboards"></div>
+      </section>
+    </main>
+
+    <aside>
+      <section class="panel">
+        <h2>SYNC PLAN</h2>
+        <div class="row"><span>1. Teams</span><span class="pill">DATABASE</span></div>
+        <div class="row"><span>2. Rosters</span><span class="pill">ESPN</span></div>
+        <div class="row"><span>3. Player profiles</span><span class="pill">ESPN</span></div>
+        <div class="row"><span>4. Player stats</span><span class="pill">ESPN</span></div>
+        <div class="row"><span>5. Leaderboards</span><span class="pill">VIEW</span></div>
+      </section>
+      <section class="panel">
+        <h2>SECURITY</h2>
+        <div class="sub">Sync Edge Functions remain JWT-protected and administrator-only. Guests can view public sports data elsewhere, but this control panel cannot execute bulk sync without an authorized session.</div>
+      </section>
+      <section class="panel danger">
+        <h2>IF SYNC STOPS</h2>
+        <div class="sub">Read the last error in the log. ESPN coverage can vary by league and player. Failed players are reported and the batch continues instead of aborting the entire run.</div>
+      </section>
+    </aside>
+  </div>
+  <div class="footer">CrowRules Sports Admin • Supabase + ESPN public data • Never expose the Supabase service-role key in frontend code.</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://zauxdqyssratvzmomozf.supabase.co";
+// Paste ONLY your project's public anon/publishable key here.
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InphdXhkcXlzc3JhdHZ6bW9tb3pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc0MjE3MjYsImV4cCI6MjEwMjk5NzcyNn0.nPTPMgD8gHzL7qRmMuUNJxpjXaCJRVXmgxck15AKDDA";
+const sb = supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+
+let stopping=false, running=false;
+const $=id=>document.getElementById(id);
+function log(msg,cls=""){const t=new Date().toLocaleTimeString();$("log").textContent += `[${t}] ${msg}\n`; $("log").scrollTop=$("log").scrollHeight}
+function setProgress(p,text){p=Math.max(0,Math.min(100,p));$("bar").style.width=p+"%";$("synced").textContent=Math.round(p)+"%";$("progressText").textContent=text}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+
+async function auth(){
+  const {data,error}=await sb.auth.getSession();
+  if(error){$("authStatus").textContent="Auth error";log(error.message,"error");return null}
+  const user=data.session?.user;
+  $("authStatus").textContent=user?`Signed in: ${user.email||user.id}`:"Not signed in";
+  if(!user) log("No Supabase session. Sign in with an authorized CrowRules admin account before syncing.","warn");
+  return data.session;
+}
+async function count(table){
+  const {count,error}=await sb.from(table).select("*",{count:"exact",head:true});
+  if(error) throw error; return count||0;
+}
+async function refreshCounts(){
+  try{
+    const [teams,players,stats,leagues]=await Promise.all([
+      count("sports_teams"),count("sports_players"),count("sports_player_stats"),count("sports_leagues")
+    ]);
+    $("teams").textContent=teams;$("players").textContent=players;$("stats").textContent=stats;$("leagues").textContent=leagues;
+    log(`Counts: ${teams} teams / ${players} players / ${stats} stat rows / ${leagues} leagues`);
+    return {teams,players,stats,leagues};
+  }catch(e){log("Count refresh failed: "+e.message,"error")}
+}
+async function invoke(fn,body){
+  const {data,error}=await sb.functions.invoke(fn,{body});
+  if(error) throw error;
+  if(data?.error) throw new Error(data.error);
+  return data;
+}
+
+async function rosterLeague(league,season,totalProcessed){
+  let offset=0, total=0;
+  while(!stopping){
+    const d=await invoke("sports-roster-sync",{action:"sync",league,season,offset,limit:12});
+    const processed=Number(d.processed||0); total=Number(d.totalTeams||0);
+    if(d.errors?.length) d.errors.forEach(x=>log(`${league} ${x.team}: ${x.error}`,"error"));
+    if(d.results?.length) d.results.forEach(x=>log(`${league}: ${x.team} — ${x.players} players`,"success"));
+    offset=Number(d.nextOffset||offset+12);
+    const base=(totalProcessed||0);
+    const leagueFraction=total?Math.min(1,offset/total):1;
+    log(`${league} roster batch complete: ${Math.min(offset,total)}/${total}`);
+    if(offset>=total || processed===0) break;
+    setProgress(5 + leagueFraction*45,`Roster sync: ${league} • ${Math.min(offset,total)}/${total} teams`);
+  }
+  return total;
+}
+
+async function fullSync(){
+  if(running)return;
+  const session=await auth();
+  if(!session){alert("Please sign in first.");return}
+  if(SUPABASE_ANON_KEY.includes("PASTE_")){alert("Add your Supabase public anon/publishable key to SUPABASE_ANON_KEY in this HTML first.");return}
+  running=true;stopping=false;$("fullBtn").disabled=true;$("log").textContent="";
+  const season=Number($("season").value);
+  try{
+    log(`FULL SYNC STARTED — season ${season}`);setProgress(1,"Starting…");
+    const leagues=["NFL","MLB","NBA","WNBA","NHL","MLS","UFL","FBS","FCS"];
+    for(let i=0;i<leagues.length&&!stopping;i++){
+      const pct=5+(i/leagues.length)*45;
+      setProgress(pct,`Roster sync: ${leagues[i]}…`);
+      await rosterLeague(leagues[i],season,i);
+    }
+    if(stopping){log("Stopped after current roster batch.","warn");return}
+    setProgress(52,"Rosters complete. Refreshing player count…");
+    let c=await refreshCounts();
+    let totalPlayers=c?.players||0, offset=0, batch=50;
+    while(!stopping && offset<totalPlayers){
+      const d=await invoke("sports-player-stats-sync",{season,offset,limit:batch});
+      log(`Stats batch ${offset}-${Math.min(offset+batch,totalPlayers)}: ${d.synced||0} synced, ${(d.errors||[]).length} errors`,(d.errors||[]).length?"warn":"success");
+      (d.errors||[]).slice(0,10).forEach(x=>log(`  ${x.player}: ${x.error}`,"error"));
+      offset += Number(d.processed||batch);
+      if(!d.processed)break;
+      setProgress(52+(offset/Math.max(totalPlayers,1))*45,`Player stats: ${Math.min(offset,totalPlayers)}/${totalPlayers}`);
+    }
+    if(stopping){log("Stopped after current player-stat batch.","warn");return}
+    setProgress(98,"Finalizing leaderboards…");
+    await refreshCounts();await loadLeaderboards();
+    setProgress(100,"FULL SPORTS DATABASE SYNC COMPLETE.");
+    log("FULL SPORTS DATABASE SYNC COMPLETE.","success");
+  }catch(e){log("FULL SYNC FAILED: "+e.message,"error");setProgress(0,"Sync failed — see log.")}
+  finally{running=false;$("fullBtn").disabled=false}
+}
+
+const boards=[
+  ["Top Points","points","DESC"],["Top Assists","assists","DESC"],["Top Rebounds","rebounds","DESC"],["Top Steals","steals","DESC"],
+  ["Top Blocks","blocks","DESC"],["MLB Home Runs","home_runs","DESC"],["MLB RBI","rbi","DESC"],["MLB Hits","hits","DESC"],
+  ["NFL Passing Yards","passing_yards","DESC"],["NFL Rushing Yards","rushing_yards","DESC"],["NFL Receiving Yards","receiving_yards","DESC"],["NFL Tackles","tackles","DESC"],
+  ["NHL Goals","goals","DESC"],["NHL Plus/Minus","plus_minus","DESC"],["Soccer Goals","goals","DESC"],["Soccer Assists","assists","DESC"]
+];
+async function loadBoard(title,field){
+  const season=Number($("season").value);
+  const {data,error}=await sb.from("sports_player_leaderboard").select("*").eq("season",season).not(field,"is",null).order(field,{ascending:false}).limit(8);
+  if(error)return `<div class="lb"><h3>${esc(title)}</h3><div class="error">${esc(error.message)}</div></div>`;
+  return `<div class="lb"><h3>${esc(title)}</h3>`+(data||[]).map((x,i)=>`<div class="row"><span>${i+1}. ${esc(x.player_name||x.name||"Unknown")} <small class="sub">${esc(x.team_name||"")}</small></span><strong>${esc(x[field])}</strong></div>`).join("")+`</div>`;
+}
+async function loadLeaderboards(){
+  $("leaderboards").innerHTML='<div class="sub">Loading…</div>';
+  $("leaderboards").innerHTML=await Promise.all(boards.map(x=>loadBoard(x[0],x[1]))).then(x=>x.join(""));
+}
+$("fullBtn").onclick=fullSync;$("stopBtn").onclick=()=>{stopping=true;log("Stop requested. Current batch will finish.","warn")};
+$("refreshBtn").onclick=refreshCounts;$("lbBtn").onclick=loadLeaderboards;
+$("season").onchange=loadLeaderboards;
+
+(async()=>{await auth();await refreshCounts();await loadLeaderboards()})();
+</script>
+</body>
+</html>
