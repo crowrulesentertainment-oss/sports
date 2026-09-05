@@ -4,138 +4,449 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#05070b">
-<meta name="description" content="CrowRules Sports v3.2 — teams, players, schedules, standings, scores and secured sports data synchronization.">
-<title>CrowRules Sports v3.2</title>
+<meta name="description" content="CrowRules Sports v6.0 — live scores, schedules, standings, teams, players, news, highlights and secured Supabase synchronization.">
+<title>CrowRules Sports v6.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Orbitron:wght@500;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--bg:#05070b;--bg2:#070b11;--panel:#0b1018;--panel2:#101722;--panel3:#151d29;--line:#202a37;--line2:#344253;--text:#f4f7fb;--muted:#8d99aa;--accent:#35b9ff;--accent2:#8b5cff;--danger:#ff4d6d;--good:#55e6a5;--warning:#ffc857;--shadow:0 18px 50px rgba(0,0,0,.35);--radius:18px}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 80% 0%,rgba(53,185,255,.11),transparent 32%),radial-gradient(circle at 0% 30%,rgba(139,92,255,.09),transparent 30%),var(--bg);color:var(--text);font-family:Montserrat,Arial,sans-serif}.topline{height:3px;background:linear-gradient(90deg,var(--accent2),var(--accent),transparent)}a{text-decoration:none;color:inherit}button,input,select{font:inherit}button{cursor:pointer}.nav{position:sticky;top:0;z-index:50;background:rgba(5,7,11,.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}.navin{max-width:1450px;margin:auto;padding:13px 22px;display:flex;align-items:center;gap:18px}.logo{font:900 18px Orbitron;white-space:nowrap}.logo span{color:var(--accent)}.links{display:flex;gap:5px;flex:1;overflow:auto}.links a{padding:9px 11px;color:var(--muted);font-size:12px;border-radius:9px;white-space:nowrap}.links a:hover,.links a.active{background:var(--panel2);color:var(--text)}.wrap{max-width:1450px;margin:auto;padding:25px 22px 70px}.hero,.panel,.syncPanel{border:1px solid var(--line);border-radius:24px;background:linear-gradient(135deg,rgba(53,185,255,.07),rgba(139,92,255,.04)),var(--panel);box-shadow:var(--shadow)}.hero{padding:42px;position:relative;overflow:hidden}.hero:after{content:"";position:absolute;width:480px;height:480px;border:1px solid rgba(53,185,255,.12);border-radius:50%;right:-150px;top:-170px;box-shadow:0 0 0 80px rgba(53,185,255,.025),0 0 0 160px rgba(53,185,255,.015)}.eyebrow,.tag{font:900 10px Orbitron;letter-spacing:2px;color:var(--accent);text-transform:uppercase}.hero h1{font:900 clamp(42px,7vw,82px) Orbitron;line-height:.95;margin:12px 0;position:relative;z-index:1}.hero p{max-width:760px;color:#c0c9d5;line-height:1.7;position:relative;z-index:1}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;position:relative;z-index:1}.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:12px 16px;border-radius:11px;font-weight:800}.btn:hover{border-color:var(--accent);transform:translateY(-1px)}.btn.primary{background:var(--accent);border-color:var(--accent);color:#031019}.btn.danger{color:#ff9aad;border-color:rgba(255,77,109,.4)}.btn.good{background:rgba(85,230,165,.12);color:var(--good);border-color:rgba(85,230,165,.35)}.section{margin-top:32px}.sectionHead{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:14px}.sectionHead h2{font:800 22px Orbitron;margin:0}.sectionHead p{margin:5px 0 0;color:var(--muted);font-size:12px}.tiny{font-size:10px;color:var(--accent);font-weight:900;letter-spacing:1px}.dataGrid{display:grid;grid-template-columns:1.1fr 1.9fr;gap:16px}.panel{padding:20px}.filters{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{display:grid;gap:6px}.field span{font-size:9px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:1px}.field select,.field input{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:10px;color:var(--text);padding:11px;outline:0}.field select:focus,.field input:focus{border-color:var(--accent)}.teamHero{display:flex;align-items:center;gap:15px;padding-bottom:16px;border-bottom:1px solid var(--line)}.teamLogo{width:68px;height:68px;border-radius:15px;border:1px solid var(--line);background:var(--panel2);object-fit:contain;padding:8px}.teamName{font:800 20px Orbitron}.muted{color:var(--muted);font-size:12px;line-height:1.6}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:15px}.stat{padding:12px;background:var(--panel2);border:1px solid var(--line);border-radius:12px}.stat b{display:block;font:900 18px Orbitron}.stat span{font-size:9px;color:var(--muted);text-transform:uppercase}.players{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.player{display:flex;gap:10px;align-items:center;padding:10px;background:var(--panel2);border:1px solid var(--line);border-radius:12px}.player img{width:46px;height:46px;border-radius:9px;object-fit:cover;background:#05070b}.player b{font-size:12px}.player small{display:block;color:var(--muted);font-size:9px;margin-top:3px}.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:14px}.table{width:100%;border-collapse:collapse;min-width:650px}.table th,.table td{padding:12px;border-bottom:1px solid var(--line);text-align:left;font-size:11px}.table th{color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:1px}.table tr:last-child td{border-bottom:0}.rank{font:900 13px Orbitron;color:var(--accent)}.live{color:var(--danger);font-weight:900}.syncPanel{padding:24px;background:linear-gradient(120deg,rgba(53,185,255,.08),rgba(139,92,255,.08)),var(--panel)}.syncHead{display:flex;justify-content:space-between;gap:20px;align-items:center}.syncHead h2{font:900 22px Orbitron;margin:0}.syncHead p{color:var(--muted);font-size:12px;line-height:1.6}.syncActions{display:flex;gap:9px;flex-wrap:wrap}.progressOuter{height:12px;background:#151e2a;border-radius:99px;overflow:hidden;margin:18px 0 12px}.progressBar{width:0;height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width .3s}.syncGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.syncStat{padding:14px;background:rgba(0,0,0,.18);border:1px solid var(--line);border-radius:12px}.syncStat b{font:900 18px Orbitron}.syncStat span{display:block;color:var(--muted);font-size:9px;margin-top:4px;text-transform:uppercase}.leagueCards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:15px}.leagueCard{padding:13px;background:var(--panel2);border:1px solid var(--line);border-radius:12px}.leagueCard b{font:800 13px Orbitron}.leagueCard small{display:block;color:var(--muted);margin-top:5px}.pill{display:inline-block;margin-top:8px;padding:4px 7px;border-radius:99px;font-size:8px;font-weight:900;background:rgba(141,153,170,.1);color:var(--muted)}.pill.running{color:var(--warning);background:rgba(255,200,87,.1)}.pill.complete{color:var(--good);background:rgba(85,230,165,.1)}.pill.error{color:var(--danger);background:rgba(255,77,109,.1)}.log{margin-top:14px;max-height:190px;overflow:auto;background:#020407;border:1px solid var(--line);border-radius:12px;padding:12px;font:11px monospace;color:#aeb8c6;white-space:pre-wrap}.notice{margin-top:12px;padding:11px;border-radius:10px;background:rgba(255,200,87,.07);border:1px solid rgba(255,200,87,.2);color:#d9c58c;font-size:10px}.hidden{display:none!important}.footer{border-top:1px solid var(--line);padding:25px;text-align:center;color:var(--muted);font-size:11px}.toast{position:fixed;right:20px;bottom:20px;z-index:100;max-width:360px;padding:13px 16px;border:1px solid var(--line2);border-radius:12px;background:var(--panel3);box-shadow:var(--shadow);font-size:11px;opacity:0;transform:translateY(10px);pointer-events:none;transition:.25s}.toast.show{opacity:1;transform:translateY(0)}@media(max-width:1050px){.dataGrid{grid-template-columns:1fr}.players{grid-template-columns:repeat(2,1fr)}.leagueCards{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){.links{display:none}.wrap{padding:18px 14px 50px}.hero{padding:25px}.filters{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.players{grid-template-columns:1fr}.leagueCards,.syncGrid{grid-template-columns:1fr}.syncHead{align-items:flex-start;flex-direction:column}.teamHero{align-items:flex-start}.teamLogo{width:58px;height:58px}}
-
-.authMini{display:flex;align-items:center;gap:8px;flex-shrink:0}.authMini>span{font:900 9px Orbitron;letter-spacing:1px;color:var(--muted);padding:7px 8px;border:1px solid var(--line);border-radius:8px}.authMini>span.admin{color:var(--good);border-color:rgba(85,230,165,.35);background:rgba(85,230,165,.08)}.authMini .btn{padding:8px 10px;font-size:9px}.authPanelWrap{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.7);backdrop-filter:blur(10px);display:none;align-items:flex-start;justify-content:center;padding:90px 18px 30px;overflow:auto}.authPanelWrap.open{display:flex}.authPanel{width:min(620px,100%);border:1px solid var(--line2);border-radius:22px;background:linear-gradient(135deg,rgba(53,185,255,.08),rgba(139,92,255,.06)),var(--panel);box-shadow:0 30px 100px rgba(0,0,0,.6);padding:24px}.authPanelHead{display:flex;justify-content:space-between;gap:15px}.authPanelHead h2{font:900 22px Orbitron;margin:8px 0}.authPanelHead p{margin:0;color:var(--muted);font-size:11px;line-height:1.6;max-width:500px}.iconBtn{border:1px solid var(--line);background:var(--panel2);color:var(--text);width:36px;height:36px;border-radius:10px;font-size:24px;line-height:1}.loginGrid{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;margin-top:20px;align-items:end}.loginBtn{height:43px;white-space:nowrap}.authMessage{margin-top:12px;font-size:10px;line-height:1.5;min-height:15px;color:var(--muted)}.authMessage.goodMsg{color:var(--good)}.authMessage.errorMsg{color:#ff9aad}.authHint{margin-top:10px;color:var(--muted);font-size:9px;line-height:1.5}.accountBox{display:flex;align-items:center;gap:13px;padding:16px;background:var(--panel2);border:1px solid var(--line);border-radius:14px;margin-top:18px}.accountAvatar{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;background:rgba(53,185,255,.12);border:1px solid rgba(53,185,255,.25);font:900 18px Orbitron;color:var(--accent)}.accountBox b{display:block;font-size:12px}.accountBox small{display:block;color:var(--muted);font-size:9px;margin-top:4px}.accountActions{display:flex;gap:9px;margin-top:12px;flex-wrap:wrap}@media(max-width:800px){.loginGrid{grid-template-columns:1fr}.loginBtn{width:100%}}@media(max-width:650px){.authMini>span{display:none}.authMini .btn{font-size:8px}.authPanelWrap{padding:70px 12px 20px}.authPanel{padding:18px}}
+:root{--bg:#05070b;--bg2:#070b11;--panel:#0b1018;--panel2:#101722;--panel3:#151d29;--line:#202a37;--line2:#344253;--text:#f4f7fb;--muted:#8d99aa;--accent:#35b9ff;--accent2:#8b5cff;--danger:#ff4d6d;--good:#55e6a5;--warning:#ffc857;--shadow:0 18px 50px rgba(0,0,0,.35);--radius:18px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 80% 0%,rgba(53,185,255,.11),transparent 32%),radial-gradient(circle at 0% 30%,rgba(139,92,255,.09),transparent 30%),var(--bg);color:var(--text);font-family:Montserrat,Arial,sans-serif}a{text-decoration:none;color:inherit}button,input,select{font:inherit}button{cursor:pointer}
+.topline{height:3px;background:linear-gradient(90deg,var(--accent2),var(--accent),transparent)}
+.nav{position:sticky;top:0;z-index:60;background:rgba(5,7,11,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.navin{max-width:1500px;margin:auto;padding:12px 20px;display:flex;align-items:center;gap:16px}.logo{font:900 17px Orbitron;white-space:nowrap}.logo span{color:var(--accent)}
+.links{display:flex;gap:4px;flex:1;overflow:auto}.links a{padding:9px 10px;color:var(--muted);font-size:11px;border-radius:9px;white-space:nowrap}.links a:hover,.links a.active{background:var(--panel2);color:var(--text)}
+.authMini{display:flex;align-items:center;gap:7px;flex-shrink:0}.authMini>span{font:900 8px Orbitron;letter-spacing:1px;color:var(--muted);padding:7px 8px;border:1px solid var(--line);border-radius:8px}.authMini>span.admin{color:var(--good);border-color:rgba(85,230,165,.35);background:rgba(85,230,165,.08)}
+.wrap{max-width:1500px;margin:auto;padding:22px 20px 70px}
+.hero,.panel,.syncPanel,.scoreCard,.newsCard,.featureCard{border:1px solid var(--line);border-radius:22px;background:linear-gradient(135deg,rgba(53,185,255,.07),rgba(139,92,255,.04)),var(--panel);box-shadow:var(--shadow)}
+.hero{padding:40px;position:relative;overflow:hidden}.hero:after{content:"";position:absolute;width:480px;height:480px;border:1px solid rgba(53,185,255,.12);border-radius:50%;right:-150px;top:-170px;box-shadow:0 0 0 80px rgba(53,185,255,.025),0 0 0 160px rgba(53,185,255,.015)}
+.eyebrow,.tag{font:900 9px Orbitron;letter-spacing:2px;color:var(--accent);text-transform:uppercase}.hero h1{font:900 clamp(40px,7vw,80px) Orbitron;line-height:.95;margin:12px 0;position:relative;z-index:1}.hero p{max-width:800px;color:#c0c9d5;line-height:1.7;position:relative;z-index:1}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:22px;position:relative;z-index:1}.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:11px 15px;border-radius:10px;font-weight:800;font-size:11px}.btn:hover{border-color:var(--accent);transform:translateY(-1px)}.btn.primary{background:var(--accent);border-color:var(--accent);color:#031019}.btn.danger{color:#ff9aad;border-color:rgba(255,77,109,.4)}.btn.good{background:rgba(85,230,165,.12);color:var(--good);border-color:rgba(85,230,165,.35)}.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.section{margin-top:30px}.sectionHead{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:13px}.sectionHead h2{font:800 21px Orbitron;margin:0}.sectionHead p{margin:5px 0 0;color:var(--muted);font-size:11px}.tiny{font-size:9px;color:var(--accent);font-weight:900;letter-spacing:1px}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:18px}.kpi{padding:15px;background:var(--panel2);border:1px solid var(--line);border-radius:14px}.kpi b{display:block;font:900 22px Orbitron}.kpi span{display:block;color:var(--muted);font-size:8px;text-transform:uppercase;margin-top:4px}
+.scoreGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}.scoreCard{padding:16px}.scoreTop{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:9px}.scoreTop .live{color:var(--danger);font-weight:900}.scoreTeams{margin-top:14px;display:grid;gap:8px}.scoreTeam{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:9px;background:var(--panel2);border:1px solid var(--line);border-radius:10px}.scoreTeam b{font-size:11px}.scoreTeam span{font:900 18px Orbitron}.scoreBottom{margin-top:10px;color:var(--muted);font-size:9px}
+.dataGrid{display:grid;grid-template-columns:1.05fr 1.95fr;gap:14px}.panel{padding:18px}.filters{display:grid;grid-template-columns:1fr 1fr;gap:9px}.field{display:grid;gap:5px}.field span{font-size:8px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:1px}.field select,.field input,.field textarea{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:9px;color:var(--text);padding:10px;outline:0}.field select:focus,.field input:focus,.field textarea:focus{border-color:var(--accent)}
+.teamHero{display:flex;align-items:center;gap:14px;padding-bottom:15px;border-bottom:1px solid var(--line)}.teamLogo{width:64px;height:64px;border-radius:14px;border:1px solid var(--line);background:var(--panel2);object-fit:contain;padding:7px}.teamName{font:800 19px Orbitron}.muted{color:var(--muted);font-size:11px;line-height:1.6}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}.stat{padding:11px;background:var(--panel2);border:1px solid var(--line);border-radius:11px}.stat b{display:block;font:900 16px Orbitron}.stat span{font-size:8px;color:var(--muted);text-transform:uppercase}
+.players{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:13px}.player{display:flex;gap:9px;align-items:center;padding:10px;background:var(--panel2);border:1px solid var(--line);border-radius:11px}.player img{width:45px;height:45px;border-radius:8px;object-fit:cover;background:#05070b}.player b{font-size:11px}.player small{display:block;color:var(--muted);font-size:8px;margin-top:3px}
+.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:13px}.table{width:100%;border-collapse:collapse;min-width:680px}.table th,.table td{padding:11px;border-bottom:1px solid var(--line);text-align:left;font-size:10px}.table th{color:var(--muted);font-size:8px;text-transform:uppercase;letter-spacing:1px}.table tr:last-child td{border-bottom:0}.rank{font:900 12px Orbitron;color:var(--accent)}.live{color:var(--danger);font-weight:900}
+.leagueGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.leagueCard{padding:14px;background:var(--panel2);border:1px solid var(--line);border-radius:13px}.leagueCard b{font:800 13px Orbitron}.leagueCard small{display:block;color:var(--muted);margin-top:5px;line-height:1.5}.leagueCard .numbers{display:flex;gap:12px;margin-top:9px;font-size:9px;color:var(--muted)}.leagueCard .numbers b{font:800 11px Montserrat;color:var(--text)}
+.newsGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.newsCard{padding:15px}.newsCard .meta{font-size:8px;color:var(--accent);font-weight:900;text-transform:uppercase}.newsCard h3{font:800 14px Orbitron;line-height:1.25;margin:8px 0}.newsCard p{font-size:10px;color:var(--muted);line-height:1.6;margin:0}.newsCard a{display:inline-block;margin-top:10px;color:var(--accent);font-size:9px;font-weight:900}
+.featureGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.featureCard{padding:12px;overflow:hidden}.featureCard img{width:100%;height:120px;object-fit:cover;border-radius:10px;background:var(--panel2)}.featureCard b{display:block;font-size:11px;margin-top:9px}.featureCard small{display:block;color:var(--muted);font-size:8px;margin-top:4px}
+.searchRow{display:flex;gap:8px;margin-bottom:12px}.searchRow input{flex:1;background:var(--bg2);border:1px solid var(--line);border-radius:10px;color:var(--text);padding:11px}.playerSearchGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.playerResult{padding:12px;background:var(--panel2);border:1px solid var(--line);border-radius:12px}.playerResult b{font-size:11px}.playerResult small{display:block;color:var(--muted);font-size:8px;margin-top:4px}.playerResult .statline{margin-top:8px;font-size:8px;color:var(--accent)}
+.syncPanel{padding:22px;background:linear-gradient(120deg,rgba(53,185,255,.08),rgba(139,92,255,.08)),var(--panel)}.syncHead{display:flex;justify-content:space-between;gap:20px;align-items:center}.syncHead h2{font:900 21px Orbitron;margin:0}.syncHead p{color:var(--muted);font-size:10px;line-height:1.6;max-width:780px}.syncActions{display:flex;gap:8px;flex-wrap:wrap}.progressOuter{height:11px;background:#151e2a;border-radius:99px;overflow:hidden;margin:17px 0 11px}.progressBar{width:0;height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width .25s}.syncGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}.syncStat{padding:12px;background:rgba(0,0,0,.18);border:1px solid var(--line);border-radius:11px}.syncStat b{font:900 16px Orbitron}.syncStat span{display:block;color:var(--muted);font-size:8px;margin-top:4px;text-transform:uppercase}.pill{display:inline-block;margin-top:8px;padding:4px 7px;border-radius:99px;font-size:7px;font-weight:900;background:rgba(141,153,170,.1);color:var(--muted)}.pill.running{color:var(--warning);background:rgba(255,200,87,.1)}.pill.complete{color:var(--good);background:rgba(85,230,165,.1)}.pill.error{color:var(--danger);background:rgba(255,77,109,.1)}
+.log{margin-top:12px;max-height:210px;overflow:auto;background:#020407;border:1px solid var(--line);border-radius:11px;padding:11px;font:10px monospace;color:#aeb8c6;white-space:pre-wrap}.notice{margin-top:10px;padding:10px;border-radius:9px;background:rgba(255,200,87,.07);border:1px solid rgba(255,200,87,.2);color:#d9c58c;font-size:9px;line-height:1.5}.hidden{display:none!important}
+.authPanelWrap{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.7);backdrop-filter:blur(10px);display:none;align-items:flex-start;justify-content:center;padding:80px 18px 30px;overflow:auto}.authPanelWrap.open{display:flex}.authPanel{width:min(620px,100%);border:1px solid var(--line2);border-radius:21px;background:linear-gradient(135deg,rgba(53,185,255,.08),rgba(139,92,255,.06)),var(--panel);box-shadow:0 30px 100px rgba(0,0,0,.6);padding:22px}.authPanelHead{display:flex;justify-content:space-between;gap:15px}.authPanelHead h2{font:900 21px Orbitron;margin:8px 0}.authPanelHead p{margin:0;color:var(--muted);font-size:10px;line-height:1.6}.iconBtn{border:1px solid var(--line);background:var(--panel2);color:var(--text);width:35px;height:35px;border-radius:9px;font-size:23px}.loginGrid{display:grid;grid-template-columns:1fr 1fr auto;gap:9px;margin-top:18px;align-items:end}.loginBtn{height:41px;white-space:nowrap}.authMessage{margin-top:10px;font-size:9px;line-height:1.5;min-height:14px;color:var(--muted)}.authMessage.goodMsg{color:var(--good)}.authMessage.errorMsg{color:#ff9aad}.accountBox{display:flex;align-items:center;gap:12px;padding:14px;background:var(--panel2);border:1px solid var(--line);border-radius:13px;margin-top:16px}.accountAvatar{width:46px;height:46px;border-radius:11px;display:grid;place-items:center;background:rgba(53,185,255,.12);border:1px solid rgba(53,185,255,.25);font:900 17px Orbitron;color:var(--accent)}.accountBox b{display:block;font-size:11px}.accountBox small{display:block;color:var(--muted);font-size:8px;margin-top:3px}.accountActions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.footer{border-top:1px solid var(--line);padding:24px;text-align:center;color:var(--muted);font-size:10px}.toast{position:fixed;right:18px;bottom:18px;z-index:120;max-width:390px;padding:12px 15px;border:1px solid var(--line2);border-radius:11px;background:var(--panel3);box-shadow:var(--shadow);font-size:10px;opacity:0;transform:translateY(10px);pointer-events:none;transition:.25s}.toast.show{opacity:1;transform:translateY(0)}
+@media(max-width:1150px){.kpis{grid-template-columns:repeat(3,1fr)}.scoreGrid{grid-template-columns:repeat(2,1fr)}.dataGrid{grid-template-columns:1fr}.featureGrid{grid-template-columns:repeat(2,1fr)}.playerSearchGrid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:800px){.links{display:none}.wrap{padding:17px 13px 50px}.hero{padding:25px}.hero h1{font-size:43px}.scoreGrid,.newsGrid,.leagueGrid{grid-template-columns:1fr}.players{grid-template-columns:repeat(2,1fr)}.playerSearchGrid{grid-template-columns:repeat(2,1fr)}.syncGrid{grid-template-columns:repeat(2,1fr)}.syncHead{align-items:flex-start;flex-direction:column}.loginGrid{grid-template-columns:1fr}.loginBtn{width:100%}}
+@media(max-width:520px){.kpis{grid-template-columns:repeat(2,1fr)}.filters,.players,.featureGrid,.playerSearchGrid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.syncGrid{grid-template-columns:1fr}.authMini>span{display:none}}
 </style>
 </head>
 <body>
 <div class="topline"></div>
-<header class="nav"><div class="navin"><a class="logo" href="index.html">CROW<span>RULES</span> SPORTS</a><nav class="links"><a class="active" href="#home">Home</a><a href="#teams">Teams</a><a href="#players">Players</a><a href="#schedule">Schedule</a><a href="#standings">Standings</a><a href="#sync">Admin Sync</a></nav><div class="authMini"><span id="authMiniStatus">GUEST</span><button class="btn" id="authToggleBtn">ADMIN SIGN IN</button></div></div></header>
-<section class="authPanelWrap" id="authPanelWrap"><div class="authPanel" id="authPanel">
-  <div class="authPanelHead"><div><div class="tag">SECURE SUPABASE AUTHENTICATION</div><h2 id="authTitle">Administrator Sign In</h2><p id="authSubtitle">Sign in with your CrowRules administrator account to unlock the secured sports synchronization engine.</p></div><button class="iconBtn" id="authCloseBtn" aria-label="Close">×</button></div>
-  <div id="signedOutView">
-    <form id="adminLoginForm" class="loginGrid" autocomplete="on">
-      <label class="field"><span>Email</span><input id="adminEmail" type="email" autocomplete="username" placeholder="administrator email" required></label>
-      <label class="field"><span>Password</span><input id="adminPassword" type="password" autocomplete="current-password" placeholder="password" required></label>
-      <button class="btn primary loginBtn" id="loginBtn" type="submit">SIGN IN</button>
-    </form>
-    <div id="loginMessage" class="authMessage" aria-live="polite"></div>
-    <div class="authHint">Your password is sent directly to Supabase Auth. It is not stored in this page or sent to CrowRules Sports.</div>
+
+<header class="nav">
+  <div class="navin">
+    <a class="logo" href="#home">CROW<span>RULES</span> SPORTS</a>
+    <nav class="links">
+      <a class="active" href="#home">Home</a><a href="#live">Live</a><a href="#leagues">Leagues</a>
+      <a href="#teams">Teams</a><a href="#players">Players</a><a href="#schedule">Schedule</a>
+      <a href="#standings">Standings</a><a href="#news">News</a><a href="#sync">Admin Sync</a>
+    </nav>
+    <div class="authMini"><span id="authMiniStatus">GUEST</span><button class="btn" id="authToggleBtn">ADMIN SIGN IN</button></div>
   </div>
-  <div id="signedInView" class="hidden">
-    <div class="accountBox"><div class="accountAvatar" id="accountAvatar">A</div><div><b id="accountEmail">—</b><small id="accountRole">—</small><small id="accountUserId">—</small></div></div>
-    <div class="accountActions"><button class="btn good" id="accountRefreshBtn">REFRESH ACCESS</button><button class="btn danger" id="signOutBtn">SIGN OUT</button></div>
-    <div id="accountMessage" class="authMessage" aria-live="polite"></div>
+</header>
+
+<section class="authPanelWrap" id="authPanelWrap">
+  <div class="authPanel">
+    <div class="authPanelHead">
+      <div><div class="tag">SECURE SUPABASE AUTHENTICATION</div><h2 id="authTitle">Administrator Sign In</h2>
+      <p id="authSubtitle">Sign in with an approved CrowRules administrator account to unlock synchronization controls.</p></div>
+      <button class="iconBtn" id="authCloseBtn" aria-label="Close">×</button>
+    </div>
+    <div id="signedOutView">
+      <form id="adminLoginForm" class="loginGrid" autocomplete="on">
+        <label class="field"><span>Email</span><input id="adminEmail" type="email" autocomplete="username" placeholder="administrator email" required></label>
+        <label class="field"><span>Password</span><input id="adminPassword" type="password" autocomplete="current-password" placeholder="password" required></label>
+        <button class="btn primary loginBtn" id="loginBtn" type="submit">SIGN IN</button>
+      </form>
+      <div id="loginMessage" class="authMessage"></div>
+      <div class="authMessage">Your password is handled by Supabase Auth. It is not stored by CrowRules Sports.</div>
+    </div>
+    <div id="signedInView" class="hidden">
+      <div class="accountBox"><div class="accountAvatar" id="accountAvatar">A</div><div><b id="accountEmail">—</b><small id="accountRole">—</small><small id="accountUserId">—</small></div></div>
+      <div class="accountActions"><button class="btn good" id="accountRefreshBtn">REFRESH ACCESS</button><button class="btn danger" id="signOutBtn">SIGN OUT</button></div>
+      <div id="accountMessage" class="authMessage"></div>
+    </div>
   </div>
-</div></section>
+</section>
+
 <main class="wrap" id="home">
-<section class="hero"><div class="eyebrow">CrowRules Entertainment • Sports Division • v3.1</div><h1>THE GAME<br>IS ALWAYS ON.</h1><p>Explore all CrowRules Sports leagues and every populated team. Select a team to see its players, upcoming and recent games, and current standings. Administrators can securely synchronize 2026 rosters, schedules and standings into Supabase.</p><div class="actions"><a class="btn primary" href="#teams">EXPLORE TEAMS</a><a class="btn" href="#schedule">VIEW SCHEDULE</a><a class="btn" href="#standings">VIEW STANDINGS</a></div></section>
-<section class="section" id="teams"><div class="sectionHead"><div><h2>TEAM DIRECTORY</h2><p>All active CrowRules Sports teams, grouped by league.</p></div><span class="tiny" id="teamCount">— TEAMS</span></div><div class="dataGrid"><div class="panel"><div class="filters"><label class="field"><span>League</span><select id="leagueSelect"><option value="">All leagues</option></select></label><label class="field"><span>Team</span><select id="teamSelect"><option value="">Select a team</option></select></label></div><div class="field" style="margin-top:10px"><span>Find a team</span><input id="teamSearch" placeholder="Search team, city or abbreviation"></div><div class="notice">The team dropdown is generated directly from <b>sports_teams</b>. No hard-coded team list is required.</div></div><div class="panel" id="teamPanel"><div class="muted">Select a team to load its profile, roster, schedule and standings.</div></div></div></section>
-<section class="section" id="players"><div class="sectionHead"><div><h2>PLAYERS</h2><p>Roster records for the selected team.</p></div><span class="tiny" id="playerCount">— PLAYERS</span></div><div class="panel"><div id="playersGrid" class="players"><div class="muted">Select a team above.</div></div></div></section>
-<section class="section" id="schedule"><div class="sectionHead"><div><h2>TEAM SCHEDULE</h2><p>Games are loaded from <b>sports_games</b> and linked to the selected team.</p></div><span class="tiny">LIVE DATA</span></div><div class="panel"><div class="tableWrap"><table class="table"><thead><tr><th>Date</th><th>League</th><th>Away</th><th>Home</th><th>Score</th><th>Status</th></tr></thead><tbody id="scheduleRows"><tr><td colspan="6">Select a team.</td></tr></tbody></table></div></div></section>
-<section class="section" id="standings"><div class="sectionHead"><div><h2>STANDINGS</h2><p>Current standings stored in Supabase for the selected league.</p></div><span class="tiny">2026 SEASON</span></div><div class="panel"><div class="field" style="max-width:340px;margin-bottom:14px"><span>Standings League</span><select id="standingsLeague"><option value="">Select a league</option></select></div><div class="tableWrap"><table class="table"><thead><tr><th>#</th><th>Team</th><th>W</th><th>L</th><th>T</th><th>PTS</th><th>Rank</th></tr></thead><tbody id="standingRows"><tr><td colspan="7">Select a league.</td></tr></tbody></table></div></div></section>
-<section class="section" id="sync"><div class="syncPanel"><div class="syncHead"><div><div class="tag">SECURED ADMIN DATA ENGINE</div><h2>🚀 SYNC ALL SPORTS</h2><p>Runs the secured roster engine league-by-league in batches, then refreshes games, schedules and standings. Requires a signed-in administrator account.</p></div><div class="syncActions"><button class="btn primary" id="syncAllBtn">🚀 SYNC ALL SPORTS</button><button class="btn" id="refreshBtn">REFRESH COUNTS</button><button class="btn danger" id="stopBtn">STOP AFTER CURRENT BATCH</button></div></div><div id="adminGate" class="notice">Checking administrator access…</div><div class="progressOuter"><div class="progressBar" id="syncProgress"></div></div><div class="syncGrid"><div class="syncStat"><b id="syncTeams">0 / 0</b><span>Teams processed</span></div><div class="syncStat"><b id="syncPlayers">—</b><span>Players in Supabase</span></div><div class="syncStat"><b id="syncGames">—</b><span>Games in Supabase</span></div></div><div class="leagueCards" id="leagueCards"></div><div class="log" id="syncLog">Ready.</div></div></section>
+<section class="hero">
+  <div class="eyebrow">CrowRules Entertainment • Sports Division • v6.0</div>
+  <h1>THE GAME<br>IS ALWAYS ON.</h1>
+  <p>One sports hub for NFL, NBA, MLB, NHL, MLS, WNBA, UFL, FBS and FCS. Browse 2026 teams and players, see live and upcoming games, review standings, read CrowRules Sports coverage and let the secured Supabase engine keep the database synchronized.</p>
+  <div class="actions"><a class="btn primary" href="#live">VIEW LIVE SCORES</a><a class="btn" href="#teams">EXPLORE TEAMS</a><a class="btn" href="#players">FIND PLAYERS</a><a class="btn" href="#standings">STANDINGS</a></div>
+  <div class="kpis">
+    <div class="kpi"><b id="kpiLeagues">—</b><span>Active Leagues</span></div>
+    <div class="kpi"><b id="kpiTeams">—</b><span>Active Teams</span></div>
+    <div class="kpi"><b id="kpiPlayers">—</b><span>Players</span></div>
+    <div class="kpi"><b id="kpiGames">—</b><span>Games Stored</span></div>
+    <div class="kpi"><b id="kpiStandings">—</b><span>Standings Rows</span></div>
+    <div class="kpi"><b id="kpiStats">—</b><span>Player Stat Rows</span></div>
+  </div>
+</section>
+
+<section class="section" id="live">
+  <div class="sectionHead"><div><h2>LIVE & UPCOMING</h2><p>Scores are read from <b>sports_games</b>. Live games are highlighted automatically.</p></div><span class="tiny" id="liveStamp">DATABASE</span></div>
+  <div class="scoreGrid" id="scoreGrid"><div class="panel muted">Loading games…</div></div>
+</section>
+
+<section class="section" id="leagues">
+  <div class="sectionHead"><div><h2>LEAGUE CENTER</h2><p>All nine active CrowRules Sports leagues.</p></div><span class="tiny">2026 SEASON</span></div>
+  <div class="leagueGrid" id="leagueGrid"></div>
+</section>
+
+<section class="section" id="teams">
+  <div class="sectionHead"><div><h2>TEAM DIRECTORY</h2><p>All active teams, grouped by league. Search works against the Supabase team directory.</p></div><span class="tiny" id="teamCount">— TEAMS</span></div>
+  <div class="dataGrid">
+    <div class="panel">
+      <div class="filters">
+        <label class="field"><span>League</span><select id="leagueSelect"><option value="">All leagues</option></select></label>
+        <label class="field"><span>Team</span><select id="teamSelect"><option value="">Select a team</option></select></label>
+      </div>
+      <div class="field" style="margin-top:10px"><span>Find a team</span><input id="teamSearch" placeholder="Search team, city or abbreviation"></div>
+      <div class="notice">The directory uses the live <b>sports_teams</b> table. No hard-coded team roster is required.</div>
+    </div>
+    <div class="panel" id="teamPanel"><div class="muted">Select a team to load its profile, roster, schedule and standings.</div></div>
+  </div>
+</section>
+
+<section class="section" id="players">
+  <div class="sectionHead"><div><h2>PLAYER DIRECTORY</h2><p>Search the live player table, then optionally load the selected team's full roster.</p></div><span class="tiny" id="playerCount">— PLAYERS</span></div>
+  <div class="panel">
+    <div class="searchRow"><input id="playerSearch" placeholder="Search player name, position or sport"><button class="btn primary" id="playerSearchBtn">SEARCH PLAYERS</button></div>
+    <div id="playerSearchGrid" class="playerSearchGrid"><div class="muted">Enter a player search.</div></div>
+  </div>
+  <div class="panel" style="margin-top:10px"><div id="playersGrid" class="players"><div class="muted">Select a team above.</div></div></div>
+</section>
+
+<section class="section" id="schedule">
+  <div class="sectionHead"><div><h2>TEAM SCHEDULE</h2><p>Recent and upcoming games for the selected team.</p></div><span class="tiny">LIVE DATABASE</span></div>
+  <div class="panel"><div class="tableWrap"><table class="table"><thead><tr><th>Date</th><th>League</th><th>Away</th><th>Home</th><th>Score</th><th>Status</th></tr></thead><tbody id="scheduleRows"><tr><td colspan="6">Select a team.</td></tr></tbody></table></div></div>
+</section>
+
+<section class="section" id="standings">
+  <div class="sectionHead"><div><h2>STANDINGS</h2><p>Season standings stored in Supabase. The page respects the database's text season column.</p></div><span class="tiny">2026 SEASON</span></div>
+  <div class="panel"><div class="field" style="max-width:360px;margin-bottom:13px"><span>Standings League</span><select id="standingsLeague"><option value="">Select a league</option></select></div>
+  <div class="tableWrap"><table class="table"><thead><tr><th>#</th><th>Team</th><th>W</th><th>L</th><th>T</th><th>PTS</th><th>Rank</th></tr></thead><tbody id="standingRows"><tr><td colspan="7">Select a league.</td></tr></tbody></table></div></div>
+</section>
+
+<section class="section" id="news">
+  <div class="sectionHead"><div><h2>SPORTS NEWS</h2><p>Editorial records from <b>sports_news</b>.</p></div><span class="tiny">CROWRULES COVERAGE</span></div>
+  <div class="newsGrid" id="newsGrid"><div class="panel muted">Loading sports news…</div></div>
+</section>
+
+<section class="section" id="highlights">
+  <div class="sectionHead"><div><h2>HIGHLIGHTS</h2><p>Featured sports videos and moments from <b>sports_highlights</b>.</p></div><span class="tiny">VIDEO</span></div>
+  <div class="featureGrid" id="highlightGrid"><div class="panel muted">Loading highlights…</div></div>
+</section>
+
+<section class="section" id="sync">
+  <div class="syncPanel">
+    <div class="syncHead">
+      <div><div class="tag">SECURED ADMIN DATA ENGINE</div><h2>SPORTS SYNC CONTROL CENTER</h2>
+      <p>Public visitors can browse Sports. Only approved administrators can run the synchronization engine. The browser uses the publishable key and the administrator's Supabase session; privileged database keys remain inside Edge Functions.</p></div>
+      <div class="syncActions"><button class="btn primary" id="syncAllBtn">🚀 SYNC ALL SPORTS</button><button class="btn" id="refreshBtn">REFRESH</button><button class="btn danger" id="stopBtn">STOP AFTER BATCH</button></div>
+    </div>
+    <div id="adminGate" class="notice">Checking administrator access…</div>
+    <div class="progressOuter"><div class="progressBar" id="syncProgress"></div></div>
+    <div class="syncGrid">
+      <div class="syncStat"><b id="syncTeams">0 / 0</b><span>Teams processed</span></div>
+      <div class="syncStat"><b id="syncPlayers">—</b><span>Players</span></div>
+      <div class="syncStat"><b id="syncGames">—</b><span>Games</span></div>
+      <div class="syncStat"><b id="syncStandings">—</b><span>Standings</span></div>
+      <div class="syncStat"><b id="syncStats">—</b><span>Player stats</span></div>
+    </div>
+    <div class="leagueGrid" id="syncLeagueGrid" style="margin-top:12px"></div>
+    <div class="log" id="syncLog">Ready.</div>
+    <div class="notice">Sync architecture: master <b>sports-full-sync-v3</b> refreshes schedules/standings; resilient <b>sports-roster-sync-v3</b> processes rosters in small batches; NFL statistics use <b>sports-player-stats-sync-v3</b>. A failed team is isolated instead of aborting the entire run.</div>
+  </div>
+</section>
 </main>
-<footer class="footer">© <span id="year"></span> CrowRules Entertainment • CrowRules Sports v3.0</footer>
+
+<footer class="footer">© <span id="year"></span> CrowRules Entertainment • CrowRules Sports v6.0 • Supabase-powered</footer>
 <div class="toast" id="toast"></div>
+
 <script>
-const CONFIG={SUPABASE_URL:'https://zauxdqyssratvzmomozf.supabase.co',SUPABASE_KEY:'sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9',SEASON:2026,BATCH:2,ROSTER_FN:'sports-roster-sync-v3',STATS_FN:'sports-player-stats-sync-v2',DATA_FN:'sports-data-sync',STATS_BATCH:50};
-const LEAGUES=[['NFL','NFL'],['MLB','MLB'],['NBA','NBA'],['WNBA','WNBA'],['NHL','NHL'],['MLS','MLS'],['UFL','UFL'],['FBS','College Football FBS'],['FCS','College Football FCS']];
+const CONFIG={
+  SUPABASE_URL:'https://zauxdqyssratvzmomozf.supabase.co',
+  SUPABASE_KEY:'sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9',
+  SEASON:2026,
+  FULL_SYNC_FN:'sports-full-sync-v3',
+  ROSTER_FN:'sports-roster-sync-v3',
+  DATA_FN:'sports-data-sync-v5',
+  NFL_STATS_FN:'sports-player-stats-sync-v3',
+  ROSTER_BATCH:2,
+  NFL_STATS_BATCH:10
+};
+const LEAGUES=[
+  ['NFL','NFL','Football'],['MLB','MLB','Baseball'],['NBA','NBA','Basketball'],
+  ['WNBA','WNBA','Basketball'],['NHL','NHL','Hockey'],['MLS','MLS','Soccer'],
+  ['UFL','UFL','Football'],['FBS','College Football FBS','Football'],['FCS','College Football FCS','Football']
+];
 const ADMIN_ROLES=['admin','super_admin','owner','manager','producer','editor'];
-const db=window.supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage,storageKey:'crowrules-sports-auth',flowType:'pkce'}});
-let leagues=[],teams=[],currentTeam=null,currentUser=null,currentRole=null,isAdmin=false,stopAfterBatch=false,running=false;
+const db=window.supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_KEY,{
+  auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage,storageKey:'crowrules-sports-auth',flowType:'pkce'}
+});
+let leagues=[],teams=[],currentTeam=null,currentUser=null,currentRole=null,isAdmin=false,running=false,stopAfterBatch=false;
+
 const $=id=>document.getElementById(id);
-function esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
-function toast(m){const x=$('toast');x.textContent=m;x.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>x.classList.remove('show'),3200)}
+const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function toast(m){const x=$('toast');x.textContent=m;x.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>x.classList.remove('show'),3500)}
 function log(m){const x=$('syncLog');x.textContent+=`\n${new Date().toLocaleTimeString()}  ${m}`;x.scrollTop=x.scrollHeight}
+function fmt(n){return Number(n||0).toLocaleString()}
 function setProgress(done,total){$('syncProgress').style.width=(total?Math.min(100,done/total*100):0)+'%';$('syncTeams').textContent=`${done} / ${total}`}
-function fillLeagueSelects(){for(const [id,name] of [['leagueSelect','All leagues'],['standingsLeague','Select a league']]){const s=$(id);if(id==='leagueSelect')s.innerHTML='<option value="">All leagues</option>';else s.innerHTML='<option value="">Select a league</option>';for(const l of leagues)s.insertAdjacentHTML('beforeend',`<option value="${l.id}">${esc(l.name)}${l.abbreviation?' • '+esc(l.abbreviation):''}</option>`)}}
-async function loadLeagues(){const r=await db.from('sports_leagues').select('id,name,sport,abbreviation,is_active').eq('is_active',true).order('id');if(r.error)throw r.error;leagues=r.data||[];fillLeagueSelects()}
-async function loadTeams(){let q=db.from('sports_teams').select('id,league_id,name,city,abbreviation,sport,conference,division,logo_url,website_url,is_local').eq('is_active',true).order('name');const leagueId=$('leagueSelect').value;if(leagueId)q=q.eq('league_id',leagueId);const r=await q;if(r.error)throw r.error;teams=r.data||[];$('teamCount').textContent=`${teams.length} TEAMS`;const grouped=new Map();for(const t of teams){if(!grouped.has(t.league_id))grouped.set(t.league_id,[]);grouped.get(t.league_id).push(t)}let html='<option value="">Select a team</option>';for(const l of leagues){const arr=grouped.get(l.id)||[];if(!arr.length)continue;html+=`<optgroup label="${esc(l.name)}">`;for(const t of arr)html+=`<option value="${t.id}">${esc(t.city?t.city+' — '+t.name:t.name)}${t.is_local?' ★':''}</option>`;html+='</optgroup>'}$('teamSelect').innerHTML=html}
-function findTeam(id){return teams.find(t=>String(t.id)===String(id))||null}
-async function loadTeam(){const id=$('teamSelect').value;if(!id){currentTeam=null;$('teamPanel').innerHTML='<div class="muted">Select a team to load its profile, roster, schedule and standings.</div>';$('playersGrid').innerHTML='<div class="muted">Select a team above.</div>';$('scheduleRows').innerHTML='<tr><td colspan="6">Select a team.</td></tr>';return}currentTeam=findTeam(id);if(!currentTeam){const r=await db.from('sports_teams').select('*').eq('id',id).maybeSingle();currentTeam=r.data}renderTeam();await Promise.all([loadPlayers(),loadSchedule()]);const l=leagues.find(x=>x.id===currentTeam.league_id);if(l){$('standingsLeague').value=l.id;await loadStandings()}}
-function renderTeam(){const t=currentTeam,l=leagues.find(x=>x.id===t.league_id);$('teamPanel').innerHTML=`<div class="teamHero">${t.logo_url?`<img class="teamLogo" src="${esc(t.logo_url)}" alt="">`:'<div class="teamLogo"></div>'}<div><div class="tag">${esc(l?.name||t.sport||'SPORTS')}</div><div class="teamName">${esc(t.name)}</div><div class="muted">${esc(t.city||'')}${t.abbreviation?' • '+esc(t.abbreviation):''}${t.conference?' • '+esc(t.conference):''}${t.division?' • '+esc(t.division):''}</div></div></div><div class="stats"><div class="stat"><b id="teamPlayerStat">—</b><span>Players</span></div><div class="stat"><b>${t.is_local?'LOCAL':'NATIONAL'}</b><span>Coverage</span></div><div class="stat"><b>${esc(t.sport)}</b><span>Sport</span></div><div class="stat"><b>${esc(t.abbreviation||'—')}</b><span>Code</span></div></div>`}
-async function loadPlayers(){if(!currentTeam)return;const r=await db.from('sports_players').select('id,name,position,jersey_number,hometown,photo_url,bio,status,provider,season').eq('team_id',currentTeam.id).eq('status','active').order('name');if(r.error){$('playersGrid').innerHTML='<div class="muted">Unable to load players.</div>';return}const rows=r.data||[];$('playerCount').textContent=`${rows.length} PLAYERS`;$('teamPlayerStat')&&($('teamPlayerStat').textContent=rows.length);if(!rows.length){$('playersGrid').innerHTML='<div class="muted">No active roster records yet. Run the admin roster sync.</div>';return}$('playersGrid').innerHTML=rows.map(p=>`<article class="player">${p.photo_url?`<img src="${esc(p.photo_url)}" alt="">`:'<div style="width:46px;height:46px;border-radius:9px;background:#05070b"></div>'}<div><b>${esc(p.name)}</b><small>${esc(p.position||'—')}${p.jersey_number?' • #'+esc(p.jersey_number):''}${p.provider?' • '+esc(p.provider):''}</small></div></article>`).join('')}
-async function loadSchedule(){if(!currentTeam)return;const r=await db.from('sports_games').select('id,league_id,home_team_id,away_team_id,sport,game_date,game_time,status,home_score,away_score').or(`home_team_id.eq.${currentTeam.id},away_team_id.eq.${currentTeam.id}`).order('game_date',{ascending:false}).limit(50);if(r.error){$('scheduleRows').innerHTML='<tr><td colspan="6">Unable to load schedule.</td></tr>';return}const ids=[...new Set((r.data||[]).flatMap(g=>[g.home_team_id,g.away_team_id]))];const tr=ids.length?await db.from('sports_teams').select('id,name').in('id',ids):{data:[]};const tm=new Map((tr.data||[]).map(x=>[String(x.id),x.name]));$('scheduleRows').innerHTML=(r.data||[]).map(g=>`<tr><td>${esc(g.game_date||'—')}</td><td>${esc(leagues.find(l=>l.id===g.league_id)?.abbreviation||g.sport||'—')}</td><td>${esc(tm.get(String(g.away_team_id))||'Away')}</td><td>${esc(tm.get(String(g.home_team_id))||'Home')}</td><td>${g.away_score??'-'} — ${g.home_score??'-'}</td><td class="${String(g.status||'').toLowerCase().includes('live')?'live':''}">${esc(g.status||'Scheduled')}</td></tr>`).join('')||'<tr><td colspan="6">No games stored for this team yet.</td></tr>'}
-async function loadStandings(){const lid=$('standingsLeague').value;if(!lid){$('standingRows').innerHTML='<tr><td colspan="7">Select a league.</td></tr>';return}const r=await db.from('sports_standings').select('team_id,wins,losses,ties,points,rank,season').eq('league_id',lid).eq('season',String(CONFIG.SEASON)).order('rank',{ascending:true,nullsFirst:false}).order('points',{ascending:false});if(r.error){$('standingRows').innerHTML='<tr><td colspan="7">Unable to load standings.</td></tr>';return}const ids=(r.data||[]).map(x=>x.team_id);const tr=ids.length?await db.from('sports_teams').select('id,name').in('id',ids):{data:[]};const tm=new Map((tr.data||[]).map(x=>[String(x.id),x.name]));$('standingRows').innerHTML=(r.data||[]).map((s,i)=>`<tr><td class="rank">${s.rank??i+1}</td><td><b>${esc(tm.get(String(s.team_id))||'Unknown')}</b></td><td>${s.wins??0}</td><td>${s.losses??0}</td><td>${s.ties??0}</td><td>${s.points??0}</td><td>${s.rank??'—'}</td></tr>`).join('')||'<tr><td colspan="7">No standings stored yet. Run the admin data sync.</td></tr>'}
-async function refreshCounts(){const [p,g,s]=await Promise.all([db.from('sports_players').select('id',{count:'exact',head:true}),db.from('sports_games').select('id',{count:'exact',head:true}),db.from('sports_standings').select('id',{count:'exact',head:true})]);$('syncPlayers').textContent=p.count??0;$('syncGames').textContent=g.count??0;const cardData=leagues.map(l=>`<div class="leagueCard"><b>${esc(l.abbreviation||l.name)}</b><small>${esc(l.name)}</small><span class="pill complete">DATABASE READY</span></div>`).join('');$('leagueCards').innerHTML=cardData;}
+function leagueById(id){return leagues.find(l=>String(l.id)===String(id))}
+function leagueByCode(code){return leagues.find(l=>(l.abbreviation||'').toUpperCase()===code.toUpperCase())}
+function statusIsLive(s){s=String(s||'').toLowerCase();return s.includes('live')||s.includes('in progress')||s==='inprogress'||s.includes('halftime')}
+function dateTime(g){return g.game_time||g.game_date||''}
+
+async function loadLeagues(){
+  const r=await db.from('sports_leagues').select('id,name,sport,abbreviation,description,logo_url,is_active').eq('is_active',true).order('id');
+  if(r.error)throw r.error;leagues=r.data||[];
+  fillLeagueSelects();renderLeagueCenter();
+}
+function fillLeagueSelects(){
+  $('leagueSelect').innerHTML='<option value="">All leagues</option>';
+  $('standingsLeague').innerHTML='<option value="">Select a league</option>';
+  for(const l of leagues){
+    $('leagueSelect').insertAdjacentHTML('beforeend',`<option value="${l.id}">${esc(l.name)}${l.abbreviation?' • '+esc(l.abbreviation):''}</option>`);
+    $('standingsLeague').insertAdjacentHTML('beforeend',`<option value="${l.id}">${esc(l.name)}${l.abbreviation?' • '+esc(l.abbreviation):''}</option>`);
+  }
+}
+async function loadTeams(){
+  let q=db.from('sports_teams').select('id,league_id,name,city,abbreviation,sport,conference,division,logo_url,website_url,is_local,is_active').eq('is_active',true).order('name').limit(1000);
+  const lid=$('leagueSelect').value;if(lid)q=q.eq('league_id',lid);
+  const r=await q;if(r.error)throw r.error;teams=r.data||[];
+  $('teamCount').textContent=`${teams.length} TEAMS`;
+  const grouped=new Map();for(const t of teams){if(!grouped.has(t.league_id))grouped.set(t.league_id,[]);grouped.get(t.league_id).push(t)}
+  let html='<option value="">Select a team</option>';
+  for(const l of leagues){const arr=grouped.get(l.id)||[];if(!arr.length)continue;html+=`<optgroup label="${esc(l.name)}">`;for(const t of arr)html+=`<option value="${t.id}">${esc(t.city?t.city+' — '+t.name:t.name)}${t.is_local?' ★':''}</option>`;html+='</optgroup>'}
+  $('teamSelect').innerHTML=html;
+}
+async function refreshCounts(){
+  const [p,g,s,ps]=await Promise.all([
+    db.from('sports_players').select('id',{count:'exact',head:true}),
+    db.from('sports_games').select('id',{count:'exact',head:true}),
+    db.from('sports_standings').select('id',{count:'exact',head:true}),
+    db.from('sports_player_stats').select('id',{count:'exact',head:true})
+  ]);
+  $('kpiLeagues').textContent=fmt(leagues.length);$('kpiTeams').textContent=fmt(teams.length);
+  $('kpiPlayers').textContent=fmt(p.count);$('kpiGames').textContent=fmt(g.count);$('kpiStandings').textContent=fmt(s.count);$('kpiStats').textContent=fmt(ps.count);
+  $('syncPlayers').textContent=fmt(p.count);$('syncGames').textContent=fmt(g.count);$('syncStandings').textContent=fmt(s.count);$('syncStats').textContent=fmt(ps.count);
+  renderSyncLeagueCards();
+}
+function renderLeagueCenter(){
+  $('leagueGrid').innerHTML=LEAGUES.map(([code,name,sport])=>{
+    const l=leagueByCode(code);return `<article class="leagueCard"><b>${esc(code)}</b><small>${esc(l?.name||name)} • ${esc(sport)}</small><div class="numbers"><span>Teams <b id="lgTeams-${code}">—</b></span><span>Players <b id="lgPlayers-${code}">—</b></span></div><span class="pill complete">ACTIVE</span></article>`
+  }).join('');
+  loadLeagueCounts();
+}
+async function loadLeagueCounts(){
+  for(const [code] of LEAGUES){
+    const l=leagueByCode(code);if(!l)continue;
+    const t=await db.from('sports_teams').select('id',{count:'exact',head:true}).eq('league_id',l.id).eq('is_active',true);
+    const p=await db.from('sports_players').select('id',{count:'exact',head:true}).eq('sport',LEAGUES.find(x=>x[0]===code)?.[2]||'');
+    if($(`lgTeams-${code}`))$(`lgTeams-${code}`).textContent=fmt(t.count);
+    if($(`lgPlayers-${code}`))$(`lgPlayers-${code}`).textContent=fmt(p.count);
+  }
+}
+function renderSyncLeagueCards(){
+  $('syncLeagueGrid').innerHTML=LEAGUES.map(([code,name])=>`<article class="leagueCard" id="syncCard-${code}"><b>${esc(code)}</b><small>${esc(name)}</small><span class="pill complete">READY</span></article>`).join('');
+}
+async function loadTeam(){
+  const id=$('teamSelect').value;
+  if(!id){currentTeam=null;$('teamPanel').innerHTML='<div class="muted">Select a team to load its profile, roster, schedule and standings.</div>';$('playersGrid').innerHTML='<div class="muted">Select a team above.</div>';$('scheduleRows').innerHTML='<tr><td colspan="6">Select a team.</td></tr>';return}
+  currentTeam=teams.find(t=>String(t.id)===String(id))||null;
+  if(!currentTeam){const r=await db.from('sports_teams').select('*').eq('id',id).maybeSingle();currentTeam=r.data}
+  renderTeam();await Promise.all([loadPlayers(),loadSchedule()]);
+  const l=leagueById(currentTeam.league_id);if(l){$('standingsLeague').value=l.id;await loadStandings()}
+}
+function renderTeam(){
+  const t=currentTeam,l=leagueById(t.league_id);
+  $('teamPanel').innerHTML=`<div class="teamHero">${t.logo_url?`<img class="teamLogo" src="${esc(t.logo_url)}" alt="">`:'<div class="teamLogo"></div>'}<div><div class="tag">${esc(l?.name||t.sport||'SPORTS')}</div><div class="teamName">${esc(t.name)}</div><div class="muted">${esc(t.city||'')}${t.abbreviation?' • '+esc(t.abbreviation):''}${t.conference?' • '+esc(t.conference):''}${t.division?' • '+esc(t.division):''}</div></div></div><div class="stats"><div class="stat"><b id="teamPlayerStat">—</b><span>Players</span></div><div class="stat"><b>${t.is_local?'LOCAL':'NATIONAL'}</b><span>Coverage</span></div><div class="stat"><b>${esc(t.sport||'—')}</b><span>Sport</span></div><div class="stat"><b>${esc(t.abbreviation||'—')}</b><span>Code</span></div></div>`;
+}
+async function loadPlayers(){
+  if(!currentTeam)return;
+  const r=await db.from('sports_players').select('id,name,position,jersey_number,hometown,photo_url,bio,status,provider,season').eq('team_id',currentTeam.id).eq('status','active').order('name').limit(250);
+  if(r.error){$('playersGrid').innerHTML='<div class="muted">Unable to load players.</div>';return}
+  const rows=r.data||[];$('playerCount').textContent=`${rows.length} PLAYERS`;if($('teamPlayerStat'))$('teamPlayerStat').textContent=rows.length;
+  $('playersGrid').innerHTML=rows.length?rows.map(p=>`<article class="player">${p.photo_url?`<img src="${esc(p.photo_url)}" alt="">`:'<div style="width:45px;height:45px;border-radius:8px;background:#05070b"></div>'}<div><b>${esc(p.name)}</b><small>${esc(p.position||'—')}${p.jersey_number?' • #'+esc(p.jersey_number):''}${p.provider?' • '+esc(p.provider):''}</small></div></article>`).join(''):'<div class="muted">No active roster records yet. Run the admin roster sync.</div>';
+}
+async function loadSchedule(){
+  if(!currentTeam)return;
+  const r=await db.from('sports_games').select('id,league_id,home_team_id,away_team_id,sport,venue,game_date,game_time,status,home_score,away_score').or(`home_team_id.eq.${currentTeam.id},away_team_id.eq.${currentTeam.id}`).order('game_date',{ascending:false}).limit(75);
+  if(r.error){$('scheduleRows').innerHTML='<tr><td colspan="6">Unable to load schedule.</td></tr>';return}
+  const ids=[...new Set((r.data||[]).flatMap(g=>[g.home_team_id,g.away_team_id]))];const tr=ids.length?await db.from('sports_teams').select('id,name').in('id',ids):{data:[]};const tm=new Map((tr.data||[]).map(x=>[String(x.id),x.name]));
+  $('scheduleRows').innerHTML=(r.data||[]).map(g=>`<tr><td>${esc(g.game_date||'—')}</td><td>${esc(leagueById(g.league_id)?.abbreviation||g.sport||'—')}</td><td>${esc(tm.get(String(g.away_team_id))||'Away')}</td><td>${esc(tm.get(String(g.home_team_id))||'Home')}</td><td>${g.away_score??'-'} — ${g.home_score??'-'}</td><td class="${statusIsLive(g.status)?'live':''}">${esc(g.status||'Scheduled')}</td></tr>`).join('')||'<tr><td colspan="6">No games stored for this team yet.</td></tr>';
+}
+async function loadStandings(){
+  const lid=$('standingsLeague').value;if(!lid){$('standingRows').innerHTML='<tr><td colspan="7">Select a league.</td></tr>';return}
+  const r=await db.from('sports_standings').select('team_id,wins,losses,ties,points,rank,season').eq('league_id',lid).eq('season',String(CONFIG.SEASON)).order('rank',{ascending:true,nullsFirst:false}).order('points',{ascending:false});
+  if(r.error){$('standingRows').innerHTML='<tr><td colspan="7">Unable to load standings.</td></tr>';return}
+  const ids=(r.data||[]).map(x=>x.team_id);const tr=ids.length?await db.from('sports_teams').select('id,name').in('id',ids):{data:[]};const tm=new Map((tr.data||[]).map(x=>[String(x.id),x.name]));
+  $('standingRows').innerHTML=(r.data||[]).map((s,i)=>`<tr><td class="rank">${s.rank??i+1}</td><td><b>${esc(tm.get(String(s.team_id))||'Unknown')}</b></td><td>${s.wins??0}</td><td>${s.losses??0}</td><td>${s.ties??0}</td><td>${s.points??0}</td><td>${s.rank??'—'}</td></tr>`).join('')||'<tr><td colspan="7">No standings stored yet. Run the admin data sync.</td></tr>';
+}
+async function loadLiveGames(){
+  const r=await db.from('sports_games').select('id,league_id,home_team_id,away_team_id,game_date,game_time,status,home_score,away_score,sport').order('game_date',{ascending:false}).limit(36);
+  if(r.error){$('scoreGrid').innerHTML='<div class="panel muted">Unable to load games.</div>';return}
+  const games=r.data||[];const ids=[...new Set(games.flatMap(g=>[g.home_team_id,g.away_team_id]))];const tr=ids.length?await db.from('sports_teams').select('id,name,abbreviation').in('id',ids):{data:[]};const tm=new Map((tr.data||[]).map(x=>[String(x.id),x]));
+  const live=games.filter(g=>statusIsLive(g.status));const upcoming=games.filter(g=>!statusIsLive(g.status));
+  const display=[...live,...upcoming].slice(0,12);
+  $('liveStamp').textContent=`${live.length} LIVE • ${new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}`;
+  $('scoreGrid').innerHTML=display.length?display.map(g=>{const a=tm.get(String(g.away_team_id)),h=tm.get(String(g.home_team_id));return `<article class="scoreCard"><div class="scoreTop"><span>${esc(leagueById(g.league_id)?.abbreviation||g.sport||'SPORTS')}</span><span class="${statusIsLive(g.status)?'live':''}">${esc(g.status||'SCHEDULED')}</span></div><div class="scoreTeams"><div class="scoreTeam"><b>${esc(a?.name||'Away')}</b><span>${g.away_score??'-'}</span></div><div class="scoreTeam"><b>${esc(h?.name||'Home')}</b><span>${g.home_score??'-'}</span></div></div><div class="scoreBottom">${esc(g.game_date||'')} ${g.game_time?`• ${esc(new Date(g.game_time).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}))}`:''}</div></article>`}).join(''):'<div class="panel muted">No games are stored yet. Run the secured sports data synchronization from the Admin Sync section.</div>';
+}
+async function searchPlayers(){
+  const q=$('playerSearch').value.trim();if(!q){$('playerSearchGrid').innerHTML='<div class="muted">Enter a player search.</div>';return}
+  const r=await db.from('sports_players').select('id,team_id,name,position,jersey_number,sport,status,season').ilike('name',`%${q}%`).eq('status','active').order('name').limit(40);
+  if(r.error){$('playerSearchGrid').innerHTML='<div class="muted">Player search failed.</div>';return}
+  const rows=r.data||[];const ids=[...new Set(rows.map(x=>x.team_id))];const tr=ids.length?await db.from('sports_teams').select('id,name').in('id',ids):{data:[]};const tm=new Map((tr.data||[]).map(x=>[String(x.id),x.name]));
+  $('playerSearchGrid').innerHTML=rows.length?rows.map(p=>`<article class="playerResult"><b>${esc(p.name)}</b><small>${esc(tm.get(String(p.team_id))||'Unknown Team')} • ${esc(p.position||'—')} • ${esc(p.sport||'—')}</small><div class="statline">${p.jersey_number?'#'+esc(p.jersey_number)+' • ':''}Season ${esc(p.season||CONFIG.SEASON)}</div></article>`).join(''):'<div class="muted">No players found.</div>';
+}
+async function loadNews(){
+  const r=await db.from('sports_news').select('id,title,slug,excerpt,content,category,author,published_at,is_featured,is_published,league,summary,source_name,source_url,image_url').eq('is_published',true).order('published_at',{ascending:false}).limit(9);
+  if(r.error){$('newsGrid').innerHTML='<div class="panel muted">Sports news unavailable.</div>';return}
+  const rows=r.data||[];$('newsGrid').innerHTML=rows.length?rows.map(n=>`<article class="newsCard"><div class="meta">${esc(n.league||n.category||'SPORTS')} ${n.published_at?'• '+esc(new Date(n.published_at).toLocaleDateString()):''}</div><h3>${esc(n.title)}</h3><p>${esc(n.excerpt||n.summary||n.content||'')}</p>${n.source_url?`<a href="${esc(n.source_url)}" target="_blank" rel="noopener">SOURCE ↗</a>`:''}</article>`).join(''):'<div class="panel muted">No published sports news yet.</div>';
+}
+async function loadHighlights(){
+  const r=await db.from('sports_highlights').select('id,league,title,description,video_url,thumbnail_url,team_name,player_name,published_at,is_featured').order('published_at',{ascending:false}).limit(8);
+  if(r.error){$('highlightGrid').innerHTML='<div class="panel muted">Highlights unavailable.</div>';return}
+  const rows=r.data||[];$('highlightGrid').innerHTML=rows.length?rows.map(h=>`<article class="featureCard">${h.thumbnail_url?`<img src="${esc(h.thumbnail_url)}" alt="">`:''}<b>${esc(h.title)}</b><small>${esc(h.league||'SPORTS')}${h.team_name?' • '+esc(h.team_name):''}${h.player_name?' • '+esc(h.player_name):''}</small>${h.video_url?`<a class="btn" style="display:inline-block;margin-top:9px;font-size:8px" href="${esc(h.video_url)}" target="_blank" rel="noopener">WATCH ↗</a>`:''}</article>`).join(''):'<div class="panel muted">No sports highlights published yet.</div>';
+}
 function setAuthPanel(open){$('authPanelWrap').classList.toggle('open',open)}
 function setAuthMessage(text,type=''){const x=$('loginMessage');x.textContent=text;x.className='authMessage '+(type?type+'Msg':'')}
 function setAccountMessage(text,type=''){const x=$('accountMessage');x.textContent=text;x.className='authMessage '+(type?type+'Msg':'')}
-function renderAuth(){const signed=!!currentUser;$('signedOutView').classList.toggle('hidden',signed);$('signedInView').classList.toggle('hidden',!signed);$('authTitle').textContent=signed?'Administrator Account':'Administrator Sign In';$('authSubtitle').textContent=signed?'Manage the current Supabase administrator session used by the secured sports sync engine.':'Sign in with your CrowRules administrator account to unlock the secured sports synchronization engine.';$('authMiniStatus').textContent=signed?(isAdmin?(currentRole||'ADMIN').toUpperCase():'SIGNED IN'):'GUEST';$('authMiniStatus').classList.toggle('admin',signed&&isAdmin);$('authToggleBtn').textContent=signed?'ACCOUNT':'ADMIN SIGN IN';if(signed){$('accountEmail').textContent=currentUser.email||'Authenticated user';$('accountRole').textContent=isAdmin?`Role: ${currentRole}`:'Role: Not authorized for Sports Sync';$('accountUserId').textContent=`User ID: ${currentUser.id}`;$('accountAvatar').textContent=(currentUser.email||'A').slice(0,1).toUpperCase()}}
-async function checkAdmin(){const s=await db.auth.getSession();currentUser=s.data.session?.user||null;currentRole=null;isAdmin=false;if(!currentUser){$('adminGate').textContent='Sign in with an administrator account to use the secured sync engine.';renderAuth();disableSync();return}const r=await db.from('cr_profiles').select('role,is_active').eq('id',currentUser.id).maybeSingle();if(r.error)log(`AUTH: profile lookup failed — ${r.error.message}`);currentRole=r.data?.role||null;isAdmin=!!r.data?.is_active&&ADMIN_ROLES.includes(r.data.role);$('adminGate').textContent=isAdmin?`Administrator verified: ${r.data.role}. Secure sync controls enabled.`:'Signed in, but this account does not have Sports Sync administrator access.';renderAuth();if(isAdmin){$('syncAllBtn').disabled=running;$('refreshBtn').disabled=running;$('stopBtn').disabled=false}else disableSync()}
 function disableSync(){['syncAllBtn','refreshBtn','stopBtn'].forEach(id=>$(id).disabled=true)}
-async function signInAdmin(e){e.preventDefault();const email=$('adminEmail').value.trim(),password=$('adminPassword').value;if(!email||!password)return;const btn=$('loginBtn');btn.disabled=true;btn.textContent='SIGNING IN…';setAuthMessage('Authenticating with Supabase…');try{const {data,error}=await db.auth.signInWithPassword({email,password});if(error)throw error;await checkAdmin();if(!isAdmin){setAuthMessage('Signed in successfully, but this account is not assigned an approved Sports Sync administrator role.','error');toast('Account authenticated but not authorized for Sports Sync.');return}setAuthMessage(`Access granted. Administrator role: ${currentRole}.`,'good');setAccountMessage('Secure administrator session is active.','good');toast('Administrator sign-in successful.');setTimeout(()=>setAuthPanel(false),650)}catch(err){console.error(err);setAuthMessage(err.message||'Unable to sign in.','error');toast('Administrator sign-in failed.')}finally{btn.disabled=false;btn.textContent='SIGN IN'}}
-async function signOutAdmin(){if(running){toast('Stop the sync before signing out.');return}const {error}=await db.auth.signOut();if(error){setAccountMessage(error.message||'Unable to sign out.','error');return}currentUser=null;currentRole=null;isAdmin=false;renderAuth();disableSync();$('adminGate').textContent='Signed out. Sign in with an administrator account to use the secured sync engine.';toast('Administrator signed out.');setAuthPanel(false)}
-async function invokeRoster(league,offset){const {data,error}=await db.functions.invoke(CONFIG.ROSTER_FN,{body:{action:'sync',league,season:CONFIG.SEASON,offset,limit:CONFIG.BATCH}});if(error)throw error;if(data?.error&&!data?.partial)throw new Error(data.error);return data||{success:false,partial:true,processed:0,totalTeams:0,nextOffset:offset,results:[],errors:[{team:'ALL',error:'Empty roster response'}]}}
-async function invokeStats(offset){const {data,error}=await db.functions.invoke(CONFIG.STATS_FN,{body:{season:CONFIG.SEASON,offset,limit:CONFIG.STATS_BATCH}});if(error)throw error;if(data?.success===false||data?.error)throw new Error(data.error||'Player stats sync failed');return data}
-async function invokeData(league){const {data,error}=await db.functions.invoke(CONFIG.DATA_FN,{body:{action:'sync',league,season:CONFIG.SEASON}});if(error)throw error;if(data?.success===false||data?.error)throw new Error(data.error||`${league} data sync failed`);return data}
-async function syncAll(){
- if(!isAdmin||running)return;
- running=true;stopAfterBatch=false;setProgress(0,0);
- $('syncAllBtn').disabled=true;$('refreshBtn').disabled=true;$('stopBtn').disabled=false;$('leagueCards').innerHTML='';
- for(const [code] of LEAGUES){const l=leagues.find(x=>(x.abbreviation||'').toUpperCase()===code);$('leagueCards').insertAdjacentHTML('beforeend',`<div class="leagueCard" id="card-${code}"><b>${esc(l?.name||code)}</b><small>Waiting</small><span class="pill running">WAITING</span></div>`)}
- let total=0,done=0;const totals={};let statsDone=0,teamErrors=0,teamSkipped=0;
- try{
-  log('🚀 FULL 9-LEAGUE SYNC STARTED — season '+CONFIG.SEASON);
-  log('🛡️ Resilient mode: one slow/failed team will not stop the full sync.');
-  for(const [code] of LEAGUES){
-   if(stopAfterBatch)throw new Error('STOPPED_BY_ADMIN');
-   const card=$(`card-${code}`);if(card){card.querySelector('.pill').textContent='RUNNING';card.querySelector('small').textContent='Starting roster sync…'}
-   let offset=0,leagueTotal=0,leagueDone=0,leagueErr=0;log(`▶ ${code}: roster sync started`);
-   while(offset<99999){
-    if(stopAfterBatch)throw new Error('STOPPED_BY_ADMIN');
-    let d=null,lastErr=null;
-    for(let attempt=1;attempt<=2;attempt++){
-      try{d=await invokeRoster(code,offset);lastErr=null;break}catch(e){lastErr=e;log(`⚠ ${code}: batch offset ${offset} attempt ${attempt}/2 failed — ${e.message||e}`);if(attempt<2)await new Promise(r=>setTimeout(r,1500))}
-    }
-    if(!d){
-      teamErrors+=CONFIG.BATCH;teamSkipped+=CONFIG.BATCH;leagueErr+=CONFIG.BATCH;
-      leagueTotal=Math.max(leagueTotal,offset+CONFIG.BATCH);totals[code]=leagueTotal;total=Object.values(totals).reduce((a,b)=>a+b,0);
-      log(`⏭ ${code}: skipped batch at offset ${offset} after 2 failed attempts. Continuing.`);
-      offset+=CONFIG.BATCH;setProgress(done,total);continue;
-    }
-    leagueTotal=Number(d.totalTeams??leagueTotal??0);totals[code]=leagueTotal;total=Object.values(totals).reduce((a,b)=>a+b,0);
-    const processed=Number(d.processed??0);const up=(d.results||[]).reduce((a,x)=>a+Number(x.upserted||0),0);const errs=Array.isArray(d.errors)?d.errors:[];
-    done+=processed;leagueDone+=processed;teamErrors+=errs.length;leagueErr+=errs.length;
-    setProgress(done,total);log(`${code}: ${processed} teams processed; ${up} players upserted${errs.length?`; ${errs.length} team error(s)`:''}`);
-    for(const er of errs.slice(0,4))log(`  ↳ ${er.team||'Team'}: ${er.error||'Unknown error'}`);
-    if(errs.length>4)log(`  ↳ … ${errs.length-4} additional team error(s)`);
-    let next=Number(d.nextOffset??(offset+Math.max(processed,CONFIG.BATCH)));
-    if(processed===0&&next<=offset){next=offset+CONFIG.BATCH;teamSkipped+=CONFIG.BATCH;log(`⏭ ${code}: no progress returned; skipping ${CONFIG.BATCH} team slot(s) and continuing.`)}
-    offset=next;
-    if(!leagueTotal||offset>=leagueTotal)break;
-   }
-   if(card){card.querySelector('small').textContent=`${leagueDone}/${leagueTotal||leagueDone} teams processed${leagueErr?` • ${leagueErr} errors`:''}`;card.querySelector('.pill').textContent=leagueErr?'COMPLETE WITH ERRORS':'ROSTER COMPLETE';card.querySelector('.pill').className='pill '+(leagueErr?'running':'complete')}
-   log(`✓ ${code}: roster phase complete${leagueErr?` with ${leagueErr} team error(s)`:''}`);
-   if(stopAfterBatch)throw new Error('STOPPED_BY_ADMIN');
-   log(`◆ ${code}: games/standings sync started`);
-   try{const d=await invokeData(code);const x=d.results?.[0]||d;log(`${code}: games ${x.games_upserted??0}, standings ${x.standings_upserted??0}`)}catch(e){log(`${code}: data sync error — ${e.message||e}`)}
-  }
-  if(stopAfterBatch)throw new Error('STOPPED_BY_ADMIN');
-  log('📊 PLAYER STATS SYNC STARTED');
-  let statsOffset=0;
-  while(true){
-   if(stopAfterBatch)throw new Error('STOPPED_BY_ADMIN');
-   let d;try{d=await invokeStats(statsOffset)}catch(e){log(`⚠ STATS: batch at ${statsOffset} failed — ${e.message||e}. Retrying once.`);await new Promise(r=>setTimeout(r,1500));try{d=await invokeStats(statsOffset)}catch(e2){log(`⏭ STATS: skipped batch at ${statsOffset} — ${e2.message||e2}`);statsOffset+=CONFIG.STATS_BATCH;continue}}
-   const processed=Number(d.processed??0),synced=Number(d.synced??0),errors=Number(d.errors??0);statsDone+=synced;log(`STATS: processed ${processed}; synced ${synced}; errors ${errors}`);if(processed===0)break;statsOffset=Number(d.nextOffset??(statsOffset+CONFIG.STATS_BATCH));if(d.done===true)break;
-  }
-  await refreshCounts();await loadTeams();$('syncProgress').style.width='100%';
-  const warning=teamErrors?` ${teamErrors} team error(s) were skipped.`:'';
-  toast(`Full sync finished: 9 leagues, ${done} team batches processed, ${statsDone} player stat rows.${warning}`);
-  log(`🚀 ALL 9 LEAGUES COMPLETE — ${done} teams processed; ${statsDone} stat rows synced; ${teamErrors} team errors; ${teamSkipped} skipped slots.`);
- }catch(e){if(String(e.message||e).includes('STOPPED_BY_ADMIN')){toast('Sync stopped after the current batch.');log('⏸ FULL SYNC STOPPED BY ADMIN.')}else{toast(`Sync error: ${e.message||e}`);log(`❌ FULL SYNC ERROR: ${e.message||e}`)}}
- finally{running=false;$('syncAllBtn').disabled=!isAdmin;$('refreshBtn').disabled=!isAdmin;$('stopBtn').disabled=!isAdmin}
+function renderAuth(){
+  const signed=!!currentUser;$('signedOutView').classList.toggle('hidden',signed);$('signedInView').classList.toggle('hidden',!signed);
+  $('authTitle').textContent=signed?'Administrator Account':'Administrator Sign In';
+  $('authSubtitle').textContent=signed?'Manage the current secured Sports synchronization session.':'Sign in with an approved CrowRules administrator account to unlock synchronization controls.';
+  $('authMiniStatus').textContent=signed?(isAdmin?(currentRole||'ADMIN').toUpperCase():'SIGNED IN'):'GUEST';
+  $('authMiniStatus').classList.toggle('admin',signed&&isAdmin);$('authToggleBtn').textContent=signed?'ACCOUNT':'ADMIN SIGN IN';
+  if(signed){$('accountEmail').textContent=currentUser.email||'Authenticated user';$('accountRole').textContent=isAdmin?`Role: ${currentRole}`:'Role: Not authorized for Sports Sync';$('accountUserId').textContent=`User ID: ${currentUser.id}`;$('accountAvatar').textContent=(currentUser.email||'A').slice(0,1).toUpperCase()}
 }
-$('leagueSelect').addEventListener('change',async()=>{await loadTeams();$('teamSelect').value='';currentTeam=null;$('teamPanel').innerHTML='<div class="muted">Select a team.</div>'});$('teamSelect').addEventListener('change',loadTeam);$('teamSearch').addEventListener('input',()=>{const q=$('teamSearch').value.trim().toLowerCase();if(!q){$('teamSelect').value='';return}const t=teams.find(x=>`${x.name} ${x.city||''} ${x.abbreviation||''}`.toLowerCase().includes(q));if(t){$('teamSelect').value=t.id;loadTeam()}});$('standingsLeague').addEventListener('change',loadStandings);$('syncAllBtn').addEventListener('click',syncAll);$('stopBtn').addEventListener('click',()=>{stopAfterBatch=true;log('⏸ Stop requested. The current batch will finish before stopping.')});$('refreshBtn').addEventListener('click',async()=>{await refreshCounts();toast('Counts refreshed.')});$('adminLoginForm').addEventListener('submit',signInAdmin);$('signOutBtn').addEventListener('click',signOutAdmin);$('accountRefreshBtn').addEventListener('click',async()=>{setAccountMessage('Refreshing administrator access…');await checkAdmin();setAccountMessage(isAdmin?`Access confirmed: ${currentRole}.`:'This account is not authorized for Sports Sync.',isAdmin?'good':'error')});$('authToggleBtn').addEventListener('click',()=>setAuthPanel(true));$('authCloseBtn').addEventListener('click',()=>setAuthPanel(false));$('authPanelWrap').addEventListener('click',e=>{if(e.target===$('authPanelWrap'))setAuthPanel(false)});document.addEventListener('keydown',e=>{if(e.key==='Escape')setAuthPanel(false)});db.auth.onAuthStateChange((event,session)=>{setTimeout(()=>checkAdmin(),0)});
-(async function init(){ $('year').textContent=new Date().getFullYear();try{await loadLeagues();await loadTeams();await refreshCounts();await checkAdmin()}catch(e){console.error(e);toast(e.message||'Sports initialization failed.')}})();
+async function checkAdmin(){
+  const s=await db.auth.getSession();currentUser=s.data.session?.user||null;currentRole=null;isAdmin=false;
+  if(!currentUser){$('adminGate').textContent='Sign in with an administrator account to use the secured synchronization engine.';renderAuth();disableSync();return}
+  const r=await db.from('cr_profiles').select('role,is_active').eq('id',currentUser.id).maybeSingle();
+  if(r.error)log(`AUTH: profile lookup failed — ${r.error.message}`);
+  currentRole=r.data?.role||null;isAdmin=!!r.data?.is_active&&ADMIN_ROLES.includes(r.data.role);
+  $('adminGate').textContent=isAdmin?`Administrator verified: ${r.data.role}. Secure sync controls enabled.`:'Signed in, but this account is not authorized for Sports Sync.';
+  renderAuth();if(isAdmin){$('syncAllBtn').disabled=running;$('refreshBtn').disabled=running;$('stopBtn').disabled=false}else disableSync();
+}
+async function signInAdmin(e){
+  e.preventDefault();const email=$('adminEmail').value.trim(),password=$('adminPassword').value;if(!email||!password)return;
+  const btn=$('loginBtn');btn.disabled=true;btn.textContent='SIGNING IN…';setAuthMessage('Authenticating with Supabase…');
+  try{const {error}=await db.auth.signInWithPassword({email,password});if(error)throw error;await checkAdmin();if(!isAdmin){setAuthMessage('Authentication succeeded, but the account is not assigned an approved Sports administrator role.','error');toast('Authenticated but not authorized.');return}setAuthMessage(`Access granted: ${currentRole}.`,'good');toast('Administrator sign-in successful.');setTimeout(()=>setAuthPanel(false),600)}
+  catch(err){setAuthMessage(err.message||'Unable to sign in.','error');toast('Administrator sign-in failed.')}
+  finally{btn.disabled=false;btn.textContent='SIGN IN'}
+}
+async function signOutAdmin(){
+  if(running){toast('Stop the sync before signing out.');return}
+  const {error}=await db.auth.signOut();if(error){setAccountMessage(error.message||'Unable to sign out.','error');return}
+  currentUser=null;currentRole=null;isAdmin=false;renderAuth();disableSync();$('adminGate').textContent='Signed out. Sign in to use the secured sync engine.';toast('Signed out.');setAuthPanel(false);
+}
+async function invokeFullSync(){
+  const {data,error}=await db.functions.invoke(CONFIG.FULL_SYNC_FN,{body:{season:CONFIG.SEASON}});
+  if(error)throw error;if(data?.success===false||data?.error)throw new Error(data.error||'Full sync failed');return data;
+}
+async function invokeRoster(league,offset){
+  const {data,error}=await db.functions.invoke(CONFIG.ROSTER_FN,{body:{action:'sync',league,season:CONFIG.SEASON,offset,limit:CONFIG.ROSTER_BATCH}});
+  if(error)throw error;if(data?.error&&!data?.partial)throw new Error(data.error);return data||{};
+}
+async function invokeNFLStats(offset){
+  const {data,error}=await db.functions.invoke(CONFIG.NFL_STATS_FN,{body:{league:'NFL',season:CONFIG.SEASON,offset,limit:CONFIG.NFL_STATS_BATCH}});
+  if(error)throw error;if(data?.success===false||data?.error)throw new Error(data.error||'NFL stats sync failed');return data;
+}
+async function syncAll(){
+  if(!isAdmin||running)return;
+  running=true;stopAfterBatch=false;setProgress(0,0);$('syncAllBtn').disabled=true;$('refreshBtn').disabled=true;$('stopBtn').disabled=false;
+  log('🚀 CROW RULES SPORTS v6.0 MASTER SYNC STARTED — season '+CONFIG.SEASON);
+  log('🛡️ Resilient mode enabled. Schedules/standings use the master sync; rosters run in small batches.');
+  let rosterDone=0,rosterErrors=0,nflStats=0;
+  try{
+    $('syncLeagueGrid').innerHTML=LEAGUES.map(([code,name])=>`<article class="leagueCard" id="syncCard-${code}"><b>${esc(code)}</b><small>${esc(name)}</small><span class="pill running">QUEUED</span></article>`).join('');
+    log('◆ Phase 1: master schedules + standings sync');
+    try{const d=await invokeFullSync();log(`✓ Master sync finished. ${Array.isArray(d.results)?d.results.length:'All'} league result(s) returned.`)}catch(e){log(`⚠ Master sync warning — ${e.message||e}`);log('Continuing into resilient roster phase instead of aborting.')}
+    let total=0,done=0;
+    const totals={};
+    for(const [code] of LEAGUES){
+      if(stopAfterBatch)throw new Error('STOPPED_BY_ADMIN');
+      const card=$(`syncCard-${code}`);if(card){card.querySelector('.pill').textContent='ROSTER RUNNING';card.querySelector('small').textContent='Starting…'}
+      let offset=0,leagueTotal=0,leagueDone=0,leagueErr=0;
+      while(offset<99999){
+        if(stopAfterBatch)throw new Error('STOPPED_BY_ADMIN');
+        let d=null;
+        for(let attempt=1;attempt<=2;attempt++){
+          try{d=await invokeRoster(code,offset);break}catch(e){log(`⚠ ${code}: offset ${offset} attempt ${attempt}/2 failed — ${e.message||e}`);if(attempt<2)await sleep(1200)}
+        }
+        if(!d){leagueErr+=CONFIG.ROSTER_BATCH;rosterErrors+=CONFIG.ROSTER_BATCH;log(`⏭ ${code}: skipped offset ${offset}; continuing.`);offset+=CONFIG.ROSTER_BATCH;continue}
+        leagueTotal=Number(d.totalTeams??leagueTotal??0);totals[code]=leagueTotal;total=Object.values(totals).reduce((a,b)=>a+b,0);
+        const processed=Number(d.processed??0),up=(d.results||[]).reduce((a,x)=>a+Number(x.upserted||0),0),errs=Array.isArray(d.errors)?d.errors:[];
+        done+=processed;rosterDone+=processed;leagueDone+=processed;leagueErr+=errs.length;rosterErrors+=errs.length;setProgress(done,total);
+        log(`${code}: ${processed} teams processed; ${up} players upserted${errs.length?`; ${errs.length} errors`:''}`);
+        for(const er of errs.slice(0,3))log(`  ↳ ${er.team||'Team'}: ${er.error||'Unknown error'}`);
+        let next=Number(d.nextOffset??(offset+Math.max(processed,CONFIG.ROSTER_BATCH)));
+        if(processed===0&&next<=offset)next=offset+CONFIG.ROSTER_BATCH;offset=next;
+        if(!leagueTotal||offset>=leagueTotal)break;
+      }
+      if(card){card.querySelector('small').textContent=`${leagueDone}/${leagueTotal||leagueDone} teams${leagueErr?' • '+leagueErr+' errors':''}`;card.querySelector('.pill').textContent=leagueErr?'COMPLETE WITH ERRORS':'ROSTER COMPLETE';card.querySelector('.pill').className='pill '+(leagueErr?'running':'complete')}
+      if(stopAfterBatch)throw new Error('STOPPED_BY_ADMIN');
+    }
+    if(stopAfterBatch)throw new Error('STOPPED_BY_ADMIN');
+    log('📊 Phase 3: NFL player statistics');
+    let offset=0;
+    while(true){
+      if(stopAfterBatch)throw new Error('STOPPED_BY_ADMIN');
+      let d;
+      try{d=await invokeNFLStats(offset)}catch(e){log(`⚠ NFL STATS: offset ${offset} failed — ${e.message||e}; retrying once.`);await sleep(1200);try{d=await invokeNFLStats(offset)}catch(e2){log(`⏭ NFL STATS: skipped offset ${offset} — ${e2.message||e2}`);offset+=CONFIG.NFL_STATS_BATCH;continue}}
+      const processed=Number(d.processed??0),synced=Number(d.synced??0);nflStats+=synced;log(`NFL STATS: processed ${processed}; synced ${synced}; errors ${Number(d.errors??0)}`);
+      if(processed===0||d.done===true)break;offset=Number(d.nextOffset??(offset+CONFIG.NFL_STATS_BATCH));
+    }
+    await refreshCounts();await loadTeams();await loadLiveGames();await loadLeagueCounts();
+    if(currentTeam){renderTeam();await Promise.all([loadPlayers(),loadSchedule()])}
+    $('syncProgress').style.width='100%';toast(`Sports sync complete: ${rosterDone} teams processed, ${nflStats} NFL stat rows synced, ${rosterErrors} roster errors.`);
+    log(`🚀 COMPLETE — ${rosterDone} teams processed; ${nflStats} NFL stat rows; ${rosterErrors} roster errors.`);
+  }catch(e){
+    if(String(e.message||e).includes('STOPPED_BY_ADMIN')){toast('Sync stopped after the current batch.');log('⏸ SYNC STOPPED BY ADMIN.')}
+    else{toast(`Sync error: ${e.message||e}`);log(`❌ SYNC ERROR: ${e.message||e}`)}
+  }finally{running=false;$('syncAllBtn').disabled=!isAdmin;$('refreshBtn').disabled=!isAdmin;$('stopBtn').disabled=!isAdmin}
+}
+
+$('leagueSelect').addEventListener('change',async()=>{await loadTeams();$('teamSelect').value='';currentTeam=null;$('teamPanel').innerHTML='<div class="muted">Select a team.</div>';});
+$('teamSelect').addEventListener('change',loadTeam);
+$('teamSearch').addEventListener('input',()=>{const q=$('teamSearch').value.trim().toLowerCase();if(!q)return;const t=teams.find(x=>`${x.name} ${x.city||''} ${x.abbreviation||''}`.toLowerCase().includes(q));if(t){$('teamSelect').value=t.id;loadTeam()}});
+$('standingsLeague').addEventListener('change',loadStandings);
+$('playerSearchBtn').addEventListener('click',searchPlayers);
+$('playerSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();searchPlayers()}});
+$('syncAllBtn').addEventListener('click',syncAll);
+$('stopBtn').addEventListener('click',()=>{if(!running)return;stopAfterBatch=true;log('⏸ Stop requested. Current batch will finish before stopping.')});
+$('refreshBtn').addEventListener('click',async()=>{try{await Promise.all([refreshCounts(),loadLiveGames(),loadNews(),loadHighlights()]);await loadTeams();toast('Sports data refreshed.')}catch(e){toast(e.message||'Refresh failed.')}});
+$('adminLoginForm').addEventListener('submit',signInAdmin);$('signOutBtn').addEventListener('click',signOutAdmin);
+$('accountRefreshBtn').addEventListener('click',async()=>{setAccountMessage('Refreshing access…');await checkAdmin();setAccountMessage(isAdmin?`Access confirmed: ${currentRole}.`:'Not authorized for Sports Sync.',isAdmin?'good':'error')});
+$('authToggleBtn').addEventListener('click',()=>setAuthPanel(true));$('authCloseBtn').addEventListener('click',()=>setAuthPanel(false));
+$('authPanelWrap').addEventListener('click',e=>{if(e.target===$('authPanelWrap'))setAuthPanel(false)});document.addEventListener('keydown',e=>{if(e.key==='Escape')setAuthPanel(false)});
+db.auth.onAuthStateChange(()=>setTimeout(checkAdmin,0));
+
+(async function init(){
+  $('year').textContent=new Date().getFullYear();
+  try{
+    await loadLeagues();await loadTeams();await Promise.all([refreshCounts(),loadLiveGames(),loadNews(),loadHighlights()]);await checkAdmin();
+    setInterval(loadLiveGames,60000);
+  }catch(e){console.error(e);toast(e.message||'Sports initialization failed.')}
+})();
 </script>
 </body>
 </html>
