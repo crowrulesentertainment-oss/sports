@@ -46,7 +46,7 @@
 <footer class="footer">© <span id="year"></span> CrowRules Entertainment • CrowRules Sports v3.0</footer>
 <div class="toast" id="toast"></div>
 <script>
-const CONFIG={SUPABASE_URL:'https://zauxdqyssratvzmomozf.supabase.co',SUPABASE_KEY:'sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9',SEASON:2026,BATCH:8,ROSTER_FN:'sports-roster-sync-v2',STATS_FN:'sports-player-stats-sync-v2',DATA_FN:'sports-data-sync',STATS_BATCH:50};
+const CONFIG={SUPABASE_URL:'https://zauxdqyssratvzmomozf.supabase.co',SUPABASE_KEY:'sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9',SEASON:2026,BATCH:2,ROSTER_FN:'sports-roster-sync-v3',STATS_FN:'sports-player-stats-sync-v2',DATA_FN:'sports-data-sync',STATS_BATCH:50};
 const LEAGUES=[['NFL','NFL'],['MLB','MLB'],['NBA','NBA'],['WNBA','WNBA'],['NHL','NHL'],['MLS','MLS'],['UFL','UFL'],['FBS','College Football FBS'],['FCS','College Football FCS']];
 const ADMIN_ROLES=['admin','super_admin','owner','manager','producer','editor'];
 const db=window.supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage,storageKey:'crowrules-sports-auth',flowType:'pkce'}});
@@ -74,10 +74,66 @@ async function checkAdmin(){const s=await db.auth.getSession();currentUser=s.dat
 function disableSync(){['syncAllBtn','refreshBtn','stopBtn'].forEach(id=>$(id).disabled=true)}
 async function signInAdmin(e){e.preventDefault();const email=$('adminEmail').value.trim(),password=$('adminPassword').value;if(!email||!password)return;const btn=$('loginBtn');btn.disabled=true;btn.textContent='SIGNING IN…';setAuthMessage('Authenticating with Supabase…');try{const {data,error}=await db.auth.signInWithPassword({email,password});if(error)throw error;await checkAdmin();if(!isAdmin){setAuthMessage('Signed in successfully, but this account is not assigned an approved Sports Sync administrator role.','error');toast('Account authenticated but not authorized for Sports Sync.');return}setAuthMessage(`Access granted. Administrator role: ${currentRole}.`,'good');setAccountMessage('Secure administrator session is active.','good');toast('Administrator sign-in successful.');setTimeout(()=>setAuthPanel(false),650)}catch(err){console.error(err);setAuthMessage(err.message||'Unable to sign in.','error');toast('Administrator sign-in failed.')}finally{btn.disabled=false;btn.textContent='SIGN IN'}}
 async function signOutAdmin(){if(running){toast('Stop the sync before signing out.');return}const {error}=await db.auth.signOut();if(error){setAccountMessage(error.message||'Unable to sign out.','error');return}currentUser=null;currentRole=null;isAdmin=false;renderAuth();disableSync();$('adminGate').textContent='Signed out. Sign in with an administrator account to use the secured sync engine.';toast('Administrator signed out.');setAuthPanel(false)}
-async function invokeRoster(league,offset){const {data,error}=await db.functions.invoke(CONFIG.ROSTER_FN,{body:{action:'sync',league,season:CONFIG.SEASON,offset,limit:CONFIG.BATCH}});if(error)throw error;if(data?.success===false||data?.error)throw new Error(data.error||`${league} roster sync failed`);return data}
+async function invokeRoster(league,offset){const {data,error}=await db.functions.invoke(CONFIG.ROSTER_FN,{body:{action:'sync',league,season:CONFIG.SEASON,offset,limit:CONFIG.BATCH}});if(error)throw error;if(data?.error&&!data?.partial)throw new Error(data.error);return data||{success:false,partial:true,processed:0,totalTeams:0,nextOffset:offset,results:[],errors:[{team:'ALL',error:'Empty roster response'}]}}
 async function invokeStats(offset){const {data,error}=await db.functions.invoke(CONFIG.STATS_FN,{body:{season:CONFIG.SEASON,offset,limit:CONFIG.STATS_BATCH}});if(error)throw error;if(data?.success===false||data?.error)throw new Error(data.error||'Player stats sync failed');return data}
 async function invokeData(league){const {data,error}=await db.functions.invoke(CONFIG.DATA_FN,{body:{action:'sync',league,season:CONFIG.SEASON}});if(error)throw error;if(data?.success===false||data?.error)throw new Error(data.error||`${league} data sync failed`);return data}
-async function syncAll(){if(!isAdmin||running)return;running=true;stopAfterBatch=false;setProgress(0,0);$('syncAllBtn').disabled=true;$('refreshBtn').disabled=true;$('stopBtn').disabled=false;$('leagueCards').innerHTML='';for(const [code] of LEAGUES){const l=leagues.find(x=>(x.abbreviation||'').toUpperCase()===code);$('leagueCards').insertAdjacentHTML('beforeend',`<div class=\"leagueCard\" id=\"card-${code}\"><b>${esc(l?.name||code)}</b><small>Waiting</small><span class=\"pill running\">WAITING</span></div>`)}let total=0,done=0;const totals={};let statsDone=0;try{log('🚀 FULL 9-LEAGUE SYNC STARTED — season '+CONFIG.SEASON);for(const [code] of LEAGUES){if(stopAfterBatch)throw new Error('STOPPED_BY_ADMIN');const card=$(`card-${code}`);if(card)card.querySelector('.pill').textContent='RUNNING';let offset=0,leagueTotal=null;log(`▶ ${code}: roster sync started`);while(true){const d=await invokeRoster(code,offset);if(d.success===false)throw new Error(`${code}: ${d.error||'roster sync failed'}`);leagueTotal=Number(d.totalTeams??leagueTotal??0);totals[code]=leagueTotal;total=Object.values(totals).reduce((a,b)=>a+b,0);const processed=Number(d.processed??0);done+=processed;setProgress(done,total);const up=(d.results||[]).reduce((a,x)=>a+Number(x.upserted||0),0);log(`${code}: ${processed} teams processed; ${up} players upserted`);if(d.errors?.length)log(`${code}: ${d.errors.length} team errors`);if(processed===0&&leagueTotal>offset)throw new Error(`${code}: roster sync made no progress at offset ${offset}`);offset=Number(d.nextOffset??(offset+CONFIG.BATCH));if(!leagueTotal||offset>=leagueTotal)break;if(stopAfterBatch){log('⏸ Stop requested after current roster batch.');throw new Error('STOPPED_BY_ADMIN')}}if(card){card.querySelector('small').textContent=`${leagueTotal||0} teams processed`;card.querySelector('.pill').textContent='ROSTER COMPLETE';card.querySelector('.pill').className='pill complete'}log(`✓ ${code}: roster complete`);if(stopAfterBatch)throw new Error('STOPPED_BY_ADMIN');log(`◆ ${code}: games/standings sync started`);try{const d=await invokeData(code);const x=d.results?.[0]||d;log(`${code}: games ${x.games_upserted??0}, standings ${x.standings_upserted??0}`)}catch(e){log(`${code}: data sync error — ${e.message||e}`)}}if(stopAfterBatch)throw new Error('STOPPED_BY_ADMIN');log('📊 PLAYER STATS SYNC STARTED');let statsOffset=0;while(true){const d=await invokeStats(statsOffset);if(d.success===false)throw new Error(d.error||'Player stats sync failed');const processed=Number(d.processed??0);const synced=Number(d.synced??0);const errors=Number(d.errors??0);statsDone+=synced;log(`STATS: processed ${processed}; synced ${synced}; errors ${errors}`);if(processed===0)break;statsOffset=Number(d.nextOffset??(statsOffset+50));if(d.done===true)break;if(stopAfterBatch){log('⏸ Stop requested after current stats batch.');throw new Error('STOPPED_BY_ADMIN')}}await refreshCounts();await loadTeams();$('syncProgress').style.width='100%';toast(`Full sync complete: 9 leagues, ${done} teams, ${statsDone} player stat rows processed.`);log(`🚀 ALL 9 LEAGUES COMPLETE — ${done} teams; ${statsDone} stat rows synced.`)}catch(e){if(String(e.message||e).includes('STOPPED_BY_ADMIN')){toast('Sync stopped after the current batch.');log('⏸ FULL SYNC STOPPED BY ADMIN.')}else{toast(`Sync error: ${e.message||e}`);log(`❌ FULL SYNC ERROR: ${e.message||e}`)}}finally{running=false;$('syncAllBtn').disabled=!isAdmin;$('refreshBtn').disabled=!isAdmin;$('stopBtn').disabled=!isAdmin}}
+async function syncAll(){
+ if(!isAdmin||running)return;
+ running=true;stopAfterBatch=false;setProgress(0,0);
+ $('syncAllBtn').disabled=true;$('refreshBtn').disabled=true;$('stopBtn').disabled=false;$('leagueCards').innerHTML='';
+ for(const [code] of LEAGUES){const l=leagues.find(x=>(x.abbreviation||'').toUpperCase()===code);$('leagueCards').insertAdjacentHTML('beforeend',`<div class="leagueCard" id="card-${code}"><b>${esc(l?.name||code)}</b><small>Waiting</small><span class="pill running">WAITING</span></div>`)}
+ let total=0,done=0;const totals={};let statsDone=0,teamErrors=0,teamSkipped=0;
+ try{
+  log('🚀 FULL 9-LEAGUE SYNC STARTED — season '+CONFIG.SEASON);
+  log('🛡️ Resilient mode: one slow/failed team will not stop the full sync.');
+  for(const [code] of LEAGUES){
+   if(stopAfterBatch)throw new Error('STOPPED_BY_ADMIN');
+   const card=$(`card-${code}`);if(card){card.querySelector('.pill').textContent='RUNNING';card.querySelector('small').textContent='Starting roster sync…'}
+   let offset=0,leagueTotal=0,leagueDone=0,leagueErr=0;log(`▶ ${code}: roster sync started`);
+   while(offset<99999){
+    if(stopAfterBatch)throw new Error('STOPPED_BY_ADMIN');
+    let d=null,lastErr=null;
+    for(let attempt=1;attempt<=2;attempt++){
+      try{d=await invokeRoster(code,offset);lastErr=null;break}catch(e){lastErr=e;log(`⚠ ${code}: batch offset ${offset} attempt ${attempt}/2 failed — ${e.message||e}`);if(attempt<2)await new Promise(r=>setTimeout(r,1500))}
+    }
+    if(!d){
+      teamErrors+=CONFIG.BATCH;teamSkipped+=CONFIG.BATCH;leagueErr+=CONFIG.BATCH;
+      leagueTotal=Math.max(leagueTotal,offset+CONFIG.BATCH);totals[code]=leagueTotal;total=Object.values(totals).reduce((a,b)=>a+b,0);
+      log(`⏭ ${code}: skipped batch at offset ${offset} after 2 failed attempts. Continuing.`);
+      offset+=CONFIG.BATCH;setProgress(done,total);continue;
+    }
+    leagueTotal=Number(d.totalTeams??leagueTotal??0);totals[code]=leagueTotal;total=Object.values(totals).reduce((a,b)=>a+b,0);
+    const processed=Number(d.processed??0);const up=(d.results||[]).reduce((a,x)=>a+Number(x.upserted||0),0);const errs=Array.isArray(d.errors)?d.errors:[];
+    done+=processed;leagueDone+=processed;teamErrors+=errs.length;leagueErr+=errs.length;
+    setProgress(done,total);log(`${code}: ${processed} teams processed; ${up} players upserted${errs.length?`; ${errs.length} team error(s)`:''}`);
+    for(const er of errs.slice(0,4))log(`  ↳ ${er.team||'Team'}: ${er.error||'Unknown error'}`);
+    if(errs.length>4)log(`  ↳ … ${errs.length-4} additional team error(s)`);
+    let next=Number(d.nextOffset??(offset+Math.max(processed,CONFIG.BATCH)));
+    if(processed===0&&next<=offset){next=offset+CONFIG.BATCH;teamSkipped+=CONFIG.BATCH;log(`⏭ ${code}: no progress returned; skipping ${CONFIG.BATCH} team slot(s) and continuing.`)}
+    offset=next;
+    if(!leagueTotal||offset>=leagueTotal)break;
+   }
+   if(card){card.querySelector('small').textContent=`${leagueDone}/${leagueTotal||leagueDone} teams processed${leagueErr?` • ${leagueErr} errors`:''}`;card.querySelector('.pill').textContent=leagueErr?'COMPLETE WITH ERRORS':'ROSTER COMPLETE';card.querySelector('.pill').className='pill '+(leagueErr?'running':'complete')}
+   log(`✓ ${code}: roster phase complete${leagueErr?` with ${leagueErr} team error(s)`:''}`);
+   if(stopAfterBatch)throw new Error('STOPPED_BY_ADMIN');
+   log(`◆ ${code}: games/standings sync started`);
+   try{const d=await invokeData(code);const x=d.results?.[0]||d;log(`${code}: games ${x.games_upserted??0}, standings ${x.standings_upserted??0}`)}catch(e){log(`${code}: data sync error — ${e.message||e}`)}
+  }
+  if(stopAfterBatch)throw new Error('STOPPED_BY_ADMIN');
+  log('📊 PLAYER STATS SYNC STARTED');
+  let statsOffset=0;
+  while(true){
+   if(stopAfterBatch)throw new Error('STOPPED_BY_ADMIN');
+   let d;try{d=await invokeStats(statsOffset)}catch(e){log(`⚠ STATS: batch at ${statsOffset} failed — ${e.message||e}. Retrying once.`);await new Promise(r=>setTimeout(r,1500));try{d=await invokeStats(statsOffset)}catch(e2){log(`⏭ STATS: skipped batch at ${statsOffset} — ${e2.message||e2}`);statsOffset+=CONFIG.STATS_BATCH;continue}}
+   const processed=Number(d.processed??0),synced=Number(d.synced??0),errors=Number(d.errors??0);statsDone+=synced;log(`STATS: processed ${processed}; synced ${synced}; errors ${errors}`);if(processed===0)break;statsOffset=Number(d.nextOffset??(statsOffset+CONFIG.STATS_BATCH));if(d.done===true)break;
+  }
+  await refreshCounts();await loadTeams();$('syncProgress').style.width='100%';
+  const warning=teamErrors?` ${teamErrors} team error(s) were skipped.`:'';
+  toast(`Full sync finished: 9 leagues, ${done} team batches processed, ${statsDone} player stat rows.${warning}`);
+  log(`🚀 ALL 9 LEAGUES COMPLETE — ${done} teams processed; ${statsDone} stat rows synced; ${teamErrors} team errors; ${teamSkipped} skipped slots.`);
+ }catch(e){if(String(e.message||e).includes('STOPPED_BY_ADMIN')){toast('Sync stopped after the current batch.');log('⏸ FULL SYNC STOPPED BY ADMIN.')}else{toast(`Sync error: ${e.message||e}`);log(`❌ FULL SYNC ERROR: ${e.message||e}`)}}
+ finally{running=false;$('syncAllBtn').disabled=!isAdmin;$('refreshBtn').disabled=!isAdmin;$('stopBtn').disabled=!isAdmin}
+}
 $('leagueSelect').addEventListener('change',async()=>{await loadTeams();$('teamSelect').value='';currentTeam=null;$('teamPanel').innerHTML='<div class="muted">Select a team.</div>'});$('teamSelect').addEventListener('change',loadTeam);$('teamSearch').addEventListener('input',()=>{const q=$('teamSearch').value.trim().toLowerCase();if(!q){$('teamSelect').value='';return}const t=teams.find(x=>`${x.name} ${x.city||''} ${x.abbreviation||''}`.toLowerCase().includes(q));if(t){$('teamSelect').value=t.id;loadTeam()}});$('standingsLeague').addEventListener('change',loadStandings);$('syncAllBtn').addEventListener('click',syncAll);$('stopBtn').addEventListener('click',()=>{stopAfterBatch=true;log('⏸ Stop requested. The current batch will finish before stopping.')});$('refreshBtn').addEventListener('click',async()=>{await refreshCounts();toast('Counts refreshed.')});$('adminLoginForm').addEventListener('submit',signInAdmin);$('signOutBtn').addEventListener('click',signOutAdmin);$('accountRefreshBtn').addEventListener('click',async()=>{setAccountMessage('Refreshing administrator access…');await checkAdmin();setAccountMessage(isAdmin?`Access confirmed: ${currentRole}.`:'This account is not authorized for Sports Sync.',isAdmin?'good':'error')});$('authToggleBtn').addEventListener('click',()=>setAuthPanel(true));$('authCloseBtn').addEventListener('click',()=>setAuthPanel(false));$('authPanelWrap').addEventListener('click',e=>{if(e.target===$('authPanelWrap'))setAuthPanel(false)});document.addEventListener('keydown',e=>{if(e.key==='Escape')setAuthPanel(false)});db.auth.onAuthStateChange((event,session)=>{setTimeout(()=>checkAdmin(),0)});
 (async function init(){ $('year').textContent=new Date().getFullYear();try{await loadLeagues();await loadTeams();await refreshCounts();await checkAdmin()}catch(e){console.error(e);toast(e.message||'Sports initialization failed.')}})();
 </script>
