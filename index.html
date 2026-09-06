@@ -4,41 +4,41 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#05070b">
-<meta name="description" content="CrowRules Sports v5.0 — live sports, teams, players, schedules, standings, creator shows and podcasts powered by Supabase.">
-<title>CrowRules Sports v5.0</title>
+<meta name="description" content="CrowRules Sports v6.0 — 24/7 live sports data, scores, teams, players, schedules, standings, creator shows, podcasts, news and video powered by Supabase.">
+<title>CrowRules Sports v6.0 — 24/7 Network</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Orbitron:wght@500;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--bg:#05070b;--bg2:#070b11;--panel:#0b1018;--panel2:#101722;--panel3:#151d29;--line:#202a37;--line2:#344253;--text:#f4f7fb;--muted:#8d99aa;--accent:#35b9ff;--accent2:#8b5cff;--danger:#ff4d6d;--good:#55e6a5;--warning:#ffc857;--shadow:0 18px 50px rgba(0,0,0,.35);--radius:18px}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 80% 0%,rgba(53,185,255,.11),transparent 32%),radial-gradient(circle at 0% 30%,rgba(139,92,255,.09),transparent 30%),var(--bg);color:var(--text);font-family:Montserrat,Arial,sans-serif}
-.topline{height:3px;background:linear-gradient(90deg,var(--accent2),var(--accent),transparent)}
-a{text-decoration:none;color:inherit}button,input,select{font:inherit}button{cursor:pointer}
-.nav{position:sticky;top:0;z-index:50;background:rgba(5,7,11,.9);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
-.navin{max-width:1500px;margin:auto;padding:13px 22px;display:flex;align-items:center;gap:18px}.logo{font:900 18px Orbitron;white-space:nowrap}.logo span{color:var(--accent)}
-.links{display:flex;gap:5px;flex:1;overflow:auto}.links a{padding:9px 11px;color:var(--muted);font-size:11px;border-radius:9px;white-space:nowrap}.links a:hover,.links a.active{background:var(--panel2);color:var(--text)}
-.liveDot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--danger);box-shadow:0 0 12px var(--danger);margin-right:6px}
-.wrap{max-width:1500px;margin:auto;padding:25px 22px 70px}
-.hero,.panel,.syncPanel{border:1px solid var(--line);border-radius:24px;background:linear-gradient(135deg,rgba(53,185,255,.07),rgba(139,92,255,.04)),var(--panel);box-shadow:var(--shadow)}
-.hero{padding:42px;position:relative;overflow:hidden}.hero:after{content:"";position:absolute;width:480px;height:480px;border:1px solid rgba(53,185,255,.12);border-radius:50%;right:-150px;top:-170px;box-shadow:0 0 0 80px rgba(53,185,255,.025),0 0 0 160px rgba(53,185,255,.015)}
-.eyebrow,.tag{font:900 10px Orbitron;letter-spacing:2px;color:var(--accent);text-transform:uppercase}.hero h1{font:900 clamp(42px,7vw,82px) Orbitron;line-height:.95;margin:12px 0;position:relative;z-index:1}.hero p{max-width:850px;color:#c0c9d5;line-height:1.7;position:relative;z-index:1}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;position:relative;z-index:1}.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:12px 16px;border-radius:11px;font-weight:800}.btn:hover{border-color:var(--accent);transform:translateY(-1px)}.btn.primary{background:var(--accent);border-color:var(--accent);color:#031019}
-.section{margin-top:32px}.sectionHead{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:14px}.sectionHead h2{font:800 22px Orbitron;margin:0}.sectionHead p{margin:5px 0 0;color:var(--muted);font-size:12px}.tiny{font-size:10px;color:var(--accent);font-weight:900;letter-spacing:1px}
-.dataGrid{display:grid;grid-template-columns:1.1fr 1.9fr;gap:16px}.panel{padding:20px}.filters{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{display:grid;gap:6px}.field span{font-size:9px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:1px}.field select,.field input{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:10px;color:var(--text);padding:11px;outline:0}.field select:focus,.field input:focus{border-color:var(--accent)}
-.teamHero{display:flex;align-items:center;gap:15px;padding-bottom:16px;border-bottom:1px solid var(--line)}.teamLogo{width:68px;height:68px;border-radius:15px;border:1px solid var(--line);background:var(--panel2);object-fit:contain;padding:8px}.teamName{font:800 20px Orbitron}.muted{color:var(--muted);font-size:12px;line-height:1.6}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:15px}.stat{padding:12px;background:var(--panel2);border:1px solid var(--line);border-radius:12px}.stat b{display:block;font:900 18px Orbitron}.stat span{font-size:9px;color:var(--muted);text-transform:uppercase}
-.players{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.player{display:flex;gap:10px;align-items:center;padding:10px;background:var(--panel2);border:1px solid var(--line);border-radius:12px}.player img{width:46px;height:46px;border-radius:9px;object-fit:cover;background:#05070b}.player b{font-size:12px}.player small{display:block;color:var(--muted);font-size:9px;margin-top:3px}
-.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:14px}.table{width:100%;border-collapse:collapse;min-width:650px}.table th,.table td{padding:12px;border-bottom:1px solid var(--line);text-align:left;font-size:11px}.table th{color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:1px}.table tr:last-child td{border-bottom:0}.rank{font:900 13px Orbitron;color:var(--accent)}.live{color:var(--danger);font-weight:900}
-.scoreGrid,.cardGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.scoreCard,.contentCard{border:1px solid var(--line);border-radius:15px;background:var(--panel2);overflow:hidden}.scoreCard{padding:15px}.scoreTop{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:9px;color:var(--muted);text-transform:uppercase;font-weight:900}.scoreStatus.live{color:var(--danger)}.scoreTeams{display:grid;gap:8px;margin:14px 0}.scoreTeam{display:flex;justify-content:space-between;align-items:center;gap:10px}.scoreTeam b{font-size:12px}.scoreTeam strong{font:900 20px Orbitron}.scoreMeta{color:var(--muted);font-size:9px}
-.cardImage{height:155px;background:#070b11;display:grid;place-items:center;overflow:hidden}.cardImage img{width:100%;height:100%;object-fit:cover}.cardBody{padding:15px}.cardBody h3{font:800 15px Orbitron;margin:0 0 7px}.cardBody p{font-size:10px;color:#aeb8c6;line-height:1.6;margin:0}.cardMeta{display:flex;gap:6px;flex-wrap:wrap;margin-top:11px}.chip{padding:5px 7px;border-radius:99px;background:rgba(53,185,255,.08);border:1px solid rgba(53,185,255,.18);color:var(--accent);font-size:8px;font-weight:900;text-transform:uppercase}.chip.good{color:var(--good);border-color:rgba(85,230,165,.25);background:rgba(85,230,165,.07)}
-.episodeList{display:grid;gap:8px;margin-top:10px}.episode{display:flex;justify-content:space-between;gap:10px;padding:10px;border:1px solid var(--line);background:var(--bg2);border-radius:10px}.episode b{font-size:10px}.episode span{font-size:9px;color:var(--muted)}
-.showHero{border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:12px}.showHero b{font:800 14px Orbitron}.showHero small{display:block;color:var(--muted);font-size:9px;margin-top:5px}
-.syncPanel{padding:24px;background:linear-gradient(120deg,rgba(53,185,255,.08),rgba(139,92,255,.08)),var(--panel)}
-.syncHead{display:flex;justify-content:space-between;gap:20px;align-items:center}.syncHead h2{font:900 22px Orbitron;margin:0}.syncHead p{color:var(--muted);font-size:12px;line-height:1.6}.syncActions{display:flex;gap:9px;flex-wrap:wrap}
-.progressOuter{height:12px;background:#151e2a;border-radius:99px;overflow:hidden;margin:18px 0 12px}.progressBar{width:0;height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width .3s}.syncGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.syncStat{padding:14px;background:rgba(0,0,0,.18);border:1px solid var(--line);border-radius:12px}.syncStat b{font:900 18px Orbitron}.syncStat span{display:block;color:var(--muted);font-size:9px;margin-top:4px;text-transform:uppercase}
-.notice{margin-top:12px;padding:11px;border-radius:10px;background:rgba(255,200,87,.07);border:1px solid rgba(255,200,87,.2);color:#d9c58c;font-size:10px}.hidden{display:none!important}.footer{border-top:1px solid var(--line);padding:25px;text-align:center;color:var(--muted);font-size:11px}.toast{position:fixed;right:20px;bottom:20px;z-index:100;max-width:360px;padding:13px 16px;border:1px solid var(--line2);border-radius:12px;background:var(--panel3);box-shadow:var(--shadow);font-size:11px;opacity:0;transform:translateY(10px);pointer-events:none;transition:.25s}.toast.show{opacity:1;transform:translateY(0)}
-@media(max-width:1100px){.dataGrid{grid-template-columns:1fr}.players{grid-template-columns:repeat(2,1fr)}.scoreGrid,.cardGrid{grid-template-columns:repeat(2,1fr)}.syncGrid{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:700px){.links{display:none}.wrap{padding:18px 14px 50px}.hero{padding:25px}.filters{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.players{grid-template-columns:1fr}.scoreGrid,.cardGrid,.syncGrid{grid-template-columns:1fr}.syncHead{align-items:flex-start;flex-direction:column}.teamHero{align-items:flex-start}.teamLogo{width:58px;height:58px}}
+:root{--bg:#05070b;--bg2:#080d14;--panel:#0b111a;--panel2:#101925;--panel3:#151f2c;--line:#202b39;--line2:#344456;--text:#f4f7fb;--muted:#8f9cad;--accent:#35b9ff;--accent2:#8b5cff;--danger:#ff4d6d;--good:#55e6a5;--warning:#ffc857;--shadow:0 18px 50px rgba(0,0,0,.35);--radius:18px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 85% 0%,rgba(53,185,255,.12),transparent 32%),radial-gradient(circle at 0% 30%,rgba(139,92,255,.1),transparent 30%),var(--bg);color:var(--text);font-family:Montserrat,Arial,sans-serif}
+a{text-decoration:none;color:inherit}button,input,select{font:inherit}button{cursor:pointer}.topline{height:3px;background:linear-gradient(90deg,var(--accent2),var(--accent),transparent)}
+.nav{position:sticky;top:0;z-index:50;background:rgba(5,7,11,.92);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}
+.navin{max-width:1550px;margin:auto;padding:12px 20px;display:flex;align-items:center;gap:16px}.logo{font:900 18px Orbitron;white-space:nowrap}.logo span{color:var(--accent)}
+.links{display:flex;gap:4px;flex:1;overflow:auto}.links a{padding:9px 10px;color:var(--muted);font-size:10px;border-radius:9px;white-space:nowrap}.links a:hover,.links a.active{background:var(--panel2);color:var(--text)}
+.liveDot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--danger);box-shadow:0 0 12px var(--danger);margin-right:6px}.statusBox{font:900 9px Orbitron;color:var(--good);white-space:nowrap}
+.wrap{max-width:1550px;margin:auto;padding:22px 20px 70px}
+.hero,.panel,.networkBar{border:1px solid var(--line);border-radius:24px;background:linear-gradient(135deg,rgba(53,185,255,.07),rgba(139,92,255,.04)),var(--panel);box-shadow:var(--shadow)}
+.hero{padding:40px;position:relative;overflow:hidden}.hero:after{content:"";position:absolute;width:500px;height:500px;border:1px solid rgba(53,185,255,.12);border-radius:50%;right:-170px;top:-190px;box-shadow:0 0 0 80px rgba(53,185,255,.025),0 0 0 160px rgba(53,185,255,.015)}
+.eyebrow,.tag{font:900 10px Orbitron;letter-spacing:2px;color:var(--accent);text-transform:uppercase}.hero h1{font:900 clamp(40px,7vw,84px) Orbitron;line-height:.94;margin:12px 0;position:relative;z-index:1}.hero p{max-width:900px;color:#c1cbd7;line-height:1.75;position:relative;z-index:1}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:22px;position:relative;z-index:1}.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:11px 15px;border-radius:11px;font-weight:800;font-size:11px}.btn:hover{border-color:var(--accent);transform:translateY(-1px)}.btn.primary{background:var(--accent);border-color:var(--accent);color:#031019}
+.networkBar{margin-top:14px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.networkLeft{display:flex;gap:15px;align-items:center;flex-wrap:wrap}.networkItem{font-size:9px;color:var(--muted);text-transform:uppercase;font-weight:900;letter-spacing:1px}.networkItem b{color:var(--text);font-size:11px}.pulse{width:9px;height:9px;border-radius:50%;background:var(--good);box-shadow:0 0 14px var(--good);display:inline-block;margin-right:7px}
+.section{margin-top:30px}.sectionHead{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:13px}.sectionHead h2{font:800 21px Orbitron;margin:0}.sectionHead p{margin:5px 0 0;color:var(--muted);font-size:11px}.tiny{font-size:9px;color:var(--accent);font-weight:900;letter-spacing:1px}
+.grid2{display:grid;grid-template-columns:1.7fr 1fr;gap:14px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.panel{padding:18px}.filters{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.field{display:grid;gap:5px}.field span{font-size:8px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:1px}.field select,.field input{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:10px;color:var(--text);padding:10px;outline:0}.field select:focus,.field input:focus{border-color:var(--accent)}
+.scoreGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.scoreCard{border:1px solid var(--line);border-radius:14px;background:var(--panel2);padding:14px;transition:.2s}.scoreCard:hover{transform:translateY(-2px);border-color:var(--line2)}.scoreTop{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:8px;color:var(--muted);text-transform:uppercase;font-weight:900}.scoreStatus.live{color:var(--danger)}.scoreTeams{display:grid;gap:7px;margin:13px 0}.scoreTeam{display:flex;justify-content:space-between;align-items:center;gap:8px}.scoreTeam b{font-size:11px}.scoreTeam strong{font:900 19px Orbitron}.scoreMeta{color:var(--muted);font-size:8px}.scoreActions{margin-top:9px;display:flex;gap:6px}.miniBtn{font-size:8px;font-weight:900;color:var(--accent);border:1px solid var(--line);background:transparent;border-radius:8px;padding:6px 8px}
+.teamHero{display:flex;align-items:center;gap:14px;padding-bottom:14px;border-bottom:1px solid var(--line)}.teamLogo{width:64px;height:64px;border-radius:14px;border:1px solid var(--line);background:var(--panel2);object-fit:contain;padding:7px}.teamName{font:800 19px Orbitron}.muted{color:var(--muted);font-size:11px;line-height:1.6}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:13px}.stat{padding:11px;background:var(--panel2);border:1px solid var(--line);border-radius:11px}.stat b{display:block;font:900 17px Orbitron}.stat span{font-size:8px;color:var(--muted);text-transform:uppercase}
+.players{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.player{display:flex;gap:9px;align-items:center;padding:9px;background:var(--panel2);border:1px solid var(--line);border-radius:11px}.player img{width:43px;height:43px;border-radius:8px;object-fit:cover;background:#05070b}.player b{font-size:11px}.player small{display:block;color:var(--muted);font-size:8px;margin-top:3px}
+.tableWrap{overflow:auto;border:1px solid var(--line);border-radius:13px}.table{width:100%;border-collapse:collapse;min-width:650px}.table th,.table td{padding:11px;border-bottom:1px solid var(--line);text-align:left;font-size:10px}.table th{color:var(--muted);font-size:8px;text-transform:uppercase;letter-spacing:1px}.table tr:last-child td{border-bottom:0}.rank{font:900 12px Orbitron;color:var(--accent)}.live{color:var(--danger);font-weight:900}
+.cardGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:11px}.contentCard{border:1px solid var(--line);border-radius:14px;background:var(--panel2);overflow:hidden}.cardImage{height:145px;background:#070b11;display:grid;place-items:center;overflow:hidden}.cardImage img{width:100%;height:100%;object-fit:cover}.cardBody{padding:13px}.cardBody h3{font:800 14px Orbitron;margin:0 0 6px}.cardBody p{font-size:9px;color:#aeb8c6;line-height:1.55;margin:0}.cardMeta{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}.chip{padding:5px 7px;border-radius:99px;background:rgba(53,185,255,.08);border:1px solid rgba(53,185,255,.18);color:var(--accent);font-size:7px;font-weight:900;text-transform:uppercase}.chip.good{color:var(--good);border-color:rgba(85,230,165,.25);background:rgba(85,230,165,.07)}
+.newsGrid{display:grid;grid-template-columns:2fr 1fr;gap:12px}.newsList{display:grid;gap:8px}.newsItem{display:grid;grid-template-columns:90px 1fr;gap:10px;padding:9px;border:1px solid var(--line);background:var(--panel2);border-radius:11px}.newsItem img{width:90px;height:62px;border-radius:8px;object-fit:cover;background:#05070b}.newsItem h3{font-size:11px;margin:0 0 5px}.newsItem p{font-size:8px;color:var(--muted);margin:0;line-height:1.45}
+.episodeList{display:grid;gap:7px;margin-top:9px}.episode{display:flex;justify-content:space-between;gap:8px;padding:9px;border:1px solid var(--line);background:var(--bg2);border-radius:9px}.episode b{font-size:9px}.episode span{font-size:8px;color:var(--muted)}
+.notice{margin-top:10px;padding:10px;border-radius:9px;background:rgba(255,200,87,.06);border:1px solid rgba(255,200,87,.18);color:#d9c58c;font-size:9px}.hidden{display:none!important}.footer{border-top:1px solid var(--line);padding:25px;text-align:center;color:var(--muted);font-size:10px}.toast{position:fixed;right:18px;bottom:18px;z-index:100;max-width:380px;padding:12px 15px;border:1px solid var(--line2);border-radius:11px;background:var(--panel3);box-shadow:var(--shadow);font-size:10px;opacity:0;transform:translateY(10px);pointer-events:none;transition:.25s}.toast.show{opacity:1;transform:translateY(0)}
+.loading{padding:25px;text-align:center;color:var(--muted);font-size:10px}.empty{padding:25px;text-align:center;border:1px dashed var(--line2);border-radius:12px;color:var(--muted);font-size:10px}
+@media(max-width:1200px){.scoreGrid,.cardGrid{grid-template-columns:repeat(3,1fr)}.grid2{grid-template-columns:1fr}.filters{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:800px){.links{display:none}.wrap{padding:16px 12px 50px}.hero{padding:25px}.scoreGrid,.cardGrid,.players{grid-template-columns:repeat(2,1fr)}.stats{grid-template-columns:repeat(2,1fr)}.newsGrid{grid-template-columns:1fr}}
+@media(max-width:560px){.scoreGrid,.cardGrid,.players,.filters{grid-template-columns:1fr}.hero h1{font-size:39px}.networkBar{align-items:flex-start}.teamHero{align-items:flex-start}}
 </style>
 </head>
 <body>
@@ -48,90 +48,139 @@ a{text-decoration:none;color:inherit}button,input,select{font:inherit}button{cur
     <a class="logo" href="#home">CROW<span>RULES</span> SPORTS</a>
     <nav class="links">
       <a class="active" href="#home">Home</a><a href="#scores">Scores</a><a href="#teams">Teams</a><a href="#players">Players</a>
-      <a href="#shows">Creator Shows</a><a href="#podcasts">Podcasts</a><a href="#schedule">Schedule</a><a href="#standings">Standings</a>
+      <a href="#schedule">Schedule</a><a href="#standings">Standings</a><a href="#shows">Creator Shows</a><a href="#podcasts">Podcasts</a><a href="#news">News</a><a href="#videos">Videos</a>
     </nav>
-    <div class="tiny"><span class="liveDot"></span><span id="dataStatus">CONNECTING</span></div>
+    <div class="statusBox"><span class="liveDot"></span><span id="dataStatus">CONNECTING</span></div>
   </div>
 </header>
 
 <main class="wrap" id="home">
 <section class="hero">
-  <div class="eyebrow">CrowRules Entertainment • Sports Division • v5.0</div>
+  <div class="eyebrow">CrowRules Entertainment • Sports Division • v6.0 24/7 Network</div>
   <h1>THE GAME<br>IS ALWAYS ON.</h1>
-  <p>One CrowRules Sports hub for live scores, teams, players, schedules, standings, original creator shows and podcasts. The public page reads directly from Supabase and keeps its sports, show and podcast data synchronized without exposing administrative controls or service keys.</p>
+  <p>One public sports network for live scores, upcoming games, teams, players, schedules, standings, creator shows, podcasts, sports news and video. Supabase runs the database while an unattended server-side sync keeps the sports feed moving around the clock.</p>
   <div class="actions">
-    <a class="btn primary" href="#scores">LIVE SCORES</a><a class="btn" href="#teams">EXPLORE TEAMS</a><a class="btn" href="#shows">CREATOR SHOWS</a><a class="btn" href="#podcasts">PODCASTS</a>
+    <a class="btn primary" href="#scores">LIVE SCORES</a><a class="btn" href="#schedule">FULL SCHEDULE</a><a class="btn" href="#shows">CREATOR SHOWS</a><a class="btn" href="#podcasts">PODCASTS</a><a class="btn" href="#news">SPORTS NEWS</a>
   </div>
 </section>
 
+<section class="networkBar">
+  <div class="networkLeft">
+    <div class="networkItem"><span class="pulse"></span><b id="networkState">24/7 DATABASE LIVE</b></div>
+    <div class="networkItem">Last browser refresh <b id="lastRefresh">—</b></div>
+    <div class="networkItem">Backend sync <b>EVERY 5 MINUTES</b></div>
+    <div class="networkItem">Realtime <b id="realtimeState">CONNECTING</b></div>
+  </div>
+  <button class="btn" id="refreshBtn">REFRESH NOW</button>
+</section>
+
 <section class="section" id="scores">
-  <div class="sectionHead"><div><h2>LIVE & RECENT SCORES</h2><p>All leagues in one scoreboard.</p></div><span class="tiny" id="scoreCount">— GAMES</span></div>
-  <div class="scoreGrid" id="scoreGrid"><div class="panel muted">Loading scores…</div></div>
+  <div class="sectionHead"><div><h2>LIVE SCORE CENTER</h2><p>Live, recent and upcoming games across every active CrowRules league.</p></div><span class="tiny" id="scoreCount">—</span></div>
+  <div class="panel">
+    <div class="filters" style="margin-bottom:12px">
+      <label class="field"><span>League</span><select id="scoreLeague"><option value="">All leagues</option></select></label>
+      <label class="field"><span>Status</span><select id="scoreStatus"><option value="">All games</option><option value="live">Live</option><option value="scheduled">Scheduled</option><option value="final">Final</option></select></label>
+      <label class="field"><span>Window</span><select id="scoreWindow"><option value="30">Latest 30</option><option value="60">Latest 60</option><option value="100">Latest 100</option></select></label>
+      <div class="notice" style="margin:0">Scores update automatically when the database changes.</div>
+    </div>
+    <div class="scoreGrid" id="scoreGrid"><div class="loading">Loading score center…</div></div>
+  </div>
 </section>
 
 <section class="section" id="teams">
-  <div class="sectionHead"><div><h2>TEAM DIRECTORY</h2><p>Every active CrowRules Sports team, grouped by league.</p></div><span class="tiny" id="teamCount">— TEAMS</span></div>
-  <div class="dataGrid">
+  <div class="sectionHead"><div><h2>TEAM COMMAND CENTER</h2><p>Search all active teams and load roster, schedule and standings data.</p></div><span class="tiny" id="teamCount">— TEAMS</span></div>
+  <div class="grid2">
     <div class="panel">
-      <div class="filters">
+      <div class="filters" style="grid-template-columns:1fr 1fr">
         <label class="field"><span>League</span><select id="leagueSelect"><option value="">All leagues</option></select></label>
         <label class="field"><span>Team</span><select id="teamSelect"><option value="">Select a team</option></select></label>
       </div>
-      <div class="field" style="margin-top:10px"><span>Find a team</span><input id="teamSearch" placeholder="Search team, city or abbreviation"></div>
-      <div class="notice">Team data is loaded from <b>sports_teams</b>. No hard-coded team directory is required.</div>
+      <div class="field" style="margin-top:9px"><span>Find a team</span><input id="teamSearch" placeholder="Search team, city or abbreviation"></div>
+      <div class="notice">All team records are read from <b>sports_teams</b>; no hard-coded directory is required.</div>
     </div>
-    <div class="panel" id="teamPanel"><div class="muted">Select a team to load its roster, schedule and standings.</div></div>
+    <div class="panel" id="teamPanel"><div class="muted">Select a team to open its command center.</div></div>
   </div>
 </section>
 
 <section class="section" id="players">
-  <div class="sectionHead"><div><h2>PLAYERS</h2><p>Roster records for the selected team.</p></div><span class="tiny" id="playerCount">— PLAYERS</span></div>
-  <div class="panel"><div id="playersGrid" class="players"><div class="muted">Select a team above.</div></div></div>
-</section>
-
-<section class="section" id="shows">
-  <div class="sectionHead"><div><h2>CREATOR SPORTS SHOWS</h2><p>Original sports programming from the CrowRules creator network.</p></div><span class="tiny" id="showCount">— SHOWS</span></div>
-  <div class="cardGrid" id="showGrid"><div class="panel muted">Loading creator shows…</div></div>
-</section>
-
-<section class="section" id="podcasts">
-  <div class="sectionHead"><div><h2>SPORTS PODCASTS</h2><p>Podcasts and latest episodes connected to the CrowRules audio network.</p></div><span class="tiny" id="podcastCount">— PODCASTS</span></div>
-  <div class="cardGrid" id="podcastGrid"><div class="panel muted">Loading podcasts…</div></div>
+  <div class="sectionHead"><div><h2>PLAYER DIRECTORY</h2><p>Search the synchronized player database or inspect the selected team's roster.</p></div><span class="tiny" id="playerCount">—</span></div>
+  <div class="panel">
+    <div class="filters" style="grid-template-columns:2fr 1fr 1fr">
+      <label class="field"><span>Player Search</span><input id="playerSearch" placeholder="Name, position or hometown"></label>
+      <label class="field"><span>League</span><select id="playerLeague"><option value="">All leagues</option></select></label>
+      <button class="btn primary" id="playerSearchBtn" style="align-self:end">SEARCH PLAYERS</button>
+    </div>
+    <div id="playersGrid" class="players" style="margin-top:13px"><div class="empty">Search for a player or select a team above.</div></div>
+  </div>
 </section>
 
 <section class="section" id="schedule">
-  <div class="sectionHead"><div><h2>TEAM SCHEDULE</h2><p>Games are linked directly to the selected team.</p></div><span class="tiny">LIVE DATABASE</span></div>
-  <div class="panel"><div class="tableWrap"><table class="table"><thead><tr><th>Date</th><th>League</th><th>Away</th><th>Home</th><th>Score</th><th>Status</th></tr></thead><tbody id="scheduleRows"><tr><td colspan="6">Select a team.</td></tr></tbody></table></div></div>
+  <div class="sectionHead"><div><h2>24/7 SPORTS SCHEDULE</h2><p>Unified schedule mirror generated from <b>sports_games</b> and maintained automatically.</p></div><span class="tiny" id="scheduleCount">—</span></div>
+  <div class="panel">
+    <div class="filters" style="margin-bottom:12px">
+      <label class="field"><span>League</span><select id="scheduleLeague"><option value="">All leagues</option></select></label>
+      <label class="field"><span>From</span><input type="date" id="scheduleFrom"></label>
+      <label class="field"><span>Through</span><input type="date" id="scheduleTo"></label>
+      <button class="btn" id="scheduleReset" style="align-self:end">RESET WINDOW</button>
+    </div>
+    <div class="tableWrap"><table class="table"><thead><tr><th>Start</th><th>League</th><th>Matchup</th><th>Status</th><th>Live</th></tr></thead><tbody id="scheduleRows"><tr><td colspan="5">Loading schedule…</td></tr></tbody></table></div>
+  </div>
 </section>
 
 <section class="section" id="standings">
-  <div class="sectionHead"><div><h2>STANDINGS</h2><p>Current season standings stored in Supabase.</p></div><span class="tiny">2026 SEASON</span></div>
+  <div class="sectionHead"><div><h2>STANDINGS</h2><p>Current-season standings synchronized by the server-side sports engine.</p></div><span class="tiny">2026 SEASON</span></div>
   <div class="panel">
-    <div class="field" style="max-width:340px;margin-bottom:14px"><span>Standings League</span><select id="standingsLeague"><option value="">Select a league</option></select></div>
+    <div class="field" style="max-width:360px;margin-bottom:12px"><span>League</span><select id="standingsLeague"><option value="">Select a league</option></select></div>
     <div class="tableWrap"><table class="table"><thead><tr><th>#</th><th>Team</th><th>W</th><th>L</th><th>T</th><th>PTS</th><th>Rank</th></tr></thead><tbody id="standingRows"><tr><td colspan="7">Select a league.</td></tr></tbody></table></div>
   </div>
 </section>
 
-<section class="section" id="sync">
-  <div class="syncPanel">
-    <div class="syncHead">
-      <div><div class="tag">UNIFIED SPORTS DATA ENGINE</div><h2>AUTO-SYNC STATUS</h2><p>This public page has no administrator panel. It automatically refreshes Supabase data and is designed to work with the unified backend synchronization engine for schedules, standings, rosters, player statistics, creator shows and podcasts.</p></div>
-      <div class="syncActions"><button class="btn" id="refreshBtn">REFRESH NOW</button></div>
+<section class="section" id="shows">
+  <div class="sectionHead"><div><h2>CREATOR SPORTS SHOWS</h2><p>Original sports programming from the CrowRules creator network.</p></div><span class="tiny" id="showCount">— SHOWS</span></div>
+  <div class="cardGrid" id="showGrid"><div class="loading">Loading creator shows…</div></div>
+</section>
+
+<section class="section" id="podcasts">
+  <div class="sectionHead"><div><h2>SPORTS PODCASTS</h2><p>Sports audio and video podcasts connected to the CrowRules audio network.</p></div><span class="tiny" id="podcastCount">— PODCASTS</span></div>
+  <div class="cardGrid" id="podcastGrid"><div class="loading">Loading podcasts…</div></div>
+</section>
+
+<section class="section" id="news">
+  <div class="sectionHead"><div><h2>SPORTS NEWS</h2><p>Published CrowRules sports news and commentary.</p></div><span class="tiny" id="newsCount">— STORIES</span></div>
+  <div class="newsGrid">
+    <div class="panel"><div class="newsList" id="newsList"><div class="loading">Loading news…</div></div></div>
+    <div class="panel">
+      <div class="tag">NETWORK HEALTH</div>
+      <h3 style="font:800 16px Orbitron;margin:9px 0">ALWAYS ON</h3>
+      <p class="muted">The public page never needs an administrator panel. The browser reads public data, Realtime pushes database changes, and Supabase Cron runs the unattended sports sync.</p>
+      <div class="stats">
+        <div class="stat"><b id="statLeagues">0</b><span>Leagues</span></div><div class="stat"><b id="statTeams">0</b><span>Teams</span></div>
+        <div class="stat"><b id="statPlayers">0</b><span>Players</span></div><div class="stat"><b id="statGames">0</b><span>Games</span></div>
+      </div>
     </div>
-    <div class="progressOuter"><div class="progressBar" id="syncProgress"></div></div>
-    <div class="syncGrid">
-      <div class="syncStat"><b id="syncLeagues">0</b><span>Active leagues</span></div>
-      <div class="syncStat"><b id="syncTeams">0</b><span>Teams</span></div>
-      <div class="syncStat"><b id="syncPlayers">0</b><span>Players</span></div>
-      <div class="syncStat"><b id="syncGames">0</b><span>Games</span></div>
-      <div class="syncStat"><b id="syncContent">0</b><span>Shows + podcasts</span></div>
+  </div>
+</section>
+
+<section class="section" id="videos">
+  <div class="sectionHead"><div><h2>SPORTS VIDEO</h2><p>Published sports videos and creator clips.</p></div><span class="tiny" id="videoCount">— VIDEOS</span></div>
+  <div class="cardGrid" id="videoGrid"><div class="loading">Loading videos…</div></div>
+</section>
+
+<section class="section">
+  <div class="panel">
+    <div class="sectionHead" style="margin:0"><div><h2>24/7 AUTO-SYNC ENGINE</h2><p>Browser polling + Supabase Realtime + server-side Cron work together so the page stays current without an admin section.</p></div><span class="tiny" id="engineState">READY</span></div>
+    <div class="stats">
+      <div class="stat"><b>5 MIN</b><span>Backend sports sync</span></div>
+      <div class="stat"><b>REALTIME</b><span>Database changes</span></div>
+      <div class="stat"><b>60 SEC</b><span>Browser safety refresh</span></div>
+      <div class="stat"><b>PUBLIC</b><span>No admin controls</span></div>
     </div>
-    <div class="notice">Last public refresh: <b id="lastRefresh">—</b>. The browser never receives a Supabase service-role or secret key.</div>
+    <div class="notice">The browser uses only the Supabase publishable key. Server-side synchronization uses protected Edge Functions and never exposes a service-role key to visitors.</div>
   </div>
 </section>
 </main>
 
-<footer class="footer">© <span id="year"></span> CrowRules Entertainment • CrowRules Sports v5.0</footer>
+<footer class="footer">© <span id="year"></span> CrowRules Entertainment • CrowRules Sports v6.0 • 24/7 Sports Network</footer>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -139,145 +188,163 @@ const CONFIG={
   SUPABASE_URL:'https://zauxdqyssratvzmomozf.supabase.co',
   SUPABASE_KEY:'sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9',
   SEASON:2026,
-  REFRESH_MS:300000
+  BROWSER_REFRESH_MS:60000,
+  REALTIME_DEBOUNCE_MS:1200
 };
-const LEAGUE_ORDER=['NFL','MLB','NBA','WNBA','NHL','MLS','UFL','FBS','FCS'];
-const db=window.supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage:window.localStorage,storageKey:'crowrules-sports-public-auth'}});
-let leagues=[],teams=[],currentTeam=null,gamesCache=[],refreshTimer=null;
-
+const db=window.supabase.createClient(CONFIG.SUPABASE_URL,CONFIG.SUPABASE_KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
 const $=id=>document.getElementById(id);
-function esc(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;')}
-function toast(m){const x=$('toast');x.textContent=m;x.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>x.classList.remove('show'),3200)}
-function fmtDate(v){if(!v)return'—';const d=new Date(v+'T00:00:00');return Number.isNaN(d.getTime())?v:d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}
-function fmtDateTime(v){if(!v)return'—';const d=new Date(v);return Number.isNaN(d.getTime())?v:d.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}
-function leagueName(id){return leagues.find(x=>String(x.id)===String(id))?.name||'Sports'}
-function leagueCode(id){return leagues.find(x=>String(x.id)===String(id))?.abbreviation||'—'}
-function setStatus(text,good=true){$('dataStatus').textContent=text;$('dataStatus').style.color=good?'var(--good)':'var(--warning)'}
-function setProgress(p){$('syncProgress').style.width=Math.max(0,Math.min(100,p))+'%'}
+const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+const leaguesOrder=['NFL','MLB','NBA','WNBA','NHL','MLS','UFL','FBS','FCS'];
+let leagues=[],teams=[],currentTeam=null,scoreRows=[],realtimeTimer=null,browserTimer=null;
 
+function toast(m){const x=$('toast');x.textContent=m;x.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>x.classList.remove('show'),3000)}
+function setStatus(s,good=true){$('dataStatus').textContent=s;$('dataStatus').style.color=good?'var(--good)':'var(--warning)';$('networkState').textContent=good?'24/7 DATABASE LIVE':'DATABASE DEGRADED'}
+function fmtDate(v){if(!v)return'—';const d=new Date(v+'T00:00:00');return Number.isNaN(d.getTime())?v:d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}
+function fmtDT(v){if(!v)return'—';const d=new Date(v);return Number.isNaN(d.getTime())?v:d.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}
+function leagueCode(id){return leagues.find(x=>String(x.id)===String(id))?.abbreviation||'SPORTS'}
+function leagueName(id){return leagues.find(x=>String(x.id)===String(id))?.name||'Sports'}
+function isLive(s){return /live|in progress|halftime|period|quarter|overtime/i.test(String(s||''))}
+function fillLeagueSelects(){
+  const all='<option value="">All leagues</option>'+leagues.map(l=>`<option value="${l.id}">${esc(l.name)}${l.abbreviation?' • '+esc(l.abbreviation):''}</option>`).join('');
+  ['scoreLeague','leagueSelect','scheduleLeague','playerLeague'].forEach(id=>$(id).innerHTML=all);
+  $('standingsLeague').innerHTML='<option value="">Select a league</option>'+leagues.map(l=>`<option value="${l.id}">${esc(l.name)}</option>`).join('');
+}
 async function loadLeagues(){
   const r=await db.from('sports_leagues').select('id,name,sport,abbreviation,is_active').eq('is_active',true).order('id');
-  if(r.error)throw r.error; leagues=r.data||[];
-  $('syncLeagues').textContent=leagues.length;
-  const opts='<option value="">Select a league</option>'+leagues.map(l=>`<option value="${l.id}">${esc(l.name)}${l.abbreviation?' • '+esc(l.abbreviation):''}</option>`).join('');
-  $('standingsLeague').innerHTML=opts;
-  $('leagueSelect').innerHTML='<option value="">All leagues</option>'+leagues.map(l=>`<option value="${l.id}">${esc(l.name)}</option>`).join('');
+  if(r.error)throw r.error;leagues=r.data||[];fillLeagueSelects();
+  $('statLeagues').textContent=leagues.length;
 }
-
 async function loadTeams(){
   let q=db.from('sports_teams').select('id,league_id,name,city,abbreviation,sport,logo_url,website_url,is_local,is_active').eq('is_active',true).order('name');
   const lid=$('leagueSelect').value;if(lid)q=q.eq('league_id',lid);
-  const r=await q;if(r.error)throw r.error;teams=r.data||[];
-  $('teamCount').textContent=`${teams.length} TEAMS`;$('syncTeams').textContent=teams.length;
+  const r=await q;if(r.error)throw r.error;teams=r.data||[];$('teamCount').textContent=`${teams.length} TEAMS`;$('statTeams').textContent=teams.length;
   const grouped=new Map();for(const t of teams){if(!grouped.has(t.league_id))grouped.set(t.league_id,[]);grouped.get(t.league_id).push(t)}
-  let html='<option value="">Select a team</option>';
-  for(const l of leagues){const arr=grouped.get(l.id)||[];if(!arr.length)continue;html+=`<optgroup label="${esc(l.name)}">`;for(const t of arr)html+=`<option value="${t.id}">${esc(t.city?t.city+' — '+t.name:t.name)}${t.is_local?' ★':''}</option>`;html+='</optgroup>'}
-  $('teamSelect').innerHTML=html;
+  let h='<option value="">Select a team</option>';for(const l of leagues){const a=grouped.get(l.id)||[];if(!a.length)continue;h+=`<optgroup label="${esc(l.name)}">`;for(const t of a)h+=`<option value="${t.id}">${esc(t.city?t.city+' — '+t.name:t.name)}${t.is_local?' ★':''}</option>`;h+='</optgroup>'}
+  $('teamSelect').innerHTML=h;
 }
-
 function findTeam(id){return teams.find(t=>String(t.id)===String(id))||null}
-
 async function loadTeam(){
   const id=$('teamSelect').value;
-  if(!id){currentTeam=null;$('teamPanel').innerHTML='<div class="muted">Select a team to load its roster, schedule and standings.</div>';$('playersGrid').innerHTML='<div class="muted">Select a team above.</div>';$('scheduleRows').innerHTML='<tr><td colspan="6">Select a team.</td></tr>';return}
-  currentTeam=findTeam(id); if(!currentTeam){const r=await db.from('sports_teams').select('*').eq('id',id).maybeSingle();currentTeam=r.data}
-  renderTeam();await Promise.all([loadPlayers(),loadSchedule()]);
-  $('standingsLeague').value=currentTeam?.league_id||'';await loadStandings();
+  if(!id){currentTeam=null;$('teamPanel').innerHTML='<div class="muted">Select a team to open its command center.</div>';return}
+  currentTeam=findTeam(id);if(!currentTeam){const r=await db.from('sports_teams').select('*').eq('id',id).maybeSingle();currentTeam=r.data}
+  $('teamPanel').innerHTML=`<div class="teamHero">${currentTeam.logo_url?`<img class="teamLogo" src="${esc(currentTeam.logo_url)}" alt="">`:'<div class="teamLogo"></div>'}<div><div class="tag">${esc(leagueName(currentTeam.league_id))}</div><div class="teamName">${esc(currentTeam.name)}</div><div class="muted">${esc(currentTeam.city||'')}${currentTeam.abbreviation?' • '+esc(currentTeam.abbreviation):''}</div></div></div><div class="stats"><div class="stat"><b id="teamPlayerStat">—</b><span>Players</span></div><div class="stat"><b>${currentTeam.is_local?'LOCAL':'NATIONAL'}</b><span>Coverage</span></div><div class="stat"><b>${esc(currentTeam.sport||'—')}</b><span>Sport</span></div><div class="stat"><b>${esc(currentTeam.abbreviation||'—')}</b><span>Code</span></div></div>`;
+  $('playerSearch').value='';await loadPlayers(currentTeam.id);await loadTeamSchedule(currentTeam.id);$('standingsLeague').value=currentTeam.league_id;await loadStandings();
 }
-
-function renderTeam(){
-  const t=currentTeam;
-  $('teamPanel').innerHTML=`<div class="teamHero">${t.logo_url?`<img class="teamLogo" src="${esc(t.logo_url)}" alt="">`:'<div class="teamLogo"></div>'}<div><div class="tag">${esc(leagueName(t.league_id))}</div><div class="teamName">${esc(t.name)}</div><div class="muted">${esc(t.city||'')}${t.abbreviation?' • '+esc(t.abbreviation):''}</div></div></div><div class="stats"><div class="stat"><b id="teamPlayerStat">—</b><span>Players</span></div><div class="stat"><b>${t.is_local?'LOCAL':'NATIONAL'}</b><span>Coverage</span></div><div class="stat"><b>${esc(t.sport||'—')}</b><span>Sport</span></div><div class="stat"><b>${esc(t.abbreviation||'—')}</b><span>Code</span></div></div>`;
+async function loadPlayers(teamId=null){
+  let q=db.from('sports_players').select('id,name,position,jersey_number,hometown,photo_url,status,season').eq('status','active').order('name').limit(60);
+  if(teamId)q=q.eq('team_id',teamId);
+  else{
+    const term=$('playerSearch').value.trim();const lid=$('playerLeague').value;
+    if(term)q=q.or(`name.ilike.%${term}%,position.ilike.%${term}%,hometown.ilike.%${term}%`);
+    if(lid){const ids=teams.filter(t=>String(t.league_id)===String(lid)).map(t=>t.id);if(!ids.length){renderPlayers([]);return}q=q.in('team_id',ids.slice(0,100));}
+  }
+  const r=await q;if(r.error){renderPlayers([],'Unable to load players.');return}renderPlayers(r.data||'');
 }
-
-async function loadPlayers(){
-  if(!currentTeam)return;
-  const r=await db.from('sports_players').select('id,name,position,jersey_number,hometown,photo_url,status,provider,season').eq('team_id',currentTeam.id).eq('status','active').order('name');
-  if(r.error){$('playersGrid').innerHTML='<div class="muted">Unable to load players.</div>';return}
-  const rows=r.data||[];$('playerCount').textContent=`${rows.length} PLAYERS`;if($('teamPlayerStat'))$('teamPlayerStat').textContent=rows.length;
-  $('playersGrid').innerHTML=rows.length?rows.map(p=>`<article class="player">${p.photo_url?`<img src="${esc(p.photo_url)}" alt="">`:'<div style="width:46px;height:46px;border-radius:9px;background:#05070b"></div>'}<div><b>${esc(p.name)}</b><small>${esc(p.position||'—')}${p.jersey_number?' • #'+esc(p.jersey_number):''}</small></div></article>`).join(''):'<div class="muted">No active roster records are currently stored.</div>';
+function renderPlayers(rows,msg){
+  if(rows==='')return;$('playerCount').textContent=`${rows.length} PLAYERS`;
+  $('playersGrid').innerHTML=rows.length?rows.map(p=>`<article class="player">${p.photo_url?`<img src="${esc(p.photo_url)}" alt="">`:'<div style="width:43px;height:43px;border-radius:8px;background:#05070b"></div>'}<div><b>${esc(p.name)}</b><small>${esc(p.position||'—')}${p.jersey_number?' • #'+esc(p.jersey_number):''}${p.hometown?' • '+esc(p.hometown):''}</small></div></article>`).join(''):`<div class="empty">${esc(msg||'No active player records found.')}</div>`;
 }
-
+async function loadTeamSchedule(teamId){
+  const r=await db.from('sports_games').select('id,league_id,home_team_id,away_team_id,game_date,game_time,status,home_score,away_score').or(`home_team_id.eq.${teamId},away_team_id.eq.${teamId}`).order('game_date',{ascending:false}).limit(40);
+  if(r.error)return;const rows=r.data||[];const ids=[...new Set(rows.flatMap(g=>[g.home_team_id,g.away_team_id]))];const tr=ids.length?await db.from('sports_teams').select('id,name').in('id',ids):{data:[]};const tm=new Map((tr.data||[]).map(x=>[String(x.id),x.name]));
+  $('scheduleRows').innerHTML=rows.length?rows.map(g=>`<tr><td>${fmtDate(g.game_date)} ${g.game_time?new Date(g.game_time).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}):''}</td><td>${esc(leagueCode(g.league_id))}</td><td>${esc(tm.get(String(g.away_team_id))||'Away')} @ ${esc(tm.get(String(g.home_team_id))||'Home')}</td><td class="${isLive(g.status)?'live':''}">${esc(g.status||'Scheduled')}</td><td>${isLive(g.status)?'● LIVE':'—'}</td></tr>`).join(''):'<tr><td colspan="5">No games found.</td></tr>';
+}
+async function loadScores(){
+  const limit=Number($('scoreWindow').value||30);let q=db.from('sports_games').select('id,league_id,home_team_id,away_team_id,sport,game_date,game_time,status,home_score,away_score').order('game_date',{ascending:false}).order('game_time',{ascending:false}).limit(limit);
+  const lid=$('scoreLeague').value;if(lid)q=q.eq('league_id',lid);
+  const r=await q;if(r.error)throw r.error;scoreRows=r.data||[];renderScores();
+}
+async function renderScores(){
+  const filter=$('scoreStatus').value;let rows=scoreRows;if(filter==='live')rows=rows.filter(g=>isLive(g.status));if(filter==='scheduled')rows=rows.filter(g=>/schedul/i.test(g.status||''));if(filter==='final')rows=rows.filter(g=>/final|complete/i.test(g.status||''));
+  const ids=[...new Set(rows.flatMap(g=>[g.home_team_id,g.away_team_id]))];const tr=ids.length?await db.from('sports_teams').select('id,name,abbreviation').in('id',ids):{data:[]};const tm=new Map((tr.data||[]).map(x=>[String(x.id),x]));
+  $('scoreCount').textContent=`${rows.length} GAMES`;
+  $('scoreGrid').innerHTML=rows.length?rows.map(g=>{const a=tm.get(String(g.away_team_id)),h=tm.get(String(g.home_team_id)),live=isLive(g.status);return `<article class="scoreCard"><div class="scoreTop"><span>${esc(leagueCode(g.league_id))}</span><span class="${live?'scoreStatus live':''}">${live?'<span class="liveDot"></span>':''}${esc(g.status||'Scheduled')}</span></div><div class="scoreTeams"><div class="scoreTeam"><b>${esc(a?.abbreviation||a?.name||'Away')}</b><strong>${g.away_score??'—'}</strong></div><div class="scoreTeam"><b>${esc(h?.abbreviation||h?.name||'Home')}</b><strong>${g.home_score??'—'}</strong></div></div><div class="scoreMeta">${fmtDate(g.game_date)}${g.game_time?' • '+new Date(g.game_time).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}):''}</div></article>`}).join(''):'<div class="empty">No games match the current filters.</div>';
+}
 async function loadSchedule(){
-  if(!currentTeam)return;
-  const r=await db.from('sports_games').select('id,league_id,home_team_id,away_team_id,sport,game_date,game_time,status,home_score,away_score').or(`home_team_id.eq.${currentTeam.id},away_team_id.eq.${currentTeam.id}`).order('game_date',{ascending:false}).limit(75);
-  if(r.error){$('scheduleRows').innerHTML='<tr><td colspan="6">Unable to load schedule.</td></tr>';return}
-  const rows=r.data||[],ids=[...new Set(rows.flatMap(g=>[g.home_team_id,g.away_team_id]))];
-  const tr=ids.length?await db.from('sports_teams').select('id,name').in('id',ids):{data:[]};const tm=new Map((tr.data||[]).map(x=>[String(x.id),x.name]));
-  $('scheduleRows').innerHTML=rows.length?rows.map(g=>`<tr><td>${fmtDate(g.game_date)}</td><td>${esc(leagueCode(g.league_id)||g.sport||'—')}</td><td>${esc(tm.get(String(g.away_team_id))||'Away')}</td><td>${esc(tm.get(String(g.home_team_id))||'Home')}</td><td>${g.away_score??'-'} — ${g.home_score??'-'}</td><td class="${String(g.status||'').toLowerCase().includes('live')?'live':''}">${esc(g.status||'Scheduled')}</td></tr>`).join(''):'<tr><td colspan="6">No games stored for this team yet.</td></tr>';
+  let q=db.from('sports_schedules').select('id,title,description,sport,start_time,end_time,game_id,is_live,is_published').eq('is_published',true).eq('program_type','sports').order('start_time',{ascending:true}).limit(200);
+  const lid=$('scheduleLeague').value;
+  const from=$('scheduleFrom').value,to=$('scheduleTo').value;
+  if(from)q=q.gte('start_time',from+'T00:00:00Z');if(to)q=q.lte('start_time',to+'T23:59:59Z');
+  const r=await q;if(r.error){$('scheduleRows').innerHTML='<tr><td colspan="5">Schedule unavailable.</td></tr>';return}
+  let rows=r.data||[];
+  if(lid){const gameIds=(scoreRows.length?scoreRows:[]).filter(g=>String(g.league_id)===String(lid)).map(g=>g.id);if(gameIds.length)rows=rows.filter(x=>gameIds.includes(x.game_id));}
+  $('scheduleCount').textContent=`${rows.length} EVENTS`;
+  $('scheduleRows').innerHTML=rows.length?rows.map(x=>`<tr><td>${fmtDT(x.start_time)}</td><td>${esc(x.sport||'SPORTS')}</td><td><b>${esc(x.title)}</b></td><td class="${x.is_live?'live':''}">${x.is_live?'LIVE':'Scheduled'}</td><td>${x.is_live?'●':'—'}</td></tr>`).join(''):'<tr><td colspan="5">No schedule entries in this window.</td></tr>';
 }
-
 async function loadStandings(){
   const lid=$('standingsLeague').value;if(!lid){$('standingRows').innerHTML='<tr><td colspan="7">Select a league.</td></tr>';return}
   const r=await db.from('sports_standings').select('team_id,wins,losses,ties,points,rank,season').eq('league_id',lid).eq('season',String(CONFIG.SEASON)).order('rank',{ascending:true,nullsFirst:false}).order('points',{ascending:false});
-  if(r.error){$('standingRows').innerHTML='<tr><td colspan="7">Unable to load standings.</td></tr>';return}
+  if(r.error){$('standingRows').innerHTML='<tr><td colspan="7">Standings unavailable.</td></tr>';return}
   const rows=r.data||[],ids=rows.map(x=>x.team_id),tr=ids.length?await db.from('sports_teams').select('id,name').in('id',ids):{data:[]};const tm=new Map((tr.data||[]).map(x=>[String(x.id),x.name]));
   $('standingRows').innerHTML=rows.length?rows.map((s,i)=>`<tr><td class="rank">${s.rank??i+1}</td><td><b>${esc(tm.get(String(s.team_id))||'Unknown')}</b></td><td>${s.wins??0}</td><td>${s.losses??0}</td><td>${s.ties??0}</td><td>${s.points??0}</td><td>${s.rank??'—'}</td></tr>`).join(''):'<tr><td colspan="7">No standings stored yet.</td></tr>';
 }
-
-async function loadScores(){
-  const r=await db.from('sports_games').select('id,league_id,home_team_id,away_team_id,sport,game_date,game_time,status,home_score,away_score').order('game_date',{ascending:false}).limit(30);
-  if(r.error)throw r.error;gamesCache=r.data||[];
-  const ids=[...new Set(gamesCache.flatMap(g=>[g.home_team_id,g.away_team_id]))];
-  const tr=ids.length?await db.from('sports_teams').select('id,name,abbreviation').in('id',ids):{data:[]};const tm=new Map((tr.data||[]).map(x=>[String(x.id),x]));
-  $('scoreCount').textContent=`${gamesCache.length} GAMES`;
-  $('scoreGrid').innerHTML=gamesCache.length?gamesCache.map(g=>{
-    const a=tm.get(String(g.away_team_id)),h=tm.get(String(g.home_team_id)),status=String(g.status||'Scheduled'),live=/live|in progress|halftime|period|quarter/i.test(status);
-    return `<article class="scoreCard"><div class="scoreTop"><span>${esc(leagueCode(g.league_id)||g.sport||'SPORTS')}</span><span class="${live?'scoreStatus live':''}">${live?'<span class="liveDot"></span>':''}${esc(status)}</span></div><div class="scoreTeams"><div class="scoreTeam"><b>${esc(a?.abbreviation||a?.name||'Away')}</b><strong>${g.away_score??'—'}</strong></div><div class="scoreTeam"><b>${esc(h?.abbreviation||h?.name||'Home')}</b><strong>${g.home_score??'—'}</strong></div></div><div class="scoreMeta">${fmtDate(g.game_date)}${g.game_time?' • '+esc(g.game_time):''}</div></article>`;
-  }).join(''):'<div class="panel muted">No games are currently stored in Supabase.</div>';
-}
-
 async function loadShows(){
-  const r=await db.from('sports_shows').select('id,title,slug,description,category,host,thumbnail_url,banner_url,is_featured,is_published,created_at,updated_at').eq('is_published',true).order('is_featured',{ascending:false}).order('updated_at',{ascending:false}).limit(30);
-  if(r.error){$('showGrid').innerHTML='<div class="panel muted">Creator shows are not available yet.</div>';return}
+  const r=await db.from('sports_shows').select('id,title,slug,description,category,host,thumbnail_url,banner_url,is_featured,is_published,updated_at').eq('is_published',true).order('is_featured',{ascending:false}).order('updated_at',{ascending:false}).limit(30);
+  if(r.error){$('showGrid').innerHTML='<div class="empty">Creator shows are unavailable.</div>';return}
   const rows=r.data||[];$('showCount').textContent=`${rows.length} SHOWS`;
-  $('showGrid').innerHTML=rows.length?rows.map(s=>`<article class="contentCard"><div class="cardImage">${s.thumbnail_url||s.banner_url?`<img src="${esc(s.thumbnail_url||s.banner_url)}" alt="">`:'<div class="tag">CROWRULES ORIGINAL</div>'}</div><div class="cardBody"><h3>${esc(s.title)}</h3><p>${esc(s.description||'Original CrowRules Sports creator programming.')}</p><div class="cardMeta"><span class="chip">${esc(s.category||'Sports')}</span>${s.host?`<span class="chip">HOST: ${esc(s.host)}</span>`:''}${s.is_featured?'<span class="chip good">FEATURED</span>':''}</div></div></article>`).join(''):'<div class="panel muted">No published creator shows found.</div>';
+  $('showGrid').innerHTML=rows.length?rows.map(s=>`<article class="contentCard"><div class="cardImage">${s.thumbnail_url||s.banner_url?`<img src="${esc(s.thumbnail_url||s.banner_url)}" alt="">`:'<div class="tag">CROWRULES ORIGINAL</div>'}</div><div class="cardBody"><h3>${esc(s.title)}</h3><p>${esc(s.description||'Original CrowRules Sports creator programming.')}</p><div class="cardMeta"><span class="chip">${esc(s.category||'Sports')}</span>${s.host?`<span class="chip">HOST: ${esc(s.host)}</span>`:''}${s.is_featured?'<span class="chip good">FEATURED</span>':''}</div></div></article>`).join(''):'<div class="empty">No published creator shows found yet.</div>';
 }
-
 async function loadPodcasts(){
-  const r=await db.from('podcasts').select('id,title,slug,description,artwork_url,category,host,status,featured,published,created_at,updated_at').eq('published',true).order('featured',{ascending:false}).order('updated_at',{ascending:false}).limit(30);
-  if(r.error){$('podcastGrid').innerHTML='<div class="panel muted">Podcasts are not available yet.</div>';return}
-  const rows=r.data||[];$('podcastCount').textContent=`${rows.length} PODCASTS`;
-  if(!rows.length){$('podcastGrid').innerHTML='<div class="panel muted">No published podcasts found.</div>';return}
-  const ids=rows.map(x=>x.id);
-  const er=await db.from('podcast_episodes').select('id,podcast_id,title,episode_number,season_number,publish_date,published,audio_url,video_url,thumbnail_url,duration_seconds').in('podcast_id',ids).eq('published',true).order('publish_date',{ascending:false}).limit(60);
-  const by=new Map();for(const e of (er.data||[])){if(!by.has(e.podcast_id))by.set(e.podcast_id,[]);if(by.get(e.podcast_id).length<3)by.get(e.podcast_id).push(e)}
+  const r=await db.from('podcasts').select('id,title,slug,description,artwork_url,category,host,featured,published,updated_at').eq('published',true).order('featured',{ascending:false}).order('updated_at',{ascending:false}).limit(30);
+  if(r.error){$('podcastGrid').innerHTML='<div class="empty">Podcasts are unavailable.</div>';return}
+  const rows=r.data||[];$('podcastCount').textContent=`${rows.length} PODCASTS`;if(!rows.length){$('podcastGrid').innerHTML='<div class="empty">No published podcasts found yet.</div>';return}
+  const ids=rows.map(x=>x.id);const er=await db.from('podcast_episodes').select('id,podcast_id,title,episode_number,season_number,publish_date,published,audio_url,video_url,thumbnail_url,duration_seconds').in('podcast_id',ids).eq('published',true).order('publish_date',{ascending:false}).limit(60);
+  const by=new Map();for(const e of(er.data||[])){if(!by.has(e.podcast_id))by.set(e.podcast_id,[]);if(by.get(e.podcast_id).length<3)by.get(e.podcast_id).push(e)}
   $('podcastGrid').innerHTML=rows.map(p=>`<article class="contentCard"><div class="cardImage">${p.artwork_url?`<img src="${esc(p.artwork_url)}" alt="">`:'<div class="tag">CROWRULES PODCAST</div>'}</div><div class="cardBody"><h3>${esc(p.title)}</h3><p>${esc(p.description||'CrowRules Sports podcast.')}</p><div class="cardMeta"><span class="chip">${esc(p.category||'Sports')}</span>${p.host?`<span class="chip">HOST: ${esc(p.host)}</span>`:''}${p.featured?'<span class="chip good">FEATURED</span>':''}</div><div class="episodeList">${(by.get(p.id)||[]).map(e=>`<div class="episode"><b>${esc(e.title)}</b><span>${e.episode_number!=null?'EP '+e.episode_number+' • ':''}${e.publish_date?fmtDate(e.publish_date):''}</span></div>`).join('')||'<div class="muted">No published episodes yet.</div>'}</div></article>`).join('');
 }
-
-async function refreshAll(){
-  setStatus('REFRESHING',true);setProgress(10);
+async function loadNews(){
+  const r=await db.from('sports_news').select('id,title,slug,excerpt,summary,category,author,thumbnail_url,image_url,published_at,is_featured,is_published,source_name,source_url').eq('is_published',true).order('is_featured',{ascending:false}).order('published_at',{ascending:false}).limit(20);
+  if(r.error){$('newsList').innerHTML='<div class="empty">Sports news is unavailable.</div>';return}
+  const rows=r.data||[];$('newsCount').textContent=`${rows.length} STORIES`;
+  $('newsList').innerHTML=rows.length?rows.map(n=>`<article class="newsItem">${n.thumbnail_url||n.image_url?`<img src="${esc(n.thumbnail_url||n.image_url)}" alt="">`:'<div></div>'}<div><h3>${esc(n.title)}</h3><p>${esc(n.excerpt||n.summary||'')} ${n.published_at?'• '+fmtDT(n.published_at):''}</p><div class="cardMeta"><span class="chip">${esc(n.league||n.category||'Sports')}</span>${n.author?`<span class="chip">BY ${esc(n.author)}</span>`:''}</div></div></article>`).join(''):'<div class="empty">No published sports news yet.</div>';
+}
+async function loadVideos(){
+  const r=await db.from('sports_videos').select('id,title,description,category,youtube_id,video_url,thumbnail_url,duration_seconds,published_at,is_featured,is_published').eq('is_published',true).order('is_featured',{ascending:false}).order('published_at',{ascending:false}).limit(24);
+  if(r.error){$('videoGrid').innerHTML='<div class="empty">Sports video is unavailable.</div>';return}
+  const rows=r.data||[];$('videoCount').textContent=`${rows.length} VIDEOS`;
+  $('videoGrid').innerHTML=rows.length?rows.map(v=>`<article class="contentCard"><div class="cardImage">${v.thumbnail_url?`<img src="${esc(v.thumbnail_url)}" alt="">`:'<div class="tag">CROWRULES SPORTS</div>'}</div><div class="cardBody"><h3>${esc(v.title)}</h3><p>${esc(v.description||'CrowRules Sports video.')}</p><div class="cardMeta"><span class="chip">${esc(v.category||'Sports')}</span>${v.is_featured?'<span class="chip good">FEATURED</span>':''}${v.published_at?`<span class="chip">${fmtDate(v.published_at)}</span>`:''}</div></div></article>`).join(''):'<div class="empty">No published sports videos yet.</div>';
+}
+async function loadCounts(){
+  const [p,g]=await Promise.all([db.from('sports_players').select('id',{count:'exact',head:true}),db.from('sports_games').select('id',{count:'exact',head:true})]);
+  $('statPlayers').textContent=p.count??0;$('statGames').textContent=g.count??0;
+}
+async function refreshAll(silent=false){
   try{
-    await loadLeagues();setProgress(25);
-    await Promise.all([loadTeams(),loadScores(),loadShows(),loadPodcasts()]);setProgress(65);
-    await refreshCounts();setProgress(80);
-    if(currentTeam)await Promise.all([loadPlayers(),loadSchedule()]);
+    setStatus('REFRESHING',true);$('engineState').textContent='SYNCING';
+    await loadLeagues();await loadTeams();await Promise.all([loadScores(),loadSchedule(),loadShows(),loadPodcasts(),loadNews(),loadVideos(),loadCounts()]);
+    if(currentTeam){await loadPlayers(currentTeam.id);await loadTeamSchedule(currentTeam.id)}
     if($('standingsLeague').value)await loadStandings();
-    setProgress(100);$('lastRefresh').textContent=new Date().toLocaleTimeString();setStatus('LIVE',true);
-  }catch(e){console.error(e);setStatus('DEGRADED',false);toast(e.message||'Unable to refresh sports data.')}
+    $('lastRefresh').textContent=new Date().toLocaleTimeString();setStatus('LIVE',true);$('engineState').textContent='READY';
+    if(!silent)toast('CrowRules Sports is current.');
+  }catch(e){console.error(e);setStatus('DEGRADED',false);$('engineState').textContent='DEGRADED';if(!silent)toast(e.message||'Refresh failed.')}
 }
-
-async function refreshCounts(){
-  const [p,g,s,sh,po]=await Promise.all([
-    db.from('sports_players').select('id',{count:'exact',head:true}),
-    db.from('sports_games').select('id',{count:'exact',head:true}),
-    db.from('sports_standings').select('id',{count:'exact',head:true}),
-    db.from('sports_shows').select('id',{count:'exact',head:true}).eq('is_published',true),
-    db.from('podcasts').select('id',{count:'exact',head:true}).eq('published',true)
-  ]);
-  $('syncPlayers').textContent=p.count??0;$('syncGames').textContent=g.count??0;$('syncContent').textContent=(sh.count??0)+(po.count??0);
+function subscribeRealtime(){
+  const channel=db.channel('crowrules-sports-live-v6')
+    .on('postgres_changes',{event:'*',schema:'public',table:'sports_games'},()=>scheduleRealtimeRefresh())
+    .on('postgres_changes',{event:'*',schema:'public',table:'sports_schedules'},()=>scheduleRealtimeRefresh())
+    .on('postgres_changes',{event:'*',schema:'public',table:'sports_standings'},()=>scheduleRealtimeRefresh())
+    .on('postgres_changes',{event:'*',schema:'public',table:'sports_shows'},()=>scheduleRealtimeRefresh())
+    .on('postgres_changes',{event:'*',schema:'public',table:'podcasts'},()=>scheduleRealtimeRefresh())
+    .on('postgres_changes',{event:'*',schema:'public',table:'podcast_episodes'},()=>scheduleRealtimeRefresh())
+    .on('postgres_changes',{event:'*',schema:'public',table:'sports_news'},()=>scheduleRealtimeRefresh())
+    .on('postgres_changes',{event:'*',schema:'public',table:'sports_videos'},()=>scheduleRealtimeRefresh())
+    .subscribe(status=>{$('realtimeState').textContent=status==='SUBSCRIBED'?'LIVE':status;$('realtimeState').style.color=status==='SUBSCRIBED'?'var(--good)':'var(--warning)'});
 }
-
-$('leagueSelect').addEventListener('change',async()=>{await loadTeams();$('teamSelect').value='';currentTeam=null;$('teamPanel').innerHTML='<div class="muted">Select a team.</div>';$('playersGrid').innerHTML='<div class="muted">Select a team above.</div>';$('scheduleRows').innerHTML='<tr><td colspan="6">Select a team.</td></tr>'});
+function scheduleRealtimeRefresh(){clearTimeout(realtimeTimer);realtimeTimer=setTimeout(()=>refreshAll(true),CONFIG.REALTIME_DEBOUNCE_MS)}
+$('leagueSelect').addEventListener('change',async()=>{await loadTeams();$('teamSelect').value='';currentTeam=null});
 $('teamSelect').addEventListener('change',loadTeam);
 $('teamSearch').addEventListener('input',()=>{const q=$('teamSearch').value.trim().toLowerCase();if(!q)return;const t=teams.find(x=>`${x.name} ${x.city||''} ${x.abbreviation||''}`.toLowerCase().includes(q));if(t){$('teamSelect').value=t.id;loadTeam()}});
-$('standingsLeague').addEventListener('change',loadStandings);
-$('refreshBtn').addEventListener('click',async()=>{await refreshAll();toast('CrowRules Sports refreshed.')});
-
+$('playerSearchBtn').addEventListener('click',()=>loadPlayers());
+$('playerSearch').addEventListener('keydown',e=>{if(e.key==='Enter')loadPlayers()});
+$('scoreLeague').addEventListener('change',loadScores);$('scoreWindow').addEventListener('change',loadScores);$('scoreStatus').addEventListener('change',renderScores);
+$('scheduleLeague').addEventListener('change',loadSchedule);$('scheduleFrom').addEventListener('change',loadSchedule);$('scheduleTo').addEventListener('change',loadSchedule);
+$('scheduleReset').addEventListener('click',()=>{$('scheduleFrom').value='';$('scheduleTo').value='';loadSchedule()});
+$('standingsLeague').addEventListener('change',loadStandings);$('refreshBtn').addEventListener('click',()=>refreshAll(false));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshAll(true)});
 (async function init(){
   $('year').textContent=new Date().getFullYear();
-  await refreshAll();
-  clearInterval(refreshTimer);refreshTimer=setInterval(refreshAll,CONFIG.REFRESH_MS);
+  await refreshAll(false);subscribeRealtime();
+  clearInterval(browserTimer);browserTimer=setInterval(()=>{if(!document.hidden)refreshAll(true)},CONFIG.BROWSER_REFRESH_MS);
 })();
 </script>
 </body>
