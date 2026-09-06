@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#05060a">
-<meta name="description" content="CrowRules Sports Center Admin v7.0">
-<title>CrowRules Sports Admin v7.0</title>
+<meta name="description" content="CrowRules Sports Command Center Admin v8.0 — Live Sports, Standings, Schedules and 24/7 Synchronization">
+<title>CrowRules Sports Admin v8.0</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,7 +18,9 @@
   --bg:#05060a;
   --panel:#0b0e16;
   --panel2:#101521;
+  --panel3:#080b12;
   --line:#202838;
+  --line2:#171d28;
   --text:#eef3ff;
   --muted:#8994aa;
   --cyan:#00eaff;
@@ -27,6 +29,7 @@
   --red:#ff4d6d;
   --purple:#a56cff;
   --orange:#ff8b3d;
+  --blue:#4d8dff;
 }
 
 *{
@@ -57,6 +60,7 @@ body:before{
     linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),
     linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);
   background-size:40px 40px;
+  z-index:-1;
 }
 
 button,
@@ -70,10 +74,14 @@ button{
 }
 
 .app{
-  width:min(1700px,calc(100% - 28px));
+  width:min(1800px,calc(100% - 28px));
   margin:auto;
-  padding:18px 0 50px;
+  padding:18px 0 60px;
 }
+
+/* =========================================================
+   TOPBAR
+   ========================================================= */
 
 .topbar{
   position:sticky;
@@ -85,6 +93,7 @@ button{
   border-radius:14px;
   background:rgba(5,6,10,.94);
   backdrop-filter:blur(18px);
+  box-shadow:0 10px 40px rgba(0,0,0,.25);
 }
 
 .brand-row{
@@ -101,8 +110,8 @@ button{
 }
 
 .logo{
-  width:44px;
-  height:44px;
+  width:46px;
+  height:46px;
   display:grid;
   place-items:center;
   border:1px solid var(--cyan);
@@ -148,6 +157,10 @@ button{
   color:var(--green);
 }
 
+/* =========================================================
+   HERO
+   ========================================================= */
+
 .hero{
   display:grid;
   grid-template-columns:1.5fr 1fr;
@@ -162,6 +175,20 @@ button{
   border:1px solid var(--line);
   border-radius:16px;
   background:linear-gradient(145deg,#0d121c,#080a10);
+}
+
+.hero-card:after{
+  content:"";
+  position:absolute;
+  width:260px;
+  height:260px;
+  right:-130px;
+  top:-130px;
+  border:1px solid rgba(0,234,255,.08);
+  border-radius:50%;
+  box-shadow:
+    0 0 0 40px rgba(0,234,255,.015),
+    0 0 0 80px rgba(0,234,255,.01);
 }
 
 .kicker{
@@ -222,9 +249,18 @@ button{
   color:var(--yellow);
 }
 
+.mode-badge.live{
+  border-color:var(--green);
+  color:var(--green);
+}
+
+/* =========================================================
+   KPI
+   ========================================================= */
+
 .kpis{
   display:grid;
-  grid-template-columns:repeat(6,1fr);
+  grid-template-columns:repeat(8,1fr);
   gap:12px;
   margin-bottom:18px;
 }
@@ -246,7 +282,7 @@ button{
 
 .kpi-value{
   margin-top:8px;
-  font:800 25px Orbitron,sans-serif;
+  font:800 23px Orbitron,sans-serif;
 }
 
 .kpi-note{
@@ -254,6 +290,34 @@ button{
   color:var(--muted);
   font-size:8px;
 }
+
+.green{
+  color:var(--green);
+}
+
+.cyan{
+  color:var(--cyan);
+}
+
+.yellow{
+  color:var(--yellow);
+}
+
+.purple{
+  color:var(--purple);
+}
+
+.orange{
+  color:var(--orange);
+}
+
+.red{
+  color:var(--red);
+}
+
+/* =========================================================
+   GRID / PANELS
+   ========================================================= */
 
 .grid{
   display:grid;
@@ -296,6 +360,10 @@ button{
   padding:16px;
 }
 
+/* =========================================================
+   CONTROLS
+   ========================================================= */
+
 .date-controls{
   display:grid;
   grid-template-columns:auto minmax(190px,1fr) auto;
@@ -330,6 +398,7 @@ button{
 
 .input:focus{
   border-color:var(--cyan);
+  box-shadow:0 0 0 2px rgba(0,234,255,.05);
 }
 
 .btn{
@@ -342,11 +411,18 @@ button{
   font-size:10px;
   font-weight:900;
   letter-spacing:.04em;
+  transition:.15s;
 }
 
 .btn:hover{
   border-color:var(--cyan);
   transform:translateY(-1px);
+}
+
+.btn:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+  transform:none;
 }
 
 .btn.primary{
@@ -379,8 +455,14 @@ button{
   color:var(--orange);
 }
 
+.btn.blue{
+  border-color:var(--blue);
+  color:var(--blue);
+}
+
 .quick-dates,
-.filters{
+.filters,
+.segmented{
   display:flex;
   flex-wrap:wrap;
   gap:7px;
@@ -388,7 +470,8 @@ button{
 }
 
 .quick,
-.filter{
+.filter,
+.segment{
   padding:7px 10px;
   border:1px solid var(--line);
   border-radius:999px;
@@ -401,7 +484,9 @@ button{
 .quick.active,
 .quick:hover,
 .filter.active,
-.filter:hover{
+.filter:hover,
+.segment.active,
+.segment:hover{
   border-color:var(--cyan);
   color:var(--cyan);
 }
@@ -415,9 +500,13 @@ button{
   color:var(--purple);
 }
 
+/* =========================================================
+   SCORE CARDS
+   ========================================================= */
+
 .cards{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:repeat(4,1fr);
   gap:10px;
 }
 
@@ -426,6 +515,17 @@ button{
   border:1px solid var(--line);
   border-radius:10px;
   background:#090c13;
+  transition:.15s;
+}
+
+.game-card:hover{
+  border-color:#334057;
+  transform:translateY(-1px);
+}
+
+.game-card.live-card{
+  border-color:rgba(56,245,154,.45);
+  box-shadow:inset 0 0 20px rgba(56,245,154,.03);
 }
 
 .game-top{
@@ -514,6 +614,10 @@ button{
   color:var(--muted);
 }
 
+/* =========================================================
+   TABLES
+   ========================================================= */
+
 .table-wrap{
   overflow:auto;
 }
@@ -543,6 +647,211 @@ th{
   letter-spacing:.1em;
 }
 
+tr:hover td{
+  background:rgba(255,255,255,.012);
+}
+
+.team-cell{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-width:190px;
+}
+
+.team-logo{
+  width:30px;
+  height:30px;
+  object-fit:contain;
+  border-radius:5px;
+  background:#070a10;
+  border:1px solid var(--line);
+}
+
+.team-logo-placeholder{
+  width:30px;
+  height:30px;
+  display:grid;
+  place-items:center;
+  border-radius:5px;
+  background:#070a10;
+  border:1px solid var(--line);
+  color:var(--cyan);
+  font:700 9px Orbitron,sans-serif;
+}
+
+.team-name{
+  font-weight:800;
+}
+
+.team-meta{
+  margin-top:3px;
+  color:var(--muted);
+  font-size:8px;
+}
+
+.local-team{
+  border-left:2px solid var(--cyan);
+  background:rgba(0,234,255,.035);
+}
+
+.rank{
+  font:800 12px Orbitron,sans-serif;
+}
+
+.pct{
+  font:800 10px Orbitron,sans-serif;
+  color:var(--cyan);
+}
+
+.gb{
+  color:var(--yellow);
+  font-weight:800;
+}
+
+.positive{
+  color:var(--green);
+}
+
+.negative{
+  color:var(--red);
+}
+
+/* =========================================================
+   STANDINGS
+   ========================================================= */
+
+.standings-toolbar{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr 1fr auto;
+  gap:9px;
+  align-items:end;
+}
+
+.standings-summary{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:8px;
+  margin-top:14px;
+}
+
+.standings-summary-item{
+  padding:11px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:#090c13;
+}
+
+.standings-summary-label{
+  color:var(--muted);
+  font-size:7px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+}
+
+.standings-summary-value{
+  margin-top:5px;
+  font:800 13px Orbitron,sans-serif;
+}
+
+.standings-groups{
+  display:grid;
+  gap:14px;
+  margin-top:15px;
+}
+
+.standings-group{
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:#080b12;
+}
+
+.standings-group-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:12px 13px;
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(90deg,rgba(0,234,255,.035),transparent);
+}
+
+.standings-group-title{
+  font:800 11px Orbitron,sans-serif;
+}
+
+.standings-group-meta{
+  color:var(--muted);
+  font-size:8px;
+}
+
+.standings-table{
+  min-width:1050px;
+}
+
+.standings-table th{
+  position:static;
+}
+
+.standings-badge{
+  display:inline-flex;
+  padding:4px 7px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  color:var(--muted);
+  font-size:7px;
+  font-weight:900;
+}
+
+.standings-badge.provider{
+  border-color:var(--cyan);
+  color:var(--cyan);
+}
+
+.standings-badge.database{
+  border-color:var(--purple);
+  color:var(--purple);
+}
+
+.standings-empty{
+  padding:35px 20px;
+  text-align:center;
+}
+
+.standings-empty-icon{
+  margin-bottom:10px;
+  font:800 24px Orbitron,sans-serif;
+  color:var(--cyan);
+}
+
+.standings-empty-title{
+  font:800 13px Orbitron,sans-serif;
+}
+
+.standings-empty-text{
+  max-width:700px;
+  margin:8px auto 0;
+  color:var(--muted);
+  font-size:9px;
+  line-height:1.7;
+}
+
+.standings-notice{
+  margin-top:12px;
+  padding:10px 12px;
+  border:1px solid rgba(0,234,255,.2);
+  border-radius:8px;
+  background:rgba(0,234,255,.025);
+  color:var(--muted);
+  font-size:8px;
+  line-height:1.6;
+}
+
+/* =========================================================
+   SYNC
+   ========================================================= */
+
 .sync-grid{
   display:grid;
   grid-template-columns:repeat(3,1fr);
@@ -568,9 +877,13 @@ th{
   line-height:1.5;
 }
 
+/* =========================================================
+   AUTOMATION
+   ========================================================= */
+
 .automation{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
+  grid-template-columns:repeat(5,1fr);
   gap:9px;
 }
 
@@ -593,10 +906,46 @@ th{
   font:700 10px Orbitron,sans-serif;
 }
 
-.green{color:var(--green)}
-.cyan{color:var(--cyan)}
-.yellow{color:var(--yellow)}
-.purple{color:var(--purple)}
+/* =========================================================
+   PROVIDER HEALTH
+   ========================================================= */
+
+.provider-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:9px;
+}
+
+.provider-card{
+  padding:13px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:#090c13;
+}
+
+.provider-card strong{
+  display:block;
+  font:800 10px Orbitron,sans-serif;
+}
+
+.provider-card span{
+  display:block;
+  margin-top:5px;
+  color:var(--muted);
+  font-size:8px;
+}
+
+.provider-online{
+  color:var(--green)!important;
+}
+
+.provider-offline{
+  color:var(--red)!important;
+}
+
+/* =========================================================
+   EMPTY / LOADING
+   ========================================================= */
 
 .empty{
   padding:30px;
@@ -629,6 +978,10 @@ th{
   to{transform:rotate(360deg)}
 }
 
+/* =========================================================
+   ALERT / TOAST
+   ========================================================= */
+
 .alert{
   display:none;
   margin-bottom:14px;
@@ -650,7 +1003,7 @@ th{
   right:18px;
   bottom:18px;
   z-index:999;
-  max-width:400px;
+  max-width:420px;
   padding:13px 15px;
   border:1px solid var(--cyan);
   border-radius:10px;
@@ -659,11 +1012,16 @@ th{
   font-size:10px;
   transform:translateY(130%);
   transition:.25s;
+  box-shadow:0 10px 35px rgba(0,0,0,.35);
 }
 
 .toast.show{
   transform:translateY(0);
 }
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
 
 .footer{
   padding:25px 5px 0;
@@ -673,17 +1031,58 @@ th{
   line-height:1.8;
 }
 
-@media(max-width:1200px){
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media(max-width:1450px){
+
   .kpis{
+    grid-template-columns:repeat(4,1fr);
+  }
+
+  .cards{
     grid-template-columns:repeat(3,1fr);
   }
+
+  .standings-toolbar{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .standings-toolbar .btn{
+    width:100%;
+  }
+
+  .standings-summary{
+    grid-template-columns:repeat(3,1fr);
+  }
+
+  .automation{
+    grid-template-columns:repeat(3,1fr);
+  }
+
+  .provider-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:1100px){
 
   .hero{
     grid-template-columns:1fr;
   }
+
+  .cards{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .sync-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
 }
 
 @media(max-width:900px){
+
   .grid{
     grid-template-columns:1fr;
   }
@@ -692,16 +1091,21 @@ th{
     grid-column:auto;
   }
 
-  .cards{
+  .kpis{
     grid-template-columns:repeat(2,1fr);
   }
 
   .automation{
     grid-template-columns:repeat(2,1fr);
   }
+
+  .standings-summary{
+    grid-template-columns:repeat(2,1fr);
+  }
 }
 
 @media(max-width:650px){
+
   .app{
     width:calc(100% - 14px);
   }
@@ -712,7 +1116,7 @@ th{
   }
 
   .kpis{
-    grid-template-columns:repeat(2,1fr);
+    grid-template-columns:1fr 1fr;
   }
 
   .date-controls{
@@ -721,7 +1125,13 @@ th{
 
   .cards,
   .sync-grid,
-  .automation{
+  .automation,
+  .provider-grid,
+  .standings-summary{
+    grid-template-columns:1fr;
+  }
+
+  .standings-toolbar{
     grid-template-columns:1fr;
   }
 }
@@ -733,17 +1143,31 @@ th{
 <div class="app">
 
 <header class="topbar">
+
   <div class="brand-row">
 
     <div class="brand">
-      <div class="logo">CR</div>
-      <div>
-        <h1>CROWRULES SPORTS ADMIN</h1>
-        <small>SPORTS COMMAND CENTER • v7.0</small>
+
+      <div class="logo">
+        CR
       </div>
+
+      <div>
+
+        <h1>
+          CROWRULES SPORTS ADMIN
+        </h1>
+
+        <small>
+          SPORTS COMMAND CENTER • v8.0 • LIVE ENGINE
+        </small>
+
+      </div>
+
     </div>
 
     <div class="top-actions">
+
       <div class="status-pill" id="authStatus">
         AUTH CHECKING...
       </div>
@@ -755,12 +1179,18 @@ th{
       <button class="btn danger" id="logoutBtn">
         LOG OUT
       </button>
+
     </div>
 
   </div>
+
 </header>
 
 <div class="alert" id="errorAlert"></div>
+
+<!-- =======================================================
+     HERO
+======================================================= -->
 
 <section class="hero">
 
@@ -775,10 +1205,11 @@ th{
     </h2>
 
     <p>
-      Manage live scores, historical results, upcoming schedules,
-      professional sports, collegiate sports, UFC, WWE and AEW.
-      Data is synchronized through Supabase and displayed using the
-      selected sports date.
+      CrowRules Sports v8.0 combines the Supabase sports database
+      with the live <strong>crowrules-sports-live-v2</strong> Edge
+      Function. Monitor live scores, schedules, provider standings,
+      divisions, conferences, historical results and 24/7 sports
+      synchronization from one administrator command center.
     </p>
 
     <div class="filters" id="leagueFilters"></div>
@@ -799,66 +1230,142 @@ th{
       TODAY • LIVE + FINAL
     </div>
 
+    <div style="margin-top:12px">
+
+      <span class="standings-badge provider">
+        LIVE ENGINE: crowrules-sports-live-v2
+      </span>
+
+    </div>
+
   </div>
 
 </section>
 
+<!-- =======================================================
+     KPIs
+======================================================= -->
+
 <section class="kpis">
 
   <div class="kpi">
-    <div class="kpi-label">Active Leagues</div>
-    <div class="kpi-value" id="kpiLeagues">—</div>
-    <div class="kpi-note">Database competitions</div>
+    <div class="kpi-label">
+      Active Leagues
+    </div>
+    <div class="kpi-value" id="kpiLeagues">
+      —
+    </div>
+    <div class="kpi-note">
+      Database competitions
+    </div>
   </div>
 
   <div class="kpi">
-    <div class="kpi-label">Teams</div>
-    <div class="kpi-value" id="kpiTeams">—</div>
-    <div class="kpi-note">Sports teams</div>
+    <div class="kpi-label">
+      Teams
+    </div>
+    <div class="kpi-value" id="kpiTeams">
+      —
+    </div>
+    <div class="kpi-note">
+      Sports teams
+    </div>
   </div>
 
   <div class="kpi">
-    <div class="kpi-label">Players</div>
-    <div class="kpi-value" id="kpiPlayers">—</div>
-    <div class="kpi-note">Roster records</div>
+    <div class="kpi-label">
+      Players
+    </div>
+    <div class="kpi-value" id="kpiPlayers">
+      —
+    </div>
+    <div class="kpi-note">
+      Roster records
+    </div>
   </div>
 
   <div class="kpi">
-    <div class="kpi-label">Database Games</div>
-    <div class="kpi-value" id="kpiGames">—</div>
-    <div class="kpi-note">Stored sports records</div>
+    <div class="kpi-label">
+      DB Games
+    </div>
+    <div class="kpi-value" id="kpiGames">
+      —
+    </div>
+    <div class="kpi-note">
+      Stored games
+    </div>
   </div>
 
   <div class="kpi">
-    <div class="kpi-label">Selected Date</div>
-    <div class="kpi-value" id="kpiDateGames">—</div>
-    <div class="kpi-note">Games/events</div>
+    <div class="kpi-label">
+      Selected Date
+    </div>
+    <div class="kpi-value" id="kpiDateGames">
+      —
+    </div>
+    <div class="kpi-note">
+      Database games
+    </div>
   </div>
 
   <div class="kpi">
-    <div class="kpi-label">Live Now</div>
-    <div class="kpi-value green" id="kpiLive">—</div>
-    <div class="kpi-note">Current live records</div>
+    <div class="kpi-label">
+      Provider Games
+    </div>
+    <div class="kpi-value cyan" id="kpiProviderGames">
+      —
+    </div>
+    <div class="kpi-note">
+      Live engine
+    </div>
+  </div>
+
+  <div class="kpi">
+    <div class="kpi-label">
+      Live Now
+    </div>
+    <div class="kpi-value green" id="kpiLive">
+      —
+    </div>
+    <div class="kpi-note">
+      Current provider games
+    </div>
+  </div>
+
+  <div class="kpi">
+    <div class="kpi-label">
+      Standings
+    </div>
+    <div class="kpi-value purple" id="kpiStandings">
+      —
+    </div>
+    <div class="kpi-note">
+      Provider rows
+    </div>
   </div>
 
 </section>
 
 <div class="grid">
 
-<!-- DATE ENGINE -->
+<!-- =======================================================
+     DATE ENGINE
+======================================================= -->
 
 <section class="panel full">
 
   <div class="panel-head">
 
     <div>
+
       <div class="panel-title">
         DATE ENGINE
       </div>
 
       <div class="panel-subtitle">
-        Select any past, current or future date.
+        Select any past, current or future sports date.
       </div>
+
     </div>
 
     <div class="mode-badge" id="dateModeSmall">
@@ -925,20 +1432,24 @@ th{
 
 </section>
 
-<!-- SCORE CENTER -->
+<!-- =======================================================
+     LIVE PROVIDER SCORE CENTER
+======================================================= -->
 
 <section class="panel full">
 
   <div class="panel-head">
 
     <div>
+
       <div class="panel-title" id="scoresTitle">
-        TODAY'S SPORTS
+        TODAY'S LIVE ENGINE
       </div>
 
       <div class="panel-subtitle" id="scoresSubtitle">
-        Live + final records
+        crowrules-sports-live-v2 provider data
       </div>
+
     </div>
 
     <div class="top-actions">
@@ -960,8 +1471,11 @@ th{
     <div id="scoreCards" class="cards">
 
       <div class="loading">
+
         <span class="spinner"></span>
-        Loading sports...
+
+        Loading live sports engine...
+
       </div>
 
     </div>
@@ -970,20 +1484,284 @@ th{
 
 </section>
 
-<!-- SCHEDULE -->
+<!-- =======================================================
+     STANDINGS COMMAND CENTER
+======================================================= -->
+
+<section class="panel full" id="standingsPanel">
+
+  <div class="panel-head">
+
+    <div>
+
+      <div class="panel-title">
+        STANDINGS COMMAND CENTER
+      </div>
+
+      <div class="panel-subtitle">
+        Overall • Conference • Division • Provider + Supabase fallback
+      </div>
+
+    </div>
+
+    <div class="top-actions">
+
+      <span
+        class="standings-badge provider"
+        id="standingsSourceBadge"
+      >
+        PROVIDER
+      </span>
+
+      <button class="btn primary" id="refreshStandingsBtn">
+        REFRESH STANDINGS
+      </button>
+
+    </div>
+
+  </div>
+
+  <div class="panel-body">
+
+    <div class="standings-toolbar">
+
+      <div class="control-group">
+
+        <label class="control-label">
+          League
+        </label>
+
+        <select
+          id="standingsLeague"
+          class="input"
+        ></select>
+
+      </div>
+
+      <div class="control-group">
+
+        <label class="control-label">
+          View
+        </label>
+
+        <select
+          id="standingsView"
+          class="input"
+        >
+
+          <option value="overall">
+            OVERALL
+          </option>
+
+          <option value="conference">
+            CONFERENCE
+          </option>
+
+          <option value="division">
+            DIVISION
+          </option>
+
+        </select>
+
+      </div>
+
+      <div
+        class="control-group"
+        id="standingsGroupWrap"
+      >
+
+        <label class="control-label">
+          Group
+        </label>
+
+        <select
+          id="standingsGroup"
+          class="input"
+        >
+
+          <option value="ALL">
+            ALL GROUPS
+          </option>
+
+        </select>
+
+      </div>
+
+      <div class="control-group">
+
+        <label class="control-label">
+          Season
+        </label>
+
+        <select
+          id="standingsSeason"
+          class="input"
+        >
+
+          <option value="2026">
+            2026
+          </option>
+
+          <option value="2025">
+            2025
+          </option>
+
+          <option value="2024">
+            2024
+          </option>
+
+          <option value="2023">
+            2023
+          </option>
+
+        </select>
+
+      </div>
+
+      <button
+        class="btn purple"
+        id="providerStandingsBtn"
+      >
+        PROVIDER
+      </button>
+
+    </div>
+
+    <div class="standings-summary">
+
+      <div class="standings-summary-item">
+
+        <div class="standings-summary-label">
+          View
+        </div>
+
+        <div
+          class="standings-summary-value"
+          id="standingSummaryView"
+        >
+          OVERALL
+        </div>
+
+      </div>
+
+      <div class="standings-summary-item">
+
+        <div class="standings-summary-label">
+          Teams
+        </div>
+
+        <div
+          class="standings-summary-value"
+          id="standingSummaryTeams"
+        >
+          —
+        </div>
+
+      </div>
+
+      <div class="standings-summary-item">
+
+        <div class="standings-summary-label">
+          Groups
+        </div>
+
+        <div
+          class="standings-summary-value"
+          id="standingSummaryGroups"
+        >
+          —
+        </div>
+
+      </div>
+
+      <div class="standings-summary-item">
+
+        <div class="standings-summary-label">
+          Source
+        </div>
+
+        <div
+          class="standings-summary-value cyan"
+          id="standingSummarySource"
+        >
+          —
+        </div>
+
+      </div>
+
+      <div class="standings-summary-item">
+
+        <div class="standings-summary-label">
+          Updated
+        </div>
+
+        <div
+          class="standings-summary-value"
+          id="standingSummaryUpdated"
+        >
+          —
+        </div>
+
+      </div>
+
+    </div>
+
+    <div
+      id="standingsGroups"
+      class="standings-groups"
+    >
+
+      <div class="loading">
+
+        <span class="spinner"></span>
+
+        Loading standings...
+
+      </div>
+
+    </div>
+
+    <div class="standings-notice">
+
+      <strong class="cyan">
+        STANDINGS ENGINE:
+      </strong>
+
+      Overall displays the complete league table.
+      Conference groups teams by conference when provider/team
+      metadata supports it.
+      Division groups teams by division.
+      CrowRules local teams are highlighted.
+      Provider standings from
+      <strong>crowrules-sports-live-v2</strong>
+      are preferred; Supabase
+      <strong>sports_standings</strong>
+      is used as the database fallback.
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =======================================================
+     DATABASE SCHEDULE
+======================================================= -->
 
 <section class="panel full">
 
   <div class="panel-head">
 
     <div>
+
       <div class="panel-title">
         SPORTS SCHEDULE DATABASE
       </div>
 
       <div class="panel-subtitle">
-        Historical, current and future records
+        Supabase historical, current and future records
       </div>
+
     </div>
 
   </div>
@@ -993,6 +1771,7 @@ th{
     <table>
 
       <thead>
+
         <tr>
           <th>Date / Time</th>
           <th>League</th>
@@ -1002,17 +1781,25 @@ th{
           <th>Score</th>
           <th>Provider</th>
         </tr>
+
       </thead>
 
       <tbody id="scheduleBody">
 
         <tr>
+
           <td colspan="7">
+
             <div class="loading">
+
               <span class="spinner"></span>
+
               Loading schedule...
+
             </div>
+
           </td>
+
         </tr>
 
       </tbody>
@@ -1023,13 +1810,105 @@ th{
 
 </section>
 
-<!-- AUTOMATION -->
+<!-- =======================================================
+     PROVIDER HEALTH
+======================================================= -->
+
+<section class="panel full">
+
+  <div class="panel-head">
+
+    <div>
+
+      <div class="panel-title">
+        LIVE PROVIDER HEALTH
+      </div>
+
+      <div class="panel-subtitle">
+        crowrules-sports-live-v2 data pipeline
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="panel-body">
+
+    <div class="provider-grid">
+
+      <div class="provider-card">
+
+        <strong>
+          ESPN
+        </strong>
+
+        <span
+          id="providerEspn"
+          class="provider-offline"
+        >
+          WAITING
+        </span>
+
+      </div>
+
+      <div class="provider-card">
+
+        <strong>
+          MLB STATS API
+        </strong>
+
+        <span
+          id="providerMilb"
+          class="provider-offline"
+        >
+          WAITING
+        </span>
+
+      </div>
+
+      <div class="provider-card">
+
+        <strong>
+          LIVE ENGINE
+        </strong>
+
+        <span
+          id="providerEngine"
+          class="provider-offline"
+        >
+          WAITING
+        </span>
+
+      </div>
+
+      <div class="provider-card">
+
+        <strong>
+          LAST UPDATE
+        </strong>
+
+        <span id="providerUpdated">
+          —
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =======================================================
+     24/7 AUTOMATION
+======================================================= -->
 
 <section class="panel">
 
   <div class="panel-head">
 
     <div>
+
       <div class="panel-title">
         24/7 AUTOMATION
       </div>
@@ -1037,6 +1916,7 @@ th{
       <div class="panel-subtitle">
         Backend synchronization health
       </div>
+
     </div>
 
   </div>
@@ -1046,6 +1926,7 @@ th{
     <div class="automation">
 
       <div class="auto-item">
+
         <div class="auto-label">
           Automation Since
         </div>
@@ -1053,9 +1934,11 @@ th{
         <div class="auto-value cyan">
           SEP 05 2026
         </div>
+
       </div>
 
       <div class="auto-item">
+
         <div class="auto-label">
           Backend
         </div>
@@ -1063,26 +1946,52 @@ th{
         <div class="auto-value green">
           ACTIVE
         </div>
+
       </div>
 
       <div class="auto-item">
+
+        <div class="auto-label">
+          Live Engine
+        </div>
+
+        <div
+          class="auto-value"
+          id="liveEngineStatus"
+        >
+          CONNECTING
+        </div>
+
+      </div>
+
+      <div class="auto-item">
+
         <div class="auto-label">
           Realtime
         </div>
 
-        <div class="auto-value" id="realtimeStatus">
+        <div
+          class="auto-value"
+          id="realtimeStatus"
+        >
           CONNECTING
         </div>
+
       </div>
 
       <div class="auto-item">
+
         <div class="auto-label">
           Browser Refresh
         </div>
 
-        <div class="auto-value yellow" id="refreshCountdown">
+        <div
+          class="auto-value yellow"
+          id="refreshCountdown"
+        >
           30s
         </div>
+
       </div>
 
     </div>
@@ -1095,7 +2004,10 @@ th{
           Last Database Refresh
         </div>
 
-        <div class="auto-value" id="lastDbRefresh">
+        <div
+          class="auto-value"
+          id="lastDbRefresh"
+        >
           —
         </div>
 
@@ -1107,13 +2019,16 @@ th{
 
 </section>
 
-<!-- SYNC CONTROL -->
+<!-- =======================================================
+     SYNC CONTROL
+======================================================= -->
 
 <section class="panel">
 
   <div class="panel-head">
 
     <div>
+
       <div class="panel-title">
         SYNC CONTROL
       </div>
@@ -1121,6 +2036,7 @@ th{
       <div class="panel-subtitle">
         Secure administrator synchronization
       </div>
+
     </div>
 
   </div>
@@ -1130,75 +2046,149 @@ th{
     <div class="sync-grid">
 
       <div class="sync-card">
-        <h4>FULL SPORTS</h4>
+
+        <h4>
+          FULL SPORTS
+        </h4>
+
         <p>
           Run the complete sports synchronization pipeline.
         </p>
-        <button class="btn primary" data-sync="full">
+
+        <button
+          class="btn primary"
+          data-sync="full"
+        >
           FULL SYNC
         </button>
+
       </div>
 
       <div class="sync-card">
-        <h4>UFL</h4>
+
+        <h4>
+          UFL
+        </h4>
+
         <p>
           Synchronize UFL schedules and scores.
         </p>
-        <button class="btn orange" data-sync="ufl">
+
+        <button
+          class="btn orange"
+          data-sync="ufl"
+        >
           UFL SYNC
         </button>
+
       </div>
 
       <div class="sync-card">
-        <h4>UFC</h4>
+
+        <h4>
+          UFC
+        </h4>
+
         <p>
           Synchronize UFC event records.
         </p>
-        <button class="btn purple" data-sync="ufc">
+
+        <button
+          class="btn purple"
+          data-sync="ufc"
+        >
           UFC SYNC
         </button>
+
       </div>
 
       <div class="sync-card">
-        <h4>WWE</h4>
+
+        <h4>
+          WWE
+        </h4>
+
         <p>
           Synchronize WWE event records.
         </p>
-        <button class="btn purple" data-sync="wwe">
+
+        <button
+          class="btn purple"
+          data-sync="wwe"
+        >
           WWE SYNC
         </button>
+
       </div>
 
       <div class="sync-card">
-        <h4>AEW</h4>
+
+        <h4>
+          AEW
+        </h4>
+
         <p>
           Synchronize AEW event records.
         </p>
-        <button class="btn purple" data-sync="aew">
+
+        <button
+          class="btn purple"
+          data-sync="aew"
+        >
           AEW SYNC
         </button>
+
       </div>
 
       <div class="sync-card">
-        <h4>MiLB</h4>
+
+        <h4>
+          MiLB
+        </h4>
+
         <p>
           Synchronize Minor League Baseball.
         </p>
-        <button class="btn success" data-sync="milb">
+
+        <button
+          class="btn success"
+          data-sync="milb"
+        >
           MiLB SYNC
         </button>
+
       </div>
 
     </div>
 
-    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+    <div
+      style="
+        margin-top:10px;
+        display:flex;
+        gap:8px;
+        flex-wrap:wrap
+      "
+    >
 
-      <button class="btn primary" id="databaseRefreshBtn">
+      <button
+        class="btn primary"
+        id="databaseRefreshBtn"
+      >
         DATABASE REFRESH
       </button>
 
-      <button class="btn warning" id="refreshEverythingBtn">
+      <button
+        class="btn warning"
+        id="refreshEverythingBtn"
+      >
         REFRESH EVERYTHING
+      </button>
+
+      <button
+        class="btn purple"
+        id="liveEngineBtn"
+      >
+        RUN LIVE ENGINE
       </button>
 
     </div>
@@ -1207,13 +2197,16 @@ th{
 
 </section>
 
-<!-- LEAGUE DIRECTORY -->
+<!-- =======================================================
+     LEAGUE DIRECTORY
+======================================================= -->
 
 <section class="panel full">
 
   <div class="panel-head">
 
     <div>
+
       <div class="panel-title">
         LEAGUE DIRECTORY
       </div>
@@ -1221,6 +2214,7 @@ th{
       <div class="panel-subtitle">
         Active Supabase sports leagues
       </div>
+
     </div>
 
   </div>
@@ -1230,6 +2224,7 @@ th{
     <table>
 
       <thead>
+
         <tr>
           <th>ID</th>
           <th>League</th>
@@ -1239,6 +2234,7 @@ th{
           <th>Games</th>
           <th>Source</th>
         </tr>
+
       </thead>
 
       <tbody id="leagueBody"></tbody>
@@ -1249,13 +2245,16 @@ th{
 
 </section>
 
-<!-- PLAYERS -->
+<!-- =======================================================
+     FEATURED PLAYERS
+======================================================= -->
 
 <section class="panel full">
 
   <div class="panel-head">
 
     <div>
+
       <div class="panel-title">
         FEATURED PLAYERS
       </div>
@@ -1263,6 +2262,7 @@ th{
       <div class="panel-subtitle">
         Featured roster records
       </div>
+
     </div>
 
   </div>
@@ -1272,6 +2272,7 @@ th{
     <table>
 
       <thead>
+
         <tr>
           <th>Player</th>
           <th>Sport</th>
@@ -1280,6 +2281,7 @@ th{
           <th>Season</th>
           <th>Status</th>
         </tr>
+
       </thead>
 
       <tbody id="playersBody"></tbody>
@@ -1294,11 +2296,11 @@ th{
 
 <footer class="footer">
 
-  CrowRules Entertainment • CrowRules Sports Center Admin v7.0<br>
+  CrowRules Entertainment • CrowRules Sports Center Admin v8.0<br>
 
-  Supabase • Realtime • Secure Backend Synchronization<br>
+  crowrules-sports-live-v2 • Supabase • Realtime • 24/7 Sports Engine<br>
 
-  NBA • NFL • MLB • NHL • MLS • WNBA • UFL • CFB • FCS • MiLB • UFC • WWE • AEW
+  NBA • NFL • MLB • NHL • MLS • WNBA • UFL • FBS • FCS • MiLB • UFC • WWE • AEW
 
 </footer>
 
@@ -1308,7 +2310,8 @@ th{
 
 <script>
 /* =========================================================
-   CROWRULES SPORTS ADMIN v7.0
+   CROWRULES SPORTS ADMIN v8.0
+   LIVE ENGINE + STANDINGS COMMAND CENTER
    ========================================================= */
 
 const CONFIG = {
@@ -1319,11 +2322,17 @@ const CONFIG = {
   supabaseKey:
     "sb_publishable_-Z6wecSOxwOk6IBut2zLnw_8DfRxnE9",
 
+  liveFunction:
+    "crowrules-sports-live-v2",
+
   adminSyncFunction:
     "sports-admin-sync-v1",
 
   automationSince:
     "2026-09-05",
+
+  season:
+    2026,
 
   liveRefreshMs:
     30000,
@@ -1346,26 +2355,39 @@ const {
   createClient
 } = supabase;
 
-const db = createClient(
-  CONFIG.supabaseUrl,
-  CONFIG.supabaseKey,
-  {
-    auth:{
-      persistSession:true,
-      autoRefreshToken:true,
-      detectSessionInUrl:true
+const db =
+  createClient(
+    CONFIG.supabaseUrl,
+    CONFIG.supabaseKey,
+    {
+      auth:{
+        persistSession:true,
+        autoRefreshToken:true,
+        detectSessionInUrl:true
+      }
     }
-  }
-);
+  );
+
+/* =========================================================
+   STATE
+========================================================= */
 
 let currentUser = null;
 let currentProfile = null;
 
 let leagues = [];
+let teams = [];
+let players = [];
+
 let games = [];
+let providerGames = [];
+let providerStandings = [];
 
 let selectedDate = "";
 let selectedLeague = "ALL";
+
+let standingsSource = "PROVIDER";
+let standingsUpdatedAt = null;
 
 let realtimeChannel = null;
 
@@ -1375,6 +2397,10 @@ let countdownTimer = null;
 
 let liveCountdown =
   CONFIG.liveRefreshMs / 1000;
+
+/* =========================================================
+   LEAGUE ORDER
+========================================================= */
 
 const LEAGUE_ORDER = [
   "NFL",
@@ -1386,6 +2412,7 @@ const LEAGUE_ORDER = [
   "MLS",
   "UFL",
   "CFB",
+  "FBS",
   "FCS",
   "UFC",
   "WWE",
@@ -1394,10 +2421,10 @@ const LEAGUE_ORDER = [
 
 /* =========================================================
    ELEMENTS
-   ========================================================= */
+========================================================= */
 
-const $ = id =>
-  document.getElementById(id);
+const $ =
+  id => document.getElementById(id);
 
 const els = {
 
@@ -1427,7 +2454,11 @@ const els = {
 
   kpiDateGames:$("kpiDateGames"),
 
+  kpiProviderGames:$("kpiProviderGames"),
+
   kpiLive:$("kpiLive"),
+
+  kpiStandings:$("kpiStandings"),
 
   leagueFilters:$("leagueFilters"),
 
@@ -1449,17 +2480,56 @@ const els = {
 
   lastDbRefresh:$("lastDbRefresh"),
 
+  liveEngineStatus:$("liveEngineStatus"),
+
+  providerEspn:$("providerEspn"),
+
+  providerMilb:$("providerMilb"),
+
+  providerEngine:$("providerEngine"),
+
+  providerUpdated:$("providerUpdated"),
+
+  standingsLeague:$("standingsLeague"),
+
+  standingsView:$("standingsView"),
+
+  standingsGroup:$("standingsGroup"),
+
+  standingsGroupWrap:$("standingsGroupWrap"),
+
+  standingsSeason:$("standingsSeason"),
+
+  refreshStandingsBtn:$("refreshStandingsBtn"),
+
+  providerStandingsBtn:$("providerStandingsBtn"),
+
+  standingsSourceBadge:$("standingsSourceBadge"),
+
+  standingSummaryView:$("standingSummaryView"),
+
+  standingSummaryTeams:$("standingSummaryTeams"),
+
+  standingSummaryGroups:$("standingSummaryGroups"),
+
+  standingSummarySource:$("standingSummarySource"),
+
+  standingSummaryUpdated:$("standingSummaryUpdated"),
+
+  standingsGroups:$("standingsGroups"),
+
   toast:$("toast")
 
 };
 
 /* =========================================================
    DATE HELPERS
-   ========================================================= */
+========================================================= */
 
 function localDateISO(date = new Date()){
 
-  const d = new Date(date);
+  const d =
+    new Date(date);
 
   const year =
     d.getFullYear();
@@ -1564,7 +2634,7 @@ function modeLabel(value){
 
 /* =========================================================
    GENERAL HELPERS
-   ========================================================= */
+========================================================= */
 
 function escapeHtml(value){
 
@@ -1574,6 +2644,34 @@ function escapeHtml(value){
     .replaceAll(">","&gt;")
     .replaceAll('"',"&quot;")
     .replaceAll("'","&#039;");
+}
+
+function numberValue(value){
+
+  const n =
+    Number(value);
+
+  return Number.isFinite(n)
+    ? n
+    : 0;
+}
+
+function nullableNumber(value){
+
+  if(
+    value === null ||
+    value === undefined ||
+    value === ""
+  ){
+    return null;
+  }
+
+  const n =
+    Number(value);
+
+  return Number.isFinite(n)
+    ? n
+    : null;
 }
 
 function toast(message,type="normal"){
@@ -1639,7 +2737,8 @@ function normalizeStatus(status){
     "2nd",
     "3rd",
     "4th",
-    "overtime"
+    "overtime",
+    "in"
   ].includes(s)){
     return "live";
   }
@@ -1719,6 +2818,9 @@ function providerLabel(provider){
 
     mlb:"MLB",
 
+    "mlb stats api":
+      "MLB STATS API",
+
     theufl:"THE UFL",
 
     ufl:"UFL",
@@ -1757,7 +2859,7 @@ function leagueClass(abbreviation){
 
 /* =========================================================
    AUTHORIZATION
-   ========================================================= */
+========================================================= */
 
 async function requireAdmin(){
 
@@ -1868,11 +2970,6 @@ async function requireAdmin(){
 
   els.authStatus.style.color =
     "var(--green)";
-
-  toast(
-    "Administrator access verified.",
-    "success"
-  );
 }
 
 async function logout(){
@@ -1899,7 +2996,7 @@ async function logout(){
 
 /* =========================================================
    DATE UI
-   ========================================================= */
+========================================================= */
 
 function setSelectedDate(value){
 
@@ -1947,74 +3044,111 @@ function updateDateUI(){
 
   els.scoresTitle.textContent =
     mode === "past"
-      ? `FINAL SCORES • ${formatShortDate(selectedDate)}`
+      ? `PROVIDER SCORES • ${formatShortDate(selectedDate)}`
       : mode === "future"
-        ? `UPCOMING • ${formatShortDate(selectedDate)}`
-        : `TODAY'S SPORTS • ${formatShortDate(selectedDate)}`;
+        ? `PROVIDER SCHEDULE • ${formatShortDate(selectedDate)}`
+        : `LIVE SPORTS ENGINE • ${formatShortDate(selectedDate)}`;
 
   els.scoresSubtitle.textContent =
-    mode === "past"
-      ? "Historical results stored in sports_games"
-      : mode === "future"
-        ? "Scheduled future events stored in sports_games"
-        : "Live + final records • database + realtime";
+    "crowrules-sports-live-v2 • ESPN + MLB Stats API";
 
-  document.querySelectorAll(
-    ".quick"
-  ).forEach(button=>{
+  document
+    .querySelectorAll(".quick")
+    .forEach(button=>{
 
-    button.classList.remove(
-      "active"
-    );
+      button.classList.remove(
+        "active"
+      );
 
-    const offset =
-      Number(button.dataset.offset);
+      const offset =
+        Number(
+          button.dataset.offset
+        );
 
-    if(
-      offset === 0 &&
-      selectedDate === localDateISO()
-    ){
-      button.classList.add("active");
-    }
+      if(
+        offset === 0 &&
+        selectedDate === localDateISO()
+      ){
+        button.classList.add("active");
+      }
 
-    if(
-      offset === -1 &&
-      selectedDate ===
-        addDays(localDateISO(),-1)
-    ){
-      button.classList.add("active");
-    }
+      if(
+        offset === -1 &&
+        selectedDate ===
+          addDays(localDateISO(),-1)
+      ){
+        button.classList.add("active");
+      }
 
-    if(
-      offset === 1 &&
-      selectedDate ===
-        addDays(localDateISO(),1)
-    ){
-      button.classList.add("active");
-    }
+      if(
+        offset === 1 &&
+        selectedDate ===
+          addDays(localDateISO(),1)
+      ){
+        button.classList.add("active");
+      }
 
-    if(
-      offset === -7 &&
-      selectedDate ===
-        addDays(localDateISO(),-7)
-    ){
-      button.classList.add("active");
-    }
+      if(
+        offset === -7 &&
+        selectedDate ===
+          addDays(localDateISO(),-7)
+      ){
+        button.classList.add("active");
+      }
 
-    if(
-      offset === 7 &&
-      selectedDate ===
-        addDays(localDateISO(),7)
-    ){
-      button.classList.add("active");
-    }
+      if(
+        offset === 7 &&
+        selectedDate ===
+          addDays(localDateISO(),7)
+      ){
+        button.classList.add("active");
+      }
 
-  });
+    });
 }
 
 /* =========================================================
    LEAGUES
-   ========================================================= */
+========================================================= */
+
+function sortedLeagues(){
+
+  return [...leagues].sort(
+    (a,b)=>{
+
+      const ai =
+        LEAGUE_ORDER.indexOf(
+          String(a.abbreviation || "")
+            .toUpperCase()
+        );
+
+      const bi =
+        LEAGUE_ORDER.indexOf(
+          String(b.abbreviation || "")
+            .toUpperCase()
+        );
+
+      if(ai === -1 && bi === -1){
+
+        return String(
+          a.abbreviation || ""
+        ).localeCompare(
+          String(
+            b.abbreviation || ""
+          )
+        );
+      }
+
+      if(ai === -1)
+        return 1;
+
+      if(bi === -1)
+        return -1;
+
+      return ai - bi;
+    }
+  );
+}
 
 async function loadLeagues(){
 
@@ -2052,47 +3186,12 @@ async function loadLeagues(){
 
   renderLeagueFilters();
 
+  populateStandingsLeague();
+
   await renderLeagueDirectory();
 
   els.kpiLeagues.textContent =
     leagues.length;
-}
-
-function sortedLeagues(){
-
-  return [...leagues].sort(
-    (a,b)=>{
-
-      const ai =
-        LEAGUE_ORDER.indexOf(
-          a.abbreviation
-        );
-
-      const bi =
-        LEAGUE_ORDER.indexOf(
-          b.abbreviation
-        );
-
-      if(ai === -1 && bi === -1){
-
-        return String(
-          a.abbreviation || ""
-        ).localeCompare(
-          String(
-            b.abbreviation || ""
-          )
-        );
-      }
-
-      if(ai === -1)
-        return 1;
-
-      if(bi === -1)
-        return -1;
-
-      return ai - bi;
-    }
-  );
 }
 
 function renderLeagueFilters(){
@@ -2134,8 +3233,10 @@ function renderLeagueFilters(){
     .forEach(league=>{
 
       const abbreviation =
-        league.abbreviation ||
-        String(league.id);
+        String(
+          league.abbreviation ||
+          league.id
+        ).toUpperCase();
 
       const button =
         document.createElement(
@@ -2177,16 +3278,74 @@ function renderLeagueFilters(){
     });
 }
 
+function populateStandingsLeague(){
+
+  const previous =
+    els.standingsLeague.value;
+
+  els.standingsLeague.innerHTML =
+    `<option value="ALL">ALL LEAGUES</option>`;
+
+  sortedLeagues()
+    .forEach(league=>{
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+      option.value =
+        String(
+          league.abbreviation ||
+          league.id
+        ).toUpperCase();
+
+      option.textContent =
+        `${option.value} — ${league.name}`;
+
+      els.standingsLeague.appendChild(
+        option
+      );
+
+    });
+
+  if(
+    [...els.standingsLeague.options]
+      .some(
+        option =>
+          option.value === previous
+      )
+  ){
+
+    els.standingsLeague.value =
+      previous;
+
+  }else if(
+    selectedLeague !== "ALL" &&
+    [...els.standingsLeague.options]
+      .some(
+        option =>
+          option.value === selectedLeague
+      )
+  ){
+
+    els.standingsLeague.value =
+      selectedLeague;
+
+  }
+
+}
+
 /* =========================================================
-   CORE STATS
-   ========================================================= */
+   CORE DATABASE STATS
+========================================================= */
 
 async function loadCoreStats(){
 
   const [
-    teams,
-    players,
-    gamesCount
+    teamsRes,
+    playersRes,
+    gamesRes
   ] =
     await Promise.all([
 
@@ -2223,18 +3382,541 @@ async function loadCoreStats(){
     ]);
 
   els.kpiTeams.textContent =
-    teams.count ?? "—";
+    teamsRes.count ?? "—";
 
   els.kpiPlayers.textContent =
-    players.count ?? "—";
+    playersRes.count ?? "—";
 
   els.kpiGames.textContent =
-    gamesCount.count ?? "—";
+    gamesRes.count ?? "—";
 }
 
 /* =========================================================
-   TEAM LOOKUP
-   ========================================================= */
+   LOAD TEAM DIRECTORY
+========================================================= */
+
+async function loadTeamDirectory(){
+
+  const {
+    data,
+    error
+  } =
+    await db
+      .from("sports_teams")
+      .select(`
+        id,
+        league_id,
+        name,
+        city,
+        abbreviation,
+        sport,
+        conference,
+        division,
+        logo_url,
+        website_url,
+        is_local,
+        is_active,
+        provider,
+        provider_team_id
+      `)
+      .eq(
+        "is_active",
+        true
+      )
+      .order(
+        "is_local",
+        {
+          ascending:false
+        }
+      )
+      .order(
+        "name"
+      );
+
+  if(error){
+
+    console.warn(
+      "Team directory failed:",
+      error
+    );
+
+    teams = [];
+
+    return;
+  }
+
+  teams =
+    data || [];
+}
+
+function findLocalTeam(name,abbr){
+
+  const n =
+    String(name || "")
+      .toLowerCase();
+
+  const a =
+    String(abbr || "")
+      .toLowerCase();
+
+  return teams.find(team=>{
+
+    if(team.is_local !== true)
+      return false;
+
+    const tn =
+      String(team.name || "")
+        .toLowerCase();
+
+    const ta =
+      String(team.abbreviation || "")
+        .toLowerCase();
+
+    return (
+      (a && ta === a) ||
+      (n && tn === n) ||
+      (n && tn.includes(n)) ||
+      (tn && n.includes(tn))
+    );
+
+  });
+}
+
+function findTeamMetadata(name,abbr){
+
+  const n =
+    String(name || "")
+      .toLowerCase();
+
+  const a =
+    String(abbr || "")
+      .toLowerCase();
+
+  return teams.find(team=>{
+
+    const tn =
+      String(team.name || "")
+        .toLowerCase();
+
+    const ta =
+      String(team.abbreviation || "")
+        .toLowerCase();
+
+    return (
+      (a && ta === a) ||
+      (n && tn === n) ||
+      (n && tn.includes(n)) ||
+      (tn && n.includes(tn))
+    );
+
+  });
+}
+
+/* =========================================================
+   LIVE ENGINE
+========================================================= */
+
+async function fetchLiveEngine(){
+
+  els.liveEngineStatus.textContent =
+    "LOADING";
+
+  els.liveEngineStatus.className =
+    "auto-value yellow";
+
+  els.providerEngine.textContent =
+    "CONNECTING";
+
+  els.providerEngine.className =
+    "provider-offline";
+
+  let url =
+    `${CONFIG.supabaseUrl}/functions/v1/${CONFIG.liveFunction}`;
+
+  const params =
+    new URLSearchParams();
+
+  params.set(
+    "date",
+    selectedDate
+  );
+
+  params.set(
+    "league",
+    selectedLeague
+  );
+
+  url +=
+    "?" +
+    params.toString();
+
+  try{
+
+    const response =
+      await fetch(
+        url,
+        {
+          method:"GET",
+          headers:{
+            "Accept":
+              "application/json",
+            "apikey":
+              CONFIG.supabaseKey
+          },
+          cache:"no-store"
+        }
+      );
+
+    const text =
+      await response.text();
+
+    let result;
+
+    try{
+
+      result =
+        JSON.parse(text);
+
+    }catch{
+
+      throw new Error(
+        "Live engine returned invalid JSON."
+      );
+
+    }
+
+    if(!result?.ok){
+
+      throw new Error(
+        result?.error ||
+        "Live engine reported an error."
+      );
+    }
+
+    providerGames =
+      Array.isArray(result.games)
+        ? result.games
+        : [];
+
+    providerStandings =
+      Array.isArray(result.standings)
+        ? result.standings
+        : [];
+
+    els.kpiProviderGames.textContent =
+      providerGames.length;
+
+    els.kpiStandings.textContent =
+      providerStandings.length;
+
+    const liveCount =
+      providerGames.filter(
+        game =>
+          normalizeStatus(
+            game.status
+          ) === "live"
+      ).length;
+
+    els.kpiLive.textContent =
+      liveCount;
+
+    els.providerEngine.textContent =
+      "ONLINE";
+
+    els.providerEngine.className =
+      "provider-online";
+
+    els.liveEngineStatus.textContent =
+      "ONLINE";
+
+    els.liveEngineStatus.className =
+      "auto-value green";
+
+    els.providerEspn.textContent =
+      result.health?.espn_leagues?.length
+        ? `ONLINE • ${result.health.espn_leagues.length} LEAGUES`
+        : "ONLINE";
+
+    els.providerEspn.className =
+      "provider-online";
+
+    els.providerMilb.textContent =
+      result.health?.milb_included
+        ? "ONLINE • INCLUDED"
+        : "READY";
+
+    els.providerMilb.className =
+      "provider-online";
+
+    els.providerUpdated.textContent =
+      result.updated_at
+        ? formatTimestamp(
+            result.updated_at
+          )
+        : "—";
+
+    standingsUpdatedAt =
+      result.updated_at ||
+      new Date().toISOString();
+
+    return result;
+
+  }catch(error){
+
+    els.liveEngineStatus.textContent =
+      "OFFLINE";
+
+    els.liveEngineStatus.className =
+      "auto-value red";
+
+    els.providerEngine.textContent =
+      "OFFLINE";
+
+    els.providerEngine.className =
+      "provider-offline";
+
+    console.error(
+      "crowrules-sports-live-v2 failed:",
+      error
+    );
+
+    toast(
+      "Live engine failed: " +
+      error.message,
+      "error"
+    );
+
+    return null;
+  }
+}
+
+function formatTimestamp(value){
+
+  if(!value)
+    return "—";
+
+  try{
+
+    return new Intl.DateTimeFormat(
+      "en-US",
+      {
+        month:"short",
+        day:"numeric",
+        hour:"numeric",
+        minute:"2-digit",
+        second:"2-digit"
+      }
+    ).format(
+      new Date(value)
+    );
+
+  }catch{
+
+    return String(value);
+
+  }
+}
+
+/* =========================================================
+   PROVIDER SCORE CARDS
+========================================================= */
+
+function providerTeamName(team){
+
+  return (
+    team?.name ||
+    team?.displayName ||
+    team?.shortDisplayName ||
+    "Unknown"
+  );
+}
+
+function renderProviderScoreCards(){
+
+  const rows =
+    providerGames || [];
+
+  if(!rows.length){
+
+    const mode =
+      dateMode(selectedDate);
+
+    els.scoreCards.innerHTML = `
+
+      <div class="empty">
+
+        <div style="
+          font:800 18px Orbitron;
+          color:var(--cyan);
+          margin-bottom:10px
+        ">
+          NO PROVIDER EVENTS
+        </div>
+
+        No provider games/events were returned by
+        <strong>
+          crowrules-sports-live-v2
+        </strong>
+        for
+        <strong>
+          ${escapeHtml(
+            formatDate(selectedDate)
+          )}
+        </strong>.
+
+        <br><br>
+
+        ${
+          mode === "future"
+            ? "This may simply mean the provider has not published the schedule yet."
+            : mode === "past"
+              ? "The live provider may not expose historical data for this date."
+              : "The provider currently has no events available."
+        }
+
+      </div>
+
+    `;
+
+    return;
+  }
+
+  els.scoreCards.innerHTML =
+    rows.map(game=>{
+
+      const league =
+        String(
+          game.league ||
+          game.sport ||
+          "SPORT"
+        );
+
+      const status =
+        normalizeStatus(
+          game.status
+        );
+
+      const away =
+        game.awayTeam ||
+        {};
+
+      const home =
+        game.homeTeam ||
+        {};
+
+      const awayName =
+        providerTeamName(
+          away
+        );
+
+      const homeName =
+        providerTeamName(
+          home
+        );
+
+      const awayScore =
+        away.score ??
+        "—";
+
+      const homeScore =
+        home.score ??
+        "—";
+
+      const isLive =
+        status === "live";
+
+      const eventTime =
+        game.date
+          ? formatTimestamp(game.date)
+          : "TIME TBA";
+
+      return `
+
+        <article class="game-card ${isLive ? "live-card" : ""}">
+
+          <div class="game-top">
+
+            <span class="league-tag">
+              ${escapeHtml(league)}
+            </span>
+
+            <span class="status ${status}">
+              ${escapeHtml(
+                statusLabel(
+                  game.status
+                )
+              )}
+            </span>
+
+          </div>
+
+          <div class="game-title">
+            ${escapeHtml(
+              game.sport ||
+              league
+            )}
+          </div>
+
+          <div class="game-time">
+            ${escapeHtml(eventTime)}
+          </div>
+
+          <div class="score-line">
+
+            <span>
+              ${escapeHtml(awayName)}
+            </span>
+
+            <strong>
+              ${escapeHtml(awayScore)}
+            </strong>
+
+          </div>
+
+          <div class="score-line">
+
+            <span>
+              ${escapeHtml(homeName)}
+            </span>
+
+            <strong>
+              ${escapeHtml(homeScore)}
+            </strong>
+
+          </div>
+
+          <div class="venue">
+
+            ${escapeHtml(
+              game.venue ||
+              "Venue not listed"
+            )}
+
+          </div>
+
+          <div class="venue">
+
+            Provider:
+            <strong>
+              ${escapeHtml(
+                providerLabel(
+                  game.source
+                )
+              )}
+            </strong>
+
+          </div>
+
+        </article>
+
+      `;
+
+    }).join("");
+}
+
+/* =========================================================
+   DATABASE TEAM LOOKUP FOR GAMES
+========================================================= */
 
 async function loadTeamsForGames(rows){
 
@@ -2293,45 +3975,33 @@ function getLeagueById(id){
 }
 
 /* =========================================================
-   DATE GAME QUERY
-   ========================================================= */
+   DATABASE DATE GAMES
+========================================================= */
 
 async function loadSelectedDate(){
 
   if(!selectedDate)
     return;
 
-  els.scoreCards.innerHTML = `
-    <div class="loading">
-      <span class="spinner"></span>
-      Loading ${escapeHtml(
-        formatShortDate(selectedDate)
-      )}...
-    </div>
-  `;
-
   els.scheduleBody.innerHTML = `
-    <tr>
-      <td colspan="7">
-        <div class="loading">
-          <span class="spinner"></span>
-          Loading schedule...
-        </div>
-      </td>
-    </tr>
-  `;
 
-  /*
-   * IMPORTANT:
-   *
-   * sports_games.game_date is PostgreSQL DATE.
-   *
-   * Therefore we use:
-   *
-   * .eq("game_date", selectedDate)
-   *
-   * NOT timestamp comparisons.
-   */
+    <tr>
+
+      <td colspan="7">
+
+        <div class="loading">
+
+          <span class="spinner"></span>
+
+          Loading database schedule...
+
+        </div>
+
+      </td>
+
+    </tr>
+
+  `;
 
   let query =
     db
@@ -2381,7 +4051,9 @@ async function loadSelectedDate(){
     const league =
       leagues.find(
         item =>
-          item.abbreviation ===
+          String(
+            item.abbreviation || ""
+          ).toUpperCase() ===
           selectedLeague
       );
 
@@ -2392,7 +4064,9 @@ async function loadSelectedDate(){
           "league_id",
           league.id
         );
+
     }
+
   }
 
   const {
@@ -2403,29 +4077,30 @@ async function loadSelectedDate(){
 
   if(error){
 
-    const message =
-      error.message;
-
-    els.scoreCards.innerHTML = `
-      <div class="empty">
-        Database query failed:
-        ${escapeHtml(message)}
-      </div>
-    `;
-
     els.scheduleBody.innerHTML = `
+
       <tr>
+
         <td colspan="7">
+
           <div class="empty">
+
             Database query failed:
-            ${escapeHtml(message)}
+
+            ${escapeHtml(
+              error.message
+            )}
+
           </div>
+
         </td>
+
       </tr>
+
     `;
 
     toast(
-      "Sports date query failed.",
+      "Database schedule query failed.",
       "error"
     );
 
@@ -2438,219 +4113,42 @@ async function loadSelectedDate(){
   els.kpiDateGames.textContent =
     games.length;
 
-  updateLiveKpi(
-    games
-  );
-
-  await renderScoreCards(
-    games
-  );
-
   await renderSchedule(
     games
   );
 }
 
 /* =========================================================
-   SCORE CARDS
-   ========================================================= */
-
-async function renderScoreCards(rows){
-
-  if(!rows.length){
-
-    const mode =
-      dateMode(selectedDate);
-
-    let message;
-
-    if(mode === "past"){
-
-      message =
-        "No historical games are currently stored for this date.";
-
-    }else if(mode === "future"){
-
-      message =
-        "No scheduled games are currently stored for this date.";
-
-    }else{
-
-      message =
-        "No games are currently available for today.";
-    }
-
-    els.scoreCards.innerHTML = `
-      <div class="empty">
-        No games found for
-        <strong>
-          ${escapeHtml(
-            formatDate(selectedDate)
-          )}
-        </strong>
-        <br><br>
-        ${escapeHtml(message)}
-      </div>
-    `;
-
-    return;
-  }
-
-  const teamMap =
-    await loadTeamsForGames(
-      rows
-    );
-
-  els.scoreCards.innerHTML =
-    rows.map(game=>{
-
-      const league =
-        getLeagueById(
-          game.league_id
-        );
-
-      const abbr =
-        league?.abbreviation ||
-        game.sport ||
-        "SPORT";
-
-      const home =
-        teamMap[
-          game.home_team_id
-        ];
-
-      const away =
-        teamMap[
-          game.away_team_id
-        ];
-
-      const homeName =
-        home?.name ||
-        "Home";
-
-      const awayName =
-        away?.name ||
-        "Away";
-
-      const statusClass =
-        normalizeStatus(
-          game.status
-        );
-
-      const homeScore =
-        game.home_score ??
-        "—";
-
-      const awayScore =
-        game.away_score ??
-        "—";
-
-      const isWrestling =
-        abbr === "WWE" ||
-        abbr === "AEW";
-
-      return `
-
-        <article class="game-card">
-
-          <div class="game-top">
-
-            <span class="league-tag ${leagueClass(abbr)}">
-              ${escapeHtml(abbr)}
-            </span>
-
-            <span class="status ${statusClass}">
-              ${escapeHtml(
-                statusLabel(game.status)
-              )}
-            </span>
-
-          </div>
-
-          <div class="game-title">
-            ${isWrestling
-              ? "WRESTLING EVENT"
-              : escapeHtml(
-                  game.sport ||
-                  "SPORTING EVENT"
-                )
-            }
-          </div>
-
-          <div class="score-line">
-            <span>
-              ${escapeHtml(
-                awayName
-              )}
-            </span>
-
-            <strong>
-              ${escapeHtml(
-                awayScore
-              )}
-            </strong>
-          </div>
-
-          <div class="score-line">
-            <span>
-              ${escapeHtml(
-                homeName
-              )}
-            </span>
-
-            <strong>
-              ${escapeHtml(
-                homeScore
-              )}
-            </strong>
-          </div>
-
-          <div class="venue">
-            ${escapeHtml(
-              game.venue ||
-              "Venue not listed"
-            )}
-          </div>
-
-          <div class="venue">
-            Provider:
-            <strong>
-              ${escapeHtml(
-                providerLabel(
-                  game.provider
-                )
-              )}
-            </strong>
-          </div>
-
-        </article>
-
-      `;
-
-    }).join("");
-}
-
-/* =========================================================
-   SCHEDULE TABLE
-   ========================================================= */
+   DATABASE SCHEDULE TABLE
+========================================================= */
 
 async function renderSchedule(rows){
 
   if(!rows.length){
 
     els.scheduleBody.innerHTML = `
+
       <tr>
+
         <td colspan="7">
+
           <div class="empty">
-            No games found for
-            ${escapeHtml(
-              formatShortDate(
-                selectedDate
-              )
-            )}.
+
+            No database games found for
+            <strong>
+              ${escapeHtml(
+                formatShortDate(
+                  selectedDate
+                )
+              )}
+            </strong>.
+
           </div>
+
         </td>
+
       </tr>
+
     `;
 
     return;
@@ -2723,11 +4221,8 @@ async function renderSchedule(rows){
         );
 
       const score =
-        normalized ===
-        "scheduled"
-
+        normalized === "scheduled"
           ? "—"
-
           : `${game.away_score ?? "—"} - ${game.home_score ?? "—"}`;
 
       return `
@@ -2735,6 +4230,7 @@ async function renderSchedule(rows){
         <tr>
 
           <td>
+
             <strong>
               ${escapeHtml(
                 formatShortDate(
@@ -2748,6 +4244,7 @@ async function renderSchedule(rows){
             <span style="color:var(--muted)">
               ${escapeHtml(time)}
             </span>
+
           </td>
 
           <td>
@@ -2760,15 +4257,21 @@ async function renderSchedule(rows){
 
           <td>
 
-            <div style="display:flex;flex-direction:column;gap:5px">
+            <div style="
+              display:flex;
+              flex-direction:column;
+              gap:5px
+            ">
 
               <strong>
                 ${escapeHtml(
                   awayName
                 )}
-                ${game.away_score != null
-                  ? ` ${escapeHtml(game.away_score)}`
-                  : ""
+
+                ${
+                  game.away_score != null
+                    ? ` ${escapeHtml(game.away_score)}`
+                    : ""
                 }
               </strong>
 
@@ -2776,9 +4279,11 @@ async function renderSchedule(rows){
                 ${escapeHtml(
                   homeName
                 )}
-                ${game.home_score != null
-                  ? ` ${escapeHtml(game.home_score)}`
-                  : ""
+
+                ${
+                  game.home_score != null
+                    ? ` ${escapeHtml(game.home_score)}`
+                    : ""
                 }
               </strong>
 
@@ -2827,39 +4332,1076 @@ async function renderSchedule(rows){
 }
 
 /* =========================================================
-   LIVE KPI
-   ========================================================= */
+   STANDINGS
+========================================================= */
 
-function updateLiveKpi(rows){
+function normalizeStandingRow(row){
 
-  const live =
-    rows.filter(
-      game =>
-        normalizeStatus(
-          game.status
-        ) === "live"
-    ).length;
+  const teamName =
+    row.team ||
+    row.team_name ||
+    row.name ||
+    "";
 
-  els.kpiLive.textContent =
-    live;
+  const abbreviation =
+    row.abbreviation ||
+    row.team_abbreviation ||
+    "";
+
+  const metadata =
+    findTeamMetadata(
+      teamName,
+      abbreviation
+    );
+
+  const local =
+    findLocalTeam(
+      teamName,
+      abbreviation
+    );
+
+  let wins =
+    nullableNumber(
+      row.wins
+    );
+
+  let losses =
+    nullableNumber(
+      row.losses
+    );
+
+  let ties =
+    nullableNumber(
+      row.ties
+    );
+
+  let points =
+    nullableNumber(
+      row.points
+    );
+
+  if(wins === null)
+    wins = 0;
+
+  if(losses === null)
+    losses = 0;
+
+  if(ties === null)
+    ties = 0;
+
+  if(points === null)
+    points = 0;
+
+  const division =
+    row.division ||
+    metadata?.division ||
+    "";
+
+  const conference =
+    row.conference ||
+    metadata?.conference ||
+    "";
+
+  let group =
+    row.group ||
+    row.group_name ||
+    "";
+
+  if(
+    !group &&
+    division
+  ){
+    group = division;
+  }
+
+  return {
+
+    raw:row,
+
+    league:
+      row.league ||
+      metadata?.sport ||
+      "",
+
+    team:
+      teamName ||
+      "Unknown Team",
+
+    abbreviation:
+      abbreviation ||
+      metadata?.abbreviation ||
+      "",
+
+    wins,
+
+    losses,
+
+    ties,
+
+    points,
+
+    rank:
+      nullableNumber(
+        row.rank
+      ),
+
+    division,
+
+    conference,
+
+    group,
+
+    provider:
+      row.source ||
+      row.provider ||
+      "ESPN",
+
+    logo_url:
+      metadata?.logo_url ||
+      row.logo_url ||
+      "",
+
+    local:
+      Boolean(
+        local?.is_local
+      ),
+
+    teamId:
+      metadata?.id ||
+      null
+
+  };
+}
+
+function calculatePct(row){
+
+  const total =
+    row.wins +
+    row.losses +
+    row.ties;
+
+  if(total <= 0)
+    return 0;
+
+  return (
+    row.wins +
+    row.ties * .5
+  ) / total;
+}
+
+function calculateGamesBack(rows,row){
+
+  if(
+    !rows.length ||
+    !row
+  ){
+    return null;
+  }
+
+  const leader =
+    rows[0];
+
+  if(
+    !leader ||
+    leader === row
+  ){
+    return 0;
+  }
+
+  return (
+    (
+      leader.wins -
+      row.wins
+    ) +
+    (
+      row.losses -
+      leader.losses
+    )
+  ) / 2;
+}
+
+function sortStandings(rows){
+
+  return [...rows].sort(
+    (a,b)=>{
+
+      const ap =
+        calculatePct(a);
+
+      const bp =
+        calculatePct(b);
+
+      if(bp !== ap)
+        return bp - ap;
+
+      if(
+        b.points !==
+        a.points
+      ){
+        return (
+          b.points -
+          a.points
+        );
+      }
+
+      if(
+        b.wins !==
+        a.wins
+      ){
+        return (
+          b.wins -
+          a.wins
+        );
+      }
+
+      if(
+        a.losses !==
+        b.losses
+      ){
+        return (
+          a.losses -
+          b.losses
+        );
+      }
+
+      return a.team.localeCompare(
+        b.team
+      );
+
+    }
+  );
+}
+
+function groupStandings(rows,view){
+
+  const groups =
+    new Map();
+
+  if(view === "overall"){
+
+    groups.set(
+      "OVERALL",
+      sortStandings(rows)
+    );
+
+    return groups;
+  }
+
+  rows.forEach(row=>{
+
+    let key =
+      view === "conference"
+        ? row.conference
+        : row.division;
+
+    if(!key){
+
+      key =
+        row.group ||
+        "UNASSIGNED";
+    }
+
+    key =
+      String(key)
+        .trim() ||
+      "UNASSIGNED";
+
+    if(!groups.has(key))
+      groups.set(
+        key,
+        []
+      );
+
+    groups
+      .get(key)
+      .push(row);
+
+  });
+
+  groups.forEach(
+    (value,key)=>{
+      groups.set(
+        key,
+        sortStandings(value)
+      );
+    }
+  );
+
+  return new Map(
+    [...groups.entries()]
+      .sort(
+        (a,b)=>
+          a[0].localeCompare(
+            b[0]
+          )
+      )
+  );
+}
+
+function populateStandingGroups(){
+
+  const view =
+    els.standingsView.value;
+
+  els.standingsGroupWrap.style.display =
+    view === "overall"
+      ? "none"
+      : "flex";
+
+  const values =
+    new Set();
+
+  providerStandings
+    .map(normalizeStandingRow)
+    .forEach(row=>{
+
+      const value =
+        view === "conference"
+          ? row.conference
+          : row.division;
+
+      if(value)
+        values.add(value);
+
+    });
+
+  els.standingsGroup.innerHTML =
+    `<option value="ALL">ALL GROUPS</option>`;
+
+  [...values]
+    .sort()
+    .forEach(value=>{
+
+      const option =
+        document.createElement(
+          "option"
+        );
+
+      option.value =
+        value;
+
+      option.textContent =
+        value.toUpperCase();
+
+      els.standingsGroup.appendChild(
+        option
+      );
+
+    });
+}
+
+function buildStandingTable(rows){
+
+  const leaderRows =
+    sortStandings(rows);
+
+  return `
+
+    <div class="table-wrap">
+
+      <table class="standings-table">
+
+        <thead>
+
+          <tr>
+
+            <th>
+              #
+            </th>
+
+            <th>
+              Team
+            </th>
+
+            <th>
+              W
+            </th>
+
+            <th>
+              L
+            </th>
+
+            <th>
+              T
+            </th>
+
+            <th>
+              PTS
+            </th>
+
+            <th>
+              PCT
+            </th>
+
+            <th>
+              GB
+            </th>
+
+            <th>
+              Division
+            </th>
+
+            <th>
+              Conference
+            </th>
+
+            <th>
+              Source
+            </th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          ${
+            leaderRows.map(
+              (row,index)=>{
+
+                const pct =
+                  calculatePct(
+                    row
+                  );
+
+                const gb =
+                  calculateGamesBack(
+                    leaderRows,
+                    row
+                  );
+
+                return `
+
+                  <tr class="${
+                    row.local
+                      ? "local-team"
+                      : ""
+                  }">
+
+                    <td>
+
+                      <span class="rank">
+                        ${
+                          index + 1
+                        }
+                      </span>
+
+                    </td>
+
+                    <td>
+
+                      <div class="team-cell">
+
+                        ${
+                          row.logo_url
+                            ? `
+                              <img
+                                class="team-logo"
+                                src="${escapeHtml(row.logo_url)}"
+                                alt=""
+                                loading="lazy"
+                              >
+                            `
+                            : `
+                              <div class="team-logo-placeholder">
+                                ${escapeHtml(
+                                  row.abbreviation ||
+                                  "CR"
+                                )}
+                              </div>
+                            `
+                        }
+
+                        <div>
+
+                          <div class="team-name">
+
+                            ${
+                              row.local
+                                ? "★ "
+                                : ""
+                            }
+
+                            ${escapeHtml(
+                              row.team
+                            )}
+
+                          </div>
+
+                          <div class="team-meta">
+
+                            ${escapeHtml(
+                              row.abbreviation ||
+                              ""
+                            )}
+
+                            ${
+                              row.local
+                                ? " • CROWRULES LOCAL"
+                                : ""
+                            }
+
+                          </div>
+
+                        </div>
+
+                      </div>
+
+                    </td>
+
+                    <td>
+                      <strong>
+                        ${row.wins}
+                      </strong>
+                    </td>
+
+                    <td>
+                      ${row.losses}
+                    </td>
+
+                    <td>
+                      ${row.ties}
+                    </td>
+
+                    <td>
+                      <strong>
+                        ${row.points}
+                      </strong>
+                    </td>
+
+                    <td>
+
+                      <span class="pct">
+                        ${pct.toFixed(3)}
+                      </span>
+
+                    </td>
+
+                    <td>
+
+                      <span class="gb">
+
+                        ${
+                          gb === null
+                            ? "—"
+                            : gb === 0
+                              ? "—"
+                              : gb.toFixed(1)
+                        }
+
+                      </span>
+
+                    </td>
+
+                    <td>
+                      ${escapeHtml(
+                        row.division ||
+                        "—"
+                      )}
+                    </td>
+
+                    <td>
+                      ${escapeHtml(
+                        row.conference ||
+                        "—"
+                      )}
+                    </td>
+
+                    <td>
+
+                      <span class="
+                        standings-badge
+                        ${
+                          row.provider
+                            ? "provider"
+                            : "database"
+                        }
+                      ">
+                        ${escapeHtml(
+                          providerLabel(
+                            row.provider
+                          )
+                        )}
+                      </span>
+
+                    </td>
+
+                  </tr>
+
+                `;
+
+              }
+            ).join("")
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  `;
+}
+
+function renderStandings(){
+
+  let rows =
+    providerStandings
+      .map(
+        normalizeStandingRow
+      );
+
+  const selected =
+    els.standingsLeague.value;
+
+  if(selected !== "ALL"){
+
+    rows =
+      rows.filter(row=>{
+
+        const rawLeague =
+          String(
+            row.raw?.league ||
+            ""
+          ).toUpperCase();
+
+        return (
+          rawLeague === selected ||
+          row.league
+            .toUpperCase()
+            .includes(selected)
+        );
+
+      });
+
+  }
+
+  const view =
+    els.standingsView.value;
+
+  const group =
+    els.standingsGroup.value;
+
+  if(
+    view !== "overall" &&
+    group !== "ALL"
+  ){
+
+    rows =
+      rows.filter(row=>{
+
+        const value =
+          view === "conference"
+            ? row.conference
+            : row.division;
+
+        return value === group;
+
+      });
+
+  }
+
+  const groups =
+    groupStandings(
+      rows,
+      view
+    );
+
+  els.standingSummaryView.textContent =
+    view.toUpperCase();
+
+  els.standingSummaryTeams.textContent =
+    rows.length;
+
+  els.standingSummaryGroups.textContent =
+    groups.size;
+
+  els.standingSummarySource.textContent =
+    standingsSource;
+
+  els.standingSummaryUpdated.textContent =
+    formatTimestamp(
+      standingsUpdatedAt
+    );
+
+  els.standingsSourceBadge.textContent =
+    standingsSource;
+
+  els.standingsSourceBadge.className =
+    "standings-badge " +
+    (
+      standingsSource === "PROVIDER"
+        ? "provider"
+        : "database"
+    );
+
+  if(!rows.length){
+
+    els.standingsGroups.innerHTML = `
+
+      <div class="standings-empty">
+
+        <div class="standings-empty-icon">
+          CR
+        </div>
+
+        <div class="standings-empty-title">
+          NO STANDINGS DATA
+        </div>
+
+        <div class="standings-empty-text">
+
+          No standings rows are currently available for
+          this league/view/season combination.
+
+          <br><br>
+
+          The live engine is configured to retrieve
+          provider standings, while
+          <strong>
+            sports_standings
+          </strong>
+          remains available as the Supabase fallback.
+
+        </div>
+
+      </div>
+
+    `;
+
+    return;
+  }
+
+  els.standingsGroups.innerHTML =
+    [...groups.entries()]
+      .map(
+        ([name,groupRows])=>`
+
+          <section class="standings-group">
+
+            <div class="standings-group-head">
+
+              <div>
+
+                <div class="standings-group-title">
+
+                  ${escapeHtml(
+                    name
+                  )}
+
+                </div>
+
+                <div class="standings-group-meta">
+
+                  ${
+                    view === "overall"
+                      ? "Complete league table"
+                      : view === "conference"
+                        ? "Conference standings"
+                        : "Division standings"
+                  }
+
+                </div>
+
+              </div>
+
+              <span class="standings-badge">
+
+                ${groupRows.length}
+                TEAM${
+                  groupRows.length === 1
+                    ? ""
+                    : "S"
+                }
+
+              </span>
+
+            </div>
+
+            ${buildStandingTable(
+              groupRows
+            )}
+
+          </section>
+
+        `
+      ).join("");
+
+}
+
+async function loadDatabaseStandings(){
+
+  const season =
+    String(
+      els.standingsSeason.value ||
+      CONFIG.season
+    );
+
+  const leagueCode =
+    els.standingsLeague.value;
+
+  let query =
+    db
+      .from("sports_standings")
+      .select(`
+        id,
+        league_id,
+        team_id,
+        season,
+        wins,
+        losses,
+        ties,
+        points,
+        rank,
+        provider,
+        level
+      `)
+      .eq(
+        "season",
+        season
+      );
+
+  const league =
+    leagues.find(
+      item =>
+        String(
+          item.abbreviation ||
+          ""
+        ).toUpperCase() ===
+        leagueCode
+    );
+
+  if(
+    leagueCode !== "ALL" &&
+    league
+  ){
+
+    query =
+      query.eq(
+        "league_id",
+        league.id
+      );
+
+  }
+
+  const {
+    data,
+    error
+  } =
+    await query
+      .order(
+        "rank",
+        {
+          ascending:true,
+          nullsFirst:false
+        }
+      );
+
+  if(error){
+
+    throw new Error(
+      "SUPABASE STANDINGS FAILED: " +
+      error.message
+    );
+  }
+
+  const teamMap =
+    Object.fromEntries(
+      teams.map(
+        team=>[
+          team.id,
+          team
+        ]
+      )
+    );
+
+  return (data || [])
+    .map(row=>{
+
+      const team =
+        teamMap[row.team_id];
+
+      return {
+
+        league:
+          getLeagueById(
+            row.league_id
+          )?.abbreviation ||
+          "",
+
+        team:
+          team?.name ||
+          "Unknown Team",
+
+        abbreviation:
+          team?.abbreviation ||
+          "",
+
+        wins:
+          row.wins,
+
+        losses:
+          row.losses,
+
+        ties:
+          row.ties,
+
+        points:
+          row.points,
+
+        rank:
+          row.rank,
+
+        division:
+          team?.division ||
+          "",
+
+        conference:
+          team?.conference ||
+          "",
+
+        source:
+          row.provider ||
+          "DATABASE",
+
+        logo_url:
+          team?.logo_url ||
+          "",
+
+        group:
+          team?.division ||
+          ""
+
+      };
+
+    });
+
+}
+
+async function loadStandings(){
+
+  els.standingsGroups.innerHTML = `
+
+    <div class="loading">
+
+      <span class="spinner"></span>
+
+      Loading provider standings...
+
+    </div>
+
+  `;
+
+  const providerRows =
+    providerStandings || [];
+
+  if(providerRows.length){
+
+    standingsSource =
+      "PROVIDER";
+
+    standingsUpdatedAt =
+      standingsUpdatedAt ||
+      new Date().toISOString();
+
+    populateStandingGroups();
+
+    renderStandings();
+
+    return;
+  }
+
+  try{
+
+    const dbRows =
+      await loadDatabaseStandings();
+
+    providerStandings =
+      dbRows;
+
+    standingsSource =
+      "DATABASE";
+
+    standingsUpdatedAt =
+      new Date().toISOString();
+
+    populateStandingGroups();
+
+    renderStandings();
+
+  }catch(error){
+
+    console.error(error);
+
+    standingsSource =
+      "NONE";
+
+    providerStandings =
+      [];
+
+    standingsUpdatedAt =
+      new Date().toISOString();
+
+    renderStandings();
+
+  }
+}
+
+/* =========================================================
+   STANDINGS PROVIDER REFRESH
+========================================================= */
+
+async function refreshProviderStandings(){
+
+  const result =
+    await fetchLiveEngine();
+
+  if(!result){
+
+    await loadStandings();
+
+    return;
+  }
+
+  standingsSource =
+    "PROVIDER";
+
+  standingsUpdatedAt =
+    result.updated_at ||
+    new Date().toISOString();
+
+  populateStandingGroups();
+
+  renderStandings();
+
+  toast(
+    `Provider standings loaded: ${providerStandings.length} rows.`,
+    "success"
+  );
 }
 
 /* =========================================================
    LEAGUE DIRECTORY
-   ========================================================= */
+========================================================= */
 
 async function renderLeagueDirectory(){
 
   if(!leagues.length){
 
     els.leagueBody.innerHTML = `
+
       <tr>
+
         <td colspan="7">
+
           <div class="empty">
             No active leagues found.
           </div>
+
         </td>
+
       </tr>
+
     `;
 
     return;
@@ -2870,7 +5412,9 @@ async function renderLeagueDirectory(){
   } =
     await db
       .from("sports_games")
-      .select("league_id");
+      .select(
+        "league_id"
+      );
 
   const counts = {};
 
@@ -2878,7 +5422,10 @@ async function renderLeagueDirectory(){
     .forEach(row=>{
 
       counts[row.league_id] =
-        (counts[row.league_id] || 0) + 1;
+        (
+          counts[row.league_id] ||
+          0
+        ) + 1;
 
     });
 
@@ -2887,8 +5434,10 @@ async function renderLeagueDirectory(){
       .map(league=>{
 
         const abbr =
-          league.abbreviation ||
-          "—";
+          String(
+            league.abbreviation ||
+            "—"
+          ).toUpperCase();
 
         return `
 
@@ -2901,11 +5450,13 @@ async function renderLeagueDirectory(){
             </td>
 
             <td>
+
               <strong>
                 ${escapeHtml(
                   league.name
                 )}
               </strong>
+
             </td>
 
             <td>
@@ -2918,7 +5469,9 @@ async function renderLeagueDirectory(){
             <td>
 
               <span class="league-tag ${leagueClass(abbr)}">
+
                 ${escapeHtml(abbr)}
+
               </span>
 
             </td>
@@ -2948,7 +5501,7 @@ async function renderLeagueDirectory(){
 
 /* =========================================================
    FEATURED PLAYERS
-   ========================================================= */
+========================================================= */
 
 async function loadFeaturedPlayers(){
 
@@ -2980,16 +5533,25 @@ async function loadFeaturedPlayers(){
   if(error){
 
     els.playersBody.innerHTML = `
+
       <tr>
+
         <td colspan="6">
+
           <div class="empty">
+
             Featured players unavailable:
+
             ${escapeHtml(
               error.message
             )}
+
           </div>
+
         </td>
+
       </tr>
+
     `;
 
     return;
@@ -2998,13 +5560,21 @@ async function loadFeaturedPlayers(){
   if(!data?.length){
 
     els.playersBody.innerHTML = `
+
       <tr>
+
         <td colspan="6">
+
           <div class="empty">
+
             No featured players are configured.
+
           </div>
+
         </td>
+
       </tr>
+
     `;
 
     return;
@@ -3016,12 +5586,14 @@ async function loadFeaturedPlayers(){
       <tr>
 
         <td>
+
           <strong>
             ${escapeHtml(
               player.name ||
               "Unknown"
             )}
           </strong>
+
         </td>
 
         <td>
@@ -3056,12 +5628,14 @@ async function loadFeaturedPlayers(){
         <td>
 
           <span class="status final">
+
             ${escapeHtml(
               String(
                 player.status ||
                 "ACTIVE"
               ).toUpperCase()
             )}
+
           </span>
 
         </td>
@@ -3073,7 +5647,7 @@ async function loadFeaturedPlayers(){
 
 /* =========================================================
    SECURE ADMIN SYNC
-   ========================================================= */
+========================================================= */
 
 async function runSecureSync(action){
 
@@ -3140,7 +5714,7 @@ async function runSecureSync(action){
             action,
 
             source:
-              "crowrules-sports-admin-v7",
+              "crowrules-sports-admin-v8",
 
             selected_date:
               selectedDate,
@@ -3202,7 +5776,7 @@ async function runSecureSync(action){
 
 /* =========================================================
    DATABASE REFRESH
-   ========================================================= */
+========================================================= */
 
 async function databaseRefresh(){
 
@@ -3214,6 +5788,8 @@ async function databaseRefresh(){
 
       loadLeagues(),
 
+      loadTeamDirectory(),
+
       loadSelectedDate(),
 
       loadFeaturedPlayers()
@@ -3221,17 +5797,8 @@ async function databaseRefresh(){
     ]);
 
     els.lastDbRefresh.textContent =
-      new Intl.DateTimeFormat(
-        "en-US",
-        {
-          month:"short",
-          day:"numeric",
-          hour:"numeric",
-          minute:"2-digit",
-          second:"2-digit"
-        }
-      ).format(
-        new Date()
+      formatTimestamp(
+        new Date().toISOString()
       );
 
   }catch(error){
@@ -3247,13 +5814,24 @@ async function databaseRefresh(){
 
 /* =========================================================
    LIVE REFRESH
-   ========================================================= */
+========================================================= */
 
 async function liveRefresh(){
 
   try{
 
-    await loadSelectedDate();
+    const result =
+      await fetchLiveEngine();
+
+    if(result){
+
+      renderProviderScoreCards();
+
+      populateStandingGroups();
+
+      renderStandings();
+
+    }
 
   }catch(error){
 
@@ -3261,6 +5839,7 @@ async function liveRefresh(){
       "Live refresh failed:",
       error
     );
+
   }
 
   liveCountdown =
@@ -3269,7 +5848,7 @@ async function liveRefresh(){
 
 /* =========================================================
    EVERYTHING
-   ========================================================= */
+========================================================= */
 
 async function refreshEverything(){
 
@@ -3279,15 +5858,17 @@ async function refreshEverything(){
 
   await liveRefresh();
 
+  await loadStandings();
+
   toast(
-    "Sports Center refreshed.",
+    "CrowRules Sports v8.0 refreshed.",
     "success"
   );
 }
 
 /* =========================================================
    REALTIME
-   ========================================================= */
+========================================================= */
 
 function setupRealtime(){
 
@@ -3296,12 +5877,13 @@ function setupRealtime(){
     db.removeChannel(
       realtimeChannel
     );
+
   }
 
   realtimeChannel =
     db
       .channel(
-        "crowrules-sports-admin-v7"
+        "crowrules-sports-admin-v8"
       )
 
       .on(
@@ -3343,6 +5925,15 @@ function setupRealtime(){
             payload.eventType
           );
 
+          if(
+            standingsSource ===
+            "DATABASE"
+          ){
+
+            loadStandings();
+
+          }
+
         }
       )
 
@@ -3368,14 +5959,16 @@ function setupRealtime(){
 
           els.realtimeStatus.className =
             "auto-value yellow";
+
         }
 
       });
+
 }
 
 /* =========================================================
    TIMERS
-   ========================================================= */
+========================================================= */
 
 function startTimers(){
 
@@ -3411,21 +6004,25 @@ function startTimers(){
 
       liveCountdown--;
 
-      if(liveCountdown < 0){
+      if(
+        liveCountdown < 0
+      ){
 
         liveCountdown =
           CONFIG.liveRefreshMs / 1000;
+
       }
 
       els.refreshCountdown.textContent =
         `${liveCountdown}s`;
 
     },1000);
+
 }
 
 /* =========================================================
-   TAB VISIBILITY
-   ========================================================= */
+   VISIBILITY / ONLINE
+========================================================= */
 
 document.addEventListener(
   "visibilitychange",
@@ -3437,6 +6034,7 @@ document.addEventListener(
         CONFIG.liveRefreshMs / 1000;
 
       liveRefresh();
+
     }
 
   }
@@ -3447,7 +6045,7 @@ window.addEventListener(
   ()=>{
 
     toast(
-      "Connection restored. Refreshing.",
+      "Connection restored. Refreshing sports engine.",
       "success"
     );
 
@@ -3458,61 +6056,75 @@ window.addEventListener(
 
 /* =========================================================
    EVENTS
-   ========================================================= */
+========================================================= */
 
 els.logoutBtn.onclick =
   logout;
 
 $("prevDayBtn").onclick =
   ()=>{
+
     setSelectedDate(
       addDays(
         selectedDate,
         -1
       )
     );
+
   };
 
 $("nextDayBtn").onclick =
   ()=>{
+
     setSelectedDate(
       addDays(
         selectedDate,
         1
       )
     );
+
   };
 
 els.datePicker.onchange =
   ()=>{
+
     setSelectedDate(
       els.datePicker.value
     );
+
   };
 
-document.querySelectorAll(
-  ".quick"
-).forEach(button=>{
+document
+  .querySelectorAll(".quick")
+  .forEach(button=>{
 
-  button.onclick =
-    ()=>{
-      const offset =
-        Number(
-          button.dataset.offset
+    button.onclick =
+      ()=>{
+
+        const offset =
+          Number(
+            button.dataset.offset
+          );
+
+        setSelectedDate(
+          addDays(
+            localDateISO(),
+            offset
+          )
         );
 
-      setSelectedDate(
-        addDays(
-          localDateISO(),
-          offset
-        )
-      );
-    };
+      };
 
-});
+  });
 
 $("loadDateBtn").onclick =
-  loadSelectedDate;
+  async ()=>{
+
+    await loadSelectedDate();
+
+    await liveRefresh();
+
+  };
 
 $("liveRefreshBtn").onclick =
   liveRefresh;
@@ -3523,22 +6135,118 @@ $("databaseRefreshBtn").onclick =
 $("refreshEverythingBtn").onclick =
   refreshEverything;
 
-document.querySelectorAll(
-  "[data-sync]"
-).forEach(button=>{
+$("liveEngineBtn").onclick =
+  async ()=>{
 
-  button.onclick =
-    ()=>{
-      runSecureSync(
-        button.dataset.sync
-      );
-    };
+    await liveRefresh();
 
-});
+    toast(
+      "crowrules-sports-live-v2 executed.",
+      "success"
+    );
+
+  };
+
+els.refreshStandingsBtn.onclick =
+  refreshProviderStandings;
+
+els.providerStandingsBtn.onclick =
+  refreshProviderStandings;
+
+els.standingsLeague.onchange =
+  ()=>{
+
+    providerStandings =
+      providerStandings || [];
+
+    populateStandingGroups();
+
+    renderStandings();
+
+  };
+
+els.standingsView.onchange =
+  ()=>{
+
+    populateStandingGroups();
+
+    renderStandings();
+
+  };
+
+els.standingsGroup.onchange =
+  renderStandings;
+
+els.standingsSeason.onchange =
+  async ()=>{
+
+    /*
+     * The current live function exposes provider standings
+     * for the active provider season. If the requested season
+     * differs, try Supabase first.
+     */
+
+    if(
+      String(
+        els.standingsSeason.value
+      ) ===
+      String(CONFIG.season)
+    ){
+
+      await refreshProviderStandings();
+
+    }else{
+
+      try{
+
+        const rows =
+          await loadDatabaseStandings();
+
+        providerStandings =
+          rows;
+
+        standingsSource =
+          "DATABASE";
+
+        standingsUpdatedAt =
+          new Date().toISOString();
+
+        populateStandingGroups();
+
+        renderStandings();
+
+      }catch(error){
+
+        providerStandings =
+          [];
+
+        standingsSource =
+          "NONE";
+
+        renderStandings();
+
+      }
+
+    }
+
+  };
+
+document
+  .querySelectorAll("[data-sync]")
+  .forEach(button=>{
+
+    button.onclick =
+      ()=>{
+        runSecureSync(
+          button.dataset.sync
+        );
+      };
+
+  });
 
 /* =========================================================
    AUTH STATE
-   ========================================================= */
+========================================================= */
 
 db.auth.onAuthStateChange(
   async(event,session)=>{
@@ -3557,6 +6265,7 @@ db.auth.onAuthStateChange(
         window.location.pathname;
 
       return;
+
     }
 
     if(
@@ -3573,6 +6282,7 @@ db.auth.onAuthStateChange(
         showError(
           error.message
         );
+
       }
 
     }
@@ -3582,7 +6292,7 @@ db.auth.onAuthStateChange(
 
 /* =========================================================
    INITIALIZATION
-   ========================================================= */
+========================================================= */
 
 async function init(){
 
@@ -3594,6 +6304,11 @@ async function init(){
     els.datePicker.value =
       selectedDate;
 
+    els.standingsSeason.value =
+      String(
+        CONFIG.season
+      );
+
     updateDateUI();
 
     await requireAdmin();
@@ -3604,18 +6319,24 @@ async function init(){
 
       loadCoreStats(),
 
+      loadTeamDirectory(),
+
       loadFeaturedPlayers()
 
     ]);
 
     await loadSelectedDate();
 
+    await liveRefresh();
+
+    await loadStandings();
+
     setupRealtime();
 
     startTimers();
 
     toast(
-      "CrowRules Sports Admin v7.0 initialized.",
+      "CrowRules Sports Admin v8.0 initialized.",
       "success"
     );
 
@@ -3632,6 +6353,7 @@ async function init(){
     );
 
     els.scoreCards.innerHTML = `
+
       <div class="empty">
 
         <strong>
@@ -3645,6 +6367,27 @@ async function init(){
         )}
 
       </div>
+
+    `;
+
+    els.standingsGroups.innerHTML = `
+
+      <div class="standings-empty">
+
+        <div class="standings-empty-title">
+          SPORTS COMMAND CENTER LOCKED
+        </div>
+
+        <div class="standings-empty-text">
+
+          Administrator authentication is required
+          before live sports and standings data can
+          be displayed.
+
+        </div>
+
+      </div>
+
     `;
 
   }
