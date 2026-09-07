@@ -1,0 +1,1677 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+  <title>CrowRules Sports — Live Sports Network</title>
+
+  <meta
+    name="description"
+    content="CrowRules Sports — live scores, schedules, standings, news, teams, highlights and Pacific Northwest sports."
+  >
+
+  <meta name="theme-color" content="#050505">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap"
+    rel="stylesheet"
+  >
+
+  <style>
+    :root {
+      --black: #050505;
+      --black-2: #080808;
+      --panel: #0d0d0d;
+      --panel-2: #121212;
+      --panel-3: #181818;
+
+      --red: #e10600;
+      --red-dark: #8f0500;
+      --red-bright: #ff211a;
+
+      --white: #ffffff;
+      --text: #eeeeee;
+      --muted: #929292;
+
+      --border: #292929;
+      --red-border: #50100e;
+
+      --radius: 14px;
+      --max: 1500px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 85% 10%, rgba(225, 6, 0, .12), transparent 30%),
+        radial-gradient(circle at 10% 40%, rgba(225, 6, 0, .06), transparent 30%),
+        var(--black);
+      color: var(--text);
+      font-family: "Montserrat", sans-serif;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    /* =========================
+       TOP BAR
+    ========================= */
+
+    .topbar {
+      height: 34px;
+      display: flex;
+      align-items: center;
+      background: #000;
+      border-bottom: 1px solid #181818;
+      overflow: hidden;
+    }
+
+    .ticker {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      white-space: nowrap;
+      animation: ticker 28s linear infinite;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .ticker-label {
+      padding: 7px 14px;
+      background: var(--red);
+      color: white;
+      font-family: "Orbitron", sans-serif;
+    }
+
+    .ticker span {
+      color: #aaa;
+    }
+
+    .ticker strong {
+      color: white;
+    }
+
+    @keyframes ticker {
+      from {
+        transform: translateX(0);
+      }
+      to {
+        transform: translateX(-35%);
+      }
+    }
+
+    /* =========================
+       HEADER
+    ========================= */
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(5,5,5,.94);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-inner {
+      width: min(var(--max), 100%);
+      min-height: 78px;
+      margin: auto;
+      padding: 0 22px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      min-width: max-content;
+    }
+
+    .crow-mark {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+
+      background: var(--red);
+      color: white;
+      border-radius: 9px;
+
+      font-family: "Orbitron", sans-serif;
+      font-size: 20px;
+      font-weight: 900;
+
+      box-shadow:
+        0 0 22px rgba(225, 6, 0, .3),
+        inset 0 0 0 1px rgba(255,255,255,.12);
+    }
+
+    .brand-name {
+      font-family: "Orbitron", sans-serif;
+      font-size: 19px;
+      font-weight: 900;
+      letter-spacing: .05em;
+    }
+
+    .brand-name span {
+      color: var(--red-bright);
+    }
+
+    .brand-sub {
+      color: #777;
+      font-size: 9px;
+      letter-spacing: .18em;
+      margin-top: 3px;
+      text-transform: uppercase;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      flex: 1;
+    }
+
+    nav a {
+      padding: 11px 12px;
+      border-radius: 7px;
+
+      color: #999;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+
+      transition: .2s ease;
+    }
+
+    nav a:hover,
+    nav a.active {
+      color: white;
+      background: #171717;
+    }
+
+    nav a.active {
+      box-shadow: inset 0 -2px 0 var(--red);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+
+      display: grid;
+      place-items: center;
+
+      background: #111;
+      color: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+
+      cursor: pointer;
+      transition: .2s ease;
+    }
+
+    .icon-btn:hover {
+      border-color: var(--red);
+      background: #1b0807;
+    }
+
+    /* =========================
+       MAIN
+    ========================= */
+
+    main {
+      width: min(var(--max), 100%);
+      margin: auto;
+      padding: 28px 22px 70px;
+    }
+
+    /* =========================
+       HERO
+    ========================= */
+
+    .hero {
+      position: relative;
+      min-height: 390px;
+      overflow: hidden;
+
+      display: flex;
+      align-items: flex-end;
+
+      border: 1px solid var(--red-border);
+      border-radius: var(--radius);
+
+      background:
+        linear-gradient(90deg, rgba(0,0,0,.98), rgba(0,0,0,.62), rgba(0,0,0,.85)),
+        radial-gradient(circle at 75% 35%, rgba(225,6,0,.28), transparent 30%),
+        #0b0b0b;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+
+      background:
+        linear-gradient(
+          transparent 49%,
+          rgba(255,255,255,.025) 50%,
+          transparent 51%
+        );
+
+      background-size: 100% 5px;
+      pointer-events: none;
+      opacity: .35;
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      opacity: .08;
+
+      background-image:
+        linear-gradient(var(--red) 1px, transparent 1px),
+        linear-gradient(90deg, var(--red) 1px, transparent 1px);
+
+      background-size: 42px 42px;
+
+      transform: perspective(500px) rotateX(50deg) scale(1.4);
+      transform-origin: bottom;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      width: 720px;
+      padding: 42px;
+    }
+
+    .live-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+
+      padding: 7px 11px;
+      margin-bottom: 17px;
+
+      background: var(--red);
+      color: white;
+
+      font-family: "Orbitron", sans-serif;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+
+      border-radius: 5px;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 0 10px white;
+      animation: pulse 1.2s infinite;
+    }
+
+    @keyframes pulse {
+      50% {
+        opacity: .35;
+      }
+    }
+
+    .hero h1 {
+      font-family: "Orbitron", sans-serif;
+      font-size: clamp(34px, 5vw, 64px);
+      line-height: .98;
+      text-transform: uppercase;
+      letter-spacing: -.03em;
+      margin-bottom: 17px;
+    }
+
+    .hero h1 span {
+      color: var(--red-bright);
+    }
+
+    .hero p {
+      max-width: 610px;
+      color: #aaa;
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 25px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      min-height: 44px;
+      padding: 0 18px;
+
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 7px;
+      border: 1px solid var(--border);
+
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+
+      cursor: pointer;
+      transition: .2s ease;
+    }
+
+    .btn-primary {
+      background: var(--red);
+      border-color: var(--red);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--red-bright);
+      box-shadow: 0 0 25px rgba(225,6,0,.3);
+    }
+
+    .btn-secondary {
+      background: #121212;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--red);
+    }
+
+    /* =========================
+       SECTION
+    ========================= */
+
+    .section {
+      margin-top: 30px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 15px;
+
+      margin-bottom: 13px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      font-family: "Orbitron", sans-serif;
+      font-size: 17px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .section-title::before {
+      content: "";
+      width: 4px;
+      height: 21px;
+      background: var(--red);
+      box-shadow: 0 0 12px rgba(225,6,0,.45);
+    }
+
+    .section-link {
+      color: var(--red-bright);
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    /* =========================
+       SCORE GRID
+    ========================= */
+
+    .scores {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .score-card {
+      position: relative;
+      padding: 16px;
+
+      background:
+        linear-gradient(135deg, #101010, #090909);
+
+      border: 1px solid var(--border);
+      border-radius: 10px;
+
+      transition: .2s ease;
+    }
+
+    .score-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--red-border);
+    }
+
+    .score-card.live {
+      border-color: #67120f;
+    }
+
+    .league {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      margin-bottom: 15px;
+
+      color: #777;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .status {
+      color: var(--red-bright);
+    }
+
+    .team {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      padding: 7px 0;
+
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .team-name {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .team-logo {
+      width: 27px;
+      height: 27px;
+
+      display: grid;
+      place-items: center;
+
+      border-radius: 6px;
+      background: #191919;
+
+      font-family: "Orbitron", sans-serif;
+      font-size: 8px;
+      font-weight: 900;
+    }
+
+    .score {
+      font-family: "Orbitron", sans-serif;
+      font-size: 17px;
+    }
+
+    .score-card.live .score {
+      color: white;
+    }
+
+    /* =========================
+       NEWS
+    ========================= */
+
+    .news-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .news-card {
+      min-height: 190px;
+      padding: 18px;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+
+      border: 1px solid var(--border);
+      border-radius: 10px;
+
+      overflow: hidden;
+      position: relative;
+
+      background:
+        linear-gradient(to top, #080808 0%, rgba(8,8,8,.72) 60%, rgba(225,6,0,.08)),
+        #111;
+    }
+
+    .news-card.featured {
+      min-height: 280px;
+    }
+
+    .news-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+
+      background:
+        repeating-linear-gradient(
+          0deg,
+          transparent 0,
+          transparent 3px,
+          rgba(255,255,255,.025) 4px
+        );
+    }
+
+    .news-card-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .news-category {
+      display: inline-block;
+      margin-bottom: 8px;
+
+      color: var(--red-bright);
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .news-card h3 {
+      font-family: "Orbitron", sans-serif;
+      font-size: 15px;
+      line-height: 1.25;
+    }
+
+    .news-card.featured h3 {
+      font-size: 22px;
+    }
+
+    .news-time {
+      margin-top: 10px;
+      color: #777;
+      font-size: 9px;
+    }
+
+    /* =========================
+       SPORTS
+    ========================= */
+
+    .sports-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+    }
+
+    .sport {
+      min-height: 88px;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+
+      background: #0d0d0d;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+
+      transition: .2s ease;
+    }
+
+    .sport:hover {
+      border-color: var(--red);
+      background: #160807;
+      transform: translateY(-2px);
+    }
+
+    .sport-icon {
+      font-size: 23px;
+    }
+
+    .sport span:last-child {
+      color: #aaa;
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    /* =========================
+       PNW
+    ========================= */
+
+    .pnw {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .pnw-card {
+      min-height: 160px;
+      padding: 22px;
+
+      position: relative;
+      overflow: hidden;
+
+      background:
+        linear-gradient(135deg, #111, #090909);
+
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .pnw-card::after {
+      content: "";
+      position: absolute;
+      right: -30px;
+      bottom: -45px;
+
+      width: 150px;
+      height: 150px;
+
+      border: 28px solid rgba(225,6,0,.08);
+      border-radius: 50%;
+    }
+
+    .pnw-card small {
+      color: var(--red-bright);
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .pnw-card h3 {
+      margin-top: 9px;
+
+      font-family: "Orbitron", sans-serif;
+      font-size: 20px;
+    }
+
+    .pnw-card p {
+      margin-top: 8px;
+
+      color: #777;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    /* =========================
+       UPCOMING
+    ========================= */
+
+    .games {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .game {
+      padding: 16px;
+
+      background: #0d0d0d;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .game-top {
+      display: flex;
+      justify-content: space-between;
+
+      color: #777;
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .game-teams {
+      margin-top: 17px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .game-team {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .game-time {
+      margin-top: 14px;
+      padding-top: 12px;
+
+      border-top: 1px solid #202020;
+
+      color: var(--red-bright);
+      font-family: "Orbitron", sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    /* =========================
+       ORIGINALS
+    ========================= */
+
+    .originals {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .original {
+      min-height: 150px;
+      padding: 20px;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+
+      background:
+        linear-gradient(135deg, #180706, #0b0b0b);
+
+      border: 1px solid #3c0c0a;
+      border-radius: 10px;
+    }
+
+    .original small {
+      color: var(--red-bright);
+      font-size: 8px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .original h3 {
+      margin-top: 7px;
+
+      font-family: "Orbitron", sans-serif;
+      font-size: 15px;
+    }
+
+    /* =========================
+       FOOTER
+    ========================= */
+
+    footer {
+      border-top: 1px solid var(--border);
+      background: #030303;
+    }
+
+    .footer-inner {
+      width: min(var(--max), 100%);
+      margin: auto;
+      padding: 35px 22px;
+
+      display: flex;
+      justify-content: space-between;
+      gap: 25px;
+    }
+
+    .footer-brand {
+      font-family: "Orbitron", sans-serif;
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    .footer-brand span {
+      color: var(--red);
+    }
+
+    .footer-copy {
+      margin-top: 7px;
+      color: #666;
+      font-size: 10px;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      color: #777;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .footer-links a:hover {
+      color: var(--red-bright);
+    }
+
+    /* =========================
+       MOBILE
+    ========================= */
+
+    @media (max-width: 1050px) {
+      nav {
+        display: none;
+      }
+
+      .scores {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .sports-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      .games {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .originals {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 720px) {
+      main {
+        padding: 16px 13px 50px;
+      }
+
+      .header-inner {
+        padding: 0 13px;
+        min-height: 66px;
+      }
+
+      .brand-sub {
+        display: none;
+      }
+
+      .brand-name {
+        font-size: 15px;
+      }
+
+      .crow-mark {
+        width: 36px;
+        height: 36px;
+      }
+
+      .hero {
+        min-height: 430px;
+      }
+
+      .hero-content {
+        padding: 25px;
+      }
+
+      .scores,
+      .news-grid,
+      .pnw,
+      .games,
+      .originals {
+        grid-template-columns: 1fr;
+      }
+
+      .sports-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .news-card,
+      .news-card.featured {
+        min-height: 210px;
+      }
+
+      .footer-inner {
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .header-actions .icon-btn:first-child {
+        display: none;
+      }
+
+      .hero h1 {
+        font-size: 34px;
+      }
+
+      .hero p {
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =========================
+       SCORE TICKER
+  ========================== -->
+
+  <div class="topbar">
+    <div class="ticker">
+      <div class="ticker-label">CROWRULES LIVE</div>
+
+      <span>MLB</span>
+      <strong>Seattle — Live</strong>
+
+      <span>MLS</span>
+      <strong>Seattle — Upcoming</strong>
+
+      <span>NHL</span>
+      <strong>Kraken — Upcoming</strong>
+
+      <span>NFL</span>
+      <strong>Seahawks — Upcoming</strong>
+
+      <span>NBA</span>
+      <strong>Scores &amp; Updates</strong>
+    </div>
+  </div>
+
+
+  <!-- =========================
+       HEADER
+  ========================== -->
+
+  <header>
+    <div class="header-inner">
+
+      <a class="brand" href="sports.html">
+        <div class="crow-mark">CR</div>
+
+        <div>
+          <div class="brand-name">
+            CROW<span>RULES</span> SPORTS
+          </div>
+
+          <div class="brand-sub">
+            Independent Sports Network
+          </div>
+        </div>
+      </a>
+
+
+      <nav>
+        <a class="active" href="sports.html">Home</a>
+        <a href="live.html">Live</a>
+        <a href="schedule.html">Schedule</a>
+        <a href="standings.html">Standings</a>
+        <a href="rankings.html">Rankings</a>
+        <a href="news.html">News</a>
+        <a href="teams.html">Teams</a>
+        <a href="pnw.html">PNW</a>
+      </nav>
+
+
+      <div class="header-actions">
+        <button
+          class="icon-btn"
+          id="searchBtn"
+          aria-label="Search"
+          type="button"
+        >
+          🔍
+        </button>
+
+        <button
+          class="icon-btn"
+          id="menuBtn"
+          aria-label="Menu"
+          type="button"
+        >
+          ☰
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+
+  <!-- =========================
+       MAIN
+  ========================== -->
+
+  <main>
+
+    <!-- HERO -->
+
+    <section class="hero">
+
+      <div class="hero-grid"></div>
+
+      <div class="hero-content">
+
+        <div class="live-label">
+          <span class="live-dot"></span>
+          CrowRules Sports Network
+        </div>
+
+        <h1>
+          Live.<br>
+          <span>Loud.</span><br>
+          Local.
+        </h1>
+
+        <p>
+          Your independent sports center for live scores,
+          upcoming games, standings, sports news, highlights
+          and Pacific Northwest coverage.
+        </p>
+
+        <div class="hero-buttons">
+          <a class="btn btn-primary" href="live.html">
+            🔴 View Live Sports
+          </a>
+
+          <a class="btn btn-secondary" href="schedule.html">
+            View Schedule
+          </a>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- LIVE SCORES -->
+
+    <section class="section">
+
+      <div class="section-heading">
+        <h2 class="section-title">
+          Live Scores
+        </h2>
+
+        <a class="section-link" href="live.html">
+          View All →
+        </a>
+      </div>
+
+
+      <div class="scores">
+
+        <article class="score-card live">
+          <div class="league">
+            <span>MLB</span>
+            <span class="status">● LIVE</span>
+          </div>
+
+          <div class="team">
+            <div class="team-name">
+              <div class="team-logo">SEA</div>
+              Seattle
+            </div>
+
+            <div class="score">4</div>
+          </div>
+
+          <div class="team">
+            <div class="team-name">
+              <div class="team-logo">OAK</div>
+              Oakland
+            </div>
+
+            <div class="score">2</div>
+          </div>
+        </article>
+
+
+        <article class="score-card">
+          <div class="league">
+            <span>NFL</span>
+            <span>UPCOMING</span>
+          </div>
+
+          <div class="team">
+            <div class="team-name">
+              <div class="team-logo">SEA</div>
+              Seattle
+            </div>
+
+            <div class="score">—</div>
+          </div>
+
+          <div class="team">
+            <div class="team-name">
+              <div class="team-logo">DEN</div>
+              Denver
+            </div>
+
+            <div class="score">—</div>
+          </div>
+        </article>
+
+
+        <article class="score-card">
+          <div class="league">
+            <span>NHL</span>
+            <span>UPCOMING</span>
+          </div>
+
+          <div class="team">
+            <div class="team-name">
+              <div class="team-logo">SEA</div>
+              Seattle
+            </div>
+
+            <div class="score">—</div>
+          </div>
+
+          <div class="team">
+            <div class="team-name">
+              <div class="team-logo">VAN</div>
+              Vancouver
+            </div>
+
+            <div class="score">—</div>
+          </div>
+        </article>
+
+
+        <article class="score-card">
+          <div class="league">
+            <span>MLS</span>
+            <span>UPCOMING</span>
+          </div>
+
+          <div class="team">
+            <div class="team-name">
+              <div class="team-logo">SEA</div>
+              Seattle
+            </div>
+
+            <div class="score">—</div>
+          </div>
+
+          <div class="team">
+            <div class="team-name">
+              <div class="team-logo">POR</div>
+              Portland
+            </div>
+
+            <div class="score">—</div>
+          </div>
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- TOP STORIES -->
+
+    <section class="section">
+
+      <div class="section-heading">
+        <h2 class="section-title">
+          Top Stories
+        </h2>
+
+        <a class="section-link" href="news.html">
+          All News →
+        </a>
+      </div>
+
+
+      <div class="news-grid">
+
+        <article class="news-card featured">
+          <div class="news-card-content">
+            <div class="news-category">
+              Featured
+            </div>
+
+            <h3>
+              The Latest From Around The Sports World
+            </h3>
+
+            <div class="news-time">
+              CrowRules Sports Desk
+            </div>
+          </div>
+        </article>
+
+
+        <article class="news-card">
+          <div class="news-card-content">
+            <div class="news-category">
+              Seattle
+            </div>
+
+            <h3>
+              Pacific Northwest Teams In Focus
+            </h3>
+
+            <div class="news-time">
+              Sports News
+            </div>
+          </div>
+        </article>
+
+
+        <article class="news-card">
+          <div class="news-card-content">
+            <div class="news-category">
+              Analysis
+            </div>
+
+            <h3>
+              What To Watch This Week
+            </h3>
+
+            <div class="news-time">
+              CrowRules Analysis
+            </div>
+          </div>
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- SPORTS -->
+
+    <section class="section">
+
+      <div class="section-heading">
+        <h2 class="section-title">
+          Sports
+        </h2>
+      </div>
+
+
+      <div class="sports-grid">
+
+        <a class="sport" href="league.html?league=nfl">
+          <span class="sport-icon">🏈</span>
+          <span>NFL</span>
+        </a>
+
+        <a class="sport" href="league.html?league=nba">
+          <span class="sport-icon">🏀</span>
+          <span>NBA</span>
+        </a>
+
+        <a class="sport" href="league.html?league=wnba">
+          <span class="sport-icon">🏀</span>
+          <span>WNBA</span>
+        </a>
+
+        <a class="sport" href="league.html?league=mlb">
+          <span class="sport-icon">⚾</span>
+          <span>MLB</span>
+        </a>
+
+        <a class="sport" href="league.html?league=nhl">
+          <span class="sport-icon">🏒</span>
+          <span>NHL</span>
+        </a>
+
+        <a class="sport" href="league.html?league=mls">
+          <span class="sport-icon">⚽</span>
+          <span>MLS</span>
+        </a>
+
+        <a class="sport" href="league.html?league=ncaa">
+          <span class="sport-icon">🎓</span>
+          <span>College</span>
+        </a>
+
+      </div>
+
+    </section>
+
+
+    <!-- PACIFIC NORTHWEST -->
+
+    <section class="section">
+
+      <div class="section-heading">
+        <h2 class="section-title">
+          Pacific Northwest
+        </h2>
+
+        <a class="section-link" href="pnw.html">
+          PNW Sports →
+        </a>
+      </div>
+
+
+      <div class="pnw">
+
+        <a class="pnw-card" href="seattle.html">
+          <small>CrowRules Sports</small>
+
+          <h3>
+            Seattle
+          </h3>
+
+          <p>
+            Follow Seattle teams, games, scores,
+            news and upcoming events.
+          </p>
+        </a>
+
+
+        <a class="pnw-card" href="tacoma.html">
+          <small>CrowRules Sports</small>
+
+          <h3>
+            Tacoma
+          </h3>
+
+          <p>
+            Local sports coverage from Tacoma
+            and the South Sound.
+          </p>
+        </a>
+
+
+        <a class="pnw-card" href="pnw.html">
+          <small>CrowRules Sports</small>
+
+          <h3>
+            Washington
+          </h3>
+
+          <p>
+            College, professional and independent
+            sports across Washington.
+          </p>
+        </a>
+
+      </div>
+
+    </section>
+
+
+    <!-- UPCOMING -->
+
+    <section class="section">
+
+      <div class="section-heading">
+        <h2 class="section-title">
+          Upcoming Games
+        </h2>
+
+        <a class="section-link" href="schedule.html">
+          Full Schedule →
+        </a>
+      </div>
+
+
+      <div class="games">
+
+        <article class="game">
+          <div class="game-top">
+            <span>MLB</span>
+            <span>Today</span>
+          </div>
+
+          <div class="game-teams">
+            <div class="game-team">
+              <span>Seattle</span>
+              <span>SEA</span>
+            </div>
+
+            <div class="game-team">
+              <span>Opponent</span>
+              <span>—</span>
+            </div>
+          </div>
+
+          <div class="game-time">
+            1:10 PM
+          </div>
+        </article>
+
+
+        <article class="game">
+          <div class="game-top">
+            <span>NFL</span>
+            <span>Upcoming</span>
+          </div>
+
+          <div class="game-teams">
+            <div class="game-team">
+              <span>Seattle</span>
+              <span>SEA</span>
+            </div>
+
+            <div class="game-team">
+              <span>Denver</span>
+              <span>DEN</span>
+            </div>
+          </div>
+
+          <div class="game-time">
+            1:25 PM
+          </div>
+        </article>
+
+
+        <article class="game">
+          <div class="game-top">
+            <span>NHL</span>
+            <span>Upcoming</span>
+          </div>
+
+          <div class="game-teams">
+            <div class="game-team">
+              <span>Seattle</span>
+              <span>SEA</span>
+            </div>
+
+            <div class="game-team">
+              <span>Vancouver</span>
+              <span>VAN</span>
+            </div>
+          </div>
+
+          <div class="game-time">
+            7:00 PM
+          </div>
+        </article>
+
+
+        <article class="game">
+          <div class="game-top">
+            <span>MLS</span>
+            <span>Upcoming</span>
+          </div>
+
+          <div class="game-teams">
+            <div class="game-team">
+              <span>Seattle</span>
+              <span>SEA</span>
+            </div>
+
+            <div class="game-team">
+              <span>Portland</span>
+              <span>POR</span>
+            </div>
+          </div>
+
+          <div class="game-time">
+            7:30 PM
+          </div>
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- CROWRULES ORIGINALS -->
+
+    <section class="section">
+
+      <div class="section-heading">
+        <h2 class="section-title">
+          CrowRules Sports Originals
+        </h2>
+
+        <a class="section-link" href="originals.html">
+          Explore →
+        </a>
+      </div>
+
+
+      <div class="originals">
+
+        <a class="original" href="original.html?id=sports-talk">
+          <small>Original Series</small>
+          <h3>Sports Talk</h3>
+        </a>
+
+        <a class="original" href="original.html?id=pnw-sports">
+          <small>Original Series</small>
+          <h3>PNW Sports</h3>
+        </a>
+
+        <a class="original" href="original.html?id=game-night">
+          <small>Original Series</small>
+          <h3>Game Night</h3>
+        </a>
+
+        <a class="original" href="original.html?id=interviews">
+          <small>Original Series</small>
+          <h3>Sports Interviews</h3>
+        </a>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- =========================
+       FOOTER
+  ========================== -->
+
+  <footer>
+
+    <div class="footer-inner">
+
+      <div>
+        <div class="footer-brand">
+          CROW<span>RULES</span> SPORTS
+        </div>
+
+        <div class="footer-copy">
+          © 2026 CrowRules Entertainment.
+          Independent sports media.
+        </div>
+      </div>
+
+
+      <div class="footer-links">
+        <a href="sports.html">Sports</a>
+        <a href="live.html">Live</a>
+        <a href="schedule.html">Schedule</a>
+        <a href="standings.html">Standings</a>
+        <a href="news.html">News</a>
+        <a href="teams.html">Teams</a>
+        <a href="members.html">Members</a>
+        <a href="about.html">About</a>
+      </div>
+
+    </div>
+
+  </footer>
+
+
+  <!-- =========================
+       JAVASCRIPT
+  ========================== -->
+
+  <script>
+    (() => {
+
+      const searchBtn = document.getElementById("searchBtn");
+      const menuBtn = document.getElementById("menuBtn");
+
+      searchBtn?.addEventListener("click", () => {
+        window.location.href = "search.html";
+      });
+
+      menuBtn?.addEventListener("click", () => {
+        document.body.classList.toggle("menu-open");
+
+        const nav = document.querySelector("nav");
+
+        if (window.innerWidth <= 1050) {
+          if (nav.style.display === "flex") {
+            nav.style.display = "";
+          } else {
+            nav.style.display = "flex";
+            nav.style.position = "absolute";
+            nav.style.top = "66px";
+            nav.style.left = "0";
+            nav.style.right = "0";
+            nav.style.padding = "12px";
+            nav.style.background = "#080808";
+            nav.style.borderBottom = "1px solid #292929";
+            nav.style.flexDirection = "column";
+          }
+        }
+      });
+
+      /*
+        Future Supabase integration:
+
+        Load:
+        - sports_games
+        - sports_scores
+        - sports_news
+        - sports_teams
+        - sports_leagues
+        - sports_standings
+
+        and replace the demo cards above with
+        live database content.
+      */
+
+      console.log("CrowRules Sports initialized.");
+
+    })();
+  </script>
+
+</body>
+</html>
