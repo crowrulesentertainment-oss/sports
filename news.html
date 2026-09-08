@@ -1,0 +1,4218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+
+<title>CrowRules Sports — Newsroom</title>
+
+<meta name="theme-color" content="#050505">
+<meta name="description" content="CrowRules Sports Newsroom — breaking sports news, analysis, scores, broadcasts and Pacific Northwest coverage.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --black:#050505;
+  --black2:#080808;
+  --panel:#0d0d0d;
+  --panel2:#121212;
+  --panel3:#181818;
+  --red:#e10600;
+  --red2:#ff211a;
+  --redDark:#780400;
+  --white:#fff;
+  --text:#ededed;
+  --muted:#888;
+  --muted2:#555;
+  --border:#292929;
+  --redBorder:#4b100e;
+  --green:#38d46a;
+  --yellow:#f2c94c;
+  --blue:#4287ff;
+  --radius:12px;
+  --max:1500px;
+}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 85% 0%,rgba(225,6,0,.14),transparent 32%),
+    radial-gradient(circle at 5% 35%,rgba(225,6,0,.055),transparent 25%),
+    var(--black);
+  color:var(--text);
+  font-family:Montserrat,Arial,sans-serif;
+}
+
+body.loading{
+  overflow:hidden;
+}
+
+a{
+  color:inherit;
+  text-decoration:none;
+}
+
+button,
+input{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+.container{
+  width:min(var(--max),calc(100% - 40px));
+  margin:auto;
+}
+
+/* =========================================================
+   LOADER
+========================================================= */
+
+.loading-screen{
+  position:fixed;
+  inset:0;
+  z-index:5000;
+  display:grid;
+  place-items:center;
+  background:#050505;
+  transition:.35s ease;
+}
+
+.loading-screen.hidden{
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+}
+
+.loader-box{
+  width:min(420px,calc(100% - 40px));
+  text-align:center;
+}
+
+.loader-logo{
+  width:64px;
+  height:64px;
+  display:grid;
+  place-items:center;
+  margin:auto;
+  background:var(--red);
+  color:#fff;
+  font-family:Orbitron,sans-serif;
+  font-size:19px;
+  font-weight:900;
+  box-shadow:0 0 35px rgba(225,6,0,.35);
+}
+
+.loader-title{
+  margin-top:18px;
+  color:#fff;
+  font-family:Orbitron,sans-serif;
+  font-size:17px;
+  font-weight:900;
+  letter-spacing:1px;
+}
+
+.loader-status{
+  margin-top:8px;
+  color:#666;
+  font-size:9px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+.loader-bar{
+  height:3px;
+  margin-top:18px;
+  overflow:hidden;
+  background:#171717;
+}
+
+.loader-bar span{
+  display:block;
+  width:35%;
+  height:100%;
+  background:var(--red);
+  animation:loader 1s infinite ease-in-out;
+}
+
+@keyframes loader{
+  0%{transform:translateX(-100%)}
+  100%{transform:translateX(400%)}
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.site-header{
+  position:sticky;
+  top:0;
+  z-index:1000;
+  background:rgba(5,5,5,.95);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+}
+
+.header-inner{
+  min-height:76px;
+  display:flex;
+  align-items:center;
+  gap:24px;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:max-content;
+}
+
+.brand-mark{
+  width:42px;
+  height:42px;
+  display:grid;
+  place-items:center;
+  background:var(--red);
+  color:#fff;
+  font-family:Orbitron,sans-serif;
+  font-size:15px;
+  font-weight:900;
+  box-shadow:0 0 22px rgba(225,6,0,.28);
+}
+
+.brand-text{
+  font-family:Orbitron,sans-serif;
+  font-size:18px;
+  font-weight:900;
+  letter-spacing:1px;
+}
+
+.brand-text span{
+  color:var(--red);
+}
+
+.main-nav{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  margin-left:auto;
+}
+
+.main-nav a{
+  position:relative;
+  padding:29px 12px 25px;
+  color:#aaa;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+}
+
+.main-nav a:hover,
+.main-nav a.active{
+  color:#fff;
+}
+
+.main-nav a.active::after{
+  content:"";
+  position:absolute;
+  left:12px;
+  right:12px;
+  bottom:0;
+  height:3px;
+  background:var(--red);
+}
+
+.header-actions{
+  display:flex;
+  gap:8px;
+  margin-left:8px;
+}
+
+.icon-btn{
+  width:40px;
+  height:40px;
+  display:grid;
+  place-items:center;
+  border:1px solid var(--border);
+  background:var(--panel);
+  color:#fff;
+  border-radius:8px;
+}
+
+.icon-btn:hover{
+  border-color:var(--red);
+  color:var(--red2);
+}
+
+.menu-btn{
+  display:none;
+}
+
+/* =========================================================
+   TICKER
+========================================================= */
+
+.ticker{
+  overflow:hidden;
+  border-bottom:1px solid var(--border);
+  background:#090909;
+}
+
+.ticker-inner{
+  min-height:34px;
+  display:flex;
+  align-items:center;
+  gap:28px;
+  overflow:hidden;
+  white-space:nowrap;
+  font-family:Orbitron,sans-serif;
+  font-size:9px;
+  letter-spacing:1px;
+}
+
+.ticker-brand{
+  color:var(--red2);
+  font-weight:900;
+}
+
+.ticker-item{
+  color:#777;
+}
+
+.ticker-item strong{
+  color:#ddd;
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.hero{
+  position:relative;
+  overflow:hidden;
+  padding:58px 0 42px;
+  border-bottom:1px solid var(--border);
+}
+
+.hero::after{
+  content:"NEWS";
+  position:absolute;
+  right:-35px;
+  bottom:-70px;
+  color:rgba(225,6,0,.045);
+  font-family:Orbitron,sans-serif;
+  font-size:185px;
+  font-weight:900;
+  pointer-events:none;
+}
+
+.hero-grid{
+  position:relative;
+  z-index:1;
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:30px;
+  align-items:end;
+}
+
+.eyebrow{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin-bottom:13px;
+  color:var(--red2);
+  font-family:Orbitron,sans-serif;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+
+.eyebrow::before{
+  content:"";
+  width:28px;
+  height:2px;
+  background:var(--red);
+}
+
+h1{
+  color:#fff;
+  font-family:Orbitron,sans-serif;
+  font-size:clamp(35px,5vw,68px);
+  line-height:.98;
+  letter-spacing:-2px;
+  text-transform:uppercase;
+}
+
+.hero-copy{
+  max-width:800px;
+  margin-top:18px;
+  color:#929292;
+  font-size:14px;
+  line-height:1.7;
+}
+
+.hero-stats{
+  display:flex;
+  gap:10px;
+}
+
+.hero-stat{
+  min-width:108px;
+  padding:15px;
+  border:1px solid var(--border);
+  background:linear-gradient(145deg,#111,#090909);
+  border-radius:10px;
+  text-align:center;
+}
+
+.hero-stat strong{
+  display:block;
+  color:#fff;
+  font-family:Orbitron,sans-serif;
+  font-size:20px;
+}
+
+.hero-stat span{
+  display:block;
+  margin-top:5px;
+  color:#777;
+  font-size:8px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+/* =========================================================
+   CATEGORY BAR
+========================================================= */
+
+.category-bar{
+  position:sticky;
+  top:76px;
+  z-index:900;
+  background:rgba(8,8,8,.97);
+  border-bottom:1px solid var(--border);
+}
+
+.category-tabs{
+  display:flex;
+  gap:8px;
+  padding:13px 0;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+
+.category-tabs::-webkit-scrollbar{
+  display:none;
+}
+
+.category-tab{
+  flex:0 0 auto;
+  padding:10px 16px;
+  border:1px solid var(--border);
+  background:#0c0c0c;
+  border-radius:7px;
+  color:#888;
+  font-family:Orbitron,sans-serif;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+}
+
+.category-tab:hover{
+  color:#fff;
+  border-color:#555;
+}
+
+.category-tab.active{
+  background:var(--red);
+  border-color:var(--red);
+  color:#fff;
+}
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+main{
+  padding:35px 0 80px;
+}
+
+.section{
+  margin-bottom:42px;
+}
+
+.section-heading{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  margin-bottom:17px;
+}
+
+.section-title{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  color:#fff;
+  font-family:Orbitron,sans-serif;
+  font-size:17px;
+  letter-spacing:.6px;
+  text-transform:uppercase;
+}
+
+.section-title::before{
+  content:"";
+  width:4px;
+  height:22px;
+  background:var(--red);
+}
+
+.section-note{
+  color:#666;
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.8px;
+  text-transform:uppercase;
+}
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.system-status{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:#666;
+  font-family:Orbitron,sans-serif;
+  font-size:8px;
+  letter-spacing:.7px;
+  text-transform:uppercase;
+}
+
+.status-dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 10px rgba(56,212,106,.5);
+}
+
+.status-dot.error{
+  background:var(--red);
+  box-shadow:0 0 10px rgba(225,6,0,.5);
+}
+
+/* =========================================================
+   BREAKING
+========================================================= */
+
+.breaking{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:center;
+  gap:16px;
+  padding:13px 17px;
+  border:1px solid var(--redBorder);
+  background:linear-gradient(90deg,#170605,#0c0c0c);
+  border-radius:9px;
+}
+
+.breaking-label{
+  padding:6px 9px;
+  background:var(--red);
+  color:#fff;
+  font-family:Orbitron,sans-serif;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:1px;
+}
+
+.breaking-text{
+  min-width:0;
+  overflow:hidden;
+  color:#ddd;
+  font-size:11px;
+  font-weight:700;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  transition:opacity .2s ease;
+}
+
+.breaking-time{
+  color:#666;
+  font-family:Orbitron,sans-serif;
+  font-size:8px;
+}
+
+/* =========================================================
+   FEATURED
+========================================================= */
+
+.featured-grid{
+  display:grid;
+  grid-template-columns:1.45fr .55fr;
+  gap:17px;
+}
+
+.featured-story{
+  position:relative;
+  min-height:390px;
+  display:flex;
+  align-items:flex-end;
+  overflow:hidden;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  background:
+    radial-gradient(circle at 78% 24%,rgba(225,6,0,.27),transparent 38%),
+    linear-gradient(135deg,#21100f,#090909 68%);
+}
+
+.featured-story.has-image{
+  background-size:cover;
+  background-position:center;
+}
+
+.featured-story.has-image::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.96));
+}
+
+.featured-story::after{
+  content:"CR";
+  position:absolute;
+  right:25px;
+  top:20px;
+  color:rgba(225,6,0,.1);
+  font-family:Orbitron,sans-serif;
+  font-size:100px;
+  font-weight:900;
+}
+
+.story-content{
+  position:relative;
+  z-index:2;
+  padding:28px;
+  max-width:900px;
+}
+
+.story-tag{
+  display:inline-block;
+  margin-bottom:12px;
+  padding:6px 9px;
+  border:1px solid #64130f;
+  background:#160605;
+  color:var(--red2);
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+.story-title{
+  max-width:760px;
+  color:#fff;
+  font-family:Orbitron,sans-serif;
+  font-size:clamp(22px,3vw,38px);
+  line-height:1.08;
+  text-transform:uppercase;
+}
+
+.story-excerpt{
+  max-width:690px;
+  margin-top:12px;
+  color:#aaa;
+  font-size:12px;
+  line-height:1.7;
+}
+
+.story-meta{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+  margin-top:18px;
+  color:#666;
+  font-size:8px;
+  text-transform:uppercase;
+}
+
+.featured-side{
+  display:grid;
+  gap:17px;
+}
+
+.side-story{
+  min-height:115px;
+  padding:20px;
+  border:1px solid var(--border);
+  background:var(--panel);
+  border-radius:var(--radius);
+}
+
+.side-story:hover{
+  border-color:#4a4a4a;
+}
+
+.side-tag{
+  color:var(--red2);
+  font-family:Orbitron,sans-serif;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+.side-title{
+  margin-top:9px;
+  color:#eee;
+  font-size:13px;
+  font-weight:800;
+  line-height:1.4;
+}
+
+.side-meta{
+  margin-top:11px;
+  color:#666;
+  font-size:8px;
+}
+
+/* =========================================================
+   NEWSROOM
+========================================================= */
+
+.news-layout{
+  display:grid;
+  grid-template-columns:1fr 330px;
+  gap:20px;
+}
+
+.news-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.news-card{
+  display:grid;
+  grid-template-columns:190px 1fr;
+  min-height:150px;
+  overflow:hidden;
+  border:1px solid var(--border);
+  background:var(--panel);
+  border-radius:10px;
+  transition:.2s ease;
+}
+
+.news-card:hover{
+  transform:translateY(-2px);
+  border-color:#4a4a4a;
+}
+
+.news-thumb{
+  position:relative;
+  min-height:150px;
+  overflow:hidden;
+  display:flex;
+  align-items:flex-end;
+  padding:12px;
+  background:
+    radial-gradient(circle at 70% 30%,rgba(225,6,0,.22),transparent 45%),
+    linear-gradient(135deg,#171717,#080808);
+}
+
+.news-thumb img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.news-thumb::after{
+  content:"CR";
+  position:absolute;
+  right:10px;
+  top:9px;
+  color:rgba(255,255,255,.06);
+  font-family:Orbitron,sans-serif;
+  font-size:48px;
+  font-weight:900;
+  pointer-events:none;
+}
+
+.news-thumb span{
+  position:relative;
+  z-index:2;
+  padding:4px 6px;
+  border:1px solid #45110e;
+  background:#100504;
+  color:var(--red2);
+  font-family:Orbitron,sans-serif;
+  font-size:7px;
+  font-weight:800;
+}
+
+.news-content{
+  padding:18px 19px;
+}
+
+.news-tag{
+  color:var(--red2);
+  font-family:Orbitron,sans-serif;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+.news-title{
+  margin-top:8px;
+  color:#eee;
+  font-size:15px;
+  font-weight:800;
+  line-height:1.35;
+}
+
+.news-excerpt{
+  margin-top:7px;
+  color:#777;
+  font-size:10px;
+  line-height:1.55;
+}
+
+.news-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:11px;
+  margin-top:13px;
+  color:#555;
+  font-size:8px;
+  text-transform:uppercase;
+}
+
+/* =========================================================
+   EMPTY / ERROR
+========================================================= */
+
+.empty-state{
+  padding:45px 20px;
+  border:1px dashed #292929;
+  background:#090909;
+  border-radius:10px;
+  text-align:center;
+}
+
+.empty-icon{
+  color:#333;
+  font-family:Orbitron,sans-serif;
+  font-size:30px;
+  font-weight:900;
+}
+
+.empty-state h3{
+  margin-top:12px;
+  color:#aaa;
+  font-family:Orbitron,sans-serif;
+  font-size:12px;
+  text-transform:uppercase;
+}
+
+.empty-state p{
+  max-width:520px;
+  margin:8px auto 0;
+  color:#555;
+  font-size:9px;
+  line-height:1.6;
+}
+
+.retry-btn{
+  margin-top:15px;
+  padding:9px 15px;
+  border:1px solid var(--red);
+  background:var(--red);
+  color:#fff;
+  border-radius:6px;
+  font-family:Orbitron,sans-serif;
+  font-size:8px;
+  font-weight:900;
+}
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.sidebar{
+  display:flex;
+  flex-direction:column;
+  gap:17px;
+}
+
+.side-panel{
+  overflow:hidden;
+  border:1px solid var(--border);
+  background:var(--panel);
+  border-radius:var(--radius);
+}
+
+.side-panel-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:15px 17px;
+  border-bottom:1px solid var(--border);
+  background:#0a0a0a;
+}
+
+.side-panel-head h3{
+  color:#fff;
+  font-family:Orbitron,sans-serif;
+  font-size:11px;
+  text-transform:uppercase;
+}
+
+.side-panel-head span{
+  color:var(--red2);
+  font-size:8px;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+/* =========================================================
+   TRENDING
+========================================================= */
+
+.trending{
+  padding:0 16px;
+}
+
+.trending-item{
+  display:grid;
+  grid-template-columns:30px 1fr;
+  gap:9px;
+  padding:15px 0;
+  border-bottom:1px solid #1d1d1d;
+}
+
+.trending-item:last-child{
+  border-bottom:0;
+}
+
+.trending-number{
+  color:var(--red2);
+  font-family:Orbitron,sans-serif;
+  font-size:12px;
+  font-weight:900;
+}
+
+.trending-title{
+  color:#ccc;
+  font-size:10px;
+  font-weight:700;
+  line-height:1.45;
+}
+
+.trending-meta{
+  margin-top:5px;
+  color:#555;
+  font-size:8px;
+}
+
+/* =========================================================
+   LIVE SCORES
+========================================================= */
+
+.score-list{
+  padding:0 15px;
+}
+
+.score-card{
+  padding:14px 0;
+  border-bottom:1px solid #1d1d1d;
+}
+
+.score-card:last-child{
+  border-bottom:0;
+}
+
+.score-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+
+.score-league{
+  color:var(--red2);
+  font-family:Orbitron,sans-serif;
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:.8px;
+}
+
+.score-status{
+  color:var(--green);
+  font-family:Orbitron,sans-serif;
+  font-size:7px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+
+.score-status.final{
+  color:#777;
+}
+
+.score-team{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-top:9px;
+  color:#bbb;
+  font-size:10px;
+  font-weight:700;
+}
+
+.score-team strong{
+  color:#fff;
+  font-family:Orbitron,sans-serif;
+  font-size:13px;
+}
+
+.score-detail{
+  margin-top:6px;
+  color:#555;
+  font-size:7px;
+  text-transform:uppercase;
+}
+
+/* =========================================================
+   PNW
+========================================================= */
+
+.pnw-news{
+  padding:22px;
+  border:1px solid var(--redBorder);
+  background:
+    radial-gradient(circle at 100% 0,rgba(225,6,0,.14),transparent 40%),
+    #0d0d0d;
+  border-radius:var(--radius);
+}
+
+.pnw-news h3{
+  color:#fff;
+  font-family:Orbitron,sans-serif;
+  font-size:13px;
+  text-transform:uppercase;
+}
+
+.pnw-news > p{
+  margin-top:7px;
+  color:#777;
+  font-size:10px;
+  line-height:1.6;
+}
+
+.pnw-item{
+  padding:13px 0;
+  border-top:1px solid #28110f;
+}
+
+.pnw-item:first-of-type{
+  margin-top:12px;
+}
+
+.pnw-item-tag{
+  color:var(--red2);
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+.pnw-item-title{
+  margin-top:5px;
+  color:#ddd;
+  font-size:10px;
+  font-weight:700;
+  line-height:1.45;
+}
+
+/* =========================================================
+   BROADCASTS
+========================================================= */
+
+.broadcast-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:13px;
+}
+
+.broadcast-card{
+  padding:17px;
+  border:1px solid var(--border);
+  background:var(--panel);
+  border-radius:10px;
+}
+
+.broadcast-card.live{
+  border-color:#5b120f;
+  background:linear-gradient(145deg,#160605,#0d0d0d);
+}
+
+.broadcast-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+
+.broadcast-label{
+  color:var(--red2);
+  font-family:Orbitron,sans-serif;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.8px;
+}
+
+.broadcast-live{
+  color:var(--green);
+  font-family:Orbitron,sans-serif;
+  font-size:7px;
+  font-weight:900;
+}
+
+.broadcast-title{
+  margin-top:9px;
+  color:#eee;
+  font-size:12px;
+  font-weight:800;
+  line-height:1.4;
+}
+
+.broadcast-network{
+  margin-top:8px;
+  color:#777;
+  font-size:8px;
+  text-transform:uppercase;
+}
+
+.broadcast-btn{
+  display:inline-block;
+  margin-top:13px;
+  padding:8px 11px;
+  border:1px solid #3a3a3a;
+  background:#090909;
+  color:#ccc;
+  border-radius:6px;
+  font-family:Orbitron,sans-serif;
+  font-size:7px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+
+.broadcast-btn:hover{
+  border-color:var(--red);
+  color:#fff;
+}
+
+/* =========================================================
+   LEAGUE DESKS
+========================================================= */
+
+.league-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:13px;
+}
+
+.league-card{
+  position:relative;
+  padding:19px;
+  border:1px solid var(--border);
+  background:var(--panel);
+  border-radius:10px;
+  overflow:hidden;
+}
+
+.league-card:hover{
+  border-color:#4a4a4a;
+}
+
+.league-card::after{
+  content:"";
+  position:absolute;
+  right:-25px;
+  bottom:-35px;
+  width:90px;
+  height:90px;
+  border-radius:50%;
+  background:rgba(225,6,0,.055);
+}
+
+.league-code{
+  color:var(--red2);
+  font-family:Orbitron,sans-serif;
+  font-size:11px;
+  font-weight:900;
+}
+
+.league-name{
+  margin-top:7px;
+  color:#eee;
+  font-size:13px;
+  font-weight:800;
+}
+
+.league-description{
+  margin-top:6px;
+  color:#666;
+  font-size:9px;
+  line-height:1.5;
+}
+
+.league-count{
+  margin-top:12px;
+  color:#555;
+  font-family:Orbitron,sans-serif;
+  font-size:7px;
+  text-transform:uppercase;
+}
+
+/* =========================================================
+   NEWSLETTER
+========================================================= */
+
+.newsletter{
+  display:grid;
+  grid-template-columns:1fr auto;
+  align-items:center;
+  gap:25px;
+  padding:25px;
+  border:1px solid var(--redBorder);
+  border-radius:var(--radius);
+  background:linear-gradient(100deg,#170605,#0c0c0c);
+}
+
+.newsletter h3{
+  color:#fff;
+  font-family:Orbitron,sans-serif;
+  font-size:15px;
+  text-transform:uppercase;
+}
+
+.newsletter p{
+  margin-top:6px;
+  color:#777;
+  font-size:10px;
+}
+
+.newsletter-form{
+  display:flex;
+  gap:7px;
+}
+
+.newsletter-form input{
+  width:240px;
+  padding:12px 13px;
+  border:1px solid #333;
+  outline:0;
+  background:#080808;
+  color:#fff;
+  border-radius:7px;
+  font-size:10px;
+}
+
+.newsletter-form input:focus{
+  border-color:var(--red);
+}
+
+.newsletter-form button{
+  padding:12px 17px;
+  border:1px solid var(--red);
+  background:var(--red);
+  color:#fff;
+  border-radius:7px;
+  font-family:Orbitron,sans-serif;
+  font-size:9px;
+  font-weight:900;
+}
+
+.newsletter-form button:hover{
+  background:var(--red2);
+}
+
+.newsletter-message{
+  margin-top:8px;
+  color:var(--green);
+  font-size:8px;
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+footer{
+  padding:35px 0;
+  border-top:1px solid var(--border);
+  background:#070707;
+}
+
+.footer-inner{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+}
+
+.footer-brand{
+  font-family:Orbitron,sans-serif;
+  font-size:15px;
+  font-weight:900;
+}
+
+.footer-brand span{
+  color:var(--red);
+}
+
+.footer-copy{
+  margin-top:5px;
+  color:#555;
+  font-size:9px;
+}
+
+.footer-links{
+  display:flex;
+  flex-wrap:wrap;
+  gap:17px;
+}
+
+.footer-links a{
+  color:#666;
+  font-size:9px;
+  text-transform:uppercase;
+}
+
+.footer-links a:hover{
+  color:var(--red2);
+}
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+.toast{
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  z-index:3000;
+  max-width:360px;
+  padding:13px 16px;
+  border:1px solid #3a3a3a;
+  background:#111;
+  color:#ddd;
+  border-radius:8px;
+  box-shadow:0 10px 35px rgba(0,0,0,.4);
+  font-size:10px;
+  opacity:0;
+  transform:translateY(15px);
+  pointer-events:none;
+  transition:.25s ease;
+}
+
+.toast.show{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:1200px){
+
+  .main-nav a{
+    padding-left:8px;
+    padding-right:8px;
+    font-size:9px;
+  }
+
+  .main-nav a.active::after{
+    left:8px;
+    right:8px;
+  }
+
+  .league-grid{
+    grid-template-columns:repeat(3,1fr);
+  }
+}
+
+@media(max-width:1050px){
+
+  .hero-grid{
+    grid-template-columns:1fr;
+  }
+
+  .hero-stats{
+    justify-content:flex-start;
+  }
+
+  .news-layout{
+    grid-template-columns:1fr;
+  }
+
+  .sidebar{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    align-items:start;
+  }
+
+  .broadcast-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:900px){
+
+  .main-nav{
+    display:none;
+    position:absolute;
+    left:0;
+    right:0;
+    top:76px;
+    flex-direction:column;
+    align-items:stretch;
+    padding:10px;
+    background:#080808;
+    border-bottom:1px solid var(--border);
+  }
+
+  .main-nav.open{
+    display:flex;
+  }
+
+  .main-nav a{
+    padding:14px;
+  }
+
+  .main-nav a.active::after{
+    display:none;
+  }
+
+  .menu-btn{
+    display:grid;
+  }
+
+  .header-actions{
+    margin-left:auto;
+  }
+
+  .featured-grid{
+    grid-template-columns:1fr;
+  }
+
+  .featured-side{
+    grid-template-columns:repeat(3,1fr);
+  }
+
+  .league-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:720px){
+
+  .container{
+    width:min(100% - 24px,var(--max));
+  }
+
+  .hero{
+    padding:43px 0 30px;
+  }
+
+  .hero-stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+  }
+
+  .hero-stat{
+    min-width:0;
+  }
+
+  .breaking{
+    grid-template-columns:auto 1fr;
+  }
+
+  .breaking-time{
+    display:none;
+  }
+
+  .sidebar{
+    grid-template-columns:1fr;
+  }
+
+  .news-card{
+    grid-template-columns:135px 1fr;
+  }
+
+  .news-thumb{
+    min-height:150px;
+  }
+
+  .featured-side{
+    grid-template-columns:1fr;
+  }
+
+  .broadcast-grid{
+    grid-template-columns:1fr;
+  }
+
+  .newsletter{
+    grid-template-columns:1fr;
+  }
+
+  .newsletter-form{
+    width:100%;
+  }
+
+  .newsletter-form input{
+    width:100%;
+  }
+}
+
+@media(max-width:520px){
+
+  .brand-text{
+    font-size:14px;
+  }
+
+  .brand-mark{
+    width:38px;
+    height:38px;
+  }
+
+  .hero-stats{
+    gap:6px;
+  }
+
+  .hero-stat{
+    padding:10px 6px;
+  }
+
+  .hero-stat strong{
+    font-size:15px;
+  }
+
+  .hero-stat span{
+    font-size:7px;
+  }
+
+  .news-card{
+    grid-template-columns:1fr;
+  }
+
+  .news-thumb{
+    min-height:105px;
+  }
+
+  .league-grid{
+    grid-template-columns:1fr;
+  }
+
+  .newsletter-form{
+    flex-direction:column;
+  }
+
+  .footer-inner{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+}
+</style>
+</head>
+
+<body class="loading">
+
+<!-- =========================================================
+     LOADING SCREEN
+========================================================= -->
+
+<div class="loading-screen" id="loadingScreen">
+  <div class="loader-box">
+    <div class="loader-logo">CR</div>
+    <div class="loader-title">CROWRULES SPORTS</div>
+    <div class="loader-status" id="loaderStatus">Connecting to newsroom...</div>
+    <div class="loader-bar"><span></span></div>
+  </div>
+</div>
+
+<!-- =========================================================
+     HEADER
+========================================================= -->
+
+<header class="site-header">
+
+  <div class="container header-inner">
+
+    <a href="sports.html" class="brand">
+      <div class="brand-mark">CR</div>
+      <div class="brand-text">
+        CROWRULES <span>SPORTS</span>
+      </div>
+    </a>
+
+    <nav class="main-nav" id="mainNav">
+
+      <a href="sports.html">Sports</a>
+      <a href="live.html">Live</a>
+      <a href="schedule.html">Schedule</a>
+      <a href="standings.html">Standings</a>
+      <a href="rankings.html">Rankings</a>
+      <a href="news.html" class="active">News</a>
+      <a href="teams.html">Teams</a>
+      <a href="pnw.html">PNW</a>
+
+    </nav>
+
+    <div class="header-actions">
+
+      <button
+        class="icon-btn"
+        onclick="location.href='search.html'"
+        aria-label="Search">
+        ⌕
+      </button>
+
+      <button
+        class="icon-btn menu-btn"
+        id="menuBtn"
+        aria-label="Menu">
+        ☰
+      </button>
+
+    </div>
+
+  </div>
+
+</header>
+
+<!-- =========================================================
+     TICKER
+========================================================= -->
+
+<div class="ticker">
+
+  <div class="container ticker-inner">
+
+    <span class="ticker-brand">
+      ● CROW RULES SPORTS
+    </span>
+
+    <span class="ticker-item">
+      <strong>LIVE</strong> NEWSROOM
+    </span>
+
+    <span class="ticker-item">
+      <strong>PNW</strong> SPORTS DESK
+    </span>
+
+    <span class="ticker-item">
+      <strong>NFL</strong> NEWS
+    </span>
+
+    <span class="ticker-item">
+      <strong>UFL</strong> NEWS
+    </span>
+
+    <span class="ticker-item">
+      <strong>MLB</strong> NEWS
+    </span>
+
+    <span class="ticker-item">
+      <strong>MiLB</strong> NEWS
+    </span>
+
+    <span class="ticker-item">
+      <strong>NBA</strong> NEWS
+    </span>
+
+    <span class="ticker-item">
+      <strong>WNBA</strong> NEWS
+    </span>
+
+    <span class="ticker-item">
+      <strong>NHL</strong> NEWS
+    </span>
+
+    <span class="ticker-item">
+      <strong>MLS</strong> NEWS
+    </span>
+
+  </div>
+
+</div>
+
+<!-- =========================================================
+     HERO
+========================================================= -->
+
+<section class="hero">
+
+  <div class="container hero-grid">
+
+    <div>
+
+      <div class="eyebrow">
+        CrowRules Sports Network • Newsroom
+      </div>
+
+      <h1>
+        Sports News
+      </h1>
+
+      <p class="hero-copy">
+        Breaking stories, league coverage, game analysis, live scores,
+        broadcasts and Pacific Northwest sports coverage from the
+        CrowRules Sports newsroom.
+      </p>
+
+    </div>
+
+    <div class="hero-stats">
+
+      <div class="hero-stat">
+        <strong id="newsCount">—</strong>
+        <span>Stories</span>
+      </div>
+
+      <div class="hero-stat">
+        <strong id="leagueCount">—</strong>
+        <span>Leagues</span>
+      </div>
+
+      <div class="hero-stat">
+        <strong id="liveCount">—</strong>
+        <span>Live Games</span>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =========================================================
+     CATEGORY FILTER
+========================================================= -->
+
+<div class="category-bar">
+
+  <div class="container category-tabs" id="categoryTabs">
+
+    <button class="category-tab active" data-filter="all">
+      All News
+    </button>
+
+    <button class="category-tab" data-filter="nfl">
+      NFL
+    </button>
+
+    <button class="category-tab" data-filter="ufl">
+      UFL
+    </button>
+
+    <button class="category-tab" data-filter="mlb">
+      MLB
+    </button>
+
+    <button class="category-tab" data-filter="milb">
+      MiLB
+    </button>
+
+    <button class="category-tab" data-filter="nba">
+      NBA
+    </button>
+
+    <button class="category-tab" data-filter="wnba">
+      WNBA
+    </button>
+
+    <button class="category-tab" data-filter="nhl">
+      NHL
+    </button>
+
+    <button class="category-tab" data-filter="mls">
+      MLS
+    </button>
+
+    <button class="category-tab" data-filter="ncaa">
+      NCAA
+    </button>
+
+    <button class="category-tab" data-filter="pnw">
+      PNW
+    </button>
+
+  </div>
+
+</div>
+
+<main>
+
+<div class="container">
+
+<!-- =========================================================
+     BREAKING BAR
+========================================================= -->
+
+<section class="section">
+
+  <div class="breaking">
+
+    <div class="breaking-label">
+      BREAKING
+    </div>
+
+    <div class="breaking-text" id="breakingText">
+      Connecting to the CrowRules Sports newsroom...
+    </div>
+
+    <div class="breaking-time">
+      <span class="status-dot"></span>
+      LIVE DESK
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =========================================================
+     FEATURED STORY
+========================================================= -->
+
+<section class="section">
+
+  <div class="section-heading">
+
+    <h2 class="section-title">
+      Featured Story
+    </h2>
+
+    <div class="system-status">
+      <span class="status-dot"></span>
+      <span id="lastUpdated">Updating</span>
+    </div>
+
+  </div>
+
+  <div class="featured-grid">
+
+    <article class="featured-story" id="featuredStory">
+
+      <div class="story-content">
+
+        <div class="story-tag" id="featuredTag">
+          CROW RULES SPORTS
+        </div>
+
+        <h2 class="story-title" id="featuredTitle">
+          Loading featured coverage...
+        </h2>
+
+        <p class="story-excerpt" id="featuredExcerpt">
+          The CrowRules Sports newsroom is loading the latest published
+          stories from Supabase.
+        </p>
+
+        <div class="story-meta" id="featuredMeta">
+          <span>CrowRules Sports</span>
+          <span>•</span>
+          <span>Newsroom</span>
+        </div>
+
+      </div>
+
+    </article>
+
+    <div class="featured-side" id="featuredSide">
+
+      <article class="side-story">
+        <div class="side-tag">NEWSROOM</div>
+        <div class="side-title">
+          Loading latest league coverage...
+        </div>
+        <div class="side-meta">
+          CROWRULES SPORTS
+        </div>
+      </article>
+
+      <article class="side-story">
+        <div class="side-tag">PNW</div>
+        <div class="side-title">
+          Loading Pacific Northwest coverage...
+        </div>
+        <div class="side-meta">
+          PNW DESK
+        </div>
+      </article>
+
+      <article class="side-story">
+        <div class="side-tag">LIVE</div>
+        <div class="side-title">
+          Checking current game activity...
+        </div>
+        <div class="side-meta">
+          LIVE DESK
+        </div>
+      </article>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =========================================================
+     LATEST NEWS
+========================================================= -->
+
+<section class="section">
+
+  <div class="section-heading">
+
+    <h2 class="section-title">
+      Latest News
+    </h2>
+
+    <span class="section-note" id="latestNote">
+      Supabase News Feed
+    </span>
+
+  </div>
+
+  <div class="news-layout">
+
+    <div class="news-list" id="newsList">
+
+      <div class="empty-state">
+
+        <div class="empty-icon">CR</div>
+
+        <h3>
+          Loading newsroom
+        </h3>
+
+        <p>
+          Retrieving published CrowRules Sports stories.
+        </p>
+
+      </div>
+
+    </div>
+
+    <aside class="sidebar">
+
+      <!-- ===================================================
+           TRENDING
+      ==================================================== -->
+
+      <div class="side-panel">
+
+        <div class="side-panel-head">
+
+          <h3>
+            Trending
+          </h3>
+
+          <span>
+            Live Feed
+          </span>
+
+        </div>
+
+        <div class="trending" id="trendingList">
+
+          <div class="trending-item">
+
+            <div class="trending-number">01</div>
+
+            <div>
+              <div class="trending-title">
+                Loading trending stories...
+              </div>
+
+              <div class="trending-meta">
+                NEWSROOM
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ===================================================
+           LIVE SCORES
+      ==================================================== -->
+
+      <div class="side-panel">
+
+        <div class="side-panel-head">
+
+          <h3>
+            Live Scores
+          </h3>
+
+          <span>
+            Live
+          </span>
+
+        </div>
+
+        <div class="score-list" id="scoreList">
+
+          <div class="empty-state" style="border:0;background:transparent;padding:25px 10px">
+            <h3>Checking scores</h3>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ===================================================
+           PNW DESK
+      ==================================================== -->
+
+      <div class="pnw-news">
+
+        <h3>
+          PNW Sports Desk
+        </h3>
+
+        <p>
+          Dedicated coverage of teams, games and stories from Washington,
+          Oregon and the Pacific Northwest.
+        </p>
+
+        <div id="pnwSidebar">
+
+          <div class="pnw-item">
+
+            <div class="pnw-item-tag">
+              PNW
+            </div>
+
+            <div class="pnw-item-title">
+              Loading regional coverage...
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </aside>
+
+  </div>
+
+</section>
+
+<!-- =========================================================
+     BROADCASTS
+========================================================= -->
+
+<section class="section">
+
+  <div class="section-heading">
+
+    <h2 class="section-title">
+      Broadcast Desk
+    </h2>
+
+    <span class="section-note">
+      Game Coverage
+    </span>
+
+  </div>
+
+  <div class="broadcast-grid" id="broadcastGrid">
+
+    <div class="empty-state">
+      <div class="empty-icon">TV</div>
+      <h3>Loading broadcasts</h3>
+      <p>
+        Checking current and upcoming CrowRules Sports broadcast data.
+      </p>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =========================================================
+     LEAGUE DESKS
+========================================================= -->
+
+<section class="section">
+
+  <div class="section-heading">
+
+    <h2 class="section-title">
+      League Desks
+    </h2>
+
+    <span class="section-note">
+      Database Coverage
+    </span>
+
+  </div>
+
+  <div class="league-grid" id="leagueGrid">
+
+    <div class="empty-state">
+      <div class="empty-icon">CR</div>
+      <h3>Loading leagues</h3>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =========================================================
+     PNW NEWS
+========================================================= -->
+
+<section class="section">
+
+  <div class="section-heading">
+
+    <h2 class="section-title">
+      Pacific Northwest
+    </h2>
+
+    <span class="section-note">
+      Regional Newsroom
+    </span>
+
+  </div>
+
+  <div class="news-list" id="pnwNewsList">
+
+    <div class="empty-state">
+
+      <div class="empty-icon">PNW</div>
+
+      <h3>
+        Loading PNW coverage
+      </h3>
+
+      <p>
+        Stories tagged for Pacific Northwest coverage will appear here.
+      </p>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =========================================================
+     NEWSLETTER
+========================================================= -->
+
+<section class="section">
+
+  <div class="newsletter">
+
+    <div>
+
+      <h3>
+        CrowRules Sports Wire
+      </h3>
+
+      <p>
+        Get the biggest CrowRules Sports stories and PNW updates.
+      </p>
+
+      <div class="newsletter-message" id="newsletterMessage"></div>
+
+    </div>
+
+    <form class="newsletter-form" id="newsletterForm">
+
+      <input
+        type="email"
+        id="newsletterEmail"
+        placeholder="Email address"
+        autocomplete="email"
+        required
+      >
+
+      <button type="submit">
+        JOIN
+      </button>
+
+    </form>
+
+  </div>
+
+</section>
+
+</div>
+
+</main>
+
+<!-- =========================================================
+     FOOTER
+========================================================= -->
+
+<footer>
+
+  <div class="container footer-inner">
+
+    <div>
+
+      <div class="footer-brand">
+        CROW<span>RULES</span> SPORTS
+      </div>
+
+      <div class="footer-copy">
+        Independent sports coverage • Pacific Northwest focused
+      </div>
+
+    </div>
+
+    <div class="footer-links">
+
+      <a href="sports.html">Home</a>
+      <a href="live.html">Live</a>
+      <a href="schedule.html">Schedule</a>
+      <a href="standings.html">Standings</a>
+      <a href="rankings.html">Rankings</a>
+
+    </div>
+
+  </div>
+
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   CROWRULES SPORTS NEWSROOM
+   SUPABASE DATA ENGINE v2.0
+========================================================= */
+
+/* =========================================================
+   SUPABASE CONFIG
+========================================================= */
+
+const SUPABASE_URL =
+  "https://cevylpnoexugwgygvtgu.supabase.co";
+
+const SUPABASE_ANON_KEY =
+  "YOUR_SUPABASE_ANON_KEY";
+
+let supabaseClient = null;
+
+if(
+  SUPABASE_URL &&
+  SUPABASE_ANON_KEY &&
+  SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY"
+){
+  supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
+}
+
+/* =========================================================
+   STATE
+========================================================= */
+
+const state = {
+
+  news: [],
+  leagues: [],
+  teams: [],
+  games: [],
+  activeFilter: "all",
+  initialized: false,
+  realtimeChannel: null
+
+};
+
+/* =========================================================
+   DOM
+========================================================= */
+
+const loadingScreen =
+  document.getElementById("loadingScreen");
+
+const loaderStatus =
+  document.getElementById("loaderStatus");
+
+const newsList =
+  document.getElementById("newsList");
+
+const featuredStory =
+  document.getElementById("featuredStory");
+
+const featuredTitle =
+  document.getElementById("featuredTitle");
+
+const featuredExcerpt =
+  document.getElementById("featuredExcerpt");
+
+const featuredTag =
+  document.getElementById("featuredTag");
+
+const featuredMeta =
+  document.getElementById("featuredMeta");
+
+const featuredSide =
+  document.getElementById("featuredSide");
+
+const trendingList =
+  document.getElementById("trendingList");
+
+const scoreList =
+  document.getElementById("scoreList");
+
+const broadcastGrid =
+  document.getElementById("broadcastGrid");
+
+const leagueGrid =
+  document.getElementById("leagueGrid");
+
+const pnwNewsList =
+  document.getElementById("pnwNewsList");
+
+const pnwSidebar =
+  document.getElementById("pnwSidebar");
+
+const breakingText =
+  document.getElementById("breakingText");
+
+const newsCount =
+  document.getElementById("newsCount");
+
+const leagueCount =
+  document.getElementById("leagueCount");
+
+const liveCount =
+  document.getElementById("liveCount");
+
+const lastUpdated =
+  document.getElementById("lastUpdated");
+
+const toast =
+  document.getElementById("toast");
+
+/* =========================================================
+   UTILITIES
+========================================================= */
+
+function escapeHTML(value){
+
+  if(value === null || value === undefined){
+    return "";
+  }
+
+  return String(value)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+function slugify(value){
+
+  return String(value || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g,"-")
+    .replace(/^-+|-+$/g,"");
+}
+
+function formatDate(value){
+
+  if(!value){
+    return "—";
+  }
+
+  const date = new Date(value);
+
+  if(Number.isNaN(date.getTime())){
+    return "—";
+  }
+
+  return date.toLocaleDateString(
+    undefined,
+    {
+      month:"short",
+      day:"numeric",
+      year:"numeric"
+    }
+  );
+}
+
+function formatDateTime(value){
+
+  if(!value){
+    return "—";
+  }
+
+  const date = new Date(value);
+
+  if(Number.isNaN(date.getTime())){
+    return "—";
+  }
+
+  return date.toLocaleString(
+    undefined,
+    {
+      month:"short",
+      day:"numeric",
+      hour:"numeric",
+      minute:"2-digit"
+    }
+  );
+}
+
+function timeAgo(value){
+
+  if(!value){
+    return "";
+  }
+
+  const date = new Date(value);
+
+  if(Number.isNaN(date.getTime())){
+    return "";
+  }
+
+  const seconds =
+    Math.floor(
+      (Date.now() - date.getTime()) / 1000
+    );
+
+  if(seconds < 60){
+    return "Just now";
+  }
+
+  const minutes =
+    Math.floor(seconds / 60);
+
+  if(minutes < 60){
+    return `${minutes}m ago`;
+  }
+
+  const hours =
+    Math.floor(minutes / 60);
+
+  if(hours < 24){
+    return `${hours}h ago`;
+  }
+
+  const days =
+    Math.floor(hours / 24);
+
+  if(days < 7){
+    return `${days}d ago`;
+  }
+
+  return formatDate(value);
+}
+
+function showToast(message){
+
+  toast.textContent = message;
+
+  toast.classList.add("show");
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+  },3500);
+}
+
+function leagueKey(league){
+
+  if(!league){
+    return "";
+  }
+
+  return String(
+    league.league_key ||
+    league.short_name ||
+    league.name ||
+    ""
+  )
+  .toLowerCase()
+  .replace(/[^a-z0-9]/g,"");
+}
+
+function getLeagueById(id){
+
+  return state.leagues.find(
+    league => String(league.id) === String(id)
+  ) || null;
+}
+
+function getTeamById(id){
+
+  return state.teams.find(
+    team => String(team.id) === String(id)
+  ) || null;
+}
+
+function getGameLeague(game){
+
+  return getLeagueById(game.league_id);
+}
+
+function getGameHome(game){
+
+  return getTeamById(game.home_team_id);
+}
+
+function getGameAway(game){
+
+  return getTeamById(game.away_team_id);
+}
+
+function getNewsLeague(item){
+
+  if(item.league_id){
+    return getLeagueById(item.league_id);
+  }
+
+  const raw =
+    item.league ||
+    item.sport ||
+    item.category ||
+    "";
+
+  return state.leagues.find(
+    league =>
+      leagueKey(league) ===
+      slugify(raw).replace(/-/g,"")
+  ) || null;
+}
+
+function getNewsLeagueKey(item){
+
+  const league =
+    getNewsLeague(item);
+
+  if(league){
+    return leagueKey(league);
+  }
+
+  return String(
+    item.league ||
+    item.category ||
+    ""
+  )
+  .toLowerCase()
+  .replace(/[^a-z0-9]/g,"");
+}
+
+function getNewsTitle(item){
+
+  return (
+    item.title ||
+    item.headline ||
+    "Untitled Sports Story"
+  );
+}
+
+function getNewsExcerpt(item){
+
+  return (
+    item.excerpt ||
+    item.summary ||
+    item.description ||
+    ""
+  );
+}
+
+function getNewsDate(item){
+
+  return (
+    item.published_at ||
+    item.created_at ||
+    item.updated_at
+  );
+}
+
+/* =========================================================
+   SUPABASE CHECK
+========================================================= */
+
+function checkSupabase(){
+
+  if(!supabaseClient){
+
+    loaderStatus.textContent =
+      "Supabase public key required";
+
+    setTimeout(() => {
+
+      loadingScreen.classList.add("hidden");
+      document.body.classList.remove("loading");
+
+      showToast(
+        "Add the Supabase anon/public key to activate the newsroom."
+      );
+
+    },500);
+
+    return false;
+  }
+
+  return true;
+}
+
+/* =========================================================
+   LOAD LEAGUES
+========================================================= */
+
+async function loadLeagues(){
+
+  const {
+    data,
+    error
+  } = await supabaseClient
+    .from("sports_leagues")
+    .select("*")
+    .eq("is_active",true)
+    .order("sort_order",{ascending:true});
+
+  if(error){
+
+    console.error(
+      "CrowRules Sports leagues error:",
+      error
+    );
+
+    throw error;
+  }
+
+  state.leagues = data || [];
+}
+
+/* =========================================================
+   LOAD TEAMS
+========================================================= */
+
+async function loadTeams(){
+
+  const {
+    data,
+    error
+  } = await supabaseClient
+    .from("sports_teams")
+    .select("*")
+    .eq("is_active",true);
+
+  if(error){
+
+    console.error(
+      "CrowRules Sports teams error:",
+      error
+    );
+
+    throw error;
+  }
+
+  state.teams = data || [];
+}
+
+/* =========================================================
+   LOAD NEWS
+========================================================= */
+
+async function loadNews(){
+
+  const now =
+    new Date().toISOString();
+
+  const {
+    data,
+    error
+  } = await supabaseClient
+    .from("sports_news")
+    .select("*")
+    .eq("status","published")
+    .lte("published_at",now)
+    .order("published_at",{ascending:false})
+    .limit(150);
+
+  if(error){
+
+    console.error(
+      "CrowRules Sports news error:",
+      error
+    );
+
+    throw error;
+  }
+
+  state.news = data || [];
+}
+
+/* =========================================================
+   LOAD GAMES
+========================================================= */
+
+async function loadGames(){
+
+  const {
+    data,
+    error
+  } = await supabaseClient
+    .from("sports_games")
+    .select("*")
+    .order("scheduled_at",{ascending:true})
+    .limit(300);
+
+  if(error){
+
+    console.error(
+      "CrowRules Sports games error:",
+      error
+    );
+
+    throw error;
+  }
+
+  state.games = data || [];
+}
+
+/* =========================================================
+   LOAD EVERYTHING
+========================================================= */
+
+async function loadData(){
+
+  if(!checkSupabase()){
+    return;
+  }
+
+  loaderStatus.textContent =
+    "Loading sports database...";
+
+  await loadLeagues();
+
+  loaderStatus.textContent =
+    "Loading newsroom...";
+
+  await loadNews();
+
+  loaderStatus.textContent =
+    "Loading teams and games...";
+
+  await loadTeams();
+
+  await loadGames();
+
+  renderEverything();
+
+  state.initialized = true;
+
+  updateLastUpdated();
+
+  loadingScreen.classList.add("hidden");
+  document.body.classList.remove("loading");
+
+}
+
+/* =========================================================
+   RENDER EVERYTHING
+========================================================= */
+
+function renderEverything(){
+
+  renderStats();
+  renderBreaking();
+  renderFeatured();
+  renderNews();
+  renderTrending();
+  renderScores();
+  renderBroadcasts();
+  renderLeagueDesks();
+  renderPNW();
+}
+
+/* =========================================================
+   STATS
+========================================================= */
+
+function renderStats(){
+
+  newsCount.textContent =
+    state.news.length;
+
+  leagueCount.textContent =
+    state.leagues.length;
+
+  const liveGames =
+    state.games.filter(
+      game =>
+        game.status === "live" ||
+        game.status === "halftime"
+    );
+
+  liveCount.textContent =
+    liveGames.length;
+}
+
+/* =========================================================
+   BREAKING
+========================================================= */
+
+function renderBreaking(){
+
+  const breaking =
+    state.news.filter(
+      item =>
+        item.is_breaking === true ||
+        String(item.category || "")
+          .toLowerCase()
+          .includes("breaking")
+    );
+
+  if(breaking.length){
+
+    breakingText.textContent =
+      getNewsTitle(breaking[0]);
+
+    return;
+  }
+
+  if(state.news.length){
+
+    breakingText.textContent =
+      getNewsTitle(state.news[0]);
+
+    return;
+  }
+
+  breakingText.textContent =
+    "CrowRules Sports newsroom is standing by for the latest sports updates.";
+}
+
+/* =========================================================
+   FEATURED
+========================================================= */
+
+function renderFeatured(){
+
+  if(!state.news.length){
+
+    featuredTitle.textContent =
+      "No published stories yet";
+
+    featuredExcerpt.textContent =
+      "Published CrowRules Sports stories will appear here automatically.";
+
+    featuredTag.textContent =
+      "NEWSROOM";
+
+    featuredMeta.innerHTML =
+      "<span>CrowRules Sports</span><span>•</span><span>Awaiting Coverage</span>";
+
+    return;
+  }
+
+  const featured =
+    state.news.find(
+      item => item.is_featured === true
+    ) || state.news[0];
+
+  const league =
+    getNewsLeague(featured);
+
+  const key =
+    getNewsLeagueKey(featured);
+
+  featuredTitle.textContent =
+    getNewsTitle(featured);
+
+  featuredExcerpt.textContent =
+    getNewsExcerpt(featured) ||
+    "Read the latest coverage from the CrowRules Sports newsroom.";
+
+  featuredTag.textContent =
+    league
+      ? `${league.short_name || league.name} • FEATURED`
+      : "CROW RULES SPORTS • FEATURED";
+
+  featuredMeta.innerHTML = `
+    <span>${escapeHTML(featured.author_name || "CrowRules Sports")}</span>
+    <span>•</span>
+    <span>${escapeHTML(formatDate(getNewsDate(featured)))}</span>
+    ${featured.is_pnw ? "<span>•</span><span>PNW DESK</span>" : ""}
+  `;
+
+  if(featured.image_url){
+
+    featuredStory.classList.add("has-image");
+
+    featuredStory.style.backgroundImage =
+      `url("${String(featured.image_url).replace(/"/g,"&quot;")}")`;
+
+  }else{
+
+    featuredStory.classList.remove("has-image");
+    featuredStory.style.backgroundImage = "";
+  }
+
+  const sideStories =
+    state.news
+      .filter(
+        item =>
+          String(item.id) !==
+          String(featured.id)
+      )
+      .slice(0,3);
+
+  if(!sideStories.length){
+
+    featuredSide.innerHTML =
+      `
+      <article class="side-story">
+        <div class="side-tag">NEWSROOM</div>
+        <div class="side-title">More stories will appear as the newsroom publishes new coverage.</div>
+        <div class="side-meta">CROWRULES SPORTS</div>
+      </article>
+      `;
+
+    return;
+  }
+
+  featuredSide.innerHTML =
+    sideStories.map(item => {
+
+      const itemLeague =
+        getNewsLeague(item);
+
+      return `
+        <article class="side-story">
+
+          <div class="side-tag">
+            ${escapeHTML(
+              itemLeague
+                ? itemLeague.short_name || itemLeague.name
+                : "SPORTS"
+            )}
+          </div>
+
+          <div class="side-title">
+            ${escapeHTML(getNewsTitle(item))}
+          </div>
+
+          <div class="side-meta">
+            ${escapeHTML(
+              timeAgo(getNewsDate(item))
+            )}
+            ${item.is_pnw ? " • PNW" : ""}
+          </div>
+
+        </article>
+      `;
+
+    }).join("");
+}
+
+/* =========================================================
+   NEWS FILTER
+========================================================= */
+
+function newsMatchesFilter(item){
+
+  const filter =
+    state.activeFilter;
+
+  if(filter === "all"){
+    return true;
+  }
+
+  if(filter === "pnw"){
+    return item.is_pnw === true;
+  }
+
+  return getNewsLeagueKey(item) === filter;
+}
+
+/* =========================================================
+   RENDER NEWS
+========================================================= */
+
+function renderNews(){
+
+  const filtered =
+    state.news.filter(
+      newsMatchesFilter
+    );
+
+  document.getElementById("latestNote").textContent =
+    `${filtered.length} ${filtered.length === 1 ? "Story" : "Stories"} • Supabase`;
+
+  if(!filtered.length){
+
+    newsList.innerHTML = `
+      <div class="empty-state">
+
+        <div class="empty-icon">CR</div>
+
+        <h3>
+          No stories in this section
+        </h3>
+
+        <p>
+          There are currently no published stories matching
+          the selected newsroom filter.
+        </p>
+
+      </div>
+    `;
+
+    return;
+  }
+
+  newsList.innerHTML =
+    filtered.map(
+      renderNewsCard
+    ).join("");
+}
+
+/* =========================================================
+   NEWS CARD
+========================================================= */
+
+function renderNewsCard(item){
+
+  const league =
+    getNewsLeague(item);
+
+  const key =
+    getNewsLeagueKey(item);
+
+  const tag =
+    league
+      ? league.short_name || league.name
+      : String(
+          item.category ||
+          "SPORTS"
+        ).toUpperCase();
+
+  const title =
+    getNewsTitle(item);
+
+  const excerpt =
+    getNewsExcerpt(item);
+
+  const date =
+    getNewsDate(item);
+
+  const image =
+    item.image_url
+      ? `
+        <img
+          src="${escapeHTML(item.image_url)}"
+          alt=""
+          loading="lazy"
+          onerror="this.style.display='none'"
+        >
+      `
+      : "";
+
+  const link =
+    item.slug
+      ? `article.html?slug=${encodeURIComponent(item.slug)}`
+      : "#";
+
+  return `
+    <article
+      class="news-card"
+      data-category="${escapeHTML(key)}"
+      data-pnw="${item.is_pnw ? "true" : "false"}"
+    >
+
+      <a
+        href="${link}"
+        class="news-thumb"
+        aria-label="${escapeHTML(title)}"
+      >
+
+        ${image}
+
+        <span>
+          ${escapeHTML(tag)}
+        </span>
+
+      </a>
+
+      <div class="news-content">
+
+        <div class="news-tag">
+          ${escapeHTML(tag)}
+          ${item.is_pnw ? " • PNW" : ""}
+        </div>
+
+        <h3 class="news-title">
+          ${escapeHTML(title)}
+        </h3>
+
+        ${
+          excerpt
+            ? `
+              <p class="news-excerpt">
+                ${escapeHTML(excerpt)}
+              </p>
+            `
+            : ""
+        }
+
+        <div class="news-meta">
+
+          <span>
+            ${escapeHTML(
+              item.author_name ||
+              "CrowRules Sports"
+            )}
+          </span>
+
+          <span>•</span>
+
+          <span>
+            ${escapeHTML(
+              timeAgo(date)
+            )}
+          </span>
+
+          ${
+            item.source_name
+              ? `
+                <span>•</span>
+                <span>
+                  ${escapeHTML(item.source_name)}
+                </span>
+              `
+              : ""
+          }
+
+        </div>
+
+      </div>
+
+    </article>
+  `;
+}
+
+/* =========================================================
+   TRENDING
+========================================================= */
+
+function renderTrending(){
+
+  if(!state.news.length){
+
+    trendingList.innerHTML = `
+      <div class="trending-item">
+        <div class="trending-number">01</div>
+        <div>
+          <div class="trending-title">
+            No published stories yet.
+          </div>
+          <div class="trending-meta">
+            NEWSROOM
+          </div>
+        </div>
+      </div>
+    `;
+
+    return;
+  }
+
+  const trending =
+    state.news
+      .slice(0,5);
+
+  trendingList.innerHTML =
+    trending.map(
+      (item,index) => {
+
+        const league =
+          getNewsLeague(item);
+
+        return `
+          <div class="trending-item">
+
+            <div class="trending-number">
+              ${String(index + 1).padStart(2,"0")}
+            </div>
+
+            <div>
+
+              <div class="trending-title">
+                ${escapeHTML(
+                  getNewsTitle(item)
+                )}
+              </div>
+
+              <div class="trending-meta">
+                ${escapeHTML(
+                  league
+                    ? league.short_name || league.name
+                    : "SPORTS"
+                )}
+                •
+                ${escapeHTML(
+                  timeAgo(getNewsDate(item))
+                )}
+              </div>
+
+            </div>
+
+          </div>
+        `;
+
+      }).join("");
+}
+
+/* =========================================================
+   SCORE HELPERS
+========================================================= */
+
+function isLiveGame(game){
+
+  return [
+    "live",
+    "halftime"
+  ].includes(
+    String(game.status || "").toLowerCase()
+  );
+}
+
+function isUpcomingGame(game){
+
+  return [
+    "scheduled",
+    "pre_game"
+  ].includes(
+    String(game.status || "").toLowerCase()
+  );
+}
+
+function isFinishedGame(game){
+
+  return [
+    "final",
+    "cancelled",
+    "postponed"
+  ].includes(
+    String(game.status || "").toLowerCase()
+  );
+}
+
+function scoreValue(value){
+
+  return value === null ||
+         value === undefined ||
+         value === ""
+    ? "—"
+    : value;
+}
+
+function gameStatusText(game){
+
+  const status =
+    String(
+      game.status || ""
+    ).toLowerCase();
+
+  if(status === "live"){
+    if(game.clock){
+      return `LIVE • ${game.clock}`;
+    }
+
+    if(game.period){
+      return `LIVE • ${game.period}`;
+    }
+
+    return "LIVE";
+  }
+
+  if(status === "halftime"){
+    return "HALFTIME";
+  }
+
+  if(status === "pre_game"){
+    return "PRE-GAME";
+  }
+
+  if(status === "scheduled"){
+    return formatDateTime(
+      game.scheduled_at
+    );
+  }
+
+  if(status === "final"){
+    return "FINAL";
+  }
+
+  return status.replace(/_/g," ");
+}
+
+/* =========================================================
+   LIVE SCORES
+========================================================= */
+
+function renderScores(){
+
+  const liveGames =
+    state.games.filter(
+      isLiveGame
+    );
+
+  if(!liveGames.length){
+
+    scoreList.innerHTML = `
+      <div class="empty-state"
+           style="border:0;background:transparent;padding:25px 10px">
+
+        <h3>
+          No live games
+        </h3>
+
+        <p>
+          When a game goes live, current scoring data
+          will appear here.
+        </p>
+
+      </div>
+    `;
+
+    return;
+  }
+
+  scoreList.innerHTML =
+    liveGames
+      .slice(0,8)
+      .map(game => {
+
+        const league =
+          getGameLeague(game);
+
+        const home =
+          getGameHome(game);
+
+        const away =
+          getGameAway(game);
+
+        return `
+          <div class="score-card">
+
+            <div class="score-head">
+
+              <div class="score-league">
+                ${escapeHTML(
+                  league
+                    ? league.short_name || league.name
+                    : "SPORTS"
+                )}
+              </div>
+
+              <div class="score-status">
+                ${escapeHTML(
+                  gameStatusText(game)
+                )}
+              </div>
+
+            </div>
+
+            <div class="score-team">
+
+              <span>
+                ${escapeHTML(
+                  away
+                    ? away.short_name || away.name
+                    : "Away Team"
+                )}
+              </span>
+
+              <strong>
+                ${escapeHTML(
+                  scoreValue(game.away_score)
+                )}
+              </strong>
+
+            </div>
+
+            <div class="score-team">
+
+              <span>
+                ${escapeHTML(
+                  home
+                    ? home.short_name || home.name
+                    : "Home Team"
+                )}
+              </span>
+
+              <strong>
+                ${escapeHTML(
+                  scoreValue(game.home_score)
+                )}
+              </strong>
+
+            </div>
+
+            <div class="score-detail">
+
+              ${escapeHTML(
+                game.venue ||
+                game.city ||
+                ""
+              )}
+
+            </div>
+
+          </div>
+        `;
+
+      }).join("");
+}
+
+/* =========================================================
+   BROADCASTS
+========================================================= */
+
+function renderBroadcasts(){
+
+  const broadcastGames =
+    state.games
+      .filter(
+        game =>
+          game.broadcast_network ||
+          game.broadcast_url
+      )
+      .sort(
+        (a,b) =>
+          new Date(a.scheduled_at || 0) -
+          new Date(b.scheduled_at || 0)
+      )
+      .slice(0,9);
+
+  if(!broadcastGames.length){
+
+    broadcastGrid.innerHTML = `
+      <div class="empty-state"
+           style="grid-column:1/-1">
+
+        <div class="empty-icon">TV</div>
+
+        <h3>
+          No broadcast listings
+        </h3>
+
+        <p>
+          Games with broadcast information will automatically
+          appear here from the sports games database.
+        </p>
+
+      </div>
+    `;
+
+    return;
+  }
+
+  broadcastGrid.innerHTML =
+    broadcastGames.map(game => {
+
+      const league =
+        getGameLeague(game);
+
+      const home =
+        getGameHome(game);
+
+      const away =
+        getGameAway(game);
+
+      const live =
+        isLiveGame(game);
+
+      const title =
+        `${away ? away.short_name || away.name : "Away"} @ ${home ? home.short_name || home.name : "Home"}`;
+
+      return `
+        <article
+          class="broadcast-card ${live ? "live" : ""}"
+        >
+
+          <div class="broadcast-top">
+
+            <div class="broadcast-label">
+              ${escapeHTML(
+                league
+                  ? league.short_name || league.name
+                  : "SPORTS"
+              )}
+            </div>
+
+            ${
+              live
+                ? `<div class="broadcast-live">● LIVE</div>`
+                : ""
+            }
+
+          </div>
+
+          <div class="broadcast-title">
+            ${escapeHTML(title)}
+          </div>
+
+          <div class="broadcast-network">
+            ${escapeHTML(
+              game.broadcast_network ||
+              "Broadcast information"
+            )}
+          </div>
+
+          <div class="broadcast-network">
+            ${escapeHTML(
+              gameStatusText(game)
+            )}
+          </div>
+
+          ${
+            game.broadcast_url
+              ? `
+                <a
+                  class="broadcast-btn"
+                  href="${escapeHTML(game.broadcast_url)}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Open Broadcast →
+                </a>
+              `
+              : ""
+          }
+
+        </article>
+      `;
+
+    }).join("");
+}
+
+/* =========================================================
+   LEAGUE DESKS
+========================================================= */
+
+function renderLeagueDesks(){
+
+  if(!state.leagues.length){
+
+    leagueGrid.innerHTML = `
+      <div class="empty-state"
+           style="grid-column:1/-1">
+
+        <h3>
+          No leagues configured
+        </h3>
+
+      </div>
+    `;
+
+    return;
+  }
+
+  leagueGrid.innerHTML =
+    state.leagues.map(league => {
+
+      const key =
+        leagueKey(league);
+
+      const count =
+        state.news.filter(
+          item =>
+            getNewsLeagueKey(item) === key
+        ).length;
+
+      const gameCount =
+        state.games.filter(
+          game =>
+            String(game.league_id) ===
+            String(league.id)
+        ).length;
+
+      return `
+        <article class="league-card">
+
+          <div class="league-code">
+            ${escapeHTML(
+              league.short_name ||
+              league.name
+            )}
+          </div>
+
+          <div class="league-name">
+            ${escapeHTML(
+              league.name
+            )}
+          </div>
+
+          <div class="league-description">
+            ${escapeHTML(
+              league.description ||
+              `${league.name} coverage from CrowRules Sports.`
+            )}
+          </div>
+
+          <div class="league-count">
+            ${count} ${count === 1 ? "story" : "stories"}
+            •
+            ${gameCount} ${gameCount === 1 ? "game" : "games"}
+          </div>
+
+        </article>
+      `;
+
+    }).join("");
+}
+
+/* =========================================================
+   PNW
+========================================================= */
+
+function isPNWGame(game){
+
+  if(game.is_pnw === true){
+    return true;
+  }
+
+  const home =
+    getGameHome(game);
+
+  const away =
+    getGameAway(game);
+
+  return Boolean(
+    (home && home.is_pnw) ||
+    (away && away.is_pnw)
+  );
+}
+
+function renderPNW(){
+
+  const pnwStories =
+    state.news.filter(
+      item =>
+        item.is_pnw === true
+    );
+
+  if(!pnwStories.length){
+
+    pnwNewsList.innerHTML = `
+      <div class="empty-state">
+
+        <div class="empty-icon">PNW</div>
+
+        <h3>
+          No PNW stories yet
+        </h3>
+
+        <p>
+          Stories marked as Pacific Northwest coverage
+          will appear automatically.
+        </p>
+
+      </div>
+    `;
+
+  }else{
+
+    pnwNewsList.innerHTML =
+      pnwStories
+        .slice(0,10)
+        .map(renderNewsCard)
+        .join("");
+
+  }
+
+  const pnwGames =
+    state.games.filter(
+      isPNWGame
+    );
+
+  const livePNW =
+    pnwGames.filter(
+      isLiveGame
+    ).length;
+
+  const upcomingPNW =
+    pnwGames.filter(
+      isUpcomingGame
+    ).length;
+
+  pnwSidebar.innerHTML = `
+
+    <div class="pnw-item">
+
+      <div class="pnw-item-tag">
+        STORIES
+      </div>
+
+      <div class="pnw-item-title">
+        ${pnwStories.length}
+        published PNW
+        ${pnwStories.length === 1 ? "story" : "stories"}
+      </div>
+
+    </div>
+
+    <div class="pnw-item">
+
+      <div class="pnw-item-tag">
+        LIVE
+      </div>
+
+      <div class="pnw-item-title">
+        ${livePNW}
+        PNW
+        ${livePNW === 1 ? "game" : "games"}
+        currently live
+      </div>
+
+    </div>
+
+    <div class="pnw-item">
+
+      <div class="pnw-item-tag">
+        UPCOMING
+      </div>
+
+      <div class="pnw-item-title">
+        ${upcomingPNW}
+        upcoming PNW
+        ${upcomingPNW === 1 ? "game" : "games"}
+      </div>
+
+    </div>
+
+    <div class="pnw-item">
+
+      <div class="pnw-item-tag">
+        REGION
+      </div>
+
+      <div class="pnw-item-title">
+        Washington • Oregon • Pacific Northwest
+      </div>
+
+    </div>
+
+  `;
+}
+
+/* =========================================================
+   CATEGORY FILTER
+========================================================= */
+
+document
+  .querySelectorAll(".category-tab")
+  .forEach(tab => {
+
+    tab.addEventListener(
+      "click",
+      () => {
+
+        state.activeFilter =
+          tab.dataset.filter ||
+          "all";
+
+        document
+          .querySelectorAll(".category-tab")
+          .forEach(item =>
+            item.classList.remove("active")
+          );
+
+        tab.classList.add("active");
+
+        renderNews();
+
+        window.scrollTo({
+          top:
+            document.querySelector(
+              ".news-layout"
+            ).offsetTop - 130,
+          behavior:"smooth"
+        });
+
+      }
+    );
+
+  });
+
+/* =========================================================
+   MOBILE NAV
+========================================================= */
+
+const menuBtn =
+  document.getElementById("menuBtn");
+
+const mainNav =
+  document.getElementById("mainNav");
+
+menuBtn.addEventListener(
+  "click",
+  () => {
+
+    mainNav.classList.toggle(
+      "open"
+    );
+
+  }
+);
+
+document
+  .querySelectorAll(".main-nav a")
+  .forEach(link => {
+
+    link.addEventListener(
+      "click",
+      () => {
+
+        mainNav.classList.remove(
+          "open"
+        );
+
+      }
+    );
+
+  });
+
+/* =========================================================
+   NEWSLETTER
+========================================================= */
+
+const newsletterForm =
+  document.getElementById(
+    "newsletterForm"
+  );
+
+const newsletterEmail =
+  document.getElementById(
+    "newsletterEmail"
+  );
+
+const newsletterMessage =
+  document.getElementById(
+    "newsletterMessage"
+  );
+
+newsletterForm.addEventListener(
+  "submit",
+  async event => {
+
+    event.preventDefault();
+
+    if(!supabaseClient){
+
+      newsletterMessage.textContent =
+        "Supabase is not configured.";
+
+      return;
+    }
+
+    const email =
+      newsletterEmail.value
+        .trim()
+        .toLowerCase();
+
+    if(!email){
+      return;
+    }
+
+    const button =
+      newsletterForm.querySelector(
+        "button"
+      );
+
+    button.disabled = true;
+    button.textContent = "JOINING...";
+
+    try{
+
+      const {
+        error
+      } =
+        await supabaseClient
+          .from(
+            "sports_newsletter_subscribers"
+          )
+          .upsert(
+            {
+              email,
+              status:"active",
+              source:"sports_news"
+            },
+            {
+              onConflict:"email"
+            }
+          );
+
+      if(error){
+        throw error;
+      }
+
+      newsletterMessage.textContent =
+        "You're on the CrowRules Sports Wire.";
+
+      showToast(
+        "Welcome to the CrowRules Sports Wire."
+      );
+
+      newsletterForm.reset();
+
+    }catch(error){
+
+      console.error(
+        "Newsletter signup error:",
+        error
+      );
+
+      newsletterMessage.textContent =
+        "Signup could not be completed.";
+
+      showToast(
+        "Newsletter signup failed."
+      );
+
+    }finally{
+
+      button.disabled = false;
+      button.textContent = "JOIN";
+
+    }
+
+  }
+);
+
+/* =========================================================
+   REALTIME
+========================================================= */
+
+function subscribeRealtime(){
+
+  if(!supabaseClient){
+    return;
+  }
+
+  if(state.realtimeChannel){
+
+    supabaseClient.removeChannel(
+      state.realtimeChannel
+    );
+
+  }
+
+  state.realtimeChannel =
+    supabaseClient
+      .channel(
+        "crowrules-sports-newsroom"
+      )
+
+      .on(
+        "postgres_changes",
+        {
+          event:"*",
+          schema:"public",
+          table:"sports_news"
+        },
+        async payload => {
+
+          console.log(
+            "Newsroom realtime update:",
+            payload
+          );
+
+          await silentRefresh();
+
+        }
+      )
+
+      .on(
+        "postgres_changes",
+        {
+          event:"*",
+          schema:"public",
+          table:"sports_games"
+        },
+        async payload => {
+
+          console.log(
+            "Game realtime update:",
+            payload
+          );
+
+          await silentRefresh();
+
+        }
+      )
+
+      .on(
+        "postgres_changes",
+        {
+          event:"*",
+          schema:"public",
+          table:"sports_leagues"
+        },
+        async payload => {
+
+          console.log(
+            "League realtime update:",
+            payload
+          );
+
+          await silentRefresh();
+
+        }
+      )
+
+      .subscribe(
+        status => {
+
+          console.log(
+            "CrowRules Sports realtime:",
+            status
+          );
+
+        }
+      );
+}
+
+/* =========================================================
+   SILENT REFRESH
+========================================================= */
+
+let refreshInProgress = false;
+
+async function silentRefresh(){
+
+  if(
+    !supabaseClient ||
+    refreshInProgress
+  ){
+    return;
+  }
+
+  refreshInProgress = true;
+
+  try{
+
+    await Promise.all([
+      loadLeagues(),
+      loadNews(),
+      loadTeams(),
+      loadGames()
+    ]);
+
+    renderEverything();
+
+    updateLastUpdated();
+
+  }catch(error){
+
+    console.error(
+      "Silent newsroom refresh failed:",
+      error
+    );
+
+  }finally{
+
+    refreshInProgress = false;
+
+  }
+}
+
+/* =========================================================
+   AUTOMATIC REFRESH
+========================================================= */
+
+setInterval(
+  () => {
+
+    silentRefresh();
+
+  },
+  60000
+);
+
+/* =========================================================
+   LAST UPDATED
+========================================================= */
+
+function updateLastUpdated(){
+
+  const now =
+    new Date();
+
+  lastUpdated.textContent =
+    `Updated ${now.toLocaleTimeString(
+      undefined,
+      {
+        hour:"numeric",
+        minute:"2-digit"
+      }
+    )}`;
+}
+
+/* =========================================================
+   CLOCK / BREAKING ROTATION
+========================================================= */
+
+setInterval(
+  () => {
+
+    if(!state.news.length){
+      return;
+    }
+
+    const stories =
+      state.news.slice(0,8);
+
+    if(!stories.length){
+      return;
+    }
+
+    const index =
+      Math.floor(
+        Date.now() / 6000
+      ) % stories.length;
+
+    const story =
+      stories[index];
+
+    breakingText.style.opacity =
+      "0";
+
+    setTimeout(
+      () => {
+
+        breakingText.textContent =
+          getNewsTitle(story);
+
+        breakingText.style.opacity =
+          "1";
+
+      },
+      200
+    );
+
+  },
+  6000
+);
+
+/* =========================================================
+   STARTUP
+========================================================= */
+
+async function boot(){
+
+  try{
+
+    await loadData();
+
+    subscribeRealtime();
+
+    console.log(
+      "CrowRules Sports Newsroom v2.0 initialized."
+    );
+
+  }catch(error){
+
+    console.error(
+      "CrowRules Sports startup error:",
+      error
+    );
+
+    loaderStatus.textContent =
+      "Unable to load newsroom";
+
+    loadingScreen.classList.add(
+      "hidden"
+    );
+
+    document.body.classList.remove(
+      "loading"
+    );
+
+    newsList.innerHTML = `
+      <div class="empty-state">
+
+        <div class="empty-icon">!</div>
+
+        <h3>
+          Newsroom connection error
+        </h3>
+
+        <p>
+          CrowRules Sports could not retrieve the
+          newsroom data from Supabase.
+        </p>
+
+        <button
+          class="retry-btn"
+          onclick="location.reload()"
+        >
+          Retry Connection
+        </button>
+
+      </div>
+    `;
+
+    showToast(
+      "CrowRules Sports database connection failed."
+    );
+
+  }
+
+}
+
+boot();
+
+</script>
+
+</body>
+</html>

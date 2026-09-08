@@ -1,0 +1,1878 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+
+<title>CrowRules Sports — Teams</title>
+<meta name="theme-color" content="#050505">
+<meta name="description" content="CrowRules Sports — Live team directory powered by Supabase.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --black:#050505;
+  --black2:#080808;
+  --panel:#0d0d0d;
+  --panel2:#121212;
+  --panel3:#181818;
+  --red:#e10600;
+  --red2:#ff211a;
+  --redDark:#780400;
+  --white:#fff;
+  --text:#ededed;
+  --muted:#888;
+  --border:#292929;
+  --redBorder:#4b100e;
+  --green:#38d46a;
+  --yellow:#f2c94c;
+  --blue:#55aaff;
+  --radius:12px;
+  --max:1500px;
+}
+
+*{box-sizing:border-box}
+
+html{scroll-behavior:smooth}
+
+body{
+  margin:0;
+  min-height:100vh;
+  color:var(--text);
+  font-family:Montserrat,Arial,sans-serif;
+  background:
+    radial-gradient(circle at 80% 0%,rgba(225,6,0,.12),transparent 25%),
+    linear-gradient(180deg,#050505 0%,#080808 45%,#050505 100%);
+}
+
+a{
+  color:inherit;
+  text-decoration:none;
+}
+
+button,input{
+  font:inherit;
+}
+
+button{cursor:pointer}
+
+.site-header{
+  position:sticky;
+  top:0;
+  z-index:1000;
+  background:rgba(5,5,5,.96);
+  backdrop-filter:blur(15px);
+  border-bottom:1px solid var(--border);
+}
+
+.header-inner{
+  max-width:var(--max);
+  min-height:74px;
+  margin:auto;
+  padding:0 22px;
+  display:flex;
+  align-items:center;
+  gap:22px;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-shrink:0;
+}
+
+.brand-mark{
+  width:43px;
+  height:43px;
+  border-radius:8px;
+  display:grid;
+  place-items:center;
+  background:var(--red);
+  color:#fff;
+  font-family:Orbitron,sans-serif;
+  font-size:15px;
+  font-weight:900;
+  box-shadow:0 0 24px rgba(225,6,0,.28);
+}
+
+.brand-title{
+  font-family:Orbitron,sans-serif;
+  font-size:16px;
+  font-weight:900;
+  letter-spacing:1.5px;
+  line-height:1;
+}
+
+.brand-sub{
+  margin-top:5px;
+  color:var(--red2);
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:2.5px;
+}
+
+.main-nav{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  margin-left:auto;
+}
+
+.main-nav a{
+  padding:10px 11px;
+  border-radius:7px;
+  color:#999;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+  transition:.2s ease;
+}
+
+.main-nav a:hover{
+  color:#fff;
+  background:#111;
+}
+
+.main-nav a.active{
+  color:#fff;
+  background:var(--red);
+}
+
+.header-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.icon-btn{
+  width:39px;
+  height:39px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:#0b0b0b;
+  color:#aaa;
+}
+
+.icon-btn:hover{
+  border-color:var(--red);
+  color:#fff;
+}
+
+.menu-btn{display:none}
+
+.ticker{
+  border-bottom:1px solid #171717;
+  background:#080808;
+  overflow:hidden;
+}
+
+.ticker-inner{
+  max-width:var(--max);
+  height:34px;
+  margin:auto;
+  padding:0 22px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+
+.ticker-label{
+  flex-shrink:0;
+  color:#fff;
+  font-family:Orbitron,sans-serif;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:1.4px;
+}
+
+.ticker-label span{color:var(--red2)}
+
+.ticker-track{
+  overflow:hidden;
+  white-space:nowrap;
+  color:#888;
+  font-size:10px;
+  font-weight:600;
+}
+
+.ticker-track b{
+  color:#ddd;
+  margin-right:35px;
+}
+
+.page{
+  max-width:var(--max);
+  margin:auto;
+  padding:35px 22px 70px;
+}
+
+.hero{
+  position:relative;
+  overflow:hidden;
+  min-height:280px;
+  padding:42px;
+  border:1px solid var(--redBorder);
+  border-radius:16px;
+  background:
+    linear-gradient(100deg,rgba(225,6,0,.16),transparent 50%),
+    linear-gradient(135deg,#111 0%,#080808 70%);
+  box-shadow:inset 0 0 80px rgba(225,6,0,.035);
+}
+
+.hero:before{
+  content:"";
+  position:absolute;
+  width:430px;
+  height:430px;
+  right:-150px;
+  top:-180px;
+  border:1px solid rgba(225,6,0,.2);
+  border-radius:50%;
+  box-shadow:
+    0 0 0 30px rgba(225,6,0,.025),
+    0 0 0 70px rgba(225,6,0,.018);
+}
+
+.hero-grid{
+  position:relative;
+  z-index:1;
+  max-width:850px;
+}
+
+.eyebrow{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  color:var(--red2);
+  font-family:Orbitron,sans-serif;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+
+.eyebrow:before{
+  content:"";
+  width:22px;
+  height:2px;
+  background:var(--red);
+}
+
+.hero h1{
+  margin:13px 0 12px;
+  font-family:Orbitron,sans-serif;
+  font-size:clamp(34px,5vw,62px);
+  line-height:1;
+  letter-spacing:-2px;
+}
+
+.hero h1 span{color:var(--red)}
+
+.hero p{
+  max-width:750px;
+  margin:0;
+  color:#aaa;
+  line-height:1.8;
+  font-size:14px;
+}
+
+.data-status{
+  position:absolute;
+  right:35px;
+  bottom:30px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 11px;
+  border:1px solid #272727;
+  border-radius:7px;
+  background:#090909;
+  color:#777;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+.status-dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:#555;
+}
+
+.status-dot.live{
+  background:var(--green);
+  box-shadow:0 0 10px rgba(56,212,106,.55);
+}
+
+.status-dot.error{
+  background:var(--red);
+}
+
+.controls{
+  margin-top:24px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.search-box{
+  position:relative;
+  flex:1 1 280px;
+  min-width:230px;
+}
+
+.search-box input{
+  width:100%;
+  height:46px;
+  padding:0 15px 0 43px;
+  color:#fff;
+  background:#0d0d0d;
+  border:1px solid var(--border);
+  border-radius:9px;
+  outline:none;
+}
+
+.search-box input:focus{
+  border-color:var(--red);
+  box-shadow:0 0 0 2px rgba(225,6,0,.1);
+}
+
+.search-icon{
+  position:absolute;
+  left:15px;
+  top:13px;
+  color:#666;
+}
+
+.filter-row{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+}
+
+.filter-btn{
+  height:43px;
+  padding:0 15px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:#0d0d0d;
+  color:#888;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+}
+
+.filter-btn:hover{
+  color:#fff;
+  border-color:#555;
+}
+
+.filter-btn.active{
+  color:#fff;
+  background:var(--red);
+  border-color:var(--red);
+}
+
+.section{margin-top:38px}
+
+.section-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:end;
+  gap:15px;
+  margin-bottom:17px;
+}
+
+.section-title{
+  margin:0;
+  font-family:Orbitron,sans-serif;
+  font-size:18px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+.section-title span{color:var(--red)}
+
+.section-desc{
+  margin:5px 0 0;
+  color:#666;
+  font-size:11px;
+}
+
+.section-count{
+  color:#777;
+  font-size:10px;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.pnw-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+}
+
+.pnw-card{
+  position:relative;
+  overflow:hidden;
+  min-height:175px;
+  padding:20px;
+  border:1px solid var(--redBorder);
+  border-radius:12px;
+  background:
+    linear-gradient(145deg,rgba(225,6,0,.11),transparent 60%),
+    #0d0d0d;
+  transition:.22s ease;
+}
+
+.pnw-card:hover{
+  transform:translateY(-3px);
+  border-color:var(--red);
+  box-shadow:0 12px 35px rgba(0,0,0,.4);
+}
+
+.pnw-tag{
+  color:var(--red2);
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:1.6px;
+  text-transform:uppercase;
+}
+
+.pnw-card h3{
+  margin:14px 0 5px;
+  max-width:75%;
+  font-family:Orbitron,sans-serif;
+  font-size:17px;
+}
+
+.pnw-meta{
+  color:#777;
+  font-size:10px;
+}
+
+.team-badge{
+  position:absolute;
+  right:17px;
+  top:17px;
+  width:52px;
+  height:52px;
+  padding:5px;
+  border:1px solid #3a3a3a;
+  border-radius:11px;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  background:#090909;
+  color:#fff;
+  font-family:Orbitron,sans-serif;
+  font-size:11px;
+  font-weight:900;
+}
+
+.team-badge img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+.team-badge.red{
+  background:var(--red);
+  border-color:var(--red);
+}
+
+.next-game{
+  margin-top:22px;
+  padding-top:12px;
+  border-top:1px solid #202020;
+  color:#888;
+  font-size:9px;
+  font-weight:700;
+}
+
+.next-game strong{color:#ddd}
+
+.team-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+}
+
+.team-card{
+  position:relative;
+  padding:20px;
+  min-height:215px;
+  background:linear-gradient(145deg,#121212,#0b0b0b);
+  border:1px solid var(--border);
+  border-radius:12px;
+  transition:.22s ease;
+}
+
+.team-card:hover{
+  transform:translateY(-3px);
+  border-color:#555;
+}
+
+.team-card.featured{border-color:var(--redBorder)}
+
+.team-card.hidden{display:none}
+
+.league-label{
+  color:#666;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:1.6px;
+  text-transform:uppercase;
+}
+
+.team-logo{
+  width:58px;
+  height:58px;
+  margin-top:15px;
+  padding:7px;
+  border-radius:13px;
+  display:grid;
+  place-items:center;
+  border:1px solid #353535;
+  background:#080808;
+  color:#fff;
+  font-family:Orbitron,sans-serif;
+  font-size:14px;
+  font-weight:900;
+  overflow:hidden;
+}
+
+.team-card.featured .team-logo{
+  border-color:var(--red);
+  box-shadow:0 0 20px rgba(225,6,0,.12);
+}
+
+.team-logo img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+.team-card h3{
+  margin:14px 0 4px;
+  font-family:Orbitron,sans-serif;
+  font-size:15px;
+}
+
+.team-city{
+  color:#777;
+  font-size:10px;
+}
+
+.record{
+  display:flex;
+  gap:5px;
+  margin-top:14px;
+  flex-wrap:wrap;
+}
+
+.record span{
+  padding:5px 7px;
+  border-radius:5px;
+  background:#171717;
+  color:#aaa;
+  font-size:9px;
+  font-weight:800;
+}
+
+.record span.win{color:var(--green)}
+
+.team-footer{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-top:14px;
+  padding-top:11px;
+  border-top:1px solid #202020;
+}
+
+.conference{
+  color:#666;
+  font-size:8px;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+}
+
+.team-link{
+  color:var(--red2);
+  font-size:9px;
+  font-weight:900;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+
+.skeleton{
+  position:relative;
+  overflow:hidden;
+  background:#111;
+}
+
+.skeleton:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  transform:translateX(-100%);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.05),transparent);
+  animation:shimmer 1.4s infinite;
+}
+
+@keyframes shimmer{
+  100%{transform:translateX(100%)}
+}
+
+.loading-grid{
+  min-height:250px;
+}
+
+.empty{
+  display:none;
+  padding:50px 20px;
+  border:1px dashed #333;
+  border-radius:12px;
+  text-align:center;
+  color:#666;
+}
+
+.empty.show{display:block}
+
+.error-box{
+  display:none;
+  margin-top:25px;
+  padding:18px;
+  border:1px solid #53110e;
+  border-radius:10px;
+  background:rgba(225,6,0,.06);
+  color:#aaa;
+  font-size:12px;
+  line-height:1.7;
+}
+
+.error-box.show{display:block}
+
+.last-updated{
+  margin-top:10px;
+  color:#555;
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:.7px;
+}
+
+.site-footer{
+  margin-top:60px;
+  border-top:1px solid var(--border);
+  background:#060606;
+}
+
+.footer-inner{
+  max-width:var(--max);
+  margin:auto;
+  padding:35px 22px;
+  display:flex;
+  justify-content:space-between;
+  gap:30px;
+  flex-wrap:wrap;
+}
+
+.footer-brand{
+  font-family:Orbitron,sans-serif;
+  font-size:14px;
+  font-weight:900;
+}
+
+.footer-brand span{color:var(--red)}
+
+.footer-copy{
+  margin-top:8px;
+  color:#666;
+  font-size:10px;
+}
+
+.footer-links{
+  display:flex;
+  gap:20px;
+  flex-wrap:wrap;
+}
+
+.footer-links a{
+  color:#777;
+  font-size:9px;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.footer-links a:hover{color:#fff}
+
+@media(max-width:1150px){
+  .main-nav a{
+    padding-left:7px;
+    padding-right:7px;
+  }
+
+  .pnw-grid,
+  .team-grid{
+    grid-template-columns:repeat(3,1fr);
+  }
+}
+
+@media(max-width:900px){
+  .main-nav{
+    display:none;
+    position:absolute;
+    left:0;
+    right:0;
+    top:74px;
+    padding:12px 20px 18px;
+    background:#080808;
+    border-bottom:1px solid var(--border);
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .main-nav.open{display:flex}
+
+  .main-nav a{padding:13px}
+
+  .menu-btn{display:block}
+
+  .header-actions{margin-left:auto}
+
+  .pnw-grid,
+  .team-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .data-status{
+    position:relative;
+    right:auto;
+    bottom:auto;
+    display:inline-flex;
+    margin-top:25px;
+  }
+}
+
+@media(max-width:620px){
+  .header-inner{padding:0 14px}
+
+  .brand-sub{display:none}
+
+  .brand-title{font-size:13px}
+
+  .page{padding:20px 14px 50px}
+
+  .hero{
+    padding:28px 22px;
+    min-height:250px;
+  }
+
+  .hero h1{font-size:36px}
+
+  .ticker-inner{padding:0 14px}
+
+  .ticker-label{display:none}
+
+  .pnw-grid,
+  .team-grid{
+    grid-template-columns:1fr;
+  }
+
+  .section-head{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+}
+</style>
+
+</head>
+
+<body>
+
+<header class="site-header">
+
+  <div class="header-inner">
+
+```
+<a href="sports.html" class="brand">
+  <div class="brand-mark">CR</div>
+
+  <div>
+    <div class="brand-title">CROWRULES SPORTS</div>
+    <div class="brand-sub">THE SPORTS DESK</div>
+  </div>
+</a>
+
+<nav class="main-nav" id="mainNav">
+  <a href="sports.html">Sports</a>
+  <a href="live.html">Live</a>
+  <a href="schedule.html">Schedule</a>
+  <a href="standings.html">Standings</a>
+  <a href="rankings.html">Rankings</a>
+  <a href="news.html">News</a>
+  <a href="teams.html" class="active">Teams</a>
+  <a href="pnw.html">PNW</a>
+</nav>
+
+<div class="header-actions">
+  <button class="icon-btn" title="Search" onclick="location.href='search.html'">🔎</button>
+  <button class="icon-btn menu-btn" id="menuBtn" title="Menu">☰</button>
+</div>
+```
+
+  </div>
+
+  <div class="ticker">
+    <div class="ticker-inner">
+
+```
+  <div class="ticker-label">
+    <span>●</span> CROW RULES SPORTS
+  </div>
+
+  <div class="ticker-track">
+    <b>TEAM DIRECTORY</b>
+    <b>MLB</b>
+    <b>NFL</b>
+    <b>NBA</b>
+    <b>WNBA</b>
+    <b>NHL</b>
+    <b>MLS</b>
+    <b>COLLEGE SPORTS</b>
+    <b>PACIFIC NORTHWEST</b>
+  </div>
+
+</div>
+```
+
+  </div>
+
+</header>
+
+<main class="page">
+
+  <section class="hero">
+
+```
+<div class="hero-grid">
+
+  <div class="eyebrow">CrowRules Sports Network</div>
+
+  <h1>
+    TEAM<br>
+    <span>DIRECTORY</span>
+  </h1>
+
+  <p>
+    Explore the live CrowRules Sports team database. Search teams,
+    filter by league, see current records and jump directly into
+    team schedules, standings and coverage.
+  </p>
+
+  <div class="data-status">
+    <span class="status-dot" id="statusDot"></span>
+    <span id="statusText">CONNECTING TO SPORTS DATA</span>
+  </div>
+
+</div>
+```
+
+  </section>
+
+  <div class="error-box" id="errorBox"></div>
+
+  <section class="controls">
+
+```
+<div class="search-box">
+  <span class="search-icon">⌕</span>
+  <input
+    id="teamSearch"
+    type="search"
+    placeholder="Search teams, cities or leagues..."
+    autocomplete="off">
+</div>
+
+<div class="filter-row" id="filters">
+
+  <button class="filter-btn active" data-filter="all">All</button>
+  <button class="filter-btn" data-filter="MLB">MLB</button>
+  <button class="filter-btn" data-filter="NFL">NFL</button>
+  <button class="filter-btn" data-filter="NBA">NBA</button>
+  <button class="filter-btn" data-filter="WNBA">WNBA</button>
+  <button class="filter-btn" data-filter="NHL">NHL</button>
+  <button class="filter-btn" data-filter="MLS">MLS</button>
+  <button class="filter-btn" data-filter="NCAA">College</button>
+
+</div>
+```
+
+  </section>
+
+  <section class="section">
+
+```
+<div class="section-head">
+
+  <div>
+    <h2 class="section-title">
+      Pacific Northwest <span>Favorites</span>
+    </h2>
+
+    <p class="section-desc">
+      Regional teams automatically pulled from the sports database.
+    </p>
+  </div>
+
+  <div class="section-count" id="pnwCount">
+    Loading
+  </div>
+
+</div>
+
+<div class="pnw-grid" id="pnwGrid">
+
+  <div class="pnw-card skeleton"></div>
+  <div class="pnw-card skeleton"></div>
+  <div class="pnw-card skeleton"></div>
+  <div class="pnw-card skeleton"></div>
+
+</div>
+```
+
+  </section>
+
+  <section class="section">
+
+```
+<div class="section-head">
+
+  <div>
+    <h2 class="section-title">
+      All <span>Teams</span>
+    </h2>
+
+    <p class="section-desc">
+      Live league-by-league directory from Supabase.
+    </p>
+
+    <div class="last-updated" id="lastUpdated"></div>
+  </div>
+
+  <div class="section-count" id="resultCount">
+    Loading
+  </div>
+
+</div>
+
+<div class="team-grid" id="teamGrid">
+
+  <article class="team-card skeleton"></article>
+  <article class="team-card skeleton"></article>
+  <article class="team-card skeleton"></article>
+  <article class="team-card skeleton"></article>
+  <article class="team-card skeleton"></article>
+  <article class="team-card skeleton"></article>
+  <article class="team-card skeleton"></article>
+  <article class="team-card skeleton"></article>
+
+</div>
+
+<div class="empty" id="emptyState">
+  <strong>No teams found.</strong>
+  <br>
+  Try another team, city, state or league.
+</div>
+```
+
+  </section>
+
+</main>
+
+<footer class="site-footer">
+
+  <div class="footer-inner">
+
+```
+<div>
+  <div class="footer-brand">
+    CROW<span>RULES</span> SPORTS
+  </div>
+
+  <div class="footer-copy">
+    Independent sports coverage from the CrowRules network.
+  </div>
+</div>
+
+<div class="footer-links">
+  <a href="sports.html">Sports</a>
+  <a href="live.html">Live</a>
+  <a href="schedule.html">Schedule</a>
+  <a href="standings.html">Standings</a>
+  <a href="news.html">News</a>
+  <a href="pnw.html">PNW</a>
+</div>
+```
+
+  </div>
+
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+/* =========================================================
+   CROWRULES SPORTS — SUPABASE CONFIG
+========================================================= */
+
+const SUPABASE_URL =
+  "https://cevylpnoexugwgygvtgu.supabase.co";
+
+const SUPABASE_ANON_KEY =
+  "YOUR_SUPABASE_ANON_KEY";
+
+let supabaseClient = null;
+
+if(
+  window.supabase &&
+  SUPABASE_ANON_KEY &&
+  SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY"
+){
+  supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    );
+}
+
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let allTeams = [];
+let allLeagues = [];
+let activeFilter = "all";
+let realtimeChannel = null;
+
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const menuBtn =
+  document.getElementById("menuBtn");
+
+const mainNav =
+  document.getElementById("mainNav");
+
+const teamSearch =
+  document.getElementById("teamSearch");
+
+const teamGrid =
+  document.getElementById("teamGrid");
+
+const pnwGrid =
+  document.getElementById("pnwGrid");
+
+const resultCount =
+  document.getElementById("resultCount");
+
+const pnwCount =
+  document.getElementById("pnwCount");
+
+const emptyState =
+  document.getElementById("emptyState");
+
+const errorBox =
+  document.getElementById("errorBox");
+
+const statusDot =
+  document.getElementById("statusDot");
+
+const statusText =
+  document.getElementById("statusText");
+
+const lastUpdated =
+  document.getElementById("lastUpdated");
+
+
+/* =========================================================
+   MOBILE NAV
+========================================================= */
+
+menuBtn.addEventListener("click",()=>{
+  mainNav.classList.toggle("open");
+});
+
+
+/* =========================================================
+   UTILITIES
+========================================================= */
+
+function esc(value){
+
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+
+function safeUrl(value){
+
+  if(!value) return "";
+
+  try{
+
+    const url = new URL(value);
+
+    if(
+      url.protocol === "https:" ||
+      url.protocol === "http:"
+    ){
+      return url.href;
+    }
+
+  }catch(e){}
+
+  return "";
+}
+
+
+function setStatus(type,text){
+
+  statusDot.className =
+    "status-dot " + (type || "");
+
+  statusText.textContent = text;
+}
+
+
+function showError(message){
+
+  errorBox.innerHTML =
+    `<strong>SPORTS DATA ERROR</strong><br>${esc(message)}`;
+
+  errorBox.classList.add("show");
+
+  setStatus("error","DATA CONNECTION ERROR");
+}
+
+
+function clearError(){
+
+  errorBox.classList.remove("show");
+  errorBox.innerHTML = "";
+}
+
+
+function formatCity(team){
+
+  return [
+    team.city,
+    team.state
+  ].filter(Boolean).join(", ") || "Location unavailable";
+}
+
+
+function formatLeague(team){
+
+  return team.league?.short_name ||
+         team.league?.name ||
+         team.league_key ||
+         "SPORTS";
+}
+
+
+function formatLeagueName(team){
+
+  return team.league?.name ||
+         formatLeague(team);
+}
+
+
+function teamUrl(team){
+
+  return `team.html?team=${encodeURIComponent(team.team_key)}`;
+}
+
+
+function logoMarkup(team,className="team-logo"){
+
+  const url =
+    safeUrl(team.logo_url);
+
+  if(url){
+
+    return `
+      <div class="${className}">
+        <img
+          src="${esc(url)}"
+          alt="${esc(team.name)} logo"
+          loading="lazy"
+          onerror="this.parentElement.innerHTML='<span>${esc(team.abbreviation || team.short_name || "CR")}</span>'">
+      </div>
+    `;
+
+  }
+
+  return `
+    <div class="${className}">
+      ${esc(team.abbreviation || team.short_name || "CR")}
+    </div>
+  `;
+}
+
+
+function teamSearchText(team){
+
+  return [
+    team.name,
+    team.short_name,
+    team.abbreviation,
+    team.city,
+    team.state,
+    team.region,
+    team.conference,
+    team.division,
+    team.league?.name,
+    team.league?.short_name,
+    team.league?.league_key
+  ]
+  .filter(Boolean)
+  .join(" ")
+  .toLowerCase();
+}
+
+
+/* =========================================================
+   SUPABASE CONNECTION
+========================================================= */
+
+function requireSupabase(){
+
+  if(!supabaseClient){
+
+    throw new Error(
+      "Add your Supabase publishable/anon key to SUPABASE_ANON_KEY in teams.html."
+    );
+
+  }
+}
+
+
+/* =========================================================
+   LOAD LEAGUES
+========================================================= */
+
+async function loadLeagues(){
+
+  const {
+    data,
+    error
+  } = await supabaseClient
+    .from("sports_leagues")
+    .select(`
+      id,
+      league_key,
+      name,
+      short_name,
+      sport,
+      level,
+      logo_url,
+      is_active
+    `)
+    .eq("is_active",true)
+    .order("sort_order",{ascending:true})
+    .order("name",{ascending:true});
+
+  if(error) throw error;
+
+  allLeagues = data || [];
+}
+
+
+/* =========================================================
+   LOAD TEAMS
+========================================================= */
+
+async function loadTeams(){
+
+  const {
+    data,
+    error
+  } = await supabaseClient
+    .from("sports_teams")
+    .select(`
+      id,
+      league_id,
+      team_key,
+      name,
+      short_name,
+      abbreviation,
+      city,
+      state,
+      region,
+      conference,
+      division,
+      team_type,
+      description,
+      logo_url,
+      primary_color,
+      secondary_color,
+      website_url,
+      is_pnw,
+      is_active,
+      sort_order
+    `)
+    .eq("is_active",true)
+    .order("is_pnw",{ascending:false})
+    .order("sort_order",{ascending:true})
+    .order("name",{ascending:true});
+
+  if(error) throw error;
+
+  const leagueMap =
+    new Map(
+      allLeagues.map(
+        league => [league.id,league]
+      )
+    );
+
+  allTeams =
+    (data || []).map(team => ({
+      ...team,
+      league:
+        leagueMap.get(team.league_id) || null
+    }));
+}
+
+
+/* =========================================================
+   RENDER PNW
+========================================================= */
+
+function renderPNW(){
+
+  const pnwTeams =
+    allTeams.filter(team => team.is_pnw);
+
+  pnwCount.textContent =
+    `${pnwTeams.length} Featured`;
+
+  if(!pnwTeams.length){
+
+    pnwGrid.innerHTML = `
+      <div class="empty show">
+        No Pacific Northwest teams are currently marked
+        <strong>is_pnw</strong> in the database.
+      </div>
+    `;
+
+    return;
+  }
+
+  pnwGrid.innerHTML =
+    pnwTeams
+      .slice(0,8)
+      .map((team,index)=>{
+
+        const league =
+          formatLeague(team);
+
+        const division =
+          team.division ||
+          team.conference ||
+          team.sport ||
+          "Sports";
+
+        return `
+          <a
+            class="pnw-card"
+            href="${teamUrl(team)}">
+
+            <div class="pnw-tag">
+              ${esc(league)} • ${esc(team.city || "PNW")}
+            </div>
+
+            ${logoMarkup(
+              team,
+              "team-badge " +
+              (index === 0 ? "red" : "")
+            )}
+
+            <h3>
+              ${esc(team.name)}
+            </h3>
+
+            <div class="pnw-meta">
+              ${esc(team.sport || formatLeagueName(team))}
+              ${division ? " • " + esc(division) : ""}
+            </div>
+
+            <div class="next-game">
+              Team Center:
+              <strong>Open Team →</strong>
+            </div>
+
+          </a>
+        `;
+
+      })
+      .join("");
+}
+
+
+/* =========================================================
+   RENDER TEAM CARDS
+========================================================= */
+
+function renderTeams(){
+
+  const query =
+    teamSearch.value
+      .trim()
+      .toLowerCase();
+
+  const filtered =
+    allTeams.filter(team => {
+
+      const leagueKey =
+        (
+          team.league?.short_name ||
+          team.league?.league_key ||
+          ""
+        ).toLowerCase();
+
+      const matchesLeague =
+        activeFilter === "all" ||
+        leagueKey === activeFilter.toLowerCase();
+
+      const matchesSearch =
+        !query ||
+        teamSearchText(team).includes(query);
+
+      return (
+        matchesLeague &&
+        matchesSearch
+      );
+
+    });
+
+  resultCount.textContent =
+    `${filtered.length} ${
+      filtered.length === 1
+        ? "Team"
+        : "Teams"
+    }`;
+
+  emptyState.classList.toggle(
+    "show",
+    filtered.length === 0
+  );
+
+  teamGrid.innerHTML =
+    filtered
+      .map(team => {
+
+        const league =
+          formatLeague(team);
+
+        const conference =
+          team.conference ||
+          team.division ||
+          "League";
+
+        return `
+          <article
+            class="team-card ${
+              team.is_pnw
+                ? "featured"
+                : ""
+            }">
+
+            <div class="league-label">
+              ${esc(league)}
+              ${team.division
+                ? " • " + esc(team.division)
+                : ""}
+            </div>
+
+            ${logoMarkup(team)}
+
+            <h3>
+              ${esc(team.name)}
+            </h3>
+
+            <div class="team-city">
+              ${esc(formatCity(team))}
+            </div>
+
+            <div class="record">
+              ${
+                team.is_pnw
+                  ? `<span class="win">PNW</span>`
+                  : `<span>TEAM</span>`
+              }
+
+              ${
+                team.team_type
+                  ? `<span>${esc(team.team_type)}</span>`
+                  : ""
+              }
+            </div>
+
+            <div class="team-footer">
+
+              <span class="conference">
+                ${esc(conference)}
+              </span>
+
+              <a
+                class="team-link"
+                href="${teamUrl(team)}">
+                Team →
+              </a>
+
+            </div>
+
+          </article>
+        `;
+
+      })
+      .join("");
+}
+
+
+/* =========================================================
+   FILTERS
+========================================================= */
+
+document
+  .querySelectorAll(".filter-btn")
+  .forEach(button => {
+
+    button.addEventListener("click",()=>{
+
+      document
+        .querySelectorAll(".filter-btn")
+        .forEach(btn =>
+          btn.classList.remove("active")
+        );
+
+      button.classList.add("active");
+
+      activeFilter =
+        button.dataset.filter;
+
+      renderTeams();
+
+    });
+
+  });
+
+
+teamSearch.addEventListener(
+  "input",
+  renderTeams
+);
+
+
+/* =========================================================
+   KEYBOARD SEARCH
+========================================================= */
+
+document.addEventListener(
+  "keydown",
+  event => {
+
+    if(
+      (event.ctrlKey || event.metaKey) &&
+      event.key.toLowerCase() === "k"
+    ){
+
+      event.preventDefault();
+
+      teamSearch.focus();
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   INITIAL DATA LOAD
+========================================================= */
+
+async function loadDirectory(){
+
+  clearError();
+
+  setStatus(
+    "",
+    "LOADING SPORTS DATABASE"
+  );
+
+  try{
+
+    requireSupabase();
+
+    await loadLeagues();
+    await loadTeams();
+
+    renderPNW();
+    renderTeams();
+
+    setStatus(
+      "live",
+      `${allTeams.length} TEAMS ONLINE`
+    );
+
+    lastUpdated.textContent =
+      `Database refreshed ${new Date().toLocaleTimeString([],{
+        hour:"numeric",
+        minute:"2-digit"
+      })}`;
+
+  }catch(error){
+
+    console.error(
+      "CrowRules Sports Teams:",
+      error
+    );
+
+    teamGrid.innerHTML = "";
+    pnwGrid.innerHTML = "";
+
+    resultCount.textContent = "Unavailable";
+    pnwCount.textContent = "Unavailable";
+
+    showError(
+      error?.message ||
+      "Unable to load the CrowRules Sports team directory."
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   REALTIME
+========================================================= */
+
+function subscribeToRealtime(){
+
+  if(!supabaseClient) return;
+
+  if(realtimeChannel){
+
+    supabaseClient.removeChannel(
+      realtimeChannel
+    );
+
+  }
+
+  realtimeChannel =
+    supabaseClient
+      .channel("crowrules-sports-teams-directory")
+
+      .on(
+        "postgres_changes",
+        {
+          event:"*",
+          schema:"public",
+          table:"sports_teams"
+        },
+        async () => {
+          await loadDirectory();
+        }
+      )
+
+      .on(
+        "postgres_changes",
+        {
+          event:"*",
+          schema:"public",
+          table:"sports_leagues"
+        },
+        async () => {
+          await loadDirectory();
+        }
+      )
+
+      .subscribe();
+
+}
+
+
+/* =========================================================
+   AUTO REFRESH
+========================================================= */
+
+setInterval(
+  async () => {
+
+    if(document.visibilityState === "visible"){
+
+      await loadDirectory();
+
+    }
+
+  },
+  5 * 60 * 1000
+);
+
+
+/* =========================================================
+   START
+========================================================= */
+
+loadDirectory()
+  .then(() => {
+
+    subscribeToRealtime();
+
+  });
+
+
+/* =========================================================
+   SUPABASE TEAM-FOLLOW API
+   Used by individual team.html pages.
+
+   Table:
+   public.sports_team_follows
+
+   Columns:
+   id
+   user_id
+   team_id
+   created_at
+========================================================= */
+
+window.CrowRulesSports = {
+
+  async getCurrentUser(){
+
+    if(!supabaseClient)
+      return null;
+
+    const {
+      data
+    } = await supabaseClient
+      .auth
+      .getUser();
+
+    return data?.user || null;
+
+  },
+
+
+  async isFollowing(teamId){
+
+    if(!supabaseClient)
+      return false;
+
+    const user =
+      await this.getCurrentUser();
+
+    if(!user)
+      return false;
+
+    const {
+      data,
+      error
+    } = await supabaseClient
+      .from("sports_team_follows")
+      .select("id")
+      .eq("user_id",user.id)
+      .eq("team_id",teamId)
+      .maybeSingle();
+
+    if(error) throw error;
+
+    return !!data;
+
+  },
+
+
+  async follow(teamId){
+
+    if(!supabaseClient)
+      throw new Error("Supabase is not configured.");
+
+    const user =
+      await this.getCurrentUser();
+
+    if(!user)
+      throw new Error("Please sign in to follow teams.");
+
+    const {
+      error
+    } = await supabaseClient
+      .from("sports_team_follows")
+      .upsert(
+        {
+          user_id:user.id,
+          team_id:teamId
+        },
+        {
+          onConflict:"user_id,team_id",
+          ignoreDuplicates:true
+        }
+      );
+
+    if(error) throw error;
+
+    return true;
+
+  },
+
+
+  async unfollow(teamId){
+
+    if(!supabaseClient)
+      throw new Error("Supabase is not configured.");
+
+    const user =
+      await this.getCurrentUser();
+
+    if(!user)
+      throw new Error("Please sign in first.");
+
+    const {
+      error
+    } = await supabaseClient
+      .from("sports_team_follows")
+      .delete()
+      .eq("user_id",user.id)
+      .eq("team_id",teamId);
+
+    if(error) throw error;
+
+    return true;
+
+  }
+
+};
+</script>
+
+</body>
+</html>

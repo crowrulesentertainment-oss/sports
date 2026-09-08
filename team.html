@@ -1,0 +1,3616 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+
+<title>CrowRules Sports — Team</title>
+
+<meta name="theme-color" content="#050505">
+<meta name="description" content="CrowRules Sports team profile, schedule, results, standings and news.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --black:#050505;
+  --black2:#080808;
+  --panel:#0d0d0d;
+  --panel2:#121212;
+  --panel3:#181818;
+  --red:#e10600;
+  --red2:#ff211a;
+  --redDark:#780400;
+  --white:#fff;
+  --text:#ededed;
+  --muted:#888;
+  --border:#292929;
+  --redBorder:#4b100e;
+  --green:#38d46a;
+  --yellow:#f2c94c;
+  --blue:#4da3ff;
+  --radius:12px;
+  --max:1500px;
+}
+
+*{box-sizing:border-box}
+
+html{scroll-behavior:smooth}
+
+body{
+  margin:0;
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 85% 0%,rgba(225,6,0,.14),transparent 28%),
+    linear-gradient(180deg,#050505,#080808 45%,#050505);
+  color:var(--text);
+  font-family:Montserrat,Arial,sans-serif;
+}
+
+a{
+  color:inherit;
+  text-decoration:none;
+}
+
+button,input{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+/* HEADER */
+
+.site-header{
+  position:sticky;
+  top:0;
+  z-index:1000;
+  background:rgba(5,5,5,.96);
+  backdrop-filter:blur(15px);
+  border-bottom:1px solid var(--border);
+}
+
+.header-inner{
+  max-width:var(--max);
+  min-height:74px;
+  margin:auto;
+  padding:0 22px;
+  display:flex;
+  align-items:center;
+  gap:22px;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-shrink:0;
+}
+
+.brand-mark{
+  width:43px;
+  height:43px;
+  border-radius:8px;
+  background:var(--red);
+  display:grid;
+  place-items:center;
+  font-family:Orbitron,sans-serif;
+  font-size:15px;
+  font-weight:900;
+  box-shadow:0 0 25px rgba(225,6,0,.3);
+}
+
+.brand-title{
+  font-family:Orbitron,sans-serif;
+  font-size:16px;
+  font-weight:900;
+  letter-spacing:1.5px;
+}
+
+.brand-sub{
+  margin-top:5px;
+  color:var(--red2);
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:2.5px;
+}
+
+.main-nav{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  margin-left:auto;
+}
+
+.main-nav a{
+  padding:10px 11px;
+  border-radius:7px;
+  color:#999;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+}
+
+.main-nav a:hover{
+  color:#fff;
+  background:#111;
+}
+
+.main-nav a.active{
+  color:#fff;
+  background:var(--red);
+}
+
+.header-actions{
+  display:flex;
+  gap:8px;
+}
+
+.icon-btn{
+  width:39px;
+  height:39px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:#0b0b0b;
+  color:#aaa;
+}
+
+.icon-btn:hover{
+  color:#fff;
+  border-color:var(--red);
+}
+
+.menu-btn{
+  display:none;
+}
+
+/* TICKER */
+
+.ticker{
+  height:34px;
+  border-bottom:1px solid #171717;
+  background:#080808;
+  overflow:hidden;
+}
+
+.ticker-inner{
+  max-width:var(--max);
+  height:100%;
+  margin:auto;
+  padding:0 22px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+
+.ticker-label{
+  flex-shrink:0;
+  font-family:Orbitron,sans-serif;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:1.5px;
+}
+
+.ticker-label span{
+  color:var(--red2);
+}
+
+.ticker-track{
+  white-space:nowrap;
+  overflow:hidden;
+  color:#777;
+  font-size:10px;
+  font-weight:700;
+}
+
+.ticker-track b{
+  color:#ddd;
+  margin-right:34px;
+}
+
+/* PAGE */
+
+.page{
+  max-width:var(--max);
+  margin:auto;
+  padding:28px 22px 70px;
+}
+
+/* LOADING */
+
+.loading-screen{
+  padding:100px 20px;
+  text-align:center;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:#0c0c0c;
+}
+
+.loader{
+  width:38px;
+  height:38px;
+  margin:0 auto 20px;
+  border:3px solid #292929;
+  border-top-color:var(--red);
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
+
+.loading-screen h2{
+  margin:0;
+  font-family:Orbitron,sans-serif;
+  font-size:16px;
+}
+
+.loading-screen p{
+  color:#777;
+  font-size:10px;
+}
+
+/* TEAM HERO */
+
+.team-hero{
+  position:relative;
+  overflow:hidden;
+  min-height:350px;
+  padding:38px;
+  border:1px solid var(--redBorder);
+  border-radius:16px;
+  background:
+    linear-gradient(115deg,rgba(225,6,0,.16),transparent 52%),
+    linear-gradient(145deg,#151515,#080808);
+}
+
+.team-hero:before{
+  content:"";
+  position:absolute;
+  width:470px;
+  height:470px;
+  right:-180px;
+  top:-180px;
+  border:1px solid rgba(225,6,0,.16);
+  border-radius:50%;
+  box-shadow:
+    0 0 0 35px rgba(225,6,0,.025),
+    0 0 0 75px rgba(225,6,0,.018);
+}
+
+.team-hero-content{
+  position:relative;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  gap:30px;
+}
+
+.big-logo{
+  width:150px;
+  height:150px;
+  flex-shrink:0;
+  display:grid;
+  place-items:center;
+  border-radius:25px;
+  background:#070707;
+  border:1px solid #444;
+  font-family:Orbitron,sans-serif;
+  font-size:30px;
+  font-weight:900;
+  overflow:hidden;
+  box-shadow:
+    0 0 0 8px rgba(255,255,255,.015),
+    0 0 45px rgba(225,6,0,.12);
+}
+
+.big-logo img{
+  width:82%;
+  height:82%;
+  object-fit:contain;
+}
+
+.team-kicker{
+  color:var(--red2);
+  font-family:Orbitron,sans-serif;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+
+.team-name{
+  margin:10px 0 8px;
+  font-family:Orbitron,sans-serif;
+  font-size:clamp(34px,5vw,65px);
+  line-height:.98;
+  letter-spacing:-2px;
+}
+
+.team-location{
+  color:#999;
+  font-size:13px;
+}
+
+.team-description{
+  max-width:700px;
+  margin:17px 0 0;
+  color:#888;
+  font-size:12px;
+  line-height:1.8;
+}
+
+.hero-actions{
+  margin-top:25px;
+  display:flex;
+  gap:9px;
+  flex-wrap:wrap;
+}
+
+.action-btn{
+  min-height:42px;
+  padding:0 17px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:#111;
+  color:#bbb;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.action-btn:hover{
+  color:#fff;
+  border-color:#555;
+}
+
+.action-btn.primary{
+  background:var(--red);
+  border-color:var(--red);
+  color:#fff;
+}
+
+.action-btn.following{
+  background:#171717;
+  border-color:var(--red);
+  color:#fff;
+}
+
+/* STATUS */
+
+.data-status{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top:12px;
+  color:#666;
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:.8px;
+  text-transform:uppercase;
+}
+
+.status-dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 10px rgba(56,212,106,.5);
+}
+
+.status-dot.error{
+  background:var(--red);
+  box-shadow:0 0 10px rgba(225,6,0,.5);
+}
+
+/* STATS */
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:10px;
+  margin-top:14px;
+}
+
+.stat{
+  padding:19px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:#0d0d0d;
+}
+
+.stat-label{
+  color:#666;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:1.2px;
+  text-transform:uppercase;
+}
+
+.stat-value{
+  margin-top:8px;
+  font-family:Orbitron,sans-serif;
+  font-size:21px;
+  font-weight:800;
+  word-break:break-word;
+}
+
+.stat-value.red{
+  color:var(--red2);
+}
+
+.stat-value.green{
+  color:var(--green);
+}
+
+/* CONTENT */
+
+.content-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 340px;
+  gap:15px;
+  margin-top:32px;
+}
+
+.section{
+  margin-bottom:25px;
+}
+
+.section-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:end;
+  margin-bottom:14px;
+  gap:15px;
+}
+
+.section-title{
+  margin:0;
+  font-family:Orbitron,sans-serif;
+  font-size:17px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+
+.section-title span{
+  color:var(--red);
+}
+
+.section-link{
+  color:var(--red2);
+  font-size:9px;
+  font-weight:900;
+  text-transform:uppercase;
+}
+
+/* NEXT GAME */
+
+.next-game-card{
+  padding:25px;
+  border:1px solid var(--redBorder);
+  border-radius:12px;
+  background:
+    linear-gradient(130deg,rgba(225,6,0,.12),transparent 60%),
+    #0d0d0d;
+}
+
+.game-status{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+  gap:15px;
+}
+
+.status-badge{
+  padding:6px 9px;
+  border-radius:5px;
+  background:#20100f;
+  color:var(--red2);
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+.status-badge.live{
+  background:#112016;
+  color:var(--green);
+}
+
+.status-badge.final{
+  background:#171717;
+  color:#aaa;
+}
+
+.game-date{
+  color:#777;
+  font-size:10px;
+  font-weight:700;
+  text-align:right;
+}
+
+.matchup{
+  display:grid;
+  grid-template-columns:1fr 90px 1fr;
+  align-items:center;
+  gap:15px;
+}
+
+.side{
+  text-align:center;
+}
+
+.mini-logo{
+  width:62px;
+  height:62px;
+  margin:auto;
+  display:grid;
+  place-items:center;
+  border-radius:13px;
+  border:1px solid #3a3a3a;
+  background:#080808;
+  font-family:Orbitron,sans-serif;
+  font-size:12px;
+  font-weight:900;
+  overflow:hidden;
+}
+
+.mini-logo img{
+  width:80%;
+  height:80%;
+  object-fit:contain;
+}
+
+.side-name{
+  margin-top:10px;
+  font-family:Orbitron,sans-serif;
+  font-size:11px;
+}
+
+.side-city{
+  margin-top:4px;
+  color:#666;
+  font-size:9px;
+}
+
+.side-record{
+  margin-top:5px;
+  color:#999;
+  font-size:8px;
+}
+
+.vs{
+  text-align:center;
+  color:#555;
+  font-family:Orbitron,sans-serif;
+  font-size:14px;
+  font-weight:900;
+}
+
+.score-center{
+  color:#fff;
+  font-family:Orbitron,sans-serif;
+  font-size:21px;
+  font-weight:900;
+  text-align:center;
+}
+
+.game-info{
+  margin-top:23px;
+  padding-top:16px;
+  border-top:1px solid #202020;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+
+.info-item{
+  text-align:center;
+}
+
+.info-item span{
+  display:block;
+  color:#666;
+  font-size:8px;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.info-item strong{
+  display:block;
+  margin-top:5px;
+  color:#ddd;
+  font-size:10px;
+}
+
+/* GAME LIST */
+
+.game-list{
+  display:grid;
+  gap:8px;
+}
+
+.game-row{
+  display:grid;
+  grid-template-columns:100px 1fr 120px;
+  align-items:center;
+  gap:15px;
+  padding:15px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:#0c0c0c;
+  transition:.2s ease;
+}
+
+.game-row:hover{
+  border-color:#4a4a4a;
+  transform:translateY(-1px);
+}
+
+.game-row-date{
+  color:#777;
+  font-size:9px;
+  font-weight:800;
+}
+
+.game-opponent{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.row-logo{
+  width:36px;
+  height:36px;
+  border:1px solid #333;
+  border-radius:8px;
+  display:grid;
+  place-items:center;
+  background:#080808;
+  font-family:Orbitron,sans-serif;
+  font-size:8px;
+  font-weight:900;
+  overflow:hidden;
+}
+
+.row-logo img{
+  width:80%;
+  height:80%;
+  object-fit:contain;
+}
+
+.opponent-name{
+  font-family:Orbitron,sans-serif;
+  font-size:10px;
+}
+
+.opponent-location{
+  margin-top:3px;
+  color:#666;
+  font-size:8px;
+}
+
+.game-result{
+  text-align:right;
+  font-size:9px;
+  font-weight:900;
+}
+
+.game-result.win{
+  color:var(--green);
+}
+
+.game-result.loss{
+  color:#ff6a63;
+}
+
+.game-result.tie{
+  color:var(--yellow);
+}
+
+.game-result.upcoming{
+  color:#aaa;
+}
+
+.game-result.live{
+  color:var(--green);
+  animation:pulse 1.4s infinite;
+}
+
+@keyframes pulse{
+  50%{opacity:.45}
+}
+
+/* EMPTY */
+
+.empty{
+  padding:35px 20px;
+  border:1px dashed #303030;
+  border-radius:10px;
+  text-align:center;
+  background:#0b0b0b;
+}
+
+.empty strong{
+  display:block;
+  font-family:Orbitron,sans-serif;
+  font-size:11px;
+}
+
+.empty span{
+  display:block;
+  margin-top:7px;
+  color:#666;
+  font-size:9px;
+}
+
+/* NEWS */
+
+.news-list{
+  display:grid;
+  gap:8px;
+}
+
+.news-card{
+  display:flex;
+  gap:15px;
+  padding:15px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:#0d0d0d;
+}
+
+.news-card:hover{
+  border-color:#444;
+}
+
+.news-thumb{
+  width:110px;
+  height:75px;
+  flex-shrink:0;
+  border-radius:7px;
+  background:
+    linear-gradient(135deg,rgba(225,6,0,.4),#151515);
+  display:grid;
+  place-items:center;
+  color:#fff;
+  font-family:Orbitron,sans-serif;
+  font-size:9px;
+  font-weight:900;
+  overflow:hidden;
+}
+
+.news-thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.news-meta{
+  color:var(--red2);
+  font-size:8px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.8px;
+}
+
+.news-card h3{
+  margin:7px 0 4px;
+  font-family:Orbitron,sans-serif;
+  font-size:12px;
+  line-height:1.4;
+}
+
+.news-card p{
+  margin:0;
+  color:#777;
+  font-size:9px;
+  line-height:1.5;
+}
+
+/* SIDEBAR */
+
+.panel{
+  margin-bottom:15px;
+  padding:20px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#0d0d0d;
+}
+
+.panel-title{
+  margin:0 0 16px;
+  font-family:Orbitron,sans-serif;
+  font-size:12px;
+  letter-spacing:.8px;
+  text-transform:uppercase;
+}
+
+.panel-title span{
+  color:var(--red);
+}
+
+.standing-row{
+  display:grid;
+  grid-template-columns:28px 1fr 50px;
+  align-items:center;
+  gap:8px;
+  padding:10px 0;
+  border-bottom:1px solid #1e1e1e;
+}
+
+.standing-row:last-child{
+  border-bottom:0;
+}
+
+.standing-row.current{
+  margin-left:-8px;
+  margin-right:-8px;
+  padding-left:8px;
+  padding-right:8px;
+  border-radius:7px;
+  background:rgba(225,6,0,.08);
+}
+
+.position{
+  color:#666;
+  font-size:9px;
+  font-weight:900;
+}
+
+.standing-team{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:9px;
+  font-weight:800;
+  min-width:0;
+}
+
+.tiny-logo{
+  width:26px;
+  height:26px;
+  flex-shrink:0;
+  border:1px solid #333;
+  border-radius:6px;
+  display:grid;
+  place-items:center;
+  background:#080808;
+  font-family:Orbitron,sans-serif;
+  font-size:6px;
+  font-weight:900;
+  overflow:hidden;
+}
+
+.tiny-logo img{
+  width:80%;
+  height:80%;
+  object-fit:contain;
+}
+
+.standing-record{
+  color:#999;
+  text-align:right;
+  font-size:8px;
+  font-weight:800;
+}
+
+/* LINKS */
+
+.quick-links{
+  display:grid;
+  gap:7px;
+}
+
+.quick-link{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px;
+  border:1px solid #242424;
+  border-radius:7px;
+  background:#0a0a0a;
+  color:#999;
+  font-size:9px;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.quick-link:hover{
+  color:#fff;
+  border-color:var(--red);
+}
+
+.quick-link span{
+  color:var(--red2);
+}
+
+/* NOT FOUND */
+
+.not-found{
+  display:none;
+  padding:70px 20px;
+  border:1px dashed #3a3a3a;
+  border-radius:14px;
+  text-align:center;
+}
+
+.not-found.show{
+  display:block;
+}
+
+.not-found h1{
+  font-family:Orbitron,sans-serif;
+}
+
+.not-found p{
+  color:#777;
+}
+
+/* ERROR */
+
+.error-box{
+  display:none;
+  margin-top:15px;
+  padding:15px;
+  border:1px solid #4b100e;
+  border-radius:9px;
+  background:#170909;
+  color:#ff8b86;
+  font-size:9px;
+}
+
+.error-box.show{
+  display:block;
+}
+
+/* FOOTER */
+
+.site-footer{
+  margin-top:30px;
+  border-top:1px solid var(--border);
+  background:#060606;
+}
+
+.footer-inner{
+  max-width:var(--max);
+  margin:auto;
+  padding:35px 22px;
+  display:flex;
+  justify-content:space-between;
+  gap:25px;
+  flex-wrap:wrap;
+}
+
+.footer-brand{
+  font-family:Orbitron,sans-serif;
+  font-size:14px;
+  font-weight:900;
+}
+
+.footer-brand span{
+  color:var(--red);
+}
+
+.footer-copy{
+  margin-top:8px;
+  color:#666;
+  font-size:9px;
+}
+
+.footer-links{
+  display:flex;
+  flex-wrap:wrap;
+  gap:18px;
+}
+
+.footer-links a{
+  color:#777;
+  font-size:9px;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.footer-links a:hover{
+  color:#fff;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:1100px){
+
+  .main-nav a{
+    padding-left:7px;
+    padding-right:7px;
+  }
+
+  .content-grid{
+    grid-template-columns:1fr;
+  }
+
+}
+
+@media(max-width:900px){
+
+  .main-nav{
+    display:none;
+    position:absolute;
+    top:74px;
+    left:0;
+    right:0;
+    padding:12px 20px 18px;
+    background:#080808;
+    border-bottom:1px solid var(--border);
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .main-nav.open{
+    display:flex;
+  }
+
+  .menu-btn{
+    display:block;
+  }
+
+  .header-actions{
+    margin-left:auto;
+  }
+
+  .stats{
+    grid-template-columns:repeat(3,1fr);
+  }
+
+}
+
+@media(max-width:650px){
+
+  .header-inner{
+    padding:0 14px;
+  }
+
+  .brand-title{
+    font-size:13px;
+  }
+
+  .brand-sub{
+    display:none;
+  }
+
+  .page{
+    padding:18px 14px 50px;
+  }
+
+  .team-hero{
+    padding:25px 20px;
+  }
+
+  .team-hero-content{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .big-logo{
+    width:105px;
+    height:105px;
+    font-size:22px;
+  }
+
+  .team-name{
+    font-size:36px;
+  }
+
+  .stats{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .matchup{
+    grid-template-columns:1fr 50px 1fr;
+  }
+
+  .game-row{
+    grid-template-columns:70px 1fr;
+  }
+
+  .game-result{
+    grid-column:2;
+    text-align:left;
+  }
+
+  .news-card{
+    flex-direction:column;
+  }
+
+  .news-thumb{
+    width:100%;
+    height:100px;
+  }
+
+  .game-info{
+    grid-template-columns:1fr;
+  }
+
+}
+</style>
+
+</head>
+
+<body>
+
+<header class="site-header">
+
+  <div class="header-inner">
+
+```
+<a href="sports.html" class="brand">
+
+  <div class="brand-mark">CR</div>
+
+  <div>
+    <div class="brand-title">CROWRULES SPORTS</div>
+    <div class="brand-sub">THE SPORTS DESK</div>
+  </div>
+
+</a>
+
+<nav class="main-nav" id="mainNav">
+  <a href="sports.html">Sports</a>
+  <a href="live.html">Live</a>
+  <a href="schedule.html">Schedule</a>
+  <a href="standings.html">Standings</a>
+  <a href="rankings.html">Rankings</a>
+  <a href="news.html">News</a>
+  <a href="teams.html" class="active">Teams</a>
+  <a href="pnw.html">PNW</a>
+</nav>
+
+<div class="header-actions">
+
+  <button
+    class="icon-btn"
+    title="Search"
+    onclick="location.href='search.html'">
+    🔎
+  </button>
+
+  <button
+    class="icon-btn menu-btn"
+    id="menuBtn"
+    title="Menu">
+    ☰
+  </button>
+
+</div>
+```
+
+  </div>
+
+  <div class="ticker">
+
+```
+<div class="ticker-inner">
+
+  <div class="ticker-label">
+    <span>●</span> TEAM DESK
+  </div>
+
+  <div class="ticker-track">
+    <b id="tickerTeam">TEAM PROFILE</b>
+    <b>LIVE SCORES</b>
+    <b>SCHEDULES</b>
+    <b>STANDINGS</b>
+    <b>TEAM NEWS</b>
+    <b>CROW RULES SPORTS</b>
+  </div>
+
+</div>
+```
+
+  </div>
+
+</header>
+
+<main class="page">
+
+  <div class="loading-screen" id="loadingScreen">
+
+```
+<div class="loader"></div>
+
+<h2>LOADING TEAM CENTER</h2>
+
+<p>Connecting to CrowRules Sports data...</p>
+```
+
+  </div>
+
+  <section class="not-found" id="notFound">
+
+```
+<h1>TEAM NOT FOUND</h1>
+
+<p>
+  We couldn't find that team in the CrowRules Sports directory.
+</p>
+
+<a
+  class="action-btn primary"
+  href="teams.html">
+  Back to Teams
+</a>
+```
+
+  </section>
+
+  <div id="teamApp" style="display:none;">
+
+```
+<!-- TEAM HERO -->
+
+<section class="team-hero" id="teamHero">
+
+  <div class="team-hero-content">
+
+    <div class="big-logo" id="teamLogo">
+      CR
+    </div>
+
+    <div>
+
+      <div class="team-kicker" id="teamLeague">
+        SPORTS
+      </div>
+
+      <h1 class="team-name" id="teamName">
+        Team
+      </h1>
+
+      <div class="team-location" id="teamLocation">
+        —
+      </div>
+
+      <p class="team-description" id="teamDescription">
+        Follow this team's schedule, results, standings and news on CrowRules Sports.
+      </p>
+
+      <div class="hero-actions">
+
+        <button
+          class="action-btn primary"
+          id="favoriteBtn">
+          ☆ Follow Team
+        </button>
+
+        <a
+          class="action-btn"
+          id="scheduleLink"
+          href="schedule.html">
+          Schedule
+        </a>
+
+        <a
+          class="action-btn"
+          id="standingsLink"
+          href="standings.html">
+          Standings
+        </a>
+
+        <a
+          class="action-btn"
+          id="officialLink"
+          href="#"
+          target="_blank"
+          rel="noopener"
+          style="display:none;">
+          Official Site
+        </a>
+
+      </div>
+
+      <div class="data-status">
+
+        <span class="status-dot" id="dataStatusDot"></span>
+
+        <span id="dataStatus">
+          LIVE DATABASE
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- TEAM STATS -->
+
+<section class="stats">
+
+  <div class="stat">
+
+    <div class="stat-label">
+      Record
+    </div>
+
+    <div class="stat-value" id="record">
+      —
+    </div>
+
+  </div>
+
+  <div class="stat">
+
+    <div class="stat-label">
+      Win %
+    </div>
+
+    <div class="stat-value green" id="winPct">
+      —
+    </div>
+
+  </div>
+
+  <div class="stat">
+
+    <div class="stat-label">
+      Standing
+    </div>
+
+    <div class="stat-value red" id="standing">
+      —
+    </div>
+
+  </div>
+
+  <div class="stat">
+
+    <div class="stat-label">
+      Division
+    </div>
+
+    <div class="stat-value" id="division">
+      —
+    </div>
+
+  </div>
+
+  <div class="stat">
+
+    <div class="stat-label">
+      Season
+    </div>
+
+    <div class="stat-value" id="season">
+      —
+    </div>
+
+  </div>
+
+</section>
+
+
+<div class="error-box" id="errorBox"></div>
+
+
+<!-- CONTENT -->
+
+<div class="content-grid">
+
+  <div>
+
+    <!-- NEXT GAME -->
+
+    <section class="section">
+
+      <div class="section-head">
+
+        <h2 class="section-title">
+          Next <span>Game</span>
+        </h2>
+
+        <a
+          href="schedule.html"
+          class="section-link">
+          Full Schedule →
+        </a>
+
+      </div>
+
+      <div
+        class="next-game-card"
+        id="nextGameCard">
+
+        <div class="game-status">
+
+          <span
+            class="status-badge"
+            id="nextStatus">
+            UPCOMING
+          </span>
+
+          <span
+            class="game-date"
+            id="nextDate">
+            —
+          </span>
+
+        </div>
+
+        <div class="matchup">
+
+          <div class="side">
+
+            <div
+              class="mini-logo"
+              id="homeLogo">
+              —
+            </div>
+
+            <div
+              class="side-name"
+              id="homeName">
+              —
+            </div>
+
+            <div
+              class="side-city"
+              id="homeCity">
+              —
+            </div>
+
+            <div
+              class="side-record"
+              id="homeRecord">
+            </div>
+
+          </div>
+
+          <div
+            class="vs"
+            id="centerVs">
+            VS
+          </div>
+
+          <div class="side">
+
+            <div
+              class="mini-logo"
+              id="awayLogo">
+              —
+            </div>
+
+            <div
+              class="side-name"
+              id="awayName">
+              —
+            </div>
+
+            <div
+              class="side-city"
+              id="awayCity">
+              —
+            </div>
+
+            <div
+              class="side-record"
+              id="awayRecord">
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="game-info">
+
+          <div class="info-item">
+
+            <span>
+              Time
+            </span>
+
+            <strong id="nextTime">
+              —
+            </strong>
+
+          </div>
+
+          <div class="info-item">
+
+            <span>
+              Venue
+            </span>
+
+            <strong id="nextVenue">
+              —
+            </strong>
+
+          </div>
+
+          <div class="info-item">
+
+            <span>
+              Broadcast
+            </span>
+
+            <strong id="nextBroadcast">
+              —
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- RECENT RESULTS -->
+
+    <section class="section">
+
+      <div class="section-head">
+
+        <h2 class="section-title">
+          Recent <span>Results</span>
+        </h2>
+
+        <a
+          id="resultsLink"
+          href="schedule.html"
+          class="section-link">
+          View All →
+        </a>
+
+      </div>
+
+      <div
+        class="game-list"
+        id="resultsList">
+
+      </div>
+
+    </section>
+
+
+    <!-- TEAM NEWS -->
+
+    <section class="section">
+
+      <div class="section-head">
+
+        <h2 class="section-title">
+          Team <span>News</span>
+        </h2>
+
+        <a
+          id="newsLink"
+          href="news.html"
+          class="section-link">
+          All News →
+        </a>
+
+      </div>
+
+      <div
+        class="news-list"
+        id="newsList">
+
+      </div>
+
+    </section>
+
+  </div>
+
+
+  <!-- SIDEBAR -->
+
+  <aside>
+
+    <!-- DIVISION -->
+
+    <section class="panel">
+
+      <h2 class="panel-title">
+        Division <span>Standings</span>
+      </h2>
+
+      <div id="divisionStandings">
+
+        <div class="empty">
+          <strong>LOADING</strong>
+          <span>Loading standings...</span>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- QUICK LINKS -->
+
+    <section class="panel">
+
+      <h2 class="panel-title">
+        Team <span>Center</span>
+      </h2>
+
+      <div class="quick-links">
+
+        <a
+          class="quick-link"
+          id="quickSchedule"
+          href="schedule.html">
+          Schedule
+          <span>→</span>
+        </a>
+
+        <a
+          class="quick-link"
+          id="quickStandings"
+          href="standings.html">
+          Standings
+          <span>→</span>
+        </a>
+
+        <a
+          class="quick-link"
+          href="news.html">
+          Team News
+          <span>→</span>
+        </a>
+
+        <a
+          class="quick-link"
+          href="live.html">
+          Live Games
+          <span>→</span>
+        </a>
+
+        <a
+          class="quick-link"
+          href="teams.html">
+          All Teams
+          <span>→</span>
+        </a>
+
+        <a
+          class="quick-link"
+          href="pnw.html">
+          PNW Sports
+          <span>→</span>
+        </a>
+
+      </div>
+
+    </section>
+
+
+    <!-- TEAM INFO -->
+
+    <section class="panel">
+
+      <h2 class="panel-title">
+        Team <span>Info</span>
+      </h2>
+
+      <div class="quick-links">
+
+        <div class="quick-link">
+          League
+          <span id="infoLeague">—</span>
+        </div>
+
+        <div class="quick-link">
+          Conference
+          <span id="infoConference">—</span>
+        </div>
+
+        <div class="quick-link">
+          Division
+          <span id="infoDivision">—</span>
+        </div>
+
+        <div class="quick-link">
+          Location
+          <span id="infoLocation">—</span>
+        </div>
+
+      </div>
+
+    </section>
+
+  </aside>
+
+</div>
+```
+
+  </div>
+
+</main>
+
+<footer class="site-footer">
+
+  <div class="footer-inner">
+
+```
+<div>
+
+  <div class="footer-brand">
+    CROW<span>RULES</span> SPORTS
+  </div>
+
+  <div class="footer-copy">
+    Independent sports coverage from the CrowRules network.
+  </div>
+
+</div>
+
+<div class="footer-links">
+
+  <a href="sports.html">Sports</a>
+  <a href="live.html">Live</a>
+  <a href="schedule.html">Schedule</a>
+  <a href="standings.html">Standings</a>
+  <a href="rankings.html">Rankings</a>
+  <a href="news.html">News</a>
+  <a href="teams.html">Teams</a>
+  <a href="pnw.html">PNW</a>
+
+</div>
+```
+
+  </div>
+
+</footer>
+
+<script>
+
+/* =========================================================
+   CROWRULES SPORTS
+   TEAM CENTER v2
+   SUPABASE DATABASE EDITION
+========================================================= */
+
+
+/* =========================================================
+   SUPABASE
+========================================================= */
+
+const SUPABASE_URL =
+  "https://cevylpnoexugwgygvtgu.supabase.co";
+
+const SUPABASE_ANON_KEY =
+  "YOUR_SUPABASE_ANON_KEY";
+
+const supabase =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+  );
+
+
+/* =========================================================
+   URL
+========================================================= */
+
+const params =
+  new URLSearchParams(window.location.search);
+
+const requestedTeam =
+  (params.get("team") || params.get("slug") || "mariners")
+  .trim()
+  .toLowerCase();
+
+
+/* =========================================================
+   DOM
+========================================================= */
+
+const loadingScreen =
+  document.getElementById("loadingScreen");
+
+const teamApp =
+  document.getElementById("teamApp");
+
+const notFound =
+  document.getElementById("notFound");
+
+const errorBox =
+  document.getElementById("errorBox");
+
+const menuBtn =
+  document.getElementById("menuBtn");
+
+const mainNav =
+  document.getElementById("mainNav");
+
+
+/* =========================================================
+   MOBILE NAV
+========================================================= */
+
+menuBtn.addEventListener("click",()=>{
+
+  mainNav.classList.toggle("open");
+
+});
+
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let currentTeam = null;
+let currentLeague = null;
+let currentStanding = null;
+let currentUser = null;
+let realtimeChannels = [];
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function esc(value){
+
+  if(value === null || value === undefined){
+    return "";
+  }
+
+  return String(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+
+}
+
+
+function firstValue(...values){
+
+  for(const value of values){
+
+    if(
+      value !== null &&
+      value !== undefined &&
+      String(value).trim() !== ""
+    ){
+      return value;
+    }
+
+  }
+
+  return "—";
+
+}
+
+
+function formatDate(date){
+
+  if(!date){
+    return "—";
+  }
+
+  const d = new Date(date);
+
+  if(Number.isNaN(d.getTime())){
+    return "—";
+  }
+
+  return d.toLocaleDateString(
+    undefined,
+    {
+      weekday:"short",
+      month:"short",
+      day:"numeric",
+      year:"numeric"
+    }
+  );
+
+}
+
+
+function formatDateTime(date){
+
+  if(!date){
+    return "—";
+  }
+
+  const d = new Date(date);
+
+  if(Number.isNaN(d.getTime())){
+    return "—";
+  }
+
+  return d.toLocaleString(
+    undefined,
+    {
+      weekday:"short",
+      month:"short",
+      day:"numeric",
+      hour:"numeric",
+      minute:"2-digit"
+    }
+  );
+
+}
+
+
+function formatTime(date){
+
+  if(!date){
+    return "—";
+  }
+
+  const d = new Date(date);
+
+  if(Number.isNaN(d.getTime())){
+    return "—";
+  }
+
+  return d.toLocaleTimeString(
+    undefined,
+    {
+      hour:"numeric",
+      minute:"2-digit"
+    }
+  );
+
+}
+
+
+function formatWinPct(value){
+
+  if(
+    value === null ||
+    value === undefined ||
+    value === ""
+  ){
+    return "—";
+  }
+
+  const number = Number(value);
+
+  if(Number.isNaN(number)){
+    return String(value);
+  }
+
+  const pct =
+    number <= 1
+      ? number * 100
+      : number;
+
+  return pct.toFixed(1) + "%";
+
+}
+
+
+function recordText(row){
+
+  if(!row){
+    return "—";
+  }
+
+  const wins =
+    Number(row.wins || 0);
+
+  const losses =
+    Number(row.losses || 0);
+
+  const ties =
+    Number(row.ties || 0);
+
+  const hasTies =
+    ties > 0;
+
+  return hasTies
+    ? `${wins}-${losses}-${ties}`
+    : `${wins}-${losses}`;
+
+}
+
+
+function teamLogo(team, fallback="CR"){
+
+  if(team?.logo_url){
+
+    return `
+      <img
+        src="${esc(team.logo_url)}"
+        alt="${esc(team.name || fallback)}"
+        loading="lazy"
+        onerror="this.style.display='none';this.parentElement.textContent='${esc(
+          team?.abbreviation || fallback
+        )}'">
+    `;
+
+  }
+
+  return esc(
+    team?.abbreviation ||
+    team?.short_name ||
+    fallback
+  );
+
+}
+
+
+function teamLocation(team){
+
+  if(!team){
+    return "—";
+  }
+
+  const parts = [];
+
+  if(team.city){
+    parts.push(team.city);
+  }
+
+  if(team.state){
+    parts.push(team.state);
+  }
+
+  return parts.length
+    ? parts.join(", ")
+    : firstValue(team.region);
+
+}
+
+
+function gameStatusLabel(status){
+
+  switch(status){
+
+    case "live":
+      return "LIVE";
+
+    case "halftime":
+      return "HALFTIME";
+
+    case "delayed":
+      return "DELAYED";
+
+    case "postponed":
+      return "POSTPONED";
+
+    case "final":
+      return "FINAL";
+
+    case "cancelled":
+      return "CANCELLED";
+
+    case "pre_game":
+      return "PRE-GAME";
+
+    default:
+      return "UPCOMING";
+
+  }
+
+}
+
+
+function resultForTeam(game){
+
+  if(
+    game.status !== "final" ||
+    game.home_score === null ||
+    game.away_score === null
+  ){
+    return {
+      text:gameStatusLabel(game.status),
+      className:
+        ["live","halftime"].includes(game.status)
+          ? "live"
+          : "upcoming"
+    };
+  }
+
+  const isHome =
+    game.home_team_id === currentTeam.id;
+
+  const teamScore =
+    isHome
+      ? Number(game.home_score)
+      : Number(game.away_score);
+
+  const opponentScore =
+    isHome
+      ? Number(game.away_score)
+      : Number(game.home_score);
+
+  if(teamScore > opponentScore){
+
+    return {
+      text:`W ${teamScore}-${opponentScore}`,
+      className:"win"
+    };
+
+  }
+
+  if(teamScore < opponentScore){
+
+    return {
+      text:`L ${teamScore}-${opponentScore}`,
+      className:"loss"
+    };
+
+  }
+
+  return {
+    text:`T ${teamScore}-${opponentScore}`,
+    className:"tie"
+  };
+
+}
+
+
+/* =========================================================
+   LOAD TEAM
+========================================================= */
+
+async function loadTeam(){
+
+  const candidates = [
+    requestedTeam,
+    requestedTeam.replaceAll("_","-"),
+    requestedTeam.replaceAll("-","_")
+  ];
+
+  let team = null;
+  let teamError = null;
+
+  for(const key of candidates){
+
+    const result =
+      await supabase
+        .from("sports_teams")
+        .select(`
+          id,
+          league_id,
+          team_key,
+          name,
+          short_name,
+          abbreviation,
+          city,
+          state,
+          region,
+          conference,
+          division,
+          team_type,
+          description,
+          logo_url,
+          primary_color,
+          secondary_color,
+          website_url,
+          is_pnw,
+          is_active,
+          sort_order
+        `)
+        .eq("team_key",key)
+        .eq("is_active",true)
+        .maybeSingle();
+
+    if(!result.error && result.data){
+
+      team = result.data;
+      break;
+
+    }
+
+    teamError = result.error;
+
+  }
+
+  if(!team){
+
+    showNotFound(
+      teamError?.message ||
+      "No active team matched the requested team key."
+    );
+
+    return false;
+
+  }
+
+  currentTeam = team;
+
+  await loadLeague();
+
+  renderTeam();
+
+  return true;
+
+}
+
+
+/* =========================================================
+   LOAD LEAGUE
+========================================================= */
+
+async function loadLeague(){
+
+  if(!currentTeam?.league_id){
+    return;
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabase
+      .from("sports_leagues")
+      .select(`
+        id,
+        league_key,
+        name,
+        short_name,
+        sport,
+        level,
+        description,
+        logo_url,
+        website_url
+      `)
+      .eq("id",currentTeam.league_id)
+      .maybeSingle();
+
+  if(error){
+
+    console.warn(
+      "League lookup failed:",
+      error
+    );
+
+    return;
+
+  }
+
+  currentLeague = data;
+
+}
+
+
+/* =========================================================
+   RENDER TEAM
+========================================================= */
+
+function renderTeam(){
+
+  document.title =
+    `CrowRules Sports — ${currentTeam.name}`;
+
+  document.getElementById("tickerTeam").textContent =
+    currentTeam.name.toUpperCase();
+
+  const logo =
+    document.getElementById("teamLogo");
+
+  logo.innerHTML =
+    teamLogo(currentTeam);
+
+  document.getElementById("teamLeague").textContent =
+    [
+      firstValue(
+        currentLeague?.short_name,
+        currentLeague?.name
+      ),
+      currentTeam.conference,
+      currentTeam.division
+    ]
+    .filter(Boolean)
+    .join(" • ");
+
+  document.getElementById("teamName").textContent =
+    currentTeam.name;
+
+  document.getElementById("teamLocation").textContent =
+    teamLocation(currentTeam);
+
+  document.getElementById("teamDescription").textContent =
+    firstValue(
+      currentTeam.description,
+      `Follow ${currentTeam.name} with CrowRules Sports coverage, schedules, results, standings and team news.`
+    );
+
+  document.getElementById("infoLeague").textContent =
+    firstValue(
+      currentLeague?.short_name,
+      currentLeague?.name
+    );
+
+  document.getElementById("infoConference").textContent =
+    firstValue(currentTeam.conference);
+
+  document.getElementById("infoDivision").textContent =
+    firstValue(currentTeam.division);
+
+  document.getElementById("infoLocation").textContent =
+    teamLocation(currentTeam);
+
+  document.getElementById("season").textContent =
+    new Date().getFullYear();
+
+  const teamUrl =
+    encodeURIComponent(currentTeam.team_key);
+
+  const leagueUrl =
+    encodeURIComponent(
+      currentLeague?.league_key || ""
+    );
+
+  document.getElementById("scheduleLink").href =
+    `schedule.html?team=${teamUrl}`;
+
+  document.getElementById("resultsLink").href =
+    `schedule.html?team=${teamUrl}`;
+
+  document.getElementById("newsLink").href =
+    `news.html?team=${teamUrl}`;
+
+  document.getElementById("quickSchedule").href =
+    `schedule.html?team=${teamUrl}`;
+
+  document.getElementById("quickStandings").href =
+    `standings.html?league=${leagueUrl}`;
+
+  if(currentTeam.website_url){
+
+    const official =
+      document.getElementById("officialLink");
+
+    official.href =
+      currentTeam.website_url;
+
+    official.style.display =
+      "inline-flex";
+
+  }
+
+}
+
+
+/* =========================================================
+   LOAD STANDING
+========================================================= */
+
+async function loadStanding(){
+
+  const season =
+    String(new Date().getFullYear());
+
+  let query =
+    supabase
+      .from("sports_standings")
+      .select(`
+        id,
+        league_id,
+        team_id,
+        season,
+        conference,
+        division,
+        rank,
+        wins,
+        losses,
+        ties,
+        games_played,
+        win_percentage,
+        points_for,
+        points_against,
+        streak,
+        games_back,
+        playoff_position,
+        stats
+      `)
+      .eq("team_id",currentTeam.id)
+      .order("season",{ascending:false})
+      .limit(1);
+
+  const {
+    data,
+    error
+  } = await query;
+
+  if(error){
+
+    console.warn(
+      "Standing load failed:",
+      error
+    );
+
+    return;
+
+  }
+
+  currentStanding =
+    data?.[0] || null;
+
+  if(!currentStanding){
+
+    document.getElementById("record").textContent =
+      "—";
+
+    document.getElementById("winPct").textContent =
+      "—";
+
+    document.getElementById("standing").textContent =
+      "—";
+
+    document.getElementById("division").textContent =
+      firstValue(currentTeam.division);
+
+    document.getElementById("season").textContent =
+      season;
+
+    return;
+
+  }
+
+  document.getElementById("record").textContent =
+    recordText(currentStanding);
+
+  document.getElementById("winPct").textContent =
+    formatWinPct(
+      currentStanding.win_percentage
+    );
+
+  document.getElementById("standing").textContent =
+    currentStanding.rank
+      ? `#${currentStanding.rank}`
+      : firstValue(
+          currentStanding.playoff_position
+        );
+
+  document.getElementById("division").textContent =
+    firstValue(
+      currentStanding.division,
+      currentTeam.division
+    );
+
+  document.getElementById("season").textContent =
+    currentStanding.season || season;
+
+  await loadDivisionStandings();
+
+}
+
+
+/* =========================================================
+   LOAD DIVISION STANDINGS
+========================================================= */
+
+async function loadDivisionStandings(){
+
+  const container =
+    document.getElementById("divisionStandings");
+
+  if(!currentStanding){
+
+    container.innerHTML = `
+      <div class="empty">
+        <strong>NO STANDING</strong>
+        <span>No current standings record is available.</span>
+      </div>
+    `;
+
+    return;
+
+  }
+
+  let query =
+    supabase
+      .from("sports_standings")
+      .select(`
+        id,
+        team_id,
+        rank,
+        wins,
+        losses,
+        ties,
+        games_played,
+        win_percentage,
+        division,
+        season,
+        sports_teams!inner(
+          id,
+          name,
+          short_name,
+          abbreviation,
+          logo_url,
+          city,
+          state,
+          division
+        )
+      `)
+      .eq("league_id",currentTeam.league_id)
+      .eq("season",currentStanding.season);
+
+  if(currentStanding.division){
+
+    query =
+      query.eq(
+        "division",
+        currentStanding.division
+      );
+
+  }
+
+  const {
+    data,
+    error
+  } = await query
+    .order("rank",{ascending:true})
+    .order("wins",{ascending:false});
+
+  if(error){
+
+    console.warn(
+      "Division standings failed:",
+      error
+    );
+
+    container.innerHTML = `
+      <div class="empty">
+        <strong>STANDINGS UNAVAILABLE</strong>
+        <span>Could not load the division standings.</span>
+      </div>
+    `;
+
+    return;
+
+  }
+
+  if(!data?.length){
+
+    container.innerHTML = `
+      <div class="empty">
+        <strong>NO DATA</strong>
+        <span>No division standings are available for this season.</span>
+      </div>
+    `;
+
+    return;
+
+  }
+
+  container.innerHTML =
+    data.map((row,index)=>{
+
+      const team =
+        row.sports_teams;
+
+      const isCurrent =
+        team?.id === currentTeam.id;
+
+      return `
+
+        <div class="standing-row ${isCurrent ? "current" : ""}">
+
+          <div class="position">
+            ${esc(
+              row.rank ||
+              index + 1
+            )}
+          </div>
+
+          <div class="standing-team">
+
+            <div class="tiny-logo">
+              ${teamLogo(team)}
+            </div>
+
+            <span>
+              ${esc(
+                team?.short_name ||
+                team?.name ||
+                "Team"
+              )}
+            </span>
+
+          </div>
+
+          <div class="standing-record">
+            ${esc(recordText(row))}
+          </div>
+
+        </div>
+
+      `;
+
+    }).join("");
+
+}
+
+
+/* =========================================================
+   LOAD GAMES
+========================================================= */
+
+async function loadGames(){
+
+  const {
+    data,
+    error
+  } =
+    await supabase
+      .from("sports_games")
+      .select(`
+        id,
+        game_key,
+        season,
+        season_type,
+        round_name,
+        venue,
+        city,
+        scheduled_at,
+        actual_start_at,
+        actual_end_at,
+        status,
+        home_score,
+        away_score,
+        period,
+        period_number,
+        clock,
+        broadcast_network,
+        broadcast_url,
+        game_url,
+        thumbnail_url,
+        home_team_id,
+        away_team_id,
+        home_team:sports_teams!sports_games_home_team_id_fkey(
+          id,
+          name,
+          short_name,
+          abbreviation,
+          city,
+          state,
+          logo_url
+        ),
+        away_team:sports_teams!sports_games_away_team_id_fkey(
+          id,
+          name,
+          short_name,
+          abbreviation,
+          city,
+          state,
+          logo_url
+        )
+      `)
+      .or(
+        `home_team_id.eq.${currentTeam.id},away_team_id.eq.${currentTeam.id}`
+      )
+      .order(
+        "scheduled_at",
+        {ascending:true}
+      );
+
+  if(error){
+
+    console.error(
+      "Games load failed:",
+      error
+    );
+
+    showError(
+      `Game data could not be loaded: ${error.message}`
+    );
+
+    return;
+
+  }
+
+  const games =
+    data || [];
+
+  const now =
+    Date.now();
+
+  const upcoming =
+    games
+      .filter(game => {
+
+        const time =
+          new Date(
+            game.scheduled_at
+          ).getTime();
+
+        return (
+          ["scheduled","pre_game","live","halftime","delayed"]
+            .includes(game.status) &&
+          time >= now - 3 * 60 * 60 * 1000
+        );
+
+      })
+      .sort(
+        (a,b)=>
+          new Date(a.scheduled_at) -
+          new Date(b.scheduled_at)
+      );
+
+  const next =
+    upcoming[0] || null;
+
+  renderNextGame(next);
+
+  const results =
+    games
+      .filter(game =>
+        ["final","cancelled","postponed"]
+          .includes(game.status)
+      )
+      .sort(
+        (a,b)=>
+          new Date(b.scheduled_at) -
+          new Date(a.scheduled_at)
+      )
+      .slice(0,8);
+
+  renderResults(results);
+
+}
+
+
+/* =========================================================
+   RENDER NEXT GAME
+========================================================= */
+
+function renderNextGame(game){
+
+  const card =
+    document.getElementById("nextGameCard");
+
+  if(!game){
+
+    card.innerHTML = `
+      <div class="empty">
+        <strong>NO UPCOMING GAMES</strong>
+        <span>
+          No upcoming ${esc(currentTeam.name)} games are currently in the database.
+        </span>
+      </div>
+    `;
+
+    return;
+
+  }
+
+  const home =
+    game.home_team || {};
+
+  const away =
+    game.away_team || {};
+
+  const status =
+    gameStatusLabel(game.status);
+
+  const badge =
+    document.getElementById("nextStatus");
+
+  badge.textContent =
+    status;
+
+  badge.className =
+    "status-badge";
+
+  if(
+    ["live","halftime"].includes(game.status)
+  ){
+
+    badge.classList.add("live");
+
+  }
+
+  if(game.status === "final"){
+
+    badge.classList.add("final");
+
+  }
+
+  document.getElementById("nextDate").textContent =
+    formatDateTime(game.scheduled_at);
+
+  document.getElementById("homeLogo").innerHTML =
+    teamLogo(
+      home,
+      home.abbreviation || "HOME"
+    );
+
+  document.getElementById("homeName").textContent =
+    firstValue(home.name);
+
+  document.getElementById("homeCity").textContent =
+    firstValue(
+      home.city,
+      home.state
+    );
+
+  document.getElementById("awayLogo").innerHTML =
+    teamLogo(
+      away,
+      away.abbreviation || "AWAY"
+    );
+
+  document.getElementById("awayName").textContent =
+    firstValue(away.name);
+
+  document.getElementById("awayCity").textContent =
+    firstValue(
+      away.city,
+      away.state
+    );
+
+  const isLive =
+    ["live","halftime"].includes(
+      game.status
+    );
+
+  const hasScore =
+    game.home_score !== null &&
+    game.away_score !== null;
+
+  if(isLive || hasScore){
+
+    document.getElementById("centerVs").innerHTML =
+      `<div class="score-center">
+        ${esc(game.home_score ?? 0)}
+        —
+        ${esc(game.away_score ?? 0)}
+      </div>`;
+
+  }else{
+
+    document.getElementById("centerVs").textContent =
+      "VS";
+
+  }
+
+  document.getElementById("nextTime").textContent =
+    isLive
+      ? firstValue(
+          game.period &&
+          `${game.period} ${game.clock || ""}`
+        )
+      : formatTime(game.scheduled_at);
+
+  document.getElementById("nextVenue").textContent =
+    firstValue(game.venue);
+
+  document.getElementById("nextBroadcast").textContent =
+    firstValue(
+      game.broadcast_network
+    );
+
+  document.getElementById("homeRecord").textContent =
+    "";
+
+  document.getElementById("awayRecord").textContent =
+    "";
+
+}
+
+
+/* =========================================================
+   RENDER RESULTS
+========================================================= */
+
+function renderResults(games){
+
+  const container =
+    document.getElementById("resultsList");
+
+  if(!games.length){
+
+    container.innerHTML = `
+      <div class="empty">
+        <strong>NO RECENT RESULTS</strong>
+        <span>
+          Completed games for this team will appear here automatically.
+        </span>
+      </div>
+    `;
+
+    return;
+
+  }
+
+  container.innerHTML =
+    games.map(game=>{
+
+      const isHome =
+        game.home_team_id === currentTeam.id;
+
+      const opponent =
+        isHome
+          ? game.away_team
+          : game.home_team;
+
+      const result =
+        resultForTeam(game);
+
+      const date =
+        new Date(
+          game.scheduled_at
+        );
+
+      return `
+
+        <a
+          class="game-row"
+          href="${game.game_url ? esc(game.game_url) : `game.html?id=${encodeURIComponent(game.id)}`}">
+
+          <div class="game-row-date">
+
+            ${esc(
+              date.toLocaleDateString(
+                undefined,
+                {
+                  month:"short",
+                  day:"numeric"
+                }
+              )
+            )}
+
+          </div>
+
+          <div class="game-opponent">
+
+            <div class="row-logo">
+              ${teamLogo(
+                opponent,
+                opponent?.abbreviation || "OPP"
+              )}
+            </div>
+
+            <div>
+
+              <div class="opponent-name">
+                ${esc(
+                  opponent?.name ||
+                  "Opponent"
+                )}
+              </div>
+
+              <div class="opponent-location">
+                ${esc(
+                  opponent
+                    ? teamLocation(opponent)
+                    : ""
+                )}
+              </div>
+
+            </div>
+
+          </div>
+
+          <div
+            class="game-result ${result.className}">
+
+            ${esc(result.text)}
+
+          </div>
+
+        </a>
+
+      `;
+
+    }).join("");
+
+}
+
+
+/* =========================================================
+   LOAD NEWS
+========================================================= */
+
+async function loadNews(){
+
+  const {
+    data,
+    error
+  } =
+    await supabase
+      .from("sports_news")
+      .select(`
+        id,
+        team_id,
+        league_id,
+        title,
+        slug,
+        excerpt,
+        category,
+        author_name,
+        source_name,
+        source_url,
+        image_url,
+        published_at,
+        status,
+        is_featured,
+        is_pnw
+      `)
+      .eq("team_id",currentTeam.id)
+      .eq("status","published")
+      .lte(
+        "published_at",
+        new Date().toISOString()
+      )
+      .order(
+        "published_at",
+        {ascending:false}
+      )
+      .limit(6);
+
+  if(error){
+
+    console.warn(
+      "News load failed:",
+      error
+    );
+
+    renderNews([]);
+
+    return;
+
+  }
+
+  renderNews(
+    data || []
+  );
+
+}
+
+
+/* =========================================================
+   RENDER NEWS
+========================================================= */
+
+function renderNews(news){
+
+  const container =
+    document.getElementById("newsList");
+
+  if(!news.length){
+
+    container.innerHTML = `
+      <div class="empty">
+        <strong>NO TEAM NEWS YET</strong>
+        <span>
+          CrowRules Sports team coverage will appear here when published.
+        </span>
+      </div>
+    `;
+
+    return;
+
+  }
+
+  container.innerHTML =
+    news.map(article=>{
+
+      const href =
+        `news.html?story=${encodeURIComponent(article.slug)}`;
+
+      const thumb =
+        article.image_url
+          ? `
+            <img
+              src="${esc(article.image_url)}"
+              alt="${esc(article.title)}"
+              loading="lazy">
+          `
+          : "CR";
+
+      return `
+
+        <a
+          class="news-card"
+          href="${href}">
+
+          <div class="news-thumb">
+            ${thumb}
+          </div>
+
+          <div>
+
+            <div class="news-meta">
+
+              ${esc(
+                firstValue(
+                  article.category,
+                  article.source_name,
+                  "TEAM DESK"
+                )
+              )}
+
+            </div>
+
+            <h3>
+              ${esc(article.title)}
+            </h3>
+
+            <p>
+              ${esc(
+                firstValue(
+                  article.excerpt,
+                  "Read the latest CrowRules Sports team coverage."
+                )
+              )}
+            </p>
+
+          </div>
+
+        </a>
+
+      `;
+
+    }).join("");
+
+}
+
+
+/* =========================================================
+   AUTH
+========================================================= */
+
+async function loadAuth(){
+
+  const {
+    data
+  } =
+    await supabase.auth.getUser();
+
+  currentUser =
+    data?.user || null;
+
+  await updateFollowButton();
+
+}
+
+
+supabase.auth.onAuthStateChange(
+  async (_event,session)=>{
+
+    currentUser =
+      session?.user || null;
+
+    await updateFollowButton();
+
+  }
+);
+
+
+/* =========================================================
+   FOLLOW BUTTON
+========================================================= */
+
+const favoriteBtn =
+  document.getElementById("favoriteBtn");
+
+
+async function updateFollowButton(){
+
+  if(!currentUser){
+
+    favoriteBtn.textContent =
+      "☆ Follow Team";
+
+    favoriteBtn.classList.remove(
+      "following"
+    );
+
+    favoriteBtn.title =
+      "Sign in to follow this team";
+
+    return;
+
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabase
+      .from("sports_team_follows")
+      .select("id")
+      .eq("user_id",currentUser.id)
+      .eq("team_id",currentTeam.id)
+      .maybeSingle();
+
+  if(error){
+
+    console.warn(
+      "Follow lookup failed:",
+      error
+    );
+
+    return;
+
+  }
+
+  if(data){
+
+    favoriteBtn.textContent =
+      "★ Following";
+
+    favoriteBtn.classList.add(
+      "following"
+    );
+
+  }else{
+
+    favoriteBtn.textContent =
+      "☆ Follow Team";
+
+    favoriteBtn.classList.remove(
+      "following"
+    );
+
+  }
+
+}
+
+
+favoriteBtn.addEventListener(
+  "click",
+  async ()=>{
+
+    if(!currentUser){
+
+      alert(
+        "Please sign in to CrowRules Sports to follow teams."
+      );
+
+      return;
+
+    }
+
+    favoriteBtn.disabled =
+      true;
+
+    try{
+
+      const {
+        data
+      } =
+        await supabase
+          .from("sports_team_follows")
+          .select("id")
+          .eq("user_id",currentUser.id)
+          .eq("team_id",currentTeam.id)
+          .maybeSingle();
+
+      if(data){
+
+        const {
+          error
+        } =
+          await supabase
+            .from("sports_team_follows")
+            .delete()
+            .eq("id",data.id);
+
+        if(error){
+          throw error;
+        }
+
+      }else{
+
+        const {
+          error
+        } =
+          await supabase
+            .from("sports_team_follows")
+            .insert({
+              user_id:currentUser.id,
+              team_id:currentTeam.id
+            });
+
+        if(error){
+          throw error;
+        }
+
+      }
+
+      await updateFollowButton();
+
+    }catch(error){
+
+      console.error(
+        "Follow update failed:",
+        error
+      );
+
+      showError(
+        `Could not update your team follow: ${error.message}`
+      );
+
+    }finally{
+
+      favoriteBtn.disabled =
+        false;
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   REALTIME
+========================================================= */
+
+function subscribeRealtime(){
+
+  if(!currentTeam){
+    return;
+  }
+
+  const gamesChannel =
+    supabase
+      .channel(
+        `team-games-${currentTeam.id}`
+      )
+      .on(
+        "postgres_changes",
+        {
+          event:"*",
+          schema:"public",
+          table:"sports_games",
+          filter:
+            `home_team_id=eq.${currentTeam.id}`
+        },
+        ()=>{
+          loadGames();
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event:"*",
+          schema:"public",
+          table:"sports_games",
+          filter:
+            `away_team_id=eq.${currentTeam.id}`
+        },
+        ()=>{
+          loadGames();
+        }
+      )
+      .subscribe();
+
+  realtimeChannels.push(
+    gamesChannel
+  );
+
+
+  const standingsChannel =
+    supabase
+      .channel(
+        `team-standings-${currentTeam.id}`
+      )
+      .on(
+        "postgres_changes",
+        {
+          event:"*",
+          schema:"public",
+          table:"sports_standings",
+          filter:
+            `team_id=eq.${currentTeam.id}`
+        },
+        ()=>{
+          loadStanding();
+        }
+      )
+      .subscribe();
+
+  realtimeChannels.push(
+    standingsChannel
+  );
+
+
+  const newsChannel =
+    supabase
+      .channel(
+        `team-news-${currentTeam.id}`
+      )
+      .on(
+        "postgres_changes",
+        {
+          event:"*",
+          schema:"public",
+          table:"sports_news",
+          filter:
+            `team_id=eq.${currentTeam.id}`
+        },
+        ()=>{
+          loadNews();
+        }
+      )
+      .subscribe();
+
+  realtimeChannels.push(
+    newsChannel
+  );
+
+}
+
+
+/* =========================================================
+   ERROR DISPLAY
+========================================================= */
+
+function showError(message){
+
+  errorBox.textContent =
+    message;
+
+  errorBox.classList.add(
+    "show"
+  );
+
+  document.getElementById(
+    "dataStatusDot"
+  ).classList.add(
+    "error"
+  );
+
+  document.getElementById(
+    "dataStatus"
+  ).textContent =
+    "DATABASE WARNING";
+
+}
+
+
+function showNotFound(message){
+
+  console.warn(
+    "Team not found:",
+    message
+  );
+
+  loadingScreen.style.display =
+    "none";
+
+  teamApp.style.display =
+    "none";
+
+  notFound.classList.add(
+    "show"
+  );
+
+}
+
+
+/* =========================================================
+   REFRESH
+========================================================= */
+
+async function refreshTeamData(){
+
+  if(!currentTeam){
+    return;
+  }
+
+  await Promise.all([
+    loadStanding(),
+    loadGames(),
+    loadNews(),
+    updateFollowButton()
+  ]);
+
+}
+
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
+
+async function init(){
+
+  try{
+
+    const loaded =
+      await loadTeam();
+
+    if(!loaded){
+      return;
+    }
+
+    await Promise.all([
+      loadStanding(),
+      loadGames(),
+      loadNews(),
+      loadAuth()
+    ]);
+
+    loadingScreen.style.display =
+      "none";
+
+    teamApp.style.display =
+      "block";
+
+    subscribeRealtime();
+
+  }catch(error){
+
+    console.error(
+      "Team Center initialization failed:",
+      error
+    );
+
+    loadingScreen.style.display =
+      "none";
+
+    teamApp.style.display =
+      "block";
+
+    showError(
+      `Team Center encountered a database error: ${error.message}`
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   AUTO REFRESH
+========================================================= */
+
+setInterval(
+  refreshTeamData,
+  5 * 60 * 1000
+);
+
+
+/* =========================================================
+   GLOBAL SEARCH
+========================================================= */
+
+document.addEventListener(
+  "keydown",
+  event=>{
+
+    if(
+      (event.ctrlKey || event.metaKey) &&
+      event.key.toLowerCase() === "k"
+    ){
+
+      event.preventDefault();
+
+      location.href =
+        "search.html";
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   START
+========================================================= */
+
+init();
+
+</script>
+
+</body>
+</html>

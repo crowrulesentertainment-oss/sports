@@ -1,0 +1,5548 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<meta name="theme-color" content="#050505">
+<meta name="description" content="CrowRules Sports Pick 'Em Challenge — Make your picks, lock them in, and climb the leaderboard.">
+
+<title>CrowRules Sports — Pick 'Em Challenge</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --black:#050505;
+  --black2:#080808;
+  --panel:#0d0d0d;
+  --panel2:#121212;
+  --panel3:#181818;
+
+  --red:#e10600;
+  --red2:#ff211a;
+  --redDark:#780400;
+
+  --white:#fff;
+  --text:#ededed;
+  --muted:#888;
+  --dim:#555;
+
+  --border:#292929;
+  --redBorder:#4b100e;
+
+  --green:#38d46a;
+  --yellow:#f2c94c;
+  --blue:#4da3ff;
+
+  --max:1500px;
+  --radius:12px;
+}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 50% 0%,rgba(225,6,0,.13),transparent 30%),
+    linear-gradient(180deg,#030303 0%,#080808 48%,#030303 100%);
+  color:var(--text);
+  font-family:"Montserrat",sans-serif;
+  overflow-x:hidden;
+}
+
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:9999;
+  opacity:.035;
+  background-image:
+    linear-gradient(rgba(255,255,255,.12) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.12) 1px,transparent 1px);
+  background-size:42px 42px;
+}
+
+a{
+  color:inherit;
+  text-decoration:none;
+}
+
+button,
+input,
+select{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+button:disabled{
+  cursor:not-allowed;
+}
+
+/* =========================================
+   HEADER
+========================================= */
+
+header{
+  position:sticky;
+  top:0;
+  z-index:1000;
+  height:74px;
+  background:rgba(5,5,5,.96);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(18px);
+}
+
+.nav{
+  max-width:var(--max);
+  height:100%;
+  margin:auto;
+  padding:0 22px;
+
+  display:flex;
+  align-items:center;
+  gap:25px;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  min-width:max-content;
+}
+
+.brand-mark{
+  width:43px;
+  height:43px;
+
+  display:grid;
+  place-items:center;
+
+  background:var(--red);
+  border:1px solid var(--red2);
+
+  color:#fff;
+
+  font-family:"Orbitron",sans-serif;
+  font-size:13px;
+  font-weight:900;
+
+  box-shadow:0 0 20px rgba(225,6,0,.25);
+}
+
+.brand-text strong{
+  display:block;
+
+  font-family:"Orbitron",sans-serif;
+  font-size:15px;
+  font-weight:900;
+  letter-spacing:1px;
+}
+
+.brand-text span{
+  display:block;
+  margin-top:2px;
+
+  color:var(--red2);
+
+  font-family:"Orbitron",sans-serif;
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:2px;
+}
+
+nav{
+  margin-left:auto;
+
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+
+nav a{
+  padding:10px;
+
+  color:#999;
+
+  border:1px solid transparent;
+
+  font-family:"Orbitron",sans-serif;
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:.5px;
+
+  transition:.2s ease;
+}
+
+nav a:hover,
+nav a.active{
+  color:#fff;
+  background:rgba(225,6,0,.08);
+  border-color:var(--redBorder);
+}
+
+.menu{
+  display:none;
+
+  width:43px;
+  height:43px;
+
+  margin-left:auto;
+
+  background:var(--panel);
+  border:1px solid var(--border);
+
+  color:#fff;
+  font-size:20px;
+}
+
+/* =========================================
+   SYSTEM BAR
+========================================= */
+
+.system-bar{
+  min-height:36px;
+
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  padding:8px 20px;
+
+  background:#080808;
+  border-bottom:1px solid var(--border);
+
+  color:#666;
+
+  font-family:"Orbitron",sans-serif;
+  font-size:7px;
+  font-weight:800;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+.system-inner{
+  width:100%;
+  max-width:var(--max);
+
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+}
+
+.system-status{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.status-dot{
+  width:7px;
+  height:7px;
+
+  background:var(--green);
+  border-radius:50%;
+
+  box-shadow:0 0 10px rgba(56,212,106,.45);
+}
+
+.status-dot.error{
+  background:var(--red);
+  box-shadow:0 0 10px rgba(225,6,0,.45);
+}
+
+.status-dot.loading{
+  background:var(--yellow);
+  box-shadow:0 0 10px rgba(242,201,76,.45);
+}
+
+/* =========================================
+   HERO
+========================================= */
+
+.hero{
+  position:relative;
+  overflow:hidden;
+
+  min-height:535px;
+
+  display:flex;
+  align-items:center;
+
+  padding:80px 22px;
+
+  border-bottom:1px solid var(--border);
+}
+
+.hero:before{
+  content:"";
+
+  position:absolute;
+
+  width:700px;
+  height:700px;
+
+  right:-250px;
+  top:-220px;
+
+  border:1px solid rgba(225,6,0,.11);
+  border-radius:50%;
+
+  box-shadow:
+    0 0 100px rgba(225,6,0,.08),
+    inset 0 0 100px rgba(225,6,0,.03);
+}
+
+.hero:after{
+  content:"";
+
+  position:absolute;
+
+  left:0;
+  right:0;
+  top:50%;
+
+  height:1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(225,6,0,.35),
+      transparent
+    );
+
+  transform:rotate(-7deg);
+}
+
+.hero-inner{
+  position:relative;
+  z-index:2;
+
+  width:100%;
+  max-width:var(--max);
+
+  margin:auto;
+
+  display:grid;
+  grid-template-columns:1.15fr .85fr;
+
+  gap:60px;
+
+  align-items:center;
+}
+
+.kicker{
+  color:var(--red);
+
+  font-family:"Orbitron",sans-serif;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:2px;
+}
+
+h1{
+  margin-top:14px;
+
+  font-family:"Orbitron",sans-serif;
+  font-size:clamp(42px,7vw,85px);
+  line-height:.94;
+
+  font-weight:900;
+  letter-spacing:-3px;
+
+  text-transform:uppercase;
+}
+
+h1 span{
+  display:block;
+  color:var(--red);
+
+  text-shadow:
+    4px 4px 0 #420200,
+    0 0 35px rgba(225,6,0,.25);
+}
+
+.hero-copy{
+  max-width:700px;
+
+  margin-top:22px;
+
+  color:#999;
+
+  font-size:14px;
+  line-height:1.8;
+}
+
+.hero-actions{
+  margin-top:30px;
+
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.btn{
+  padding:14px 19px;
+
+  background:var(--panel2);
+  border:1px solid var(--border);
+
+  color:#fff;
+
+  font-family:"Orbitron",sans-serif;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:1px;
+
+  transition:.2s ease;
+}
+
+.btn:hover:not(:disabled){
+  transform:translateY(-2px);
+  border-color:var(--red);
+}
+
+.btn-primary{
+  background:var(--red);
+  border-color:var(--red2);
+}
+
+.btn-primary:hover:not(:disabled){
+  background:var(--red2);
+  box-shadow:0 0 25px rgba(225,6,0,.25);
+}
+
+.btn:disabled{
+  opacity:.45;
+}
+
+/* =========================================
+   CHALLENGE PANEL
+========================================= */
+
+.challenge-panel{
+  position:relative;
+
+  padding:28px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(225,6,0,.11),
+      rgba(255,255,255,.015)
+    );
+
+  border:1px solid var(--redBorder);
+
+  box-shadow:inset 0 0 35px rgba(225,6,0,.025);
+}
+
+.challenge-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  gap:15px;
+
+  padding-bottom:18px;
+
+  border-bottom:1px solid var(--border);
+}
+
+.challenge-title{
+  font-family:"Orbitron",sans-serif;
+  font-size:15px;
+  font-weight:900;
+}
+
+.live-pill{
+  padding:6px 9px;
+
+  background:rgba(56,212,106,.08);
+  border:1px solid rgba(56,212,106,.25);
+
+  color:var(--green);
+
+  font-family:"Orbitron",sans-serif;
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:1px;
+}
+
+.live-pill.locked{
+  color:var(--red2);
+  background:rgba(225,6,0,.1);
+  border-color:var(--redBorder);
+}
+
+.week{
+  margin-top:22px;
+
+  color:#777;
+
+  font-family:"Orbitron",sans-serif;
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:1px;
+}
+
+.challenge-name{
+  margin-top:8px;
+
+  font-family:"Orbitron",sans-serif;
+  font-size:24px;
+  font-weight:900;
+}
+
+.challenge-description{
+  margin-top:10px;
+
+  color:#777;
+
+  font-size:10px;
+  line-height:1.6;
+}
+
+.deadline{
+  margin-top:25px;
+
+  padding:17px;
+
+  background:#080808;
+  border:1px solid var(--border);
+}
+
+.deadline-label{
+  color:#666;
+
+  font-family:"Orbitron",sans-serif;
+  font-size:7px;
+  font-weight:800;
+  letter-spacing:1px;
+}
+
+.deadline-time{
+  margin-top:8px;
+
+  color:#fff;
+
+  font-family:"Orbitron",sans-serif;
+  font-size:25px;
+  font-weight:900;
+}
+
+.deadline-time span{
+  color:var(--red);
+}
+
+.challenge-stats{
+  margin-top:12px;
+
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+
+  gap:7px;
+}
+
+.mini-stat{
+  padding:12px;
+
+  background:#0a0a0a;
+
+  border:1px solid var(--border);
+}
+
+.mini-stat strong{
+  display:block;
+
+  font-family:"Orbitron",sans-serif;
+  font-size:17px;
+}
+
+.mini-stat span{
+  display:block;
+
+  margin-top:5px;
+
+  color:#666;
+  font-size:8px;
+}
+
+/* =========================================
+   ALERT
+========================================= */
+
+.alert{
+  display:none;
+
+  max-width:var(--max);
+
+  margin:0 auto;
+
+  padding:0 22px;
+}
+
+.alert.show{
+  display:block;
+}
+
+.alert-box{
+  margin-top:20px;
+
+  padding:15px 18px;
+
+  background:rgba(225,6,0,.08);
+  border:1px solid var(--redBorder);
+
+  color:#ddd;
+
+  font-size:10px;
+  line-height:1.6;
+}
+
+.alert-box strong{
+  color:var(--red2);
+}
+
+/* =========================================
+   TICKER
+========================================= */
+
+.ticker{
+  overflow:hidden;
+
+  background:#080808;
+
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+
+  white-space:nowrap;
+}
+
+.ticker-track{
+  width:max-content;
+
+  display:flex;
+  gap:55px;
+
+  padding:13px 0;
+
+  animation:ticker 30s linear infinite;
+}
+
+.ticker-item{
+  color:#888;
+
+  font-family:"Orbitron",sans-serif;
+  font-size:8px;
+  font-weight:800;
+  letter-spacing:1px;
+}
+
+.ticker-item b{
+  color:var(--red);
+}
+
+@keyframes ticker{
+  from{
+    transform:translateX(0);
+  }
+
+  to{
+    transform:translateX(-50%);
+  }
+}
+
+/* =========================================
+   MAIN
+========================================= */
+
+.section{
+  max-width:var(--max);
+
+  margin:auto;
+
+  padding:75px 22px;
+}
+
+.section-head{
+  margin-bottom:30px;
+}
+
+.section-head h2{
+  margin-top:8px;
+
+  font-family:"Orbitron",sans-serif;
+  font-size:clamp(25px,4vw,40px);
+  font-weight:900;
+
+  text-transform:uppercase;
+}
+
+.section-sub{
+  max-width:750px;
+
+  margin-top:9px;
+
+  color:#777;
+
+  font-size:12px;
+  line-height:1.8;
+}
+
+/* =========================================
+   FILTERS
+========================================= */
+
+.filters{
+  display:flex;
+  flex-wrap:wrap;
+
+  gap:8px;
+
+  margin-bottom:20px;
+}
+
+.filter{
+  padding:10px 13px;
+
+  background:#0b0b0b;
+
+  border:1px solid var(--border);
+
+  color:#888;
+
+  font-family:"Orbitron",sans-serif;
+  font-size:8px;
+  font-weight:800;
+}
+
+.filter.active,
+.filter:hover{
+  background:rgba(225,6,0,.1);
+
+  border-color:var(--red);
+
+  color:#fff;
+}
+
+/* =========================================
+   AUTH BAR
+========================================= */
+
+.auth-bar{
+  margin-bottom:20px;
+
+  padding:15px 18px;
+
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+
+  background:#0b0b0b;
+  border:1px solid var(--border);
+}
+
+.auth-copy{
+  color:#777;
+  font-size:10px;
+  line-height:1.6;
+}
+
+.auth-copy strong{
+  color:#fff;
+}
+
+.auth-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+/* =========================================
+   PICK GRID
+========================================= */
+
+.pick-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+}
+
+.pick-card{
+  position:relative;
+
+  padding:23px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #111,
+      #090909
+    );
+
+  border:1px solid var(--border);
+
+  transition:.2s ease;
+}
+
+.pick-card:hover{
+  border-color:var(--redBorder);
+}
+
+.pick-card.locked{
+  opacity:.62;
+}
+
+.pick-card.filtered-out{
+  display:none;
+}
+
+.pick-card.user-picked{
+  border-color:rgba(56,212,106,.35);
+}
+
+.pick-head{
+  display:flex;
+
+  justify-content:space-between;
+  align-items:center;
+
+  gap:15px;
+
+  padding-bottom:14px;
+
+  border-bottom:1px solid var(--border);
+}
+
+.league{
+  color:var(--red);
+
+  font-family:"Orbitron",sans-serif;
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:1px;
+}
+
+.game-time{
+  color:#777;
+
+  font-size:9px;
+  font-weight:700;
+
+  text-align:right;
+}
+
+.lock-label{
+  margin-top:4px;
+
+  color:var(--yellow);
+
+  font-family:"Orbitron",sans-serif;
+  font-size:7px;
+  font-weight:800;
+}
+
+.matchup{
+  margin-top:20px;
+
+  display:grid;
+  grid-template-columns:1fr 50px 1fr;
+
+  gap:10px;
+
+  align-items:center;
+}
+
+.team{
+  min-height:92px;
+
+  padding:17px 12px;
+
+  text-align:center;
+
+  background:#080808;
+
+  border:1px solid var(--border);
+
+  color:#fff;
+
+  transition:.2s ease;
+}
+
+.team:hover:not(:disabled){
+  border-color:var(--red);
+}
+
+.team.selected{
+  background:
+    linear-gradient(
+      135deg,
+      rgba(225,6,0,.18),
+      rgba(225,6,0,.04)
+    );
+
+  border-color:var(--red);
+
+  box-shadow:
+    inset 0 0 20px rgba(225,6,0,.05),
+    0 0 15px rgba(225,6,0,.08);
+}
+
+.team:disabled{
+  opacity:.7;
+}
+
+.team-logo{
+  width:34px;
+  height:34px;
+
+  object-fit:contain;
+
+  display:block;
+
+  margin:0 auto 7px;
+
+  background:#111;
+}
+
+.team-code{
+  font-family:"Orbitron",sans-serif;
+  font-size:20px;
+  font-weight:900;
+}
+
+.team-name{
+  margin-top:5px;
+
+  color:#777;
+
+  font-size:9px;
+}
+
+.vs{
+  text-align:center;
+
+  color:#555;
+
+  font-family:"Orbitron",sans-serif;
+  font-size:9px;
+  font-weight:900;
+}
+
+.pick-meta{
+  margin-top:13px;
+
+  display:flex;
+  justify-content:space-between;
+
+  color:#666;
+
+  font-size:8px;
+}
+
+.confidence{
+  margin-top:18px;
+}
+
+.confidence-head{
+  display:flex;
+
+  justify-content:space-between;
+
+  margin-bottom:8px;
+
+  font-family:"Orbitron",sans-serif;
+  font-size:7px;
+  font-weight:800;
+  letter-spacing:1px;
+}
+
+.confidence-head span:last-child{
+  color:var(--red);
+}
+
+input[type="range"]{
+  width:100%;
+
+  accent-color:var(--red);
+
+  cursor:pointer;
+}
+
+input[type="range"]:disabled{
+  cursor:not-allowed;
+  opacity:.5;
+}
+
+.pick-status{
+  margin-top:13px;
+
+  color:#555;
+
+  font-size:8px;
+}
+
+.pick-status strong{
+  color:var(--green);
+}
+
+.pick-status strong.none{
+  color:#666;
+}
+
+.game-result{
+  margin-top:10px;
+
+  padding:8px;
+
+  background:#080808;
+
+  border:1px solid var(--border);
+
+  color:#777;
+
+  font-size:8px;
+}
+
+.game-result.correct{
+  border-color:rgba(56,212,106,.3);
+  color:var(--green);
+}
+
+.game-result.incorrect{
+  border-color:rgba(225,6,0,.3);
+  color:var(--red2);
+}
+
+/* =========================================
+   LOADING / EMPTY
+========================================= */
+
+.state{
+  grid-column:1/-1;
+
+  padding:60px 25px;
+
+  text-align:center;
+
+  background:#0b0b0b;
+
+  border:1px solid var(--border);
+}
+
+.state-mark{
+  color:var(--red);
+
+  font-family:"Orbitron",sans-serif;
+  font-size:24px;
+  font-weight:900;
+}
+
+.state h3{
+  margin-top:12px;
+
+  font-family:"Orbitron",sans-serif;
+  font-size:15px;
+}
+
+.state p{
+  max-width:600px;
+
+  margin:10px auto 0;
+
+  color:#666;
+
+  font-size:10px;
+  line-height:1.7;
+}
+
+/* =========================================
+   SUBMIT BAR
+========================================= */
+
+.submit-bar{
+  position:sticky;
+
+  bottom:12px;
+
+  z-index:50;
+
+  margin-top:25px;
+
+  padding:17px 20px;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:space-between;
+
+  gap:20px;
+
+  background:rgba(12,12,12,.96);
+
+  border:1px solid var(--redBorder);
+
+  box-shadow:0 8px 40px rgba(0,0,0,.5);
+
+  backdrop-filter:blur(16px);
+}
+
+.submit-info{
+  display:flex;
+
+  align-items:center;
+
+  gap:18px;
+}
+
+.submit-number{
+  font-family:"Orbitron",sans-serif;
+  font-size:25px;
+  font-weight:900;
+}
+
+.submit-number span{
+  color:var(--red);
+}
+
+.submit-copy{
+  color:#777;
+  font-size:9px;
+}
+
+.save-status{
+  color:#666;
+
+  font-family:"Orbitron",sans-serif;
+  font-size:7px;
+  font-weight:800;
+  letter-spacing:1px;
+}
+
+.save-status.saved{
+  color:var(--green);
+}
+
+.save-status.error{
+  color:var(--red2);
+}
+
+/* =========================================
+   LEADERBOARD
+========================================= */
+
+.leader-layout{
+  display:grid;
+
+  grid-template-columns:1fr 360px;
+
+  gap:14px;
+}
+
+.leaderboard{
+  background:#0b0b0b;
+
+  border:1px solid var(--border);
+
+  overflow:hidden;
+}
+
+.leader-row{
+  display:grid;
+
+  grid-template-columns:55px 1fr 100px 100px;
+
+  align-items:center;
+
+  gap:10px;
+
+  padding:15px 18px;
+
+  border-bottom:1px solid var(--border);
+}
+
+.leader-row:last-child{
+  border-bottom:0;
+}
+
+.leader-row.header{
+  color:#555;
+
+  font-family:"Orbitron",sans-serif;
+  font-size:7px;
+  font-weight:800;
+  letter-spacing:1px;
+}
+
+.leader-row.current{
+  background:rgba(225,6,0,.08);
+
+  border-left:3px solid var(--red);
+}
+
+.rank{
+  color:var(--red);
+
+  font-family:"Orbitron",sans-serif;
+  font-size:12px;
+  font-weight:900;
+}
+
+.player{
+  display:flex;
+
+  align-items:center;
+
+  gap:10px;
+}
+
+.avatar{
+  width:33px;
+  height:33px;
+
+  display:grid;
+  place-items:center;
+
+  background:#181818;
+
+  border:1px solid var(--border);
+
+  color:#fff;
+
+  font-family:"Orbitron",sans-serif;
+  font-size:8px;
+  font-weight:900;
+}
+
+.player-name{
+  font-size:10px;
+  font-weight:800;
+}
+
+.player-record{
+  margin-top:3px;
+
+  color:#666;
+
+  font-size:8px;
+}
+
+.points{
+  text-align:right;
+
+  font-family:"Orbitron",sans-serif;
+  font-size:12px;
+  font-weight:900;
+}
+
+.streak{
+  text-align:right;
+
+  color:var(--green);
+
+  font-size:9px;
+  font-weight:800;
+}
+
+/* =========================================
+   SIDEBAR
+========================================= */
+
+.side-stack{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.side-card{
+  padding:22px;
+
+  background:#0b0b0b;
+
+  border:1px solid var(--border);
+}
+
+.side-card h3{
+  font-family:"Orbitron",sans-serif;
+  font-size:13px;
+  font-weight:900;
+}
+
+.side-card p{
+  margin-top:9px;
+
+  color:#777;
+
+  font-size:10px;
+  line-height:1.7;
+}
+
+.stat-big{
+  margin-top:18px;
+
+  color:var(--red);
+
+  font-family:"Orbitron",sans-serif;
+  font-size:36px;
+  font-weight:900;
+}
+
+/* =========================================
+   HOW IT WORKS
+========================================= */
+
+.rules-grid{
+  display:grid;
+
+  grid-template-columns:repeat(4,1fr);
+
+  gap:12px;
+}
+
+.rule{
+  padding:25px;
+
+  background:#0b0b0b;
+
+  border:1px solid var(--border);
+}
+
+.rule-num{
+  color:var(--red);
+
+  font-family:"Orbitron",sans-serif;
+  font-size:10px;
+  font-weight:900;
+}
+
+.rule h3{
+  margin-top:17px;
+
+  font-family:"Orbitron",sans-serif;
+  font-size:13px;
+  font-weight:900;
+}
+
+.rule p{
+  margin-top:8px;
+
+  color:#777;
+
+  font-size:10px;
+  line-height:1.7;
+}
+
+/* =========================================
+   TOAST
+========================================= */
+
+.toast{
+  position:fixed;
+
+  right:20px;
+  bottom:20px;
+
+  z-index:9998;
+
+  max-width:380px;
+
+  padding:14px 17px;
+
+  background:#111;
+
+  border:1px solid var(--border);
+
+  box-shadow:0 12px 40px rgba(0,0,0,.5);
+
+  color:#ddd;
+
+  font-size:10px;
+
+  transform:translateY(20px);
+
+  opacity:0;
+
+  pointer-events:none;
+
+  transition:.25s ease;
+}
+
+.toast.show{
+  transform:translateY(0);
+
+  opacity:1;
+}
+
+.toast.success{
+  border-color:rgba(56,212,106,.35);
+}
+
+.toast.error{
+  border-color:var(--redBorder);
+}
+
+/* =========================================
+   FOOTER
+========================================= */
+
+footer{
+  border-top:1px solid var(--border);
+
+  background:#030303;
+}
+
+.footer-inner{
+  max-width:var(--max);
+
+  margin:auto;
+
+  padding:35px 22px;
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+  gap:25px;
+}
+
+.footer-brand{
+  font-family:"Orbitron",sans-serif;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:1px;
+}
+
+.footer-brand span{
+  color:var(--red);
+}
+
+.footer-copy{
+  margin-top:6px;
+
+  color:#555;
+
+  font-size:9px;
+}
+
+.footer-status{
+  display:flex;
+
+  align-items:center;
+
+  gap:8px;
+
+  color:#666;
+
+  font-family:"Orbitron",sans-serif;
+  font-size:8px;
+  font-weight:800;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media(max-width:1100px){
+
+  nav a{
+    padding:8px 6px;
+    font-size:7px;
+  }
+
+  .hero-inner{
+    grid-template-columns:1fr;
+  }
+
+  .leader-layout{
+    grid-template-columns:1fr;
+  }
+
+  .rules-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:850px){
+
+  header{
+    height:66px;
+  }
+
+  .nav{
+    padding:0 15px;
+  }
+
+  nav{
+    display:none;
+
+    position:absolute;
+
+    top:66px;
+    left:0;
+    right:0;
+
+    padding:10px;
+
+    flex-direction:column;
+    align-items:stretch;
+
+    background:rgba(5,5,5,.99);
+
+    border-bottom:1px solid var(--border);
+  }
+
+  nav.open{
+    display:flex;
+  }
+
+  nav a{
+    padding:14px;
+    font-size:9px;
+  }
+
+  .menu{
+    display:block;
+  }
+
+  .pick-grid{
+    grid-template-columns:1fr;
+  }
+
+  .system-inner{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:6px;
+  }
+}
+
+@media(max-width:600px){
+
+  .hero{
+    padding:65px 16px;
+  }
+
+  .section{
+    padding:60px 16px;
+  }
+
+  h1{
+    letter-spacing:-2px;
+  }
+
+  .challenge-panel{
+    padding:20px;
+  }
+
+  .challenge-stats{
+    grid-template-columns:1fr;
+  }
+
+  .matchup{
+    grid-template-columns:1fr 30px 1fr;
+  }
+
+  .team{
+    padding:14px 7px;
+  }
+
+  .team-code{
+    font-size:15px;
+  }
+
+  .team-name{
+    font-size:7px;
+  }
+
+  .submit-bar{
+    align-items:stretch;
+    flex-direction:column;
+  }
+
+  .submit-info{
+    justify-content:space-between;
+  }
+
+  .submit-bar .btn{
+    width:100%;
+    text-align:center;
+  }
+
+  .leader-row{
+    grid-template-columns:38px 1fr 65px;
+  }
+
+  .leader-row .streak{
+    display:none;
+  }
+
+  .rules-grid{
+    grid-template-columns:1fr;
+  }
+
+  .footer-inner{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .auth-bar{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .auth-actions{
+    width:100%;
+  }
+
+  .auth-actions .btn{
+    flex:1;
+  }
+
+  .toast{
+    left:15px;
+    right:15px;
+    bottom:15px;
+    max-width:none;
+  }
+}
+</style>
+
+</head>
+
+<body>
+
+<!-- =========================================
+     HEADER
+========================================= -->
+
+<header>
+
+  <div class="nav">
+
+```
+<a href="sports.html" class="brand">
+
+  <div class="brand-mark">
+    CR
+  </div>
+
+  <div class="brand-text">
+    <strong>CROWRULES</strong>
+    <span>SPORTS</span>
+  </div>
+
+</a>
+
+<nav id="mainNav">
+
+  <a href="sports.html">HOME</a>
+  <a href="live.html">LIVE</a>
+  <a href="schedule.html">SCHEDULE</a>
+  <a href="standings.html">STANDINGS</a>
+  <a href="rankings.html">RANKINGS</a>
+  <a href="news.html">NEWS</a>
+  <a href="teams.html">TEAMS</a>
+  <a href="pnw.html">PNW</a>
+  <a href="pickem.html" class="active">PICK 'EM</a>
+
+</nav>
+
+<button
+  class="menu"
+  id="menuButton"
+  aria-label="Open navigation"
+  aria-expanded="false">
+  ☰
+</button>
+```
+
+  </div>
+
+</header>
+
+<!-- =========================================
+     SYSTEM STATUS
+========================================= -->
+
+<div class="system-bar">
+
+  <div class="system-inner">
+
+```
+<div class="system-status">
+
+  <span class="status-dot loading" id="systemDot"></span>
+
+  <span id="systemStatus">
+    CONNECTING TO CROWRULES PICK 'EM SYSTEM
+  </span>
+
+</div>
+
+<div id="lastUpdated">
+  WAITING FOR DATA
+</div>
+```
+
+  </div>
+
+</div>
+
+<!-- =========================================
+     HERO
+========================================= -->
+
+<section class="hero">
+
+  <div class="hero-inner">
+
+```
+<div>
+
+  <div class="kicker">
+    CROWRULES SPORTS • MEMBER CHALLENGE
+  </div>
+
+  <h1>
+    PICK 'EM
+    <span>CHALLENGE</span>
+  </h1>
+
+  <p class="hero-copy" id="heroCopy">
+    Make your picks. Lock them in. Earn points.
+    Climb the leaderboard. The CrowRules Pick 'Em
+    Challenge puts your sports knowledge to the test
+    across the games you follow.
+  </p>
+
+  <div class="hero-actions">
+
+    <a href="#picks" class="btn btn-primary">
+      MAKE YOUR PICKS
+    </a>
+
+    <a href="#leaderboard" class="btn">
+      VIEW LEADERBOARD
+    </a>
+
+  </div>
+
+</div>
+
+
+<aside class="challenge-panel">
+
+  <div class="challenge-top">
+
+    <div class="challenge-title">
+      WEEKLY CHALLENGE
+    </div>
+
+    <div
+      class="live-pill"
+      id="challengeStatus">
+      LOADING
+    </div>
+
+  </div>
+
+
+  <div class="week" id="challengeWeek">
+    CURRENT CHALLENGE
+  </div>
+
+  <div
+    class="challenge-name"
+    id="challengeName">
+    Loading Challenge
+  </div>
+
+  <p
+    class="challenge-description"
+    id="challengeDescription">
+    Connecting to the CrowRules Sports challenge system.
+  </p>
+
+
+  <div class="deadline">
+
+    <div class="deadline-label">
+      PICKS LOCK IN
+    </div>
+
+    <div
+      class="deadline-time"
+      id="deadline">
+      --:--:--
+    </div>
+
+  </div>
+
+
+  <div class="challenge-stats">
+
+    <div class="mini-stat">
+
+      <strong id="gameCount">
+        0
+      </strong>
+
+      <span>
+        GAMES
+      </span>
+
+    </div>
+
+
+    <div class="mini-stat">
+
+      <strong id="maxPoints">
+        0
+      </strong>
+
+      <span>
+        MAX PTS
+      </span>
+
+    </div>
+
+
+    <div class="mini-stat">
+
+      <strong id="playerCount">
+        0
+      </strong>
+
+      <span>
+        PLAYERS
+      </span>
+
+    </div>
+
+  </div>
+
+</aside>
+```
+
+  </div>
+
+</section>
+
+<!-- =========================================
+     ALERT
+========================================= -->
+
+<div
+  class="alert"
+  id="alertContainer">
+
+  <div
+    class="alert-box"
+    id="alertBox">
+  </div>
+
+</div>
+
+<!-- =========================================
+     TICKER
+========================================= -->
+
+<div class="ticker">
+
+  <div class="ticker-track">
+
+```
+<div class="ticker-item">
+  <b>PICK 'EM</b> MAKE YOUR CALL
+</div>
+
+<div class="ticker-item">
+  <b>LOCK</b> DEADLINES MATTER
+</div>
+
+<div class="ticker-item">
+  <b>CONFIDENCE</b> RISK FOR REWARD
+</div>
+
+<div class="ticker-item">
+  <b>POINTS</b> EVERY PICK COUNTS
+</div>
+
+<div class="ticker-item">
+  <b>LEADERBOARD</b> CLIMB THE BOARD
+</div>
+
+<div class="ticker-item">
+  <b>PNW</b> PACIFIC NORTHWEST
+</div>
+
+<div class="ticker-item">
+  <b>PICK 'EM</b> MAKE YOUR CALL
+</div>
+
+<div class="ticker-item">
+  <b>LOCK</b> DEADLINES MATTER
+</div>
+
+<div class="ticker-item">
+  <b>CONFIDENCE</b> RISK FOR REWARD
+</div>
+
+<div class="ticker-item">
+  <b>POINTS</b> EVERY PICK COUNTS
+</div>
+
+<div class="ticker-item">
+  <b>LEADERBOARD</b> CLIMB THE BOARD
+</div>
+
+<div class="ticker-item">
+  <b>PNW</b> PACIFIC NORTHWEST
+</div>
+```
+
+  </div>
+
+</div>
+
+<main>
+
+<!-- =========================================
+     PICKS
+========================================= -->
+
+<section class="section" id="picks">
+
+  <div class="section-head">
+
+```
+<div class="kicker">
+  WEEKLY PICKS
+</div>
+
+<h2>
+  Make Your Call.
+</h2>
+
+<p class="section-sub" id="pickSubtitle">
+  Select a winner for each matchup and assign
+  your confidence. Higher confidence means more
+  points when you're right.
+</p>
+```
+
+  </div>
+
+  <!-- AUTH -->
+
+  <div class="auth-bar">
+
+```
+<div
+  class="auth-copy"
+  id="authMessage">
+
+  <strong>MEMBER ACCESS</strong><br>
+  Sign in to save and submit your picks.
+
+</div>
+
+<div class="auth-actions">
+
+  <button
+    class="btn btn-primary"
+    id="authButton">
+    SIGN IN
+  </button>
+
+  <button
+    class="btn"
+    id="signOutButton"
+    style="display:none;">
+    SIGN OUT
+  </button>
+
+</div>
+```
+
+  </div>
+
+  <!-- FILTERS -->
+
+  <div
+    class="filters"
+    id="filters">
+
+```
+<button
+  class="filter active"
+  data-filter="all">
+  ALL
+</button>
+
+<button
+  class="filter"
+  data-filter="pnw">
+  PNW
+</button>
+```
+
+  </div>
+
+  <!-- PICK GRID -->
+
+  <div
+    class="pick-grid"
+    id="pickGrid">
+
+```
+<div class="state">
+
+  <div class="state-mark">
+    CR
+  </div>
+
+  <h3>
+    LOADING PICK 'EM
+  </h3>
+
+  <p>
+    Connecting to the CrowRules Sports challenge database.
+  </p>
+
+</div>
+```
+
+  </div>
+
+  <!-- SUBMIT -->
+
+  <div class="submit-bar">
+
+```
+<div class="submit-info">
+
+  <div class="submit-number">
+    <span id="pickedCount">0</span>/<span id="totalPickCount">0</span>
+  </div>
+
+  <div class="submit-copy">
+    PICKS SELECTED
+  </div>
+
+</div>
+
+
+<div
+  class="save-status"
+  id="saveStatus">
+  NOT SAVED
+</div>
+
+
+<button
+  class="btn btn-primary"
+  id="submitPicks"
+  disabled>
+  LOCK IN MY PICKS
+</button>
+```
+
+  </div>
+
+</section>
+
+<!-- =========================================
+     LEADERBOARD
+========================================= -->
+
+<section
+  class="section"
+  id="leaderboard">
+
+  <div class="section-head">
+
+```
+<div class="kicker">
+  CROWRULES RANKINGS
+</div>
+
+<h2>
+  Pick 'Em Leaderboard
+</h2>
+
+<p class="section-sub">
+  See who is making the best calls and where
+  you stand against the CrowRules community.
+</p>
+```
+
+  </div>
+
+  <div class="leader-layout">
+
+```
+<div
+  class="leaderboard"
+  id="leaderboardList">
+
+  <div class="leader-row header">
+
+    <div>
+      #
+    </div>
+
+    <div>
+      PLAYER
+    </div>
+
+    <div class="points">
+      POINTS
+    </div>
+
+    <div class="streak">
+      STATUS
+    </div>
+
+  </div>
+
+  <div class="state">
+
+    <div class="state-mark">
+      CR
+    </div>
+
+    <h3>
+      LOADING LEADERBOARD
+    </h3>
+
+    <p>
+      Loading current challenge standings.
+    </p>
+
+  </div>
+
+</div>
+
+
+<div class="side-stack">
+
+  <div class="side-card">
+
+    <h3>
+      YOUR SEASON
+    </h3>
+
+    <div
+      class="stat-big"
+      id="yourPoints">
+      0
+    </div>
+
+    <p id="yourRecord">
+      Sign in to view your Pick 'Em record.
+    </p>
+
+  </div>
+
+
+  <div class="side-card">
+
+    <h3>
+      PNW CHALLENGE
+    </h3>
+
+    <p>
+      Track your performance against the
+      CrowRules Sports community across
+      Seattle, Tacoma, Portland and the
+      Pacific Northwest.
+    </p>
+
+    <div class="stat-big">
+      PNW
+    </div>
+
+  </div>
+
+
+  <div class="side-card">
+
+    <h3>
+      YOUR PICKS
+    </h3>
+
+    <p id="yourPickSummary">
+      No picks have been submitted for this challenge.
+    </p>
+
+  </div>
+
+</div>
+```
+
+  </div>
+
+</section>
+
+<!-- =========================================
+     HOW IT WORKS
+========================================= -->
+
+<section class="section">
+
+  <div class="section-head">
+
+```
+<div class="kicker">
+  THE RULES
+</div>
+
+<h2>
+  How Pick 'Em Works
+</h2>
+```
+
+  </div>
+
+  <div class="rules-grid">
+
+```
+<article class="rule">
+
+  <div class="rule-num">
+    01
+  </div>
+
+  <h3>
+    PICK A WINNER
+  </h3>
+
+  <p>
+    Select which team you believe will win
+    each eligible matchup.
+  </p>
+
+</article>
+
+
+<article class="rule">
+
+  <div class="rule-num">
+    02
+  </div>
+
+  <h3>
+    SET CONFIDENCE
+  </h3>
+
+  <p>
+    Assign confidence from 1 to 10 points.
+    Bigger confidence means bigger rewards.
+  </p>
+
+</article>
+
+
+<article class="rule">
+
+  <div class="rule-num">
+    03
+  </div>
+
+  <h3>
+    LOCK IT IN
+  </h3>
+
+  <p>
+    Picks become locked when the challenge
+    or individual game reaches its lock time.
+  </p>
+
+</article>
+
+
+<article class="rule">
+
+  <div class="rule-num">
+    04
+  </div>
+
+  <h3>
+    CLIMB THE BOARD
+  </h3>
+
+  <p>
+    Earn points, build your record and compete
+    for the top spot.
+  </p>
+
+</article>
+```
+
+  </div>
+
+</section>
+
+</main>
+
+<!-- =========================================
+     FOOTER
+========================================= -->
+
+<footer>
+
+  <div class="footer-inner">
+
+```
+<div>
+
+  <div class="footer-brand">
+    CROWRULES
+    <span>SPORTS</span>
+  </div>
+
+  <div class="footer-copy">
+    © <span id="year"></span>
+    CrowRules Entertainment.
+    All rights reserved.
+  </div>
+
+</div>
+
+
+<div class="footer-status">
+
+  <span
+    class="status-dot"
+    id="footerDot">
+  </span>
+
+  PICK 'EM SYSTEM:
+  <span id="footerStatus">
+    CONNECTING
+  </span>
+
+</div>
+```
+
+  </div>
+
+</footer>
+
+<!-- =========================================
+     TOAST
+========================================= -->
+
+<div
+  class="toast"
+  id="toast">
+</div>
+
+<script>
+/* =========================================================
+   CROWRULES SPORTS PICK 'EM
+   SUPABASE CONFIGURATION
+========================================================= */
+
+const SUPABASE_URL =
+  "https://cevylpnoexugwgygvtgu.supabase.co";
+
+const SUPABASE_ANON_KEY =
+  "YOUR_SUPABASE_ANON_KEY";
+
+const SUPABASE_READY =
+  SUPABASE_ANON_KEY &&
+  SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY";
+
+let supabase = null;
+
+if(SUPABASE_READY){
+  supabase =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY,
+      {
+        auth:{
+          persistSession:true,
+          autoRefreshToken:true,
+          detectSessionInUrl:true
+        }
+      }
+    );
+}
+
+
+/* =========================================================
+   STATE
+========================================================= */
+
+const state = {
+
+  user:null,
+
+  session:null,
+
+  challenge:null,
+
+  games:[],
+
+  teams:[],
+
+  leagues:[],
+
+  options:[],
+
+  entries:[],
+
+  leaderboard:[],
+
+  selectedFilter:"all",
+
+  realtimeChannel:null,
+
+  refreshTimer:null,
+
+  countdownTimer:null,
+
+  dirty:false,
+
+  saving:false
+
+};
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function escapeHtml(value){
+
+  if(value === null || value === undefined){
+    return "";
+  }
+
+  return String(value)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
+}
+
+
+function initials(name){
+
+  const value =
+    String(name || "CR")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+
+  if(!value.length){
+    return "CR";
+  }
+
+  if(value.length === 1){
+    return value[0]
+      .slice(0,2)
+      .toUpperCase();
+  }
+
+  return (
+    value[0][0] +
+    value[value.length - 1][0]
+  ).toUpperCase();
+
+}
+
+
+function formatDate(value){
+
+  if(!value){
+    return "TBD";
+  }
+
+  const date =
+    new Date(value);
+
+  if(Number.isNaN(date.getTime())){
+    return "TBD";
+  }
+
+  return new Intl.DateTimeFormat(
+    undefined,
+    {
+      weekday:"short",
+      month:"short",
+      day:"numeric",
+      hour:"numeric",
+      minute:"2-digit"
+    }
+  ).format(date);
+
+}
+
+
+function formatShortDate(value){
+
+  if(!value){
+    return "TBD";
+  }
+
+  const date =
+    new Date(value);
+
+  if(Number.isNaN(date.getTime())){
+    return "TBD";
+  }
+
+  return new Intl.DateTimeFormat(
+    undefined,
+    {
+      weekday:"short",
+      hour:"numeric",
+      minute:"2-digit"
+    }
+  ).format(date);
+
+}
+
+
+function getLeague(game){
+
+  return state.leagues.find(
+    league =>
+      league.id === game.league_id
+  ) || null;
+
+}
+
+
+function getTeam(id){
+
+  return state.teams.find(
+    team =>
+      team.id === id
+  ) || null;
+
+}
+
+
+function getGameOptions(gameId){
+
+  return state.options
+    .filter(
+      option =>
+        option.game_id === gameId
+    )
+    .sort(
+      (a,b) =>
+        (a.sort_order || 0) -
+        (b.sort_order || 0)
+    );
+
+}
+
+
+function getEntryForGame(gameId){
+
+  return state.entries.find(
+    entry =>
+      entry.game_id === gameId
+  ) || null;
+
+}
+
+
+function isChallengeLocked(){
+
+  if(!state.challenge){
+    return true;
+  }
+
+  if(
+    state.challenge.status !== "open" &&
+    state.challenge.status !== "locked"
+  ){
+    return true;
+  }
+
+  if(!state.challenge.locks_at){
+    return state.challenge.status !== "open";
+  }
+
+  return (
+    new Date(state.challenge.locks_at).getTime()
+    <= Date.now()
+  );
+
+}
+
+
+function isGameLocked(game){
+
+  if(!game){
+    return true;
+  }
+
+  if(
+    [
+      "final",
+      "cancelled",
+      "postponed"
+    ].includes(game.status)
+  ){
+    return true;
+  }
+
+  if(isChallengeLocked()){
+    return true;
+  }
+
+  return (
+    new Date(game.scheduled_at).getTime()
+    <= Date.now()
+  );
+
+}
+
+
+function gameIsEligible(game){
+
+  if(!game){
+    return false;
+  }
+
+  if(
+    [
+      "cancelled",
+      "postponed"
+    ].includes(game.status)
+  ){
+    return false;
+  }
+
+  return true;
+
+}
+
+
+function challengeGames(){
+
+  return state.games
+    .filter(game => gameIsEligible(game))
+    .sort(
+      (a,b) =>
+        new Date(a.scheduled_at) -
+        new Date(b.scheduled_at)
+    );
+
+}
+
+
+function maxPossiblePoints(){
+
+  const games =
+    challengeGames();
+
+  if(!games.length){
+    return 0;
+  }
+
+  const base =
+    Number(state.challenge?.points_per_pick || 1);
+
+  return games.length * 10 * base;
+
+}
+
+
+function showToast(message,type=""){
+
+  const toast =
+    document.getElementById("toast");
+
+  toast.textContent =
+    message;
+
+  toast.className =
+    "toast show " + type;
+
+  clearTimeout(
+    showToast.timer
+  );
+
+  showToast.timer =
+    setTimeout(
+      () => {
+        toast.className =
+          "toast";
+      },
+      4000
+    );
+
+}
+
+
+function setSystemStatus(
+  message,
+  type="loading"
+){
+
+  const dot =
+    document.getElementById("systemDot");
+
+  const footerDot =
+    document.getElementById("footerDot");
+
+  dot.className =
+    "status-dot " + type;
+
+  footerDot.className =
+    "status-dot " + type;
+
+  document.getElementById(
+    "systemStatus"
+  ).textContent =
+    message;
+
+  document.getElementById(
+    "footerStatus"
+  ).textContent =
+    type === "error"
+      ? "ERROR"
+      : type === "loading"
+        ? "CONNECTING"
+        : "ONLINE";
+
+}
+
+
+function showAlert(message){
+
+  const container =
+    document.getElementById(
+      "alertContainer"
+    );
+
+  const box =
+    document.getElementById(
+      "alertBox"
+    );
+
+  box.innerHTML =
+    message;
+
+  container.classList.add(
+    "show"
+  );
+
+}
+
+
+function hideAlert(){
+
+  document.getElementById(
+    "alertContainer"
+  ).classList.remove(
+    "show"
+  );
+
+}
+
+
+/* =========================================================
+   MOBILE NAV
+========================================================= */
+
+const menuButton =
+  document.getElementById(
+    "menuButton"
+  );
+
+const mainNav =
+  document.getElementById(
+    "mainNav"
+  );
+
+menuButton.addEventListener(
+  "click",
+  () => {
+
+    mainNav.classList.toggle(
+      "open"
+    );
+
+    const open =
+      mainNav.classList.contains(
+        "open"
+      );
+
+    menuButton.textContent =
+      open ? "×" : "☰";
+
+    menuButton.setAttribute(
+      "aria-expanded",
+      open ? "true" : "false"
+    );
+
+  }
+);
+
+
+/* =========================================================
+   AUTH UI
+========================================================= */
+
+function renderAuth(){
+
+  const authMessage =
+    document.getElementById(
+      "authMessage"
+    );
+
+  const authButton =
+    document.getElementById(
+      "authButton"
+    );
+
+  const signOutButton =
+    document.getElementById(
+      "signOutButton"
+    );
+
+  if(state.user){
+
+    const metadata =
+      state.user.user_metadata || {};
+
+    const displayName =
+      metadata.display_name ||
+      metadata.full_name ||
+      metadata.name ||
+      state.user.email ||
+      "CrowRules Member";
+
+    authMessage.innerHTML =
+      "<strong>" +
+      escapeHtml(displayName) +
+      "</strong><br>" +
+      "Your picks are connected to your CrowRules member account.";
+
+    authButton.style.display =
+      "none";
+
+    signOutButton.style.display =
+      "";
+
+  }else{
+
+    authMessage.innerHTML =
+      "<strong>MEMBER ACCESS</strong><br>" +
+      "Sign in to save and submit your picks.";
+
+    authButton.style.display =
+      "";
+
+    signOutButton.style.display =
+      "none";
+
+  }
+
+}
+
+
+async function refreshAuth(){
+
+  if(!supabase){
+    renderAuth();
+    return;
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabase.auth.getSession();
+
+  if(error){
+    console.error(error);
+    return;
+  }
+
+  state.session =
+    data.session || null;
+
+  state.user =
+    data.session?.user || null;
+
+  renderAuth();
+
+}
+
+
+document.getElementById(
+  "authButton"
+).addEventListener(
+  "click",
+  async () => {
+
+    if(!supabase){
+
+      showToast(
+        "Add your Supabase anon key to enable member sign-in.",
+        "error"
+      );
+
+      return;
+    }
+
+    const redirectTo =
+      window.location.href;
+
+    const {
+      error
+    } =
+      await supabase.auth.signInWithOAuth({
+        provider:"google",
+        options:{
+          redirectTo
+        }
+      });
+
+    if(error){
+
+      showToast(
+        error.message,
+        "error"
+      );
+
+    }
+
+  }
+);
+
+
+document.getElementById(
+  "signOutButton"
+).addEventListener(
+  "click",
+  async () => {
+
+    if(!supabase){
+      return;
+    }
+
+    const {
+      error
+    } =
+      await supabase.auth.signOut();
+
+    if(error){
+
+      showToast(
+        error.message,
+        "error"
+      );
+
+      return;
+    }
+
+    state.user = null;
+    state.session = null;
+    state.entries = [];
+
+    renderAuth();
+    renderGames();
+    renderLeaderboard();
+
+    showToast(
+      "You have been signed out.",
+      "success"
+    );
+
+  }
+);
+
+
+/* =========================================================
+   LOAD ACTIVE CHALLENGE
+========================================================= */
+
+async function loadChallenge(){
+
+  if(!supabase){
+    throw new Error(
+      "Supabase is not configured. Add your public anon key."
+    );
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabase
+      .from(
+        "sports_pickem_challenges"
+      )
+      .select("*")
+      .in(
+        "status",
+        [
+          "open",
+          "locked",
+          "scoring"
+        ]
+      )
+      .order(
+        "is_featured",
+        {
+          ascending:false
+        }
+      )
+      .order(
+        "starts_at",
+        {
+          ascending:false,
+          nullsFirst:false
+        }
+      )
+      .limit(1)
+      .maybeSingle();
+
+  if(error){
+    throw error;
+  }
+
+  state.challenge =
+    data || null;
+
+}
+
+
+/* =========================================================
+   LOAD LEAGUES
+========================================================= */
+
+async function loadLeagues(){
+
+  const {
+    data,
+    error
+  } =
+    await supabase
+      .from("sports_leagues")
+      .select("*")
+      .eq("is_active",true)
+      .order("sort_order");
+
+  if(error){
+    throw error;
+  }
+
+  state.leagues =
+    data || [];
+
+}
+
+
+/* =========================================================
+   LOAD TEAMS
+========================================================= */
+
+async function loadTeams(){
+
+  const {
+    data,
+    error
+  } =
+    await supabase
+      .from("sports_teams")
+      .select("*")
+      .eq("is_active",true);
+
+  if(error){
+    throw error;
+  }
+
+  state.teams =
+    data || [];
+
+}
+
+
+/* =========================================================
+   LOAD CHALLENGE OPTIONS
+========================================================= */
+
+async function loadOptions(){
+
+  if(!state.challenge){
+    state.options = [];
+    return;
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabase
+      .from("sports_pickem_options")
+      .select("*")
+      .eq(
+        "challenge_id",
+        state.challenge.id
+      )
+      .order("sort_order");
+
+  if(error){
+    throw error;
+  }
+
+  state.options =
+    data || [];
+
+}
+
+
+/* =========================================================
+   LOAD GAMES
+========================================================= */
+
+async function loadGames(){
+
+  if(!state.challenge){
+
+    state.games = [];
+
+    return;
+  }
+
+  const optionGameIds =
+    [
+      ...new Set(
+        state.options
+          .map(option => option.game_id)
+          .filter(Boolean)
+      )
+    ];
+
+  if(!optionGameIds.length){
+
+    state.games = [];
+
+    return;
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabase
+      .from("sports_games")
+      .select("*")
+      .in(
+        "id",
+        optionGameIds
+      )
+      .order(
+        "scheduled_at",
+        {
+          ascending:true
+        }
+      );
+
+  if(error){
+    throw error;
+  }
+
+  state.games =
+    data || [];
+
+}
+
+
+/* =========================================================
+   LOAD USER ENTRIES
+========================================================= */
+
+async function loadEntries(){
+
+  state.entries = [];
+
+  if(
+    !state.user ||
+    !state.challenge
+  ){
+    return;
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabase
+      .from("sports_pickem_entries")
+      .select("*")
+      .eq(
+        "challenge_id",
+        state.challenge.id
+      )
+      .eq(
+        "user_id",
+        state.user.id
+      );
+
+  if(error){
+    throw error;
+  }
+
+  state.entries =
+    data || [];
+
+}
+
+
+/* =========================================================
+   LOAD LEADERBOARD
+========================================================= */
+
+async function loadLeaderboard(){
+
+  state.leaderboard = [];
+
+  if(!state.challenge){
+    renderLeaderboard();
+    return;
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabase
+      .from("sports_pickem_leaderboard")
+      .select("*")
+      .eq(
+        "challenge_id",
+        state.challenge.id
+      )
+      .order(
+        "total_points",
+        {
+          ascending:false
+        }
+      )
+      .limit(100);
+
+  if(error){
+    throw error;
+  }
+
+  state.leaderboard =
+    data || [];
+
+}
+
+
+/* =========================================================
+   LOAD ALL DATA
+========================================================= */
+
+async function loadAll(){
+
+  if(!SUPABASE_READY){
+
+    setSystemStatus(
+      "SUPABASE ANON KEY REQUIRED",
+      "error"
+    );
+
+    showAlert(
+      "<strong>Supabase configuration required.</strong> " +
+      "Open this file and replace " +
+      "<code>YOUR_SUPABASE_ANON_KEY</code> " +
+      "with your project's public anon key. " +
+      "Never use a service-role key in browser code."
+    );
+
+    renderEmpty(
+      "pickGrid",
+      "SUPABASE CONFIGURATION",
+      "Add the public Supabase anon key to connect the Pick 'Em system."
+    );
+
+    return;
+  }
+
+  hideAlert();
+
+  setSystemStatus(
+    "CONNECTING TO CROWRULES PICK 'EM SYSTEM",
+    "loading"
+  );
+
+  try{
+
+    await refreshAuth();
+
+    await Promise.all([
+      loadLeagues(),
+      loadTeams()
+    ]);
+
+    await loadChallenge();
+
+    if(state.challenge){
+
+      await loadOptions();
+      await loadGames();
+      await loadEntries();
+      await loadLeaderboard();
+
+    }else{
+
+      state.options = [];
+      state.games = [];
+      state.entries = [];
+      state.leaderboard = [];
+
+    }
+
+    renderEverything();
+
+    setSystemStatus(
+      "CROWRULES PICK 'EM SYSTEM ONLINE",
+      "online"
+    );
+
+    document.getElementById(
+      "lastUpdated"
+    ).textContent =
+      "UPDATED " +
+      new Date().toLocaleTimeString();
+
+  }catch(error){
+
+    console.error(
+      "Pick 'Em load error:",
+      error
+    );
+
+    setSystemStatus(
+      "PICK 'EM DATABASE ERROR",
+      "error"
+    );
+
+    showAlert(
+      "<strong>Pick 'Em database error:</strong> " +
+      escapeHtml(
+        error?.message ||
+        "Unable to load challenge data."
+      )
+    );
+
+    renderEmpty(
+      "pickGrid",
+      "SYSTEM ERROR",
+      "The Pick 'Em system could not load its current challenge. Check the browser console and Supabase policies."
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   RENDER CHALLENGE
+========================================================= */
+
+function renderChallenge(){
+
+  const challenge =
+    state.challenge;
+
+  if(!challenge){
+
+    document.getElementById(
+      "challengeStatus"
+    ).textContent =
+      "OFFLINE";
+
+    document.getElementById(
+      "challengeStatus"
+    ).classList.add(
+      "locked"
+    );
+
+    document.getElementById(
+      "challengeWeek"
+    ).textContent =
+      "NO ACTIVE CHALLENGE";
+
+    document.getElementById(
+      "challengeName"
+    ).textContent =
+      "Pick 'Em Is Between Challenges";
+
+    document.getElementById(
+      "challengeDescription"
+    ).textContent =
+      "The next CrowRules Sports Pick 'Em challenge has not been opened yet.";
+
+    document.getElementById(
+      "deadline"
+    ).innerHTML =
+      "<span>OFFLINE</span>";
+
+    document.getElementById(
+      "gameCount"
+    ).textContent =
+      "0";
+
+    document.getElementById(
+      "maxPoints"
+    ).textContent =
+      "0";
+
+    document.getElementById(
+      "playerCount"
+    ).textContent =
+      "0";
+
+    return;
+  }
+
+  const status =
+    String(
+      challenge.status || "open"
+    ).toUpperCase();
+
+  const pill =
+    document.getElementById(
+      "challengeStatus"
+    );
+
+  pill.textContent =
+    status;
+
+  pill.classList.toggle(
+    "locked",
+    status !== "OPEN"
+  );
+
+  document.getElementById(
+    "challengeWeek"
+  ).textContent =
+    challenge.week_label ||
+    challenge.season ||
+    "CURRENT CHALLENGE";
+
+  document.getElementById(
+    "challengeName"
+  ).textContent =
+    challenge.title ||
+    "CrowRules Weekly Picks";
+
+  document.getElementById(
+    "challengeDescription"
+  ).textContent =
+    challenge.description ||
+    "Make your picks before the challenge lock time.";
+
+  document.getElementById(
+    "gameCount"
+  ).textContent =
+    challengeGames().length;
+
+  document.getElementById(
+    "maxPoints"
+  ).textContent =
+    maxPossiblePoints();
+
+}
+
+
+/* =========================================================
+   COUNTDOWN
+========================================================= */
+
+function updateDeadline(){
+
+  const element =
+    document.getElementById(
+      "deadline"
+    );
+
+  if(!state.challenge){
+
+    element.innerHTML =
+      "<span>OFFLINE</span>";
+
+    return;
+
+  }
+
+  const target =
+    state.challenge.locks_at;
+
+  if(!target){
+
+    element.textContent =
+      "NO LOCK TIME";
+
+    return;
+
+  }
+
+  const remaining =
+    new Date(target).getTime() -
+    Date.now();
+
+  if(remaining <= 0){
+
+    element.innerHTML =
+      "<span>LOCKED</span>";
+
+    renderChallenge();
+
+    renderGames();
+
+    updateSubmitState();
+
+    return;
+
+  }
+
+  const totalSeconds =
+    Math.floor(
+      remaining / 1000
+    );
+
+  const days =
+    Math.floor(
+      totalSeconds / 86400
+    );
+
+  const hours =
+    Math.floor(
+      (totalSeconds % 86400) / 3600
+    );
+
+  const minutes =
+    Math.floor(
+      (totalSeconds % 3600) / 60
+    );
+
+  const seconds =
+    totalSeconds % 60;
+
+  element.innerHTML =
+    days +
+    "D " +
+    String(hours).padStart(2,"0") +
+    "H " +
+    String(minutes).padStart(2,"0") +
+    "M " +
+    "<span>" +
+    String(seconds).padStart(2,"0") +
+    "S</span>";
+
+}
+
+
+function startCountdown(){
+
+  clearInterval(
+    state.countdownTimer
+  );
+
+  updateDeadline();
+
+  state.countdownTimer =
+    setInterval(
+      updateDeadline,
+      1000
+    );
+
+}
+
+
+/* =========================================================
+   FILTERS
+========================================================= */
+
+function renderFilters(){
+
+  const container =
+    document.getElementById(
+      "filters"
+    );
+
+  const existing =
+    container.querySelectorAll(
+      ".filter"
+    );
+
+  existing.forEach(
+    button => {
+
+      if(
+        !["all","pnw"].includes(
+          button.dataset.filter
+        )
+      ){
+        button.remove();
+      }
+
+    }
+  );
+
+  const usedLeagues =
+    state.games
+      .map(
+        game =>
+          getLeague(game)
+      )
+      .filter(Boolean);
+
+  const unique =
+    [];
+
+  usedLeagues.forEach(
+    league => {
+
+      if(
+        !unique.some(
+          item =>
+            item.id === league.id
+        )
+      ){
+        unique.push(league);
+      }
+
+    }
+  );
+
+  unique
+    .sort(
+      (a,b) =>
+        (a.sort_order || 0) -
+        (b.sort_order || 0)
+    )
+    .forEach(
+      league => {
+
+        const button =
+          document.createElement(
+            "button"
+          );
+
+        button.className =
+          "filter";
+
+        button.dataset.filter =
+          league.league_key;
+
+        button.textContent =
+          league.short_name ||
+          league.name;
+
+        container.appendChild(
+          button
+        );
+
+      }
+    );
+
+  container
+    .querySelectorAll(
+      ".filter"
+    )
+    .forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            container
+              .querySelectorAll(
+                ".filter"
+              )
+              .forEach(
+                item =>
+                  item.classList.remove(
+                    "active"
+                  )
+              );
+
+            button.classList.add(
+              "active"
+            );
+
+            state.selectedFilter =
+              button.dataset.filter;
+
+            renderGames();
+
+          }
+        );
+
+      }
+    );
+
+}
+
+
+/* =========================================================
+   TEAM HTML
+========================================================= */
+
+function teamButtonHtml(
+  team,
+  option,
+  selected,
+  locked,
+  gameId
+){
+
+  const label =
+    option?.label ||
+    team?.name ||
+    "TEAM";
+
+  const abbreviation =
+    team?.abbreviation ||
+    team?.short_name ||
+    label.slice(0,3);
+
+  const name =
+    team?.name ||
+    label;
+
+  const logo =
+    team?.logo_url;
+
+  return `
+    <button
+      type="button"
+      class="team ${selected ? "selected" : ""}"
+      data-game-id="${escapeHtml(gameId)}"
+      data-option-id="${escapeHtml(option?.id || "")}"
+      ${locked ? "disabled" : ""}>
+
+      ${
+        logo
+          ? `
+            <img
+              class="team-logo"
+              src="${escapeHtml(logo)}"
+              alt="${escapeHtml(name)}"
+              loading="lazy"
+              onerror="this.style.display='none'">
+          `
+          : ""
+      }
+
+      <div class="team-code">
+        ${escapeHtml(
+          String(abbreviation).toUpperCase()
+        )}
+      </div>
+
+      <div class="team-name">
+        ${escapeHtml(name)}
+      </div>
+
+    </button>
+  `;
+
+}
+
+
+/* =========================================================
+   PICK CARD
+========================================================= */
+
+function pickCardHtml(game){
+
+  const league =
+    getLeague(game);
+
+  const options =
+    getGameOptions(game.id);
+
+  const entry =
+    getEntryForGame(game.id);
+
+  const locked =
+    isGameLocked(game);
+
+  const selectedOptionId =
+    entry?.option_id || null;
+
+  const optionA =
+    options[0] || null;
+
+  const optionB =
+    options[1] || null;
+
+  const teamA =
+    getTeam(game.home_team_id);
+
+  const teamB =
+    getTeam(game.away_team_id);
+
+  /*
+     If the Pick 'Em options don't contain team IDs,
+     infer them from the game's home/away team IDs.
+  */
+
+  const optionATeam =
+    optionA &&
+    (
+      optionA.team_id
+        ? getTeam(optionA.team_id)
+        : teamA
+    );
+
+  const optionBTeam =
+    optionB &&
+    (
+      optionB.team_id
+        ? getTeam(optionB.team_id)
+        : teamB
+    );
+
+  const confidence =
+    entry?.confidence ||
+    5;
+
+  const result =
+    entry?.result;
+
+  let resultHtml = "";
+
+  if(result){
+
+    const correct =
+      result === "correct";
+
+    const incorrect =
+      result === "incorrect";
+
+    resultHtml = `
+      <div class="game-result ${
+        correct
+          ? "correct"
+          : incorrect
+            ? "incorrect"
+            : ""
+      }">
+        RESULT:
+        ${escapeHtml(
+          String(result).toUpperCase()
+        )}
+        ${
+          entry?.points_earned !== undefined
+            ? " • " +
+              Number(
+                entry.points_earned || 0
+              ) +
+              " POINTS"
+            : ""
+        }
+      </div>
+    `;
+
+  }
+
+  const leagueKey =
+    league?.league_key ||
+    "other";
+
+  const isPnw =
+    Boolean(
+      game.is_pnw ||
+      teamA?.is_pnw ||
+      teamB?.is_pnw
+    );
+
+  return `
+    <article
+      class="pick-card ${
+        locked ? "locked" : ""
+      } ${
+        entry ? "user-picked" : ""
+      }"
+      data-league="${escapeHtml(leagueKey)}"
+      data-pnw="${isPnw ? "true" : "false"}"
+      data-game-id="${escapeHtml(game.id)}">
+
+      <div class="pick-head">
+
+        <div>
+
+          <div class="league">
+            ${escapeHtml(
+              league?.short_name ||
+              league?.name ||
+              "SPORTS"
+            )}
+          </div>
+
+          ${
+            locked
+              ? `
+                <div class="lock-label">
+                  LOCKED
+                </div>
+              `
+              : ""
+          }
+
+        </div>
+
+        <div class="game-time">
+          ${escapeHtml(
+            formatShortDate(
+              game.scheduled_at
+            )
+          )}
+        </div>
+
+      </div>
+
+
+      <div class="matchup">
+
+        ${
+          optionA
+            ? teamButtonHtml(
+                optionATeam,
+                optionA,
+                selectedOptionId === optionA.id,
+                locked,
+                game.id
+              )
+            : `
+              <button
+                class="team"
+                disabled>
+                <div class="team-code">—</div>
+                <div class="team-name">
+                  OPTION UNAVAILABLE
+                </div>
+              </button>
+            `
+        }
+
+        <div class="vs">
+          VS
+        </div>
+
+        ${
+          optionB
+            ? teamButtonHtml(
+                optionBTeam,
+                optionB,
+                selectedOptionId === optionB.id,
+                locked,
+                game.id
+              )
+            : `
+              <button
+                class="team"
+                disabled>
+                <div class="team-code">—</div>
+                <div class="team-name">
+                  OPTION UNAVAILABLE
+                </div>
+              </button>
+            `
+        }
+
+      </div>
+
+
+      <div class="pick-meta">
+
+        <span>
+          ${
+            teamA?.city
+              ? escapeHtml(teamA.city)
+              : escapeHtml(
+                  teamA?.name || ""
+                )
+          }
+        </span>
+
+        <span>
+          ${
+            teamB?.city
+              ? escapeHtml(teamB.city)
+              : escapeHtml(
+                  teamB?.name || ""
+                )
+          }
+        </span>
+
+      </div>
+
+
+      <div class="confidence">
+
+        <div class="confidence-head">
+
+          <span>
+            CONFIDENCE
+          </span>
+
+          <span
+            class="confidence-value">
+            ${confidence} PTS
+          </span>
+
+        </div>
+
+        <input
+          type="range"
+          min="1"
+          max="10"
+          step="1"
+          value="${escapeHtml(confidence)}"
+          class="confidence-slider"
+          data-game-id="${escapeHtml(game.id)}"
+          ${locked ? "disabled" : ""}>
+
+      </div>
+
+
+      <div class="pick-status">
+
+        PICK:
+
+        <strong
+          class="${
+            entry
+              ? ""
+              : "none"
+          }">
+
+          ${
+            entry
+              ? escapeHtml(
+                  getOptionLabel(
+                    entry.option_id
+                  )
+                )
+              : "NOT SELECTED"
+          }
+
+        </strong>
+
+      </div>
+
+      ${
+        game.venue
+          ? `
+            <div class="pick-meta">
+              <span>
+                ${escapeHtml(game.venue)}
+              </span>
+              <span>
+                ${escapeHtml(
+                  game.city || ""
+                )}
+              </span>
+            </div>
+          `
+          : ""
+      }
+
+      ${resultHtml}
+
+    </article>
+  `;
+
+}
+
+
+function getOptionLabel(optionId){
+
+  const option =
+    state.options.find(
+      item =>
+        item.id === optionId
+    );
+
+  if(!option){
+    return "SELECTED";
+  }
+
+  const team =
+    option.team_id
+      ? getTeam(option.team_id)
+      : null;
+
+  return (
+    team?.abbreviation ||
+    team?.short_name ||
+    option.label ||
+    "SELECTED"
+  );
+
+}
+
+
+/* =========================================================
+   RENDER GAMES
+========================================================= */
+
+function renderGames(){
+
+  const grid =
+    document.getElementById(
+      "pickGrid"
+    );
+
+  const games =
+    challengeGames();
+
+  if(!games.length){
+
+    renderEmpty(
+      "pickGrid",
+      state.challenge
+        ? "NO GAMES LOADED"
+        : "NO ACTIVE CHALLENGE",
+      state.challenge
+        ? "The current challenge does not have any eligible Pick 'Em games yet."
+        : "The next CrowRules Sports Pick 'Em challenge will appear here when it opens."
+    );
+
+    updatePickedCount();
+
+    return;
+
+  }
+
+  let visible =
+    games.filter(
+      game => {
+
+        if(
+          state.selectedFilter === "all"
+        ){
+          return true;
+        }
+
+        if(
+          state.selectedFilter === "pnw"
+        ){
+          const teamA =
+            getTeam(game.home_team_id);
+
+          const teamB =
+            getTeam(game.away_team_id);
+
+          return Boolean(
+            game.is_pnw ||
+            teamA?.is_pnw ||
+            teamB?.is_pnw
+          );
+        }
+
+        const league =
+          getLeague(game);
+
+        return (
+          league?.league_key ===
+          state.selectedFilter
+        );
+
+      }
+    );
+
+  if(!visible.length){
+
+    renderEmpty(
+      "pickGrid",
+      "NO MATCHUPS",
+      "There are no games in the selected Pick 'Em category."
+    );
+
+    updatePickedCount();
+
+    return;
+
+  }
+
+  grid.innerHTML =
+    visible
+      .map(
+        game =>
+          pickCardHtml(game)
+      )
+      .join("");
+
+  attachPickListeners();
+
+  updatePickedCount();
+
+}
+
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+function renderEmpty(
+  id,
+  title,
+  description
+){
+
+  const container =
+    document.getElementById(id);
+
+  container.innerHTML = `
+    <div class="state">
+
+      <div class="state-mark">
+        CR
+      </div>
+
+      <h3>
+        ${escapeHtml(title)}
+      </h3>
+
+      <p>
+        ${escapeHtml(description)}
+      </p>
+
+    </div>
+  `;
+
+}
+
+
+/* =========================================================
+   PICK LISTENERS
+========================================================= */
+
+function attachPickListeners(){
+
+  document
+    .querySelectorAll(
+      ".team:not(:disabled)"
+    )
+    .forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            if(!state.user){
+
+              showToast(
+                "Sign in before making picks.",
+                "error"
+              );
+
+              return;
+            }
+
+            const card =
+              button.closest(
+                ".pick-card"
+              );
+
+            const gameId =
+              card.dataset.gameId;
+
+            const optionId =
+              button.dataset.optionId;
+
+            card
+              .querySelectorAll(
+                ".team"
+              )
+              .forEach(
+                team =>
+                  team.classList.remove(
+                    "selected"
+                  )
+              );
+
+            button.classList.add(
+              "selected"
+            );
+
+            const existing =
+              getEntryForGame(gameId);
+
+            if(existing){
+
+              existing.option_id =
+                optionId;
+
+            }else{
+
+              state.entries.push({
+                id:null,
+                challenge_id:
+                  state.challenge.id,
+                user_id:
+                  state.user.id,
+                game_id:
+                  gameId,
+                option_id:
+                  optionId,
+                confidence:5,
+                points_earned:0,
+                result:null,
+                is_locked:false,
+                locked_at:null,
+                submitted_at:
+                  new Date().toISOString(),
+                updated_at:
+                  new Date().toISOString()
+              });
+
+            }
+
+            const label =
+              card.querySelector(
+                ".pick-status strong"
+              );
+
+            label.classList.remove(
+              "none"
+            );
+
+            label.textContent =
+              getOptionLabel(
+                optionId
+              );
+
+            card.classList.add(
+              "user-picked"
+            );
+
+            state.dirty = true;
+
+            updatePickedCount();
+
+            updateSubmitState();
+
+            document.getElementById(
+              "saveStatus"
+            ).textContent =
+              "UNSAVED CHANGES";
+
+            document.getElementById(
+              "saveStatus"
+            ).className =
+              "save-status";
+
+          }
+        );
+
+      }
+    );
+
+
+  document
+    .querySelectorAll(
+      ".confidence-slider"
+    )
+    .forEach(
+      slider => {
+
+        slider.addEventListener(
+          "input",
+          () => {
+
+            const gameId =
+              slider.dataset.gameId;
+
+            const value =
+              Number(
+                slider.value
+              );
+
+            const display =
+              slider
+                .closest(
+                  ".confidence"
+                )
+                .querySelector(
+                  ".confidence-value"
+                );
+
+            display.textContent =
+              value +
+              " PTS";
+
+            let entry =
+              getEntryForGame(
+                gameId
+              );
+
+            if(!entry){
+
+              if(!state.user){
+                return;
+              }
+
+              entry = {
+                id:null,
+                challenge_id:
+                  state.challenge.id,
+                user_id:
+                  state.user.id,
+                game_id:
+                  gameId,
+                option_id:null,
+                confidence:value,
+                points_earned:0,
+                result:null,
+                is_locked:false,
+                locked_at:null,
+                submitted_at:
+                  new Date().toISOString(),
+                updated_at:
+                  new Date().toISOString()
+              };
+
+              state.entries.push(
+                entry
+              );
+
+            }else{
+
+              entry.confidence =
+                value;
+
+            }
+
+            state.dirty = true;
+
+            updateSubmitState();
+
+            document.getElementById(
+              "saveStatus"
+            ).textContent =
+              "UNSAVED CHANGES";
+
+            document.getElementById(
+              "saveStatus"
+            ).className =
+              "save-status";
+
+          }
+        );
+
+      }
+    );
+
+}
+
+
+/* =========================================================
+   PICK COUNT
+========================================================= */
+
+function updatePickedCount(){
+
+  const games =
+    challengeGames();
+
+  const selected =
+    games.filter(
+      game =>
+        Boolean(
+          getEntryForGame(game.id)
+            ?.option_id
+        )
+    ).length;
+
+  document.getElementById(
+    "pickedCount"
+  ).textContent =
+    selected;
+
+  document.getElementById(
+    "totalPickCount"
+  ).textContent =
+    games.length;
+
+}
+
+
+/* =========================================================
+   SUBMIT STATE
+========================================================= */
+
+function updateSubmitState(){
+
+  const button =
+    document.getElementById(
+      "submitPicks"
+    );
+
+  const games =
+    challengeGames();
+
+  const selected =
+    games.filter(
+      game =>
+        Boolean(
+          getEntryForGame(game.id)
+            ?.option_id
+        )
+    ).length;
+
+  const locked =
+    isChallengeLocked();
+
+  button.disabled =
+    !state.user ||
+    !state.challenge ||
+    locked ||
+    selected !== games.length ||
+    state.saving;
+
+  button.textContent =
+    locked
+      ? "PICKS LOCKED"
+      : state.saving
+        ? "SAVING..."
+        : selected === games.length &&
+          games.length > 0
+          ? "LOCK IN MY PICKS"
+          : "SELECT ALL PICKS";
+
+}
+
+
+/* =========================================================
+   SAVE ENTRY
+========================================================= */
+
+async function saveEntry(entry){
+
+  if(!state.user){
+    throw new Error(
+      "You must be signed in."
+    );
+  }
+
+  if(!entry.option_id){
+    throw new Error(
+      "A winning team must be selected."
+    );
+  }
+
+  if(
+    !state.challenge ||
+    !entry.game_id
+  ){
+    throw new Error(
+      "Invalid Pick 'Em entry."
+    );
+  }
+
+  const game =
+    state.games.find(
+      item =>
+        item.id === entry.game_id
+    );
+
+  if(
+    !game ||
+    isGameLocked(game)
+  ){
+    throw new Error(
+      "This game is already locked."
+    );
+  }
+
+  const payload = {
+
+    challenge_id:
+      state.challenge.id,
+
+    user_id:
+      state.user.id,
+
+    game_id:
+      entry.game_id,
+
+    option_id:
+      entry.option_id,
+
+    confidence:
+      Math.max(
+        1,
+        Math.min(
+          10,
+          Number(
+            entry.confidence || 5
+          )
+        )
+      ),
+
+    points_earned:
+      Number(
+        entry.points_earned || 0
+      ),
+
+    result:
+      entry.result || null,
+
+    is_locked:
+      false,
+
+    locked_at:
+      null,
+
+    submitted_at:
+      entry.submitted_at ||
+      new Date().toISOString(),
+
+    updated_at:
+      new Date().toISOString()
+
+  };
+
+  /*
+    The database should have the unique
+    challenge/user/game constraint discussed
+    for the Pick 'Em system.
+
+    If your deployed constraint is instead
+    challenge/user/option, the fallback below
+    attempts an update after an insert conflict.
+  */
+
+  if(entry.id){
+
+    const {
+      data,
+      error
+    } =
+      await supabase
+        .from(
+          "sports_pickem_entries"
+        )
+        .update(payload)
+        .eq(
+          "id",
+          entry.id
+        )
+        .eq(
+          "user_id",
+          state.user.id
+        )
+        .select()
+        .single();
+
+    if(error){
+      throw error;
+    }
+
+    return data;
+
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabase
+      .from(
+        "sports_pickem_entries"
+      )
+      .upsert(
+        payload,
+        {
+          onConflict:
+            "challenge_id,user_id,game_id"
+        }
+      )
+      .select()
+      .single();
+
+  if(error){
+    throw error;
+  }
+
+  return data;
+
+}
+
+
+/* =========================================================
+   LOCK / SAVE ALL PICKS
+========================================================= */
+
+async function submitPicks(){
+
+  if(!state.user){
+
+    showToast(
+      "Sign in before locking your picks.",
+      "error"
+    );
+
+    return;
+
+  }
+
+  if(!state.challenge){
+
+    showToast(
+      "There is no active Pick 'Em challenge.",
+      "error"
+    );
+
+    return;
+
+  }
+
+  if(isChallengeLocked()){
+
+    showToast(
+      "This Pick 'Em challenge is already locked.",
+      "error"
+    );
+
+    return;
+
+  }
+
+  const games =
+    challengeGames();
+
+  const incomplete =
+    games.filter(
+      game =>
+        !getEntryForGame(
+          game.id
+        )?.option_id
+    );
+
+  if(incomplete.length){
+
+    showToast(
+      "Select a winner for every game before locking in.",
+      "error"
+    );
+
+    return;
+
+  }
+
+  state.saving = true;
+
+  updateSubmitState();
+
+  document.getElementById(
+    "saveStatus"
+  ).textContent =
+    "SAVING PICKS...";
+
+  try{
+
+    for(
+      const game of games
+    ){
+
+      const entry =
+        getEntryForGame(
+          game.id
+        );
+
+      if(!entry){
+        continue;
+      }
+
+      const saved =
+        await saveEntry(
+          entry
+        );
+
+      const index =
+        state.entries.findIndex(
+          item =>
+            item.game_id ===
+            game.id
+        );
+
+      if(index >= 0){
+        state.entries[index] =
+          saved;
+      }
+
+    }
+
+    state.dirty = false;
+
+    document.getElementById(
+      "saveStatus"
+    ).textContent =
+      "SAVED TO SUPABASE";
+
+    document.getElementById(
+      "saveStatus"
+    ).className =
+      "save-status saved";
+
+    showToast(
+      "Your CrowRules Pick 'Em picks have been saved.",
+      "success"
+    );
+
+    await loadLeaderboard();
+
+    renderGames();
+    renderLeaderboard();
+
+  }catch(error){
+
+    console.error(error);
+
+    document.getElementById(
+      "saveStatus"
+    ).textContent =
+      "SAVE ERROR";
+
+    document.getElementById(
+      "saveStatus"
+    ).className =
+      "save-status error";
+
+    showToast(
+      error?.message ||
+      "Unable to save your picks.",
+      "error"
+    );
+
+  }finally{
+
+    state.saving = false;
+
+    updateSubmitState();
+
+  }
+
+}
+
+
+document.getElementById(
+  "submitPicks"
+).addEventListener(
+  "click",
+  submitPicks
+);
+
+
+/* =========================================================
+   LEADERBOARD
+========================================================= */
+
+function renderLeaderboard(){
+
+  const container =
+    document.getElementById(
+      "leaderboardList"
+    );
+
+  const header = `
+    <div class="leader-row header">
+
+      <div>#</div>
+
+      <div>PLAYER</div>
+
+      <div class="points">
+        POINTS
+      </div>
+
+      <div class="streak">
+        STATUS
+      </div>
+
+    </div>
+  `;
+
+  if(!state.leaderboard.length){
+
+    container.innerHTML =
+      header +
+      `
+        <div class="state">
+
+          <div class="state-mark">
+            CR
+          </div>
+
+          <h3>
+            NO LEADERBOARD DATA
+          </h3>
+
+          <p>
+            The leaderboard will populate after members begin submitting picks.
+          </p>
+
+        </div>
+      `;
+
+    renderYourStats();
+
+    return;
+
+  }
+
+  const rows =
+    state.leaderboard
+      .map(
+        (row,index) => {
+
+          const current =
+            state.user &&
+            row.user_id ===
+            state.user.id;
+
+          const name =
+            current
+              ? "YOU"
+              : "CrowRules Member";
+
+          const points =
+            Number(
+              row.total_points || 0
+            );
+
+          const correct =
+            Number(
+              row.correct_picks || 0
+            );
+
+          const incorrect =
+            Number(
+              row.incorrect_picks || 0
+            );
+
+          const pending =
+            Number(
+              row.pending_picks || 0
+            );
+
+          let status =
+            "ACTIVE";
+
+          if(pending > 0){
+            status =
+              "PENDING";
+          }
+
+          if(
+            correct > 0 &&
+            pending === 0
+          ){
+            status =
+              "COMPLETE";
+          }
+
+          return `
+            <div class="leader-row ${
+              current ? "current" : ""
+            }">
+
+              <div class="rank">
+                ${String(
+                  index + 1
+                ).padStart(2,"0")}
+              </div>
+
+              <div class="player">
+
+                <div class="avatar">
+                  ${
+                    current
+                      ? "YOU"
+                      : "CR"
+                  }
+                </div>
+
+                <div>
+
+                  <div class="player-name">
+                    ${escapeHtml(name)}
+                  </div>
+
+                  <div class="player-record">
+                    ${correct}–${incorrect}
+                    ${
+                      pending
+                        ? " • " +
+                          pending +
+                          " PENDING"
+                        : ""
+                    }
+                  </div>
+
+                </div>
+
+              </div>
+
+              <div class="points">
+                ${points}
+              </div>
+
+              <div class="streak">
+                ${status}
+              </div>
+
+            </div>
+          `;
+
+        }
+      )
+      .join("");
+
+  container.innerHTML =
+    header +
+    rows;
+
+  renderYourStats();
+
+}
+
+
+function renderYourStats(){
+
+  const yourRow =
+    state.user
+      ? state.leaderboard.find(
+          row =>
+            row.user_id ===
+            state.user.id
+        )
+      : null;
+
+  if(!yourRow){
+
+    document.getElementById(
+      "yourPoints"
+    ).textContent =
+      "0";
+
+    document.getElementById(
+      "yourRecord"
+    ).textContent =
+      state.user
+        ? "Submit your first Pick 'Em entry to appear on the leaderboard."
+        : "Sign in to view your Pick 'Em record.";
+
+    document.getElementById(
+      "yourPickSummary"
+    ).textContent =
+      state.user
+        ? "No leaderboard entry yet for this challenge."
+        : "Sign in to view your submitted picks.";
+
+    return;
+
+  }
+
+  const points =
+    Number(
+      yourRow.total_points || 0
+    );
+
+  const correct =
+    Number(
+      yourRow.correct_picks || 0
+    );
+
+  const incorrect =
+    Number(
+      yourRow.incorrect_picks || 0
+    );
+
+  const pending =
+    Number(
+      yourRow.pending_picks || 0
+    );
+
+  document.getElementById(
+    "yourPoints"
+  ).textContent =
+    points;
+
+  document.getElementById(
+    "yourRecord"
+  ).textContent =
+    correct +
+    " correct • " +
+    incorrect +
+    " incorrect • " +
+    pending +
+    " pending";
+
+  document.getElementById(
+    "yourPickSummary"
+  ).textContent =
+    state.entries.length +
+    " saved pick" +
+    (
+      state.entries.length === 1
+        ? ""
+        : "s"
+    ) +
+    " for this challenge.";
+
+}
+
+
+/* =========================================================
+   RENDER EVERYTHING
+========================================================= */
+
+function renderEverything(){
+
+  renderChallenge();
+
+  renderFilters();
+
+  renderGames();
+
+  renderLeaderboard();
+
+  updatePickedCount();
+
+  updateSubmitState();
+
+  startCountdown();
+
+}
+
+
+/* =========================================================
+   REALTIME
+========================================================= */
+
+function subscribeRealtime(){
+
+  if(
+    !supabase ||
+    state.realtimeChannel
+  ){
+    return;
+  }
+
+  state.realtimeChannel =
+    supabase
+      .channel(
+        "crowrules-pickem-live"
+      )
+
+      .on(
+        "postgres_changes",
+        {
+          event:"*",
+          schema:"public",
+          table:"sports_pickem_challenges"
+        },
+        async () => {
+
+          try{
+
+            await loadChallenge();
+
+            await loadOptions();
+
+            await loadGames();
+
+            await loadEntries();
+
+            await loadLeaderboard();
+
+            renderEverything();
+
+          }catch(error){
+
+            console.error(
+              "Realtime challenge refresh:",
+              error
+            );
+
+          }
+
+        }
+      )
+
+      .on(
+        "postgres_changes",
+        {
+          event:"*",
+          schema:"public",
+          table:"sports_pickem_options"
+        },
+        async () => {
+
+          try{
+
+            await loadOptions();
+
+            await loadGames();
+
+            await loadEntries();
+
+            renderEverything();
+
+          }catch(error){
+
+            console.error(error);
+
+          }
+
+        }
+      )
+
+      .on(
+        "postgres_changes",
+        {
+          event:"*",
+          schema:"public",
+          table:"sports_pickem_entries"
+        },
+        async payload => {
+
+          /*
+            Only refresh the member's data or the
+            current challenge leaderboard.
+          */
+
+          if(
+            state.user &&
+            payload?.new?.user_id &&
+            payload.new.user_id !==
+              state.user.id
+          ){
+            try{
+              await loadLeaderboard();
+              renderLeaderboard();
+            }catch(error){
+              console.error(error);
+            }
+            return;
+          }
+
+          try{
+
+            await loadEntries();
+
+            await loadLeaderboard();
+
+            renderGames();
+
+            renderLeaderboard();
+
+          }catch(error){
+
+            console.error(error);
+
+          }
+
+        }
+      )
+
+      .on(
+        "postgres_changes",
+        {
+          event:"*",
+          schema:"public",
+          table:"sports_games"
+        },
+        async () => {
+
+          try{
+
+            await loadOptions();
+
+            await loadGames();
+
+            renderChallenge();
+
+            renderFilters();
+
+            renderGames();
+
+            updateSubmitState();
+
+          }catch(error){
+
+            console.error(error);
+
+          }
+
+        }
+      )
+
+      .subscribe(
+        status => {
+
+          console.log(
+            "Pick 'Em realtime:",
+            status
+          );
+
+        }
+      );
+
+}
+
+
+/* =========================================================
+   FALLBACK REFRESH
+========================================================= */
+
+function startRefreshTimer(){
+
+  clearInterval(
+    state.refreshTimer
+  );
+
+  state.refreshTimer =
+    setInterval(
+      async () => {
+
+        try{
+
+          await loadChallenge();
+
+          if(state.challenge){
+
+            await loadOptions();
+            await loadGames();
+            await loadEntries();
+            await loadLeaderboard();
+
+          }
+
+          renderEverything();
+
+          document.getElementById(
+            "lastUpdated"
+          ).textContent =
+            "UPDATED " +
+            new Date().toLocaleTimeString();
+
+        }catch(error){
+
+          console.error(
+            "Background refresh:",
+            error
+          );
+
+        }
+
+      },
+      60000
+    );
+
+}
+
+
+/* =========================================================
+   AUTH STATE LISTENER
+========================================================= */
+
+if(supabase){
+
+  supabase.auth.onAuthStateChange(
+    async (
+      event,
+      session
+    ) => {
+
+      state.session =
+        session;
+
+      state.user =
+        session?.user || null;
+
+      renderAuth();
+
+      /*
+        Delay database work slightly so the
+        auth state transaction completes first.
+      */
+
+      setTimeout(
+        async () => {
+
+          try{
+
+            await loadEntries();
+
+            await loadLeaderboard();
+
+            renderGames();
+
+            renderLeaderboard();
+
+            updateSubmitState();
+
+          }catch(error){
+
+            console.error(
+              "Auth refresh:",
+              error
+            );
+
+          }
+
+        },
+        0
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   PAGE VISIBILITY
+========================================================= */
+
+document.addEventListener(
+  "visibilitychange",
+  async () => {
+
+    if(
+      document.visibilityState ===
+      "visible" &&
+      supabase
+    ){
+
+      try{
+
+        await refreshAuth();
+
+        await loadEntries();
+
+        renderGames();
+
+        updateSubmitState();
+
+      }catch(error){
+
+        console.error(error);
+
+      }
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   BEFORE LEAVING
+========================================================= */
+
+window.addEventListener(
+  "beforeunload",
+  event => {
+
+    if(state.dirty){
+
+      event.preventDefault();
+
+      event.returnValue =
+        "";
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   CURRENT YEAR
+========================================================= */
+
+document.getElementById(
+  "year"
+).textContent =
+  new Date().getFullYear();
+
+
+/* =========================================================
+   BOOT
+========================================================= */
+
+(async function boot(){
+
+  renderAuth();
+
+  if(!SUPABASE_READY){
+
+    renderChallenge();
+
+    renderFilters();
+
+    updatePickedCount();
+
+    updateSubmitState();
+
+    return;
+
+  }
+
+  await loadAll();
+
+  subscribeRealtime();
+
+  startRefreshTimer();
+
+})();
+</script>
+
+</body>
+</html>
