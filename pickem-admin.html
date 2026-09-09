@@ -1,0 +1,4161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>CrowRules Sports — Pick ’Em Admin Center</title>
+<meta name="theme-color" content="#070707">
+<meta name="description" content="CrowRules Sports Pick ’Em Administration Center">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root{
+  --bg:#050505;
+  --panel:#0d0d0d;
+  --panel2:#121212;
+  --panel3:#181818;
+  --line:#292929;
+  --red:#e50914;
+  --red2:#ff2632;
+  --text:#f5f5f5;
+  --muted:#929292;
+  --green:#22c55e;
+  --yellow:#f5c542;
+  --blue:#3b82f6;
+  --shadow:0 18px 55px rgba(0,0,0,.45);
+  --radius:16px;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at top right,rgba(229,9,20,.10),transparent 30%),
+    radial-gradient(circle at bottom left,rgba(229,9,20,.06),transparent 28%),
+    var(--bg);
+  color:var(--text);
+  font-family:Montserrat,Arial,sans-serif;
+  min-height:100vh;
+}
+
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.035;
+  background-image:
+    linear-gradient(rgba(255,255,255,.3) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.3) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+
+a{
+  color:inherit;
+  text-decoration:none;
+}
+
+button,
+input,
+select,
+textarea{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:100;
+  height:72px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 22px;
+  border-bottom:1px solid var(--line);
+  background:rgba(5,5,5,.94);
+  backdrop-filter:blur(16px);
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:13px;
+}
+
+.logo{
+  width:42px;
+  height:42px;
+  border:2px solid var(--red);
+  border-radius:12px;
+  display:grid;
+  place-items:center;
+  color:var(--red);
+  font-family:Orbitron,sans-serif;
+  font-weight:900;
+  box-shadow:0 0 24px rgba(229,9,20,.18);
+}
+
+.brand-title{
+  font-family:Orbitron,sans-serif;
+  font-size:15px;
+  font-weight:800;
+  letter-spacing:1px;
+}
+
+.brand-sub{
+  margin-top:2px;
+  font-size:10px;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:1.5px;
+}
+
+.top-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.admin-user{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:7px 11px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--panel);
+}
+
+.avatar{
+  width:31px;
+  height:31px;
+  border-radius:50%;
+  object-fit:cover;
+  background:#222;
+}
+
+.user-name{
+  font-size:12px;
+  font-weight:700;
+}
+
+.user-role{
+  font-size:9px;
+  color:var(--red2);
+  text-transform:uppercase;
+  letter-spacing:1px;
+  margin-top:2px;
+}
+
+.layout{
+  display:grid;
+  grid-template-columns:250px 1fr;
+  min-height:calc(100vh - 72px);
+}
+
+.sidebar{
+  position:sticky;
+  top:72px;
+  height:calc(100vh - 72px);
+  padding:18px 13px;
+  border-right:1px solid var(--line);
+  background:rgba(8,8,8,.94);
+  overflow-y:auto;
+}
+
+.side-label{
+  margin:12px 10px 7px;
+  font-size:9px;
+  color:#666;
+  text-transform:uppercase;
+  letter-spacing:1.8px;
+  font-weight:800;
+}
+
+.nav-btn{
+  width:100%;
+  border:1px solid transparent;
+  background:transparent;
+  color:#aaa;
+  padding:11px 12px;
+  border-radius:11px;
+  text-align:left;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:4px;
+  font-size:12px;
+  font-weight:700;
+  transition:.18s ease;
+}
+
+.nav-btn:hover{
+  background:#151515;
+  color:#fff;
+}
+
+.nav-btn.active{
+  background:rgba(229,9,20,.12);
+  color:#fff;
+  border-color:rgba(229,9,20,.32);
+}
+
+.nav-icon{
+  width:23px;
+  text-align:center;
+  color:var(--red);
+  font-size:15px;
+}
+
+.main{
+  padding:25px;
+  min-width:0;
+}
+
+.page{
+  display:none;
+}
+
+.page.active{
+  display:block;
+}
+
+.page-head{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  align-items:flex-start;
+  margin-bottom:24px;
+}
+
+.eyebrow{
+  color:var(--red);
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:2px;
+  font-weight:800;
+  margin-bottom:7px;
+}
+
+h1,
+h2,
+h3{
+  font-family:Orbitron,sans-serif;
+  margin:0;
+}
+
+h1{
+  font-size:25px;
+  letter-spacing:.5px;
+}
+
+h2{
+  font-size:17px;
+}
+
+h3{
+  font-size:13px;
+}
+
+.page-desc{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:7px;
+}
+
+.btn{
+  border:1px solid var(--line);
+  background:#161616;
+  color:#fff;
+  border-radius:10px;
+  padding:10px 14px;
+  font-size:11px;
+  font-weight:800;
+  transition:.18s ease;
+}
+
+.btn:hover{
+  border-color:#444;
+  transform:translateY(-1px);
+}
+
+.btn-primary{
+  background:var(--red);
+  border-color:var(--red);
+}
+
+.btn-primary:hover{
+  background:var(--red2);
+}
+
+.btn-danger{
+  background:#35080b;
+  border-color:#721117;
+  color:#ff8a91;
+}
+
+.btn-success{
+  background:#092414;
+  border-color:#185e30;
+  color:#73e49a;
+}
+
+.btn-warning{
+  background:#2a2107;
+  border-color:#68510e;
+  color:#f5d66d;
+}
+
+.btn-small{
+  padding:7px 10px;
+  font-size:10px;
+}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:13px;
+  margin-bottom:20px;
+}
+
+.stat{
+  background:linear-gradient(145deg,#111,#0a0a0a);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:17px;
+  box-shadow:var(--shadow);
+}
+
+.stat-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  color:#777;
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:1.4px;
+  font-weight:800;
+}
+
+.stat-icon{
+  color:var(--red);
+  font-size:17px;
+}
+
+.stat-value{
+  font-family:Orbitron,sans-serif;
+  font-size:24px;
+  margin-top:13px;
+  font-weight:800;
+}
+
+.stat-note{
+  color:#6f6f6f;
+  font-size:10px;
+  margin-top:6px;
+}
+
+.grid-2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+}
+
+.grid-main{
+  display:grid;
+  grid-template-columns:minmax(0,1.55fr) minmax(300px,.8fr);
+  gap:18px;
+}
+
+.panel{
+  background:linear-gradient(145deg,#101010,#090909);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+
+.panel-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  padding:16px 17px;
+  border-bottom:1px solid var(--line);
+}
+
+.panel-title{
+  font-family:Orbitron,sans-serif;
+  font-size:12px;
+  font-weight:800;
+}
+
+.panel-sub{
+  color:#777;
+  font-size:9px;
+  margin-top:4px;
+}
+
+.panel-body{
+  padding:17px;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:13px;
+}
+
+.form-grid-3{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:13px;
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.field.full{
+  grid-column:1/-1;
+}
+
+label{
+  font-size:9px;
+  color:#888;
+  text-transform:uppercase;
+  letter-spacing:1.2px;
+  font-weight:800;
+}
+
+input,
+select,
+textarea{
+  width:100%;
+  background:#090909;
+  color:#fff;
+  border:1px solid #303030;
+  border-radius:9px;
+  padding:10px 11px;
+  outline:none;
+  font-size:11px;
+}
+
+textarea{
+  min-height:90px;
+  resize:vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+  border-color:var(--red);
+  box-shadow:0 0 0 2px rgba(229,9,20,.08);
+}
+
+.form-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  margin-top:16px;
+}
+
+.challenge-card{
+  padding:17px;
+}
+
+.challenge-name{
+  font-family:Orbitron,sans-serif;
+  font-size:15px;
+  font-weight:800;
+}
+
+.challenge-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:11px;
+}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  border:1px solid #303030;
+  border-radius:999px;
+  padding:5px 8px;
+  font-size:9px;
+  font-weight:800;
+  color:#aaa;
+  background:#111;
+}
+
+.badge.red{
+  color:#ff7880;
+  border-color:#651017;
+  background:#200709;
+}
+
+.badge.green{
+  color:#69dc91;
+  border-color:#18552e;
+  background:#081c0f;
+}
+
+.badge.yellow{
+  color:#f1cf67;
+  border-color:#5e4b12;
+  background:#1d1806;
+}
+
+.badge.blue{
+  color:#79a9ff;
+  border-color:#24467d;
+  background:#081426;
+}
+
+.table-wrap{
+  overflow:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:680px;
+}
+
+th{
+  text-align:left;
+  padding:10px 12px;
+  color:#666;
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  border-bottom:1px solid var(--line);
+  background:#0c0c0c;
+}
+
+td{
+  padding:12px;
+  border-bottom:1px solid #1d1d1d;
+  font-size:10px;
+  color:#c8c8c8;
+}
+
+tr:hover td{
+  background:#111;
+}
+
+.team{
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+
+.team-logo{
+  width:30px;
+  height:30px;
+  border-radius:8px;
+  object-fit:contain;
+  background:#171717;
+  padding:4px;
+}
+
+.team-name{
+  font-weight:800;
+  color:#eee;
+}
+
+.team-abbr{
+  color:#666;
+  font-size:8px;
+  margin-top:2px;
+}
+
+.game-row{
+  display:grid;
+  grid-template-columns:65px minmax(0,1fr) 100px 115px;
+  align-items:center;
+  gap:13px;
+  padding:13px 15px;
+  border-bottom:1px solid #1b1b1b;
+}
+
+.game-row:last-child{
+  border-bottom:0;
+}
+
+.game-date{
+  color:#777;
+  font-size:9px;
+  text-align:center;
+}
+
+.matchup{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+
+.matchup-team{
+  min-width:0;
+}
+
+.matchup-name{
+  font-weight:800;
+  font-size:10px;
+}
+
+.vs{
+  color:#555;
+  font-family:Orbitron,sans-serif;
+  font-size:9px;
+}
+
+.game-info{
+  color:#777;
+  font-size:8px;
+  line-height:1.5;
+}
+
+.game-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:5px;
+}
+
+.progress{
+  height:7px;
+  background:#1c1c1c;
+  border-radius:99px;
+  overflow:hidden;
+}
+
+.progress > span{
+  display:block;
+  height:100%;
+  width:0;
+  background:var(--red);
+  border-radius:99px;
+  transition:width .3s ease;
+}
+
+.kpi{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:11px 0;
+  border-bottom:1px solid #1b1b1b;
+}
+
+.kpi:last-child{
+  border-bottom:0;
+}
+
+.kpi-label{
+  color:#777;
+  font-size:10px;
+}
+
+.kpi-value{
+  font-family:Orbitron,sans-serif;
+  font-size:12px;
+  font-weight:800;
+}
+
+.empty{
+  text-align:center;
+  padding:40px 20px;
+  color:#666;
+  font-size:11px;
+}
+
+.empty strong{
+  display:block;
+  color:#bbb;
+  margin-bottom:5px;
+}
+
+.notice{
+  padding:12px 14px;
+  border-radius:10px;
+  background:#111;
+  border:1px solid #2a2a2a;
+  color:#999;
+  font-size:10px;
+  line-height:1.6;
+}
+
+.notice.red{
+  border-color:#5e1118;
+  background:#1a0709;
+  color:#ff969c;
+}
+
+.notice.green{
+  border-color:#164e2a;
+  background:#07170c;
+  color:#72d990;
+}
+
+.automation-box{
+  display:grid;
+  gap:10px;
+}
+
+.automation-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  padding:12px;
+  border:1px solid #242424;
+  border-radius:10px;
+  background:#0b0b0b;
+}
+
+.automation-name{
+  font-weight:800;
+  font-size:10px;
+}
+
+.automation-desc{
+  color:#666;
+  font-size:8px;
+  margin-top:3px;
+}
+
+.status-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  display:inline-block;
+  margin-right:5px;
+  background:#555;
+}
+
+.status-dot.on{
+  background:var(--green);
+  box-shadow:0 0 9px rgba(34,197,94,.5);
+}
+
+.status-dot.warn{
+  background:var(--yellow);
+}
+
+.status-dot.off{
+  background:var(--red);
+}
+
+.toast{
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  z-index:999;
+  min-width:280px;
+  max-width:420px;
+  padding:13px 15px;
+  background:#111;
+  border:1px solid #333;
+  border-left:3px solid var(--red);
+  border-radius:10px;
+  box-shadow:var(--shadow);
+  transform:translateY(25px);
+  opacity:0;
+  pointer-events:none;
+  transition:.25s ease;
+  font-size:11px;
+}
+
+.toast.show{
+  transform:translateY(0);
+  opacity:1;
+}
+
+.toast.success{
+  border-left-color:var(--green);
+}
+
+.toast.error{
+  border-left-color:var(--red);
+}
+
+.loading{
+  display:inline-block;
+  width:13px;
+  height:13px;
+  border:2px solid #444;
+  border-top-color:var(--red);
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+  vertical-align:middle;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
+
+.locked-overlay{
+  position:fixed;
+  inset:0;
+  z-index:500;
+  display:none;
+  place-items:center;
+  background:rgba(0,0,0,.88);
+  backdrop-filter:blur(8px);
+}
+
+.locked-card{
+  width:min(440px,calc(100% - 30px));
+  padding:30px;
+  text-align:center;
+  border:1px solid #441015;
+  border-radius:18px;
+  background:#0c0c0c;
+  box-shadow:0 25px 80px rgba(0,0,0,.7);
+}
+
+.locked-card .big{
+  font-size:45px;
+  color:var(--red);
+  margin-bottom:15px;
+}
+
+.access-denied{
+  min-height:70vh;
+  display:none;
+  place-items:center;
+}
+
+.access-card{
+  max-width:500px;
+  text-align:center;
+  padding:35px;
+  border:1px solid #461017;
+  background:#0c0c0c;
+  border-radius:18px;
+}
+
+.mobile-menu{
+  display:none;
+}
+
+@media(max-width:1100px){
+  .cards{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .grid-main{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:800px){
+  .layout{
+    grid-template-columns:1fr;
+  }
+
+  .sidebar{
+    position:fixed;
+    top:72px;
+    left:0;
+    bottom:0;
+    width:250px;
+    transform:translateX(-100%);
+    z-index:90;
+    transition:.25s ease;
+  }
+
+  .sidebar.open{
+    transform:translateX(0);
+  }
+
+  .mobile-menu{
+    display:block;
+  }
+
+  .main{
+    padding:18px;
+  }
+
+  .topbar{
+    padding:0 13px;
+  }
+
+  .admin-user .user-copy{
+    display:none;
+  }
+
+  .page-head{
+    flex-direction:column;
+  }
+
+  .grid-2,
+  .form-grid,
+  .form-grid-3{
+    grid-template-columns:1fr;
+  }
+
+  .cards{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .game-row{
+    grid-template-columns:55px 1fr;
+  }
+
+  .game-info,
+  .game-actions{
+    grid-column:2;
+    justify-content:flex-start;
+  }
+}
+
+@media(max-width:500px){
+  .cards{
+    grid-template-columns:1fr;
+  }
+
+  h1{
+    font-size:20px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <button class="btn mobile-menu" id="mobileMenuBtn">☰</button>
+
+    <div class="logo">CR</div>
+
+    <div>
+      <div class="brand-title">CROWRULES SPORTS</div>
+      <div class="brand-sub">Pick ’Em Admin Center</div>
+    </div>
+  </div>
+
+  <div class="top-actions">
+    <button class="btn btn-small" id="refreshBtn">↻ Refresh</button>
+
+    <div class="admin-user">
+      <img id="adminAvatar" class="avatar" src="" alt="">
+      <div class="user-copy">
+        <div class="user-name" id="adminName">Checking access...</div>
+        <div class="user-role" id="adminRole">—</div>
+      </div>
+    </div>
+
+    <button class="btn btn-small" id="signOutBtn">Sign Out</button>
+  </div>
+</header>
+
+<div class="layout">
+
+  <aside class="sidebar" id="sidebar">
+
+    <div class="side-label">Pick ’Em</div>
+
+    <button class="nav-btn active" data-page="dashboard">
+      <span class="nav-icon">▣</span>
+      Dashboard
+    </button>
+
+    <button class="nav-btn" data-page="challenges">
+      <span class="nav-icon">◆</span>
+      Challenges
+    </button>
+
+    <button class="nav-btn" data-page="games">
+      <span class="nav-icon">◈</span>
+      Game Manager
+    </button>
+
+    <button class="nav-btn" data-page="leaderboard">
+      <span class="nav-icon">♛</span>
+      Leaderboard
+    </button>
+
+    <button class="nav-btn" data-page="players">
+      <span class="nav-icon">♟</span>
+      Player Activity
+    </button>
+
+    <div class="side-label">Operations</div>
+
+    <button class="nav-btn" data-page="automation">
+      <span class="nav-icon">⚙</span>
+      Automation
+    </button>
+
+    <button class="nav-btn" data-page="settings">
+      <span class="nav-icon">⌘</span>
+      Settings
+    </button>
+
+    <div class="side-label">CrowRules</div>
+
+    <a class="nav-btn" href="index.html">
+      <span class="nav-icon">←</span>
+      Sports Center
+    </a>
+
+    <a class="nav-btn" href="member.html">
+      <span class="nav-icon">◎</span>
+      Member Pick ’Em
+    </a>
+
+  </aside>
+
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <section class="page active" id="page-dashboard">
+
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Control Room</div>
+          <h1>Pick ’Em Dashboard</h1>
+          <div class="page-desc">
+            Manage weekly challenges, games, scoring and player activity.
+          </div>
+        </div>
+
+        <div>
+          <button class="btn btn-primary" id="runSetupBtn">
+            ▶ Run Weekly Setup
+          </button>
+        </div>
+      </div>
+
+      <div class="cards">
+
+        <div class="stat">
+          <div class="stat-top">
+            <span>Current Challenge</span>
+            <span class="stat-icon">◆</span>
+          </div>
+          <div class="stat-value" id="statWeek">—</div>
+          <div class="stat-note" id="statWeekName">No active challenge</div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-top">
+            <span>Games</span>
+            <span class="stat-icon">◈</span>
+          </div>
+          <div class="stat-value" id="statGames">0</div>
+          <div class="stat-note">Attached to challenge</div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-top">
+            <span>Players</span>
+            <span class="stat-icon">♟</span>
+          </div>
+          <div class="stat-value" id="statPlayers">0</div>
+          <div class="stat-note">Unique participants</div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-top">
+            <span>Total Picks</span>
+            <span class="stat-icon">✓</span>
+          </div>
+          <div class="stat-value" id="statPicks">0</div>
+          <div class="stat-note">Current challenge</div>
+        </div>
+
+      </div>
+
+      <div class="grid-main">
+
+        <div class="panel">
+
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Current Challenge</div>
+              <div class="panel-sub">Live weekly configuration</div>
+            </div>
+
+            <button class="btn btn-small" id="editCurrentBtn">
+              Edit
+            </button>
+          </div>
+
+          <div class="challenge-card">
+
+            <div class="challenge-name" id="dashboardChallengeName">
+              No challenge loaded
+            </div>
+
+            <div class="challenge-meta">
+              <span class="badge" id="dashboardStatus">—</span>
+              <span class="badge" id="dashboardLeague">—</span>
+              <span class="badge" id="dashboardLock">Lock: —</span>
+            </div>
+
+            <div style="margin-top:20px">
+
+              <div class="kpi">
+                <span class="kpi-label">Week</span>
+                <span class="kpi-value" id="dashWeek">—</span>
+              </div>
+
+              <div class="kpi">
+                <span class="kpi-label">Challenge Window</span>
+                <span class="kpi-value" id="dashDates">—</span>
+              </div>
+
+              <div class="kpi">
+                <span class="kpi-label">Points Per Correct Pick</span>
+                <span class="kpi-value" id="dashPoints">—</span>
+              </div>
+
+              <div class="kpi">
+                <span class="kpi-label">Pick Requirement</span>
+                <span class="kpi-value" id="dashPickRules">—</span>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="panel">
+
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Operations</div>
+              <div class="panel-sub">Quick controls</div>
+            </div>
+          </div>
+
+          <div class="panel-body">
+
+            <div class="automation-box">
+
+              <div class="automation-item">
+                <div>
+                  <div class="automation-name">
+                    <span class="status-dot on"></span>
+                    Weekly Setup
+                  </div>
+                  <div class="automation-desc">
+                    Creates the weekly challenge automatically.
+                  </div>
+                </div>
+                <button class="btn btn-small" id="setupNowBtn">Run</button>
+              </div>
+
+              <div class="automation-item">
+                <div>
+                  <div class="automation-name">
+                    <span class="status-dot on"></span>
+                    Game Attachment
+                  </div>
+                  <div class="automation-desc">
+                    New matching games attach automatically.
+                  </div>
+                </div>
+                <span class="badge green">ACTIVE</span>
+              </div>
+
+              <div class="automation-item">
+                <div>
+                  <div class="automation-name">
+                    <span class="status-dot on"></span>
+                    Automatic Scoring
+                  </div>
+                  <div class="automation-desc">
+                    Final games score eligible picks.
+                  </div>
+                </div>
+                <span class="badge green">ACTIVE</span>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="panel" style="margin-top:18px">
+
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Current Games</div>
+            <div class="panel-sub">Games attached to the active challenge</div>
+          </div>
+
+          <button class="btn btn-small" id="dashboardGamesBtn">
+            Manage Games
+          </button>
+        </div>
+
+        <div id="dashboardGames">
+          <div class="empty">
+            <strong>No games loaded</strong>
+            Run weekly setup or attach games manually.
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- CHALLENGES -->
+    <section class="page" id="page-challenges">
+
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Challenge Manager</div>
+          <h1>Challenges</h1>
+          <div class="page-desc">
+            Create and manage weekly Pick ’Em contests.
+          </div>
+        </div>
+
+        <button class="btn btn-primary" id="newChallengeBtn">
+          + New Challenge
+        </button>
+      </div>
+
+      <div class="panel">
+
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Challenge List</div>
+            <div class="panel-sub">All Pick ’Em weeks</div>
+          </div>
+
+          <button class="btn btn-small" id="refreshChallengesBtn">
+            ↻ Refresh
+          </button>
+        </div>
+
+        <div class="table-wrap">
+
+          <table>
+            <thead>
+              <tr>
+                <th>Challenge</th>
+                <th>Season</th>
+                <th>Week</th>
+                <th>Status</th>
+                <th>Lock</th>
+                <th>Games</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody id="challengeTable">
+              <tr>
+                <td colspan="7">
+                  <div class="empty">Loading challenges...</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+        </div>
+
+      </div>
+
+      <div class="panel" id="challengeEditor" style="margin-top:18px;display:none">
+
+        <div class="panel-head">
+          <div>
+            <div class="panel-title" id="challengeEditorTitle">
+              New Challenge
+            </div>
+            <div class="panel-sub">
+              Configure the Pick ’Em rules.
+            </div>
+          </div>
+
+          <button class="btn btn-small" id="closeEditorBtn">× Close</button>
+        </div>
+
+        <div class="panel-body">
+
+          <input type="hidden" id="challengeId">
+
+          <div class="form-grid">
+
+            <div class="field">
+              <label>Name</label>
+              <input id="challengeName" placeholder="CrowRules Pick Em — Week 2">
+            </div>
+
+            <div class="field">
+              <label>Season</label>
+              <input id="challengeSeason" placeholder="2026">
+            </div>
+
+            <div class="field">
+              <label>Week Number</label>
+              <input id="challengeWeek" type="number" min="1" max="60">
+            </div>
+
+            <div class="field">
+              <label>Status</label>
+              <select id="challengeStatus">
+                <option value="draft">Draft</option>
+                <option value="open">Open</option>
+                <option value="locked">Locked</option>
+                <option value="scored">Scored</option>
+                <option value="closed">Closed</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Week Start</label>
+              <input id="challengeStart" type="date">
+            </div>
+
+            <div class="field">
+              <label>Week End</label>
+              <input id="challengeEnd" type="date">
+            </div>
+
+            <div class="field">
+              <label>Lock Time</label>
+              <input id="challengeLock" type="datetime-local">
+            </div>
+
+            <div class="field">
+              <label>Points Per Correct Pick</label>
+              <input id="challengePoints" type="number" min="1" value="1">
+            </div>
+
+            <div class="field">
+              <label>Minimum Picks</label>
+              <input id="challengeMinPicks" type="number" min="1" value="1">
+            </div>
+
+            <div class="field">
+              <label>Maximum Picks</label>
+              <input id="challengeMaxPicks" type="number" min="1" placeholder="Leave blank for unlimited">
+            </div>
+
+            <div class="field full">
+              <label>Leagues</label>
+              <input id="challengeLeagues" value="NFL" placeholder="NFL,NBA,MLB">
+            </div>
+
+          </div>
+
+          <div class="form-actions">
+            <button class="btn" id="cancelChallengeBtn">Cancel</button>
+            <button class="btn btn-primary" id="saveChallengeBtn">
+              Save Challenge
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- GAMES -->
+    <section class="page" id="page-games">
+
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Game Manager</div>
+          <h1>Challenge Games</h1>
+          <div class="page-desc">
+            Attach, remove and reorder games available for picks.
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" id="loadAvailableGamesBtn">
+            Load Available Games
+          </button>
+          <button class="btn btn-primary" id="attachWeekGamesBtn">
+            Auto Attach Week
+          </button>
+        </div>
+      </div>
+
+      <div class="panel">
+
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Selected Challenge</div>
+            <div class="panel-sub">Games currently available to members</div>
+          </div>
+
+          <select id="gameChallengeSelect" style="max-width:280px">
+            <option value="">Select challenge</option>
+          </select>
+        </div>
+
+        <div id="challengeGamesList">
+          <div class="empty">
+            <strong>Select a challenge</strong>
+            Choose a challenge above to manage its games.
+          </div>
+        </div>
+
+      </div>
+
+      <div class="panel" style="margin-top:18px;display:none" id="availableGamesPanel">
+
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Available Sports Games</div>
+            <div class="panel-sub">
+              Games from sports_games that can be attached.
+            </div>
+          </div>
+
+          <button class="btn btn-small" id="closeAvailableGamesBtn">× Close</button>
+        </div>
+
+        <div id="availableGamesList">
+          <div class="empty">Loading...</div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- LEADERBOARD -->
+    <section class="page" id="page-leaderboard">
+
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Competition</div>
+          <h1>Leaderboard</h1>
+          <div class="page-desc">
+            Weekly Pick ’Em rankings and scoring.
+          </div>
+        </div>
+
+        <select id="leaderboardChallengeSelect" style="max-width:300px">
+          <option value="">Select challenge</option>
+        </select>
+      </div>
+
+      <div class="cards">
+
+        <div class="stat">
+          <div class="stat-top">
+            <span>Players</span>
+            <span class="stat-icon">♟</span>
+          </div>
+          <div class="stat-value" id="leaderPlayers">0</div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-top">
+            <span>Correct</span>
+            <span class="stat-icon">✓</span>
+          </div>
+          <div class="stat-value" id="leaderCorrect">0</div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-top">
+            <span>Points</span>
+            <span class="stat-icon">★</span>
+          </div>
+          <div class="stat-value" id="leaderPoints">0</div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-top">
+            <span>Accuracy</span>
+            <span class="stat-icon">%</span>
+          </div>
+          <div class="stat-value" id="leaderAccuracy">0%</div>
+        </div>
+
+      </div>
+
+      <div class="panel">
+
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Weekly Rankings</div>
+            <div class="panel-sub">Calculated from scored Pick ’Em selections</div>
+          </div>
+
+          <button class="btn btn-small" id="refreshLeaderboardBtn">
+            ↻ Refresh
+          </button>
+        </div>
+
+        <div class="table-wrap">
+
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Member</th>
+                <th>Graded</th>
+                <th>Correct</th>
+                <th>Points</th>
+                <th>Accuracy</th>
+              </tr>
+            </thead>
+
+            <tbody id="leaderboardTable">
+              <tr>
+                <td colspan="6">
+                  <div class="empty">Select a challenge.</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- PLAYERS -->
+    <section class="page" id="page-players">
+
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Member Activity</div>
+          <h1>Player Activity</h1>
+          <div class="page-desc">
+            Monitor Pick ’Em participation and results.
+          </div>
+        </div>
+
+        <select id="playerChallengeSelect" style="max-width:300px">
+          <option value="">Select challenge</option>
+        </select>
+      </div>
+
+      <div class="panel">
+
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Participants</div>
+            <div class="panel-sub">Pick activity for the selected challenge</div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+
+          <table>
+            <thead>
+              <tr>
+                <th>Member</th>
+                <th>Picks</th>
+                <th>Correct</th>
+                <th>Points</th>
+                <th>Accuracy</th>
+                <th>Last Pick</th>
+              </tr>
+            </thead>
+
+            <tbody id="playersTable">
+              <tr>
+                <td colspan="6">
+                  <div class="empty">Select a challenge.</div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- AUTOMATION -->
+    <section class="page" id="page-automation">
+
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Operations</div>
+          <h1>Automation</h1>
+          <div class="page-desc">
+            Monitor and manually trigger the Pick ’Em automation system.
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+
+        <div class="panel">
+
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Weekly Setup</div>
+              <div class="panel-sub">
+                Creates the current week's challenge and attaches matching games.
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-body">
+
+            <div class="notice green">
+              The automatic weekly setup job runs Monday at 09:00 UTC.
+            </div>
+
+            <div style="margin-top:15px">
+
+              <div class="kpi">
+                <span class="kpi-label">Automation</span>
+                <span class="badge green">ACTIVE</span>
+              </div>
+
+              <div class="kpi">
+                <span class="kpi-label">Schedule</span>
+                <span class="kpi-value">Monday 09:00 UTC</span>
+              </div>
+
+              <div class="kpi">
+                <span class="kpi-label">Function</span>
+                <span class="kpi-value">pickem_setup_week()</span>
+              </div>
+
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn-primary" id="automationSetupBtn">
+                ▶ Run Setup Now
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="panel">
+
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Automatic Game Attachment</div>
+              <div class="panel-sub">
+                Games matching an open challenge are attached automatically.
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-body">
+
+            <div class="notice green">
+              New sports_games records can automatically enter an open Pick ’Em challenge.
+            </div>
+
+            <div style="margin-top:15px">
+
+              <div class="kpi">
+                <span class="kpi-label">Trigger</span>
+                <span class="kpi-value">ACTIVE</span>
+              </div>
+
+              <div class="kpi">
+                <span class="kpi-label">Source</span>
+                <span class="kpi-value">sports_games</span>
+              </div>
+
+              <div class="kpi">
+                <span class="kpi-label">Target</span>
+                <span class="kpi-value">pickem_games</span>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="panel">
+
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Automatic Scoring</div>
+              <div class="panel-sub">
+                Final game results update Pick ’Em selections.
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-body">
+
+            <div class="notice green">
+              When a sports game reaches a final status, eligible picks are automatically graded.
+            </div>
+
+            <div style="margin-top:15px">
+
+              <div class="kpi">
+                <span class="kpi-label">Trigger</span>
+                <span class="kpi-value">ACTIVE</span>
+              </div>
+
+              <div class="kpi">
+                <span class="kpi-label">Correct Pick</span>
+                <span class="kpi-value">+ Challenge Points</span>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="panel">
+
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">System Status</div>
+              <div class="panel-sub">Current database connection</div>
+            </div>
+          </div>
+
+          <div class="panel-body">
+
+            <div class="kpi">
+              <span class="kpi-label">Supabase</span>
+              <span class="badge green" id="supabaseStatus">CONNECTED</span>
+            </div>
+
+            <div class="kpi">
+              <span class="kpi-label">Authentication</span>
+              <span class="badge green" id="authStatus">AUTHORIZED</span>
+            </div>
+
+            <div class="kpi">
+              <span class="kpi-label">Pick ’Em Tables</span>
+              <span class="badge green">READY</span>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- SETTINGS -->
+    <section class="page" id="page-settings">
+
+      <div class="page-head">
+        <div>
+          <div class="eyebrow">Configuration</div>
+          <h1>Pick ’Em Settings</h1>
+          <div class="page-desc">
+            Global administration preferences.
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+
+        <div class="panel">
+
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Default Rules</div>
+              <div class="panel-sub">Defaults used for newly created challenges.</div>
+            </div>
+          </div>
+
+          <div class="panel-body">
+
+            <div class="form-grid">
+
+              <div class="field">
+                <label>Default Points</label>
+                <input id="settingPoints" type="number" value="1" min="1">
+              </div>
+
+              <div class="field">
+                <label>Default Minimum Picks</label>
+                <input id="settingMinPicks" type="number" value="1" min="1">
+              </div>
+
+              <div class="field">
+                <label>Default Maximum Picks</label>
+                <input id="settingMaxPicks" type="number" min="1" placeholder="Unlimited">
+              </div>
+
+              <div class="field">
+                <label>Default Leagues</label>
+                <input id="settingLeagues" value="NFL">
+              </div>
+
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn-primary" id="saveSettingsBtn">
+                Save Defaults
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="panel">
+
+          <div class="panel-head">
+            <div>
+              <div class="panel-title">Admin Security</div>
+              <div class="panel-sub">Pick ’Em administration access.</div>
+            </div>
+          </div>
+
+          <div class="panel-body">
+
+            <div class="notice">
+              Pick ’Em administration is restricted to authorized member roles.
+            </div>
+
+            <div style="margin-top:15px">
+
+              <div class="kpi">
+                <span class="kpi-label">Your Role</span>
+                <span class="kpi-value" id="settingsRole">—</span>
+              </div>
+
+              <div class="kpi">
+                <span class="kpi-label">Access</span>
+                <span class="badge green">AUTHORIZED</span>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+
+<!-- ACCESS DENIED -->
+<div class="access-denied" id="accessDenied">
+
+  <div class="access-card">
+
+    <div style="font-size:45px;color:var(--red);margin-bottom:15px">⛔</div>
+
+    <h2>Admin Access Required</h2>
+
+    <p style="color:#777;font-size:11px;line-height:1.7;margin:12px 0 20px">
+      Your account does not have permission to access the CrowRules Sports Pick ’Em Admin Center.
+    </p>
+
+    <button class="btn btn-primary" id="accessSignOutBtn">
+      Sign Out
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- LOCKED MODAL -->
+<div class="locked-overlay" id="loadingOverlay">
+
+  <div class="locked-card">
+
+    <div class="big">
+      <span class="loading" style="width:28px;height:28px"></span>
+    </div>
+
+    <h2>Loading Pick ’Em</h2>
+
+    <p style="color:#777;font-size:11px">
+      Verifying administrator access…
+    </p>
+
+  </div>
+
+</div>
+
+
+<div class="toast" id="toast"></div>
+
+
+<script>
+/* ============================================================
+   CROWRULES SPORTS — PICK 'EM ADMIN CENTER
+   ============================================================ */
+
+const SUPABASE_URL = "YOUR_SUPABASE_URL";
+const SUPABASE_PUBLISHABLE_KEY = "YOUR_SUPABASE_PUBLISHABLE_KEY";
+
+const { createClient } = supabase;
+
+const sb = createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
+
+
+/* ============================================================
+   STATE
+   ============================================================ */
+
+let currentUser = null;
+let currentMember = null;
+let currentChallenge = null;
+let challenges = [];
+let challengeGames = [];
+let availableGames = [];
+let teamCache = {};
+let leagueCache = {};
+
+const ADMIN_ROLES = new Set([
+  "admin",
+  "administrator",
+  "owner",
+  "super_admin",
+  "superadmin"
+]);
+
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+
+const $ = id => document.getElementById(id);
+
+function escapeHTML(value){
+  return String(value ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function showToast(message,type=""){
+  const el = $("toast");
+
+  el.textContent = message;
+  el.className = "toast show " + type;
+
+  clearTimeout(showToast.timer);
+
+  showToast.timer = setTimeout(()=>{
+    el.className = "toast";
+  },3500);
+}
+
+function formatDate(value){
+  if(!value) return "—";
+
+  return new Intl.DateTimeFormat("en-US",{
+    month:"short",
+    day:"numeric",
+    year:"numeric"
+  }).format(new Date(value));
+}
+
+function formatDateTime(value){
+  if(!value) return "—";
+
+  return new Intl.DateTimeFormat("en-US",{
+    month:"short",
+    day:"numeric",
+    year:"numeric",
+    hour:"numeric",
+    minute:"2-digit"
+  }).format(new Date(value));
+}
+
+function formatDateInput(value){
+  if(!value) return "";
+
+  return String(value).slice(0,10);
+}
+
+function toLocalDateTimeInput(value){
+  if(!value) return "";
+
+  const d = new Date(value);
+
+  const pad = n => String(n).padStart(2,"0");
+
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function statusBadge(status){
+  const s = String(status || "").toLowerCase();
+
+  let cls = "";
+
+  if(s === "open") cls = "green";
+  if(s === "locked") cls = "yellow";
+  if(s === "scored") cls = "blue";
+  if(s === "closed") cls = "red";
+
+  return `<span class="badge ${cls}">${escapeHTML(status || "—").toUpperCase()}</span>`;
+}
+
+function getTeam(id){
+  return teamCache[id] || {
+    id,
+    name:"Unknown Team",
+    short_name:"Unknown",
+    abbreviation:"—",
+    logo_url:""
+  };
+}
+
+function getLeague(id){
+  return leagueCache[id] || {
+    id,
+    name:"Unknown League",
+    league_key:"—"
+  };
+}
+
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+
+document.querySelectorAll(".nav-btn[data-page]").forEach(btn=>{
+
+  btn.addEventListener("click",()=>{
+
+    const page = btn.dataset.page;
+
+    document.querySelectorAll(".nav-btn[data-page]")
+      .forEach(x=>x.classList.remove("active"));
+
+    btn.classList.add("active");
+
+    document.querySelectorAll(".page")
+      .forEach(x=>x.classList.remove("active"));
+
+    $("page-" + page).classList.add("active");
+
+    $("sidebar").classList.remove("open");
+
+    if(page === "challenges"){
+      loadChallenges();
+    }
+
+    if(page === "games"){
+      populateChallengeSelects();
+    }
+
+    if(page === "leaderboard"){
+      populateChallengeSelects();
+    }
+
+    if(page === "players"){
+      populateChallengeSelects();
+    }
+
+  });
+
+});
+
+
+$("mobileMenuBtn").addEventListener("click",()=>{
+  $("sidebar").classList.toggle("open");
+});
+
+
+/* ============================================================
+   AUTH / ADMIN ACCESS
+   ============================================================ */
+
+async function initialize(){
+
+  $("loadingOverlay").style.display = "grid";
+
+  try{
+
+    const {
+      data:{session},
+      error
+    } = await sb.auth.getSession();
+
+    if(error) throw error;
+
+    if(!session){
+      await requireLogin();
+      return;
+    }
+
+    currentUser = session.user;
+
+    await loadCurrentMember();
+
+    if(!currentMember || !isAdmin(currentMember.role)){
+
+      $("loadingOverlay").style.display = "none";
+      $("accessDenied").style.display = "grid";
+
+      document.querySelector(".layout").style.display = "none";
+      document.querySelector(".topbar").style.display = "none";
+
+      return;
+    }
+
+    renderAdminIdentity();
+
+    await hydrateTeams();
+    await hydrateLeagues();
+    await loadDashboard();
+
+    subscribeRealtime();
+
+    $("loadingOverlay").style.display = "none";
+
+  }catch(error){
+
+    console.error(error);
+
+    $("loadingOverlay").style.display = "none";
+
+    showToast(
+      error.message || "Unable to initialize Pick ’Em Admin.",
+      "error"
+    );
+  }
+}
+
+async function requireLogin(){
+
+  const {error} = await sb.auth.signInWithOAuth({
+    provider:"google",
+    options:{
+      redirectTo:window.location.href
+    }
+  });
+
+  if(error){
+    showToast(error.message,"error");
+  }
+}
+
+async function loadCurrentMember(){
+
+  const {data,error} = await sb
+    .from("members")
+    .select(`
+      id,
+      user_id,
+      first_name,
+      last_name,
+      username,
+      email,
+      display_name,
+      role,
+      status,
+      avatar_url
+    `)
+    .eq("user_id",currentUser.id)
+    .maybeSingle();
+
+  if(error) throw error;
+
+  currentMember = data;
+}
+
+function isAdmin(role){
+
+  if(!role) return false;
+
+  return ADMIN_ROLES.has(
+    String(role).trim().toLowerCase()
+  );
+}
+
+function renderAdminIdentity(){
+
+  const name =
+    currentMember.display_name ||
+    currentMember.username ||
+    [currentMember.first_name,currentMember.last_name]
+      .filter(Boolean)
+      .join(" ") ||
+    currentUser.email ||
+    "Administrator";
+
+  $("adminName").textContent = name;
+  $("adminRole").textContent = currentMember.role || "Admin";
+
+  $("settingsRole").textContent =
+    String(currentMember.role || "—").toUpperCase();
+
+  const avatar =
+    currentMember.avatar_url ||
+    currentUser.user_metadata?.avatar_url ||
+    currentUser.user_metadata?.picture ||
+    "";
+
+  if(avatar){
+    $("adminAvatar").src = avatar;
+  }else{
+    $("adminAvatar").style.display = "none";
+  }
+}
+
+
+/* ============================================================
+   TEAMS / LEAGUES
+   ============================================================ */
+
+async function hydrateTeams(){
+
+  const {data,error} = await sb
+    .from("sports_teams")
+    .select(`
+      id,
+      team_key,
+      name,
+      short_name,
+      abbreviation,
+      city,
+      state,
+      region,
+      conference,
+      division,
+      logo_url,
+      is_pnw,
+      is_active
+    `)
+    .limit(5000);
+
+  if(error) throw error;
+
+  teamCache = {};
+
+  (data || []).forEach(team=>{
+    teamCache[team.id] = team;
+  });
+}
+
+async function hydrateLeagues(){
+
+  const {data,error} = await sb
+    .from("sports_leagues")
+    .select(`
+      id,
+      league_key,
+      name,
+      short_name,
+      sport,
+      level,
+      is_active
+    `)
+    .limit(500);
+
+  if(error) throw error;
+
+  leagueCache = {};
+
+  (data || []).forEach(league=>{
+    leagueCache[league.id] = league;
+  });
+}
+
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+
+async function loadDashboard(){
+
+  await loadChallenges();
+
+  currentChallenge =
+    challenges.find(x=>x.status === "open") ||
+    challenges.find(x=>x.status === "draft") ||
+    challenges[0] ||
+    null;
+
+  if(currentChallenge){
+
+    $("statWeek").textContent =
+      "W" + currentChallenge.week_number;
+
+    $("statWeekName").textContent =
+      currentChallenge.name;
+
+    $("dashboardChallengeName").textContent =
+      currentChallenge.name;
+
+    $("dashboardStatus").outerHTML =
+      statusBadge(currentChallenge.status);
+
+    const leagueKeys =
+      currentChallenge.league_keys || [];
+
+    $("dashboardLeague").textContent =
+      leagueKeys.join(", ") || "—";
+
+    $("dashboardLock").textContent =
+      "Lock: " + formatDateTime(currentChallenge.lock_at);
+
+    $("dashWeek").textContent =
+      currentChallenge.week_number;
+
+    $("dashDates").textContent =
+      `${formatDate(currentChallenge.week_start)} — ${formatDate(currentChallenge.week_end)}`;
+
+    $("dashPoints").textContent =
+      currentChallenge.points_per_correct_pick;
+
+    $("dashPickRules").textContent =
+      `${currentChallenge.min_picks || 1}–${currentChallenge.max_picks || "∞"} picks`;
+
+    await loadChallengeGames(currentChallenge.id);
+
+    $("statGames").textContent =
+      challengeGames.length;
+
+    await loadChallengeStats(currentChallenge.id);
+
+    renderDashboardGames();
+
+  }else{
+
+    $("dashboardChallengeName").textContent =
+      "No challenge exists";
+
+    $("statWeek").textContent = "—";
+    $("statGames").textContent = "0";
+    $("statPlayers").textContent = "0";
+    $("statPicks").textContent = "0";
+
+  }
+}
+
+async function loadChallengeStats(challengeId){
+
+  const {data,error} = await sb
+    .from("pickem_picks")
+    .select("user_id,id")
+    .eq("challenge_id",challengeId);
+
+  if(error){
+
+    console.warn(error);
+
+    $("statPlayers").textContent = "—";
+    $("statPicks").textContent = "—";
+
+    return;
+  }
+
+  const uniqueUsers =
+    new Set((data || []).map(x=>x.user_id));
+
+  $("statPlayers").textContent =
+    uniqueUsers.size;
+
+  $("statPicks").textContent =
+    data?.length || 0;
+}
+
+function renderDashboardGames(){
+
+  if(!challengeGames.length){
+
+    $("dashboardGames").innerHTML = `
+      <div class="empty">
+        <strong>No games attached</strong>
+        Use Game Manager or run weekly setup.
+      </div>
+    `;
+
+    return;
+  }
+
+  $("dashboardGames").innerHTML =
+    challengeGames
+      .slice(0,12)
+      .map(renderGameRow)
+      .join("");
+}
+
+
+/* ============================================================
+   CHALLENGES
+   ============================================================ */
+
+async function loadChallenges(){
+
+  const {data,error} = await sb
+    .from("pickem_challenges")
+    .select(`
+      id,
+      name,
+      season,
+      week_number,
+      week_start,
+      week_end,
+      lock_at,
+      status,
+      league_keys,
+      min_picks,
+      max_picks,
+      points_per_correct_pick,
+      created_at,
+      updated_at
+    `)
+    .order("season",{ascending:false})
+    .order("week_number",{ascending:false});
+
+  if(error) throw error;
+
+  challenges = data || [];
+
+  renderChallengeTable();
+
+  populateChallengeSelects();
+}
+
+async function getGameCount(challengeId){
+
+  const {count,error} = await sb
+    .from("pickem_games")
+    .select("id",{count:"exact",head:true})
+    .eq("challenge_id",challengeId);
+
+  if(error) return 0;
+
+  return count || 0;
+}
+
+async function renderChallengeTable(){
+
+  if(!challenges.length){
+
+    $("challengeTable").innerHTML = `
+      <tr>
+        <td colspan="7">
+          <div class="empty">
+            <strong>No challenges</strong>
+            Create your first Pick ’Em challenge.
+          </div>
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  const rows = await Promise.all(
+    challenges.map(async challenge=>{
+
+      const games = await getGameCount(challenge.id);
+
+      return `
+        <tr>
+
+          <td>
+            <strong>${escapeHTML(challenge.name)}</strong>
+            <div style="color:#555;font-size:8px;margin-top:3px">
+              ${escapeHTML(challenge.id)}
+            </div>
+          </td>
+
+          <td>${escapeHTML(challenge.season)}</td>
+
+          <td>
+            <span class="badge red">
+              WEEK ${escapeHTML(challenge.week_number)}
+            </span>
+          </td>
+
+          <td>${statusBadge(challenge.status)}</td>
+
+          <td>${formatDateTime(challenge.lock_at)}</td>
+
+          <td>${games}</td>
+
+          <td>
+            <div style="display:flex;gap:5px;flex-wrap:wrap">
+
+              <button
+                class="btn btn-small"
+                onclick="editChallenge('${challenge.id}')">
+                Edit
+              </button>
+
+              <button
+                class="btn btn-small"
+                onclick="manageChallengeGames('${challenge.id}')">
+                Games
+              </button>
+
+              ${
+                challenge.status === "draft"
+                ? `
+                  <button
+                    class="btn btn-small btn-success"
+                    onclick="setChallengeStatus('${challenge.id}','open')">
+                    Open
+                  </button>
+                `
+                : ""
+              }
+
+              ${
+                challenge.status === "open"
+                ? `
+                  <button
+                    class="btn btn-small btn-warning"
+                    onclick="setChallengeStatus('${challenge.id}','locked')">
+                    Lock
+                  </button>
+                `
+                : ""
+              }
+
+              ${
+                challenge.status === "locked"
+                ? `
+                  <button
+                    class="btn btn-small btn-success"
+                    onclick="setChallengeStatus('${challenge.id}','open')">
+                    Reopen
+                  </button>
+                `
+                : ""
+              }
+
+              ${
+                challenge.status === "scored"
+                ? `
+                  <button
+                    class="btn btn-small"
+                    onclick="setChallengeStatus('${challenge.id}','closed')">
+                    Close
+                  </button>
+                `
+                : ""
+              }
+
+            </div>
+          </td>
+
+        </tr>
+      `;
+    })
+  );
+
+  $("challengeTable").innerHTML = rows.join("");
+}
+
+function openNewChallenge(){
+
+  $("challengeEditor").style.display = "block";
+
+  $("challengeEditorTitle").textContent =
+    "New Challenge";
+
+  $("challengeId").value = "";
+
+  const year = new Date().getFullYear();
+
+  $("challengeName").value =
+    "CrowRules Pick Em";
+
+  $("challengeSeason").value =
+    year;
+
+  $("challengeWeek").value = "";
+
+  $("challengeStatus").value =
+    "draft";
+
+  $("challengeStart").value = "";
+
+  $("challengeEnd").value = "";
+
+  $("challengeLock").value = "";
+
+  $("challengePoints").value = 1;
+
+  $("challengeMinPicks").value = 1;
+
+  $("challengeMaxPicks").value = "";
+
+  $("challengeLeagues").value = "NFL";
+
+  $("challengeEditor").scrollIntoView({
+    behavior:"smooth",
+    block:"start"
+  });
+}
+
+window.editChallenge = function(id){
+
+  const challenge =
+    challenges.find(x=>x.id === id);
+
+  if(!challenge) return;
+
+  $("challengeEditor").style.display = "block";
+
+  $("challengeEditorTitle").textContent =
+    "Edit Challenge";
+
+  $("challengeId").value =
+    challenge.id;
+
+  $("challengeName").value =
+    challenge.name || "";
+
+  $("challengeSeason").value =
+    challenge.season || "";
+
+  $("challengeWeek").value =
+    challenge.week_number || "";
+
+  $("challengeStatus").value =
+    challenge.status || "draft";
+
+  $("challengeStart").value =
+    formatDateInput(challenge.week_start);
+
+  $("challengeEnd").value =
+    formatDateInput(challenge.week_end);
+
+  $("challengeLock").value =
+    toLocalDateTimeInput(challenge.lock_at);
+
+  $("challengePoints").value =
+    challenge.points_per_correct_pick || 1;
+
+  $("challengeMinPicks").value =
+    challenge.min_picks || 1;
+
+  $("challengeMaxPicks").value =
+    challenge.max_picks || "";
+
+  $("challengeLeagues").value =
+    (challenge.league_keys || []).join(",");
+
+  $("challengeEditor").scrollIntoView({
+    behavior:"smooth",
+    block:"start"
+  });
+};
+
+async function saveChallenge(){
+
+  const id = $("challengeId").value.trim();
+
+  const payload = {
+    name:$("challengeName").value.trim(),
+    season:$("challengeSeason").value.trim(),
+    week_number:Number($("challengeWeek").value),
+    week_start:$("challengeStart").value || null,
+    week_end:$("challengeEnd").value || null,
+    lock_at:$("challengeLock").value
+      ? new Date($("challengeLock").value).toISOString()
+      : null,
+    status:$("challengeStatus").value,
+    league_keys:$("challengeLeagues").value
+      .split(",")
+      .map(x=>x.trim().toUpperCase())
+      .filter(Boolean),
+    min_picks:Number($("challengeMinPicks").value) || 1,
+    max_picks:$("challengeMaxPicks").value
+      ? Number($("challengeMaxPicks").value)
+      : null,
+    points_per_correct_pick:
+      Number($("challengePoints").value) || 1,
+    updated_at:new Date().toISOString()
+  };
+
+  if(!payload.name){
+    showToast("Challenge name is required.","error");
+    return;
+  }
+
+  if(!payload.season || !payload.week_number){
+    showToast("Season and week are required.","error");
+    return;
+  }
+
+  $("saveChallengeBtn").disabled = true;
+
+  try{
+
+    let result;
+
+    if(id){
+
+      result = await sb
+        .from("pickem_challenges")
+        .update(payload)
+        .eq("id",id)
+        .select()
+        .single();
+
+    }else{
+
+      result = await sb
+        .from("pickem_challenges")
+        .insert(payload)
+        .select()
+        .single();
+
+    }
+
+    if(result.error) throw result.error;
+
+    showToast(
+      id ? "Challenge updated." : "Challenge created.",
+      "success"
+    );
+
+    $("challengeEditor").style.display = "none";
+
+    await loadChallenges();
+
+    await loadDashboard();
+
+  }catch(error){
+
+    console.error(error);
+
+    showToast(
+      error.message || "Unable to save challenge.",
+      "error"
+    );
+
+  }finally{
+
+    $("saveChallengeBtn").disabled = false;
+
+  }
+}
+
+window.setChallengeStatus = async function(id,status){
+
+  try{
+
+    const {error} = await sb
+      .from("pickem_challenges")
+      .update({
+        status,
+        updated_at:new Date().toISOString()
+      })
+      .eq("id",id);
+
+    if(error) throw error;
+
+    showToast(
+      `Challenge ${status}.`,
+      "success"
+    );
+
+    await loadChallenges();
+    await loadDashboard();
+
+  }catch(error){
+
+    showToast(error.message,"error");
+
+  }
+};
+
+
+/* ============================================================
+   CHALLENGE SELECTS
+   ============================================================ */
+
+function populateChallengeSelects(){
+
+  const selectors = [
+    $("gameChallengeSelect"),
+    $("leaderboardChallengeSelect"),
+    $("playerChallengeSelect")
+  ];
+
+  selectors.forEach(select=>{
+
+    if(!select) return;
+
+    const current = select.value;
+
+    select.innerHTML =
+      `<option value="">Select challenge</option>` +
+      challenges.map(c=>`
+        <option value="${c.id}">
+          ${escapeHTML(c.name)}
+        </option>
+      `).join("");
+
+    if(current){
+      select.value = current;
+    }
+
+  });
+}
+
+$("gameChallengeSelect").addEventListener("change",async e=>{
+
+  const id = e.target.value;
+
+  if(!id){
+
+    $("challengeGamesList").innerHTML = `
+      <div class="empty">
+        <strong>Select a challenge</strong>
+        Choose a challenge above.
+      </div>
+    `;
+
+    return;
+  }
+
+  await loadChallengeGames(id);
+});
+
+$("leaderboardChallengeSelect").addEventListener("change",async e=>{
+
+  if(e.target.value){
+    await loadLeaderboard(e.target.value);
+  }
+
+});
+
+$("playerChallengeSelect").addEventListener("change",async e=>{
+
+  if(e.target.value){
+    await loadPlayerActivity(e.target.value);
+  }
+
+});
+
+
+/* ============================================================
+   GAME MANAGER
+   ============================================================ */
+
+async function loadChallengeGames(challengeId){
+
+  const {data,error} = await sb
+    .from("pickem_games")
+    .select(`
+      id,
+      challenge_id,
+      game_id,
+      pick_order,
+      created_at
+    `)
+    .eq("challenge_id",challengeId)
+    .order("pick_order",{ascending:true});
+
+  if(error) throw error;
+
+  challengeGames = data || [];
+
+  if(
+    currentChallenge &&
+    currentChallenge.id === challengeId
+  ){
+    renderDashboardGames();
+  }
+
+  await hydrateGameRecords();
+
+  renderChallengeGames();
+
+  return challengeGames;
+}
+
+async function hydrateGameRecords(){
+
+  if(!challengeGames.length) return;
+
+  const ids =
+    challengeGames.map(x=>x.game_id);
+
+  const {data,error} = await sb
+    .from("sports_games")
+    .select(`
+      id,
+      league_id,
+      home_team_id,
+      away_team_id,
+      game_key,
+      season,
+      season_type,
+      round_name,
+      venue,
+      city,
+      scheduled_at,
+      actual_start_at,
+      actual_end_at,
+      status,
+      home_score,
+      away_score,
+      period,
+      period_number,
+      clock,
+      broadcast_network,
+      broadcast_url,
+      game_url,
+      thumbnail_url,
+      is_featured,
+      is_pnw
+    `)
+    .in("id",ids);
+
+  if(error) throw error;
+
+  const map = {};
+
+  (data || []).forEach(game=>{
+    map[game.id] = game;
+  });
+
+  challengeGames =
+    challengeGames.map(item=>({
+      ...item,
+      game:map[item.game_id] || null
+    }));
+
+}
+
+function renderChallengeGames(){
+
+  if(!challengeGames.length){
+
+    $("challengeGamesList").innerHTML = `
+      <div class="empty">
+        <strong>No games attached</strong>
+        Use Auto Attach Week or load available games.
+      </div>
+    `;
+
+    return;
+  }
+
+  $("challengeGamesList").innerHTML =
+    challengeGames.map(renderGameRow).join("");
+}
+
+function renderGameRow(item){
+
+  const game = item.game || item;
+
+  if(!game){
+    return "";
+  }
+
+  const home = getTeam(game.home_team_id);
+  const away = getTeam(game.away_team_id);
+
+  const scheduled =
+    game.scheduled_at
+      ? new Date(game.scheduled_at)
+      : null;
+
+  const dateLabel =
+    scheduled
+      ? new Intl.DateTimeFormat("en-US",{
+          month:"short",
+          day:"numeric"
+        }).format(scheduled)
+      : "—";
+
+  const status =
+    String(game.status || "scheduled")
+      .toUpperCase();
+
+  return `
+    <div class="game-row">
+
+      <div class="game-date">
+        <strong>${escapeHTML(dateLabel)}</strong>
+        <div style="margin-top:3px;color:#555">
+          ${scheduled
+            ? escapeHTML(
+                scheduled.toLocaleTimeString([],{
+                  hour:"numeric",
+                  minute:"2-digit"
+                })
+              )
+            : ""
+          }
+        </div>
+      </div>
+
+      <div class="matchup">
+
+        <div class="team">
+          ${
+            away.logo_url
+            ? `<img class="team-logo" src="${escapeHTML(away.logo_url)}" alt="">`
+            : `<div class="team-logo"></div>`
+          }
+
+          <div class="matchup-team">
+            <div class="matchup-name">
+              ${escapeHTML(away.short_name || away.name)}
+            </div>
+            <div class="team-abbr">
+              ${escapeHTML(away.abbreviation || "—")}
+            </div>
+          </div>
+        </div>
+
+        <div class="vs">@</div>
+
+        <div class="team">
+          ${
+            home.logo_url
+            ? `<img class="team-logo" src="${escapeHTML(home.logo_url)}" alt="">`
+            : `<div class="team-logo"></div>`
+          }
+
+          <div class="matchup-team">
+            <div class="matchup-name">
+              ${escapeHTML(home.short_name || home.name)}
+            </div>
+            <div class="team-abbr">
+              ${escapeHTML(home.abbreviation || "—")}
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="game-info">
+
+        <div>${escapeHTML(game.venue || game.city || "")}</div>
+
+        <div style="margin-top:3px">
+          ${escapeHTML(game.broadcast_network || "")}
+        </div>
+
+        <div style="margin-top:3px">
+          ${
+            game.home_score != null &&
+            game.away_score != null
+              ? `${game.away_score} — ${game.home_score}`
+              : ""
+          }
+        </div>
+
+      </div>
+
+      <div class="game-actions">
+
+        <span class="badge ${
+          status === "FINAL" ||
+          status === "COMPLETED"
+            ? "green"
+            : status === "LIVE"
+              ? "red"
+              : ""
+        }">
+          ${escapeHTML(status)}
+        </span>
+
+        ${
+          item.challenge_id
+          ? `
+            <button
+              class="btn btn-small btn-danger"
+              onclick="removeGame('${item.id}')">
+              Remove
+            </button>
+          `
+          : `
+            <button
+              class="btn btn-small btn-primary"
+              onclick="attachGame('${currentChallenge?.id || ""}','${game.id}')">
+              Attach
+            </button>
+          `
+        }
+
+      </div>
+
+    </div>
+  `;
+}
+
+async function loadAvailableGames(){
+
+  const challengeId =
+    $("gameChallengeSelect").value ||
+    currentChallenge?.id;
+
+  if(!challengeId){
+
+    showToast(
+      "Select a challenge first.",
+      "error"
+    );
+
+    return;
+  }
+
+  $("availableGamesPanel").style.display =
+    "block";
+
+  $("availableGamesList").innerHTML =
+    `<div class="empty"><span class="loading"></span> Loading games...</div>`;
+
+  const challenge =
+    challenges.find(x=>x.id === challengeId);
+
+  if(!challenge) return;
+
+  const start =
+    `${challenge.week_start}T00:00:00`;
+
+  const endDate =
+    new Date(challenge.week_end + "T23:59:59");
+
+  const {data,error} = await sb
+    .from("sports_games")
+    .select(`
+      id,
+      league_id,
+      home_team_id,
+      away_team_id,
+      game_key,
+      season,
+      season_type,
+      round_name,
+      venue,
+      city,
+      scheduled_at,
+      status,
+      home_score,
+      away_score,
+      broadcast_network
+    `)
+    .gte("scheduled_at",start)
+    .lte("scheduled_at",endDate.toISOString())
+    .order("scheduled_at",{ascending:true})
+    .limit(300);
+
+  if(error){
+
+    $("availableGamesList").innerHTML =
+      `<div class="empty">${escapeHTML(error.message)}</div>`;
+
+    return;
+  }
+
+  const attachedIds =
+    new Set(
+      challengeGames.map(x=>x.game_id)
+    );
+
+  availableGames =
+    (data || [])
+      .filter(game=>!attachedIds.has(game.id));
+
+  $("availableGamesList").innerHTML =
+    availableGames.length
+      ? availableGames.map(game=>renderGameRow(game)).join("")
+      : `
+        <div class="empty">
+          <strong>No unattached games</strong>
+          All matching games are already attached.
+        </div>
+      `;
+}
+
+async function attachGame(challengeId,gameId){
+
+  if(!challengeId || !gameId){
+
+    showToast(
+      "Challenge and game are required.",
+      "error"
+    );
+
+    return;
+  }
+
+  try{
+
+    const nextOrder =
+      challengeGames.length + 1;
+
+    const {error} = await sb
+      .from("pickem_games")
+      .insert({
+        challenge_id:challengeId,
+        game_id:gameId,
+        pick_order:nextOrder
+      });
+
+    if(error) throw error;
+
+    showToast(
+      "Game attached.",
+      "success"
+    );
+
+    await loadChallengeGames(challengeId);
+
+    await loadAvailableGames();
+
+    await loadDashboard();
+
+  }catch(error){
+
+    showToast(error.message,"error");
+
+  }
+}
+
+window.attachGame = attachGame;
+
+window.removeGame = async function(id){
+
+  if(!confirm(
+    "Remove this game from the Pick ’Em challenge?"
+  )){
+    return;
+  }
+
+  try{
+
+    const {error} = await sb
+      .from("pickem_games")
+      .delete()
+      .eq("id",id);
+
+    if(error) throw error;
+
+    showToast(
+      "Game removed.",
+      "success"
+    );
+
+    const challengeId =
+      $("gameChallengeSelect").value ||
+      currentChallenge?.id;
+
+    if(challengeId){
+      await loadChallengeGames(challengeId);
+    }
+
+    await loadDashboard();
+
+  }catch(error){
+
+    showToast(error.message,"error");
+
+  }
+};
+
+async function autoAttachWeek(challengeId){
+
+  const challenge =
+    challenges.find(x=>x.id === challengeId);
+
+  if(!challenge){
+
+    showToast(
+      "Select a challenge first.",
+      "error"
+    );
+
+    return;
+  }
+
+  try{
+
+    const {data:leagueRows,error:leagueError} =
+      await sb
+        .from("sports_leagues")
+        .select("id,league_key")
+        .in(
+          "league_key",
+          challenge.league_keys || ["NFL"]
+        );
+
+    if(leagueError) throw leagueError;
+
+    const leagueIds =
+      (leagueRows || []).map(x=>x.id);
+
+    if(!leagueIds.length){
+
+      showToast(
+        "No matching leagues found.",
+        "error"
+      );
+
+      return;
+    }
+
+    const start =
+      `${challenge.week_start}T00:00:00`;
+
+    const end =
+      new Date(
+        challenge.week_end + "T23:59:59"
+      ).toISOString();
+
+    const {data:games,error} =
+      await sb
+        .from("sports_games")
+        .select("id,season_type,scheduled_at")
+        .in("league_id",leagueIds)
+        .gte("scheduled_at",start)
+        .lte("scheduled_at",end)
+        .not("season_type","in","(PRE,PRESEASON)");
+
+    if(error) throw error;
+
+    const existing =
+      await sb
+        .from("pickem_games")
+        .select("game_id")
+        .eq("challenge_id",challengeId);
+
+    if(existing.error) throw existing.error;
+
+    const existingIds =
+      new Set(
+        (existing.data || []).map(x=>x.game_id)
+      );
+
+    const newGames =
+      (games || [])
+        .filter(x=>!existingIds.has(x.id))
+        .sort(
+          (a,b)=>
+            new Date(a.scheduled_at) -
+            new Date(b.scheduled_at)
+        );
+
+    if(!newGames.length){
+
+      showToast(
+        "No new matching games found.",
+        "success"
+      );
+
+      return;
+    }
+
+    const startingOrder =
+      challengeGames.length;
+
+    const rows =
+      newGames.map((game,index)=>({
+        challenge_id:challengeId,
+        game_id:game.id,
+        pick_order:startingOrder + index + 1
+      }));
+
+    const {error:insertError} =
+      await sb
+        .from("pickem_games")
+        .insert(rows);
+
+    if(insertError) throw insertError;
+
+    showToast(
+      `${rows.length} game(s) attached.`,
+      "success"
+    );
+
+    await loadChallengeGames(challengeId);
+    await loadDashboard();
+
+  }catch(error){
+
+    console.error(error);
+
+    showToast(
+      error.message ||
+      "Unable to attach weekly games.",
+      "error"
+    );
+  }
+}
+
+function manageChallengeGames(id){
+
+  document.querySelector(
+    '[data-page="games"]'
+  ).click();
+
+  $("gameChallengeSelect").value = id;
+
+  loadChallengeGames(id);
+}
+
+
+/* ============================================================
+   LEADERBOARD
+   ============================================================ */
+
+async function loadLeaderboard(challengeId){
+
+  $("leaderboardTable").innerHTML = `
+    <tr>
+      <td colspan="6">
+        <div class="empty">
+          <span class="loading"></span> Loading leaderboard...
+        </div>
+      </td>
+    </tr>
+  `;
+
+  const {data,error} = await sb
+    .from("pickem_leaderboard")
+    .select(`
+      challenge_id,
+      user_id,
+      display_name,
+      graded_picks,
+      correct_picks,
+      points
+    `)
+    .eq("challenge_id",challengeId)
+    .order("points",{ascending:false})
+    .order("correct_picks",{ascending:false});
+
+  if(error){
+
+    $("leaderboardTable").innerHTML = `
+      <tr>
+        <td colspan="6">
+          <div class="empty">${escapeHTML(error.message)}</div>
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  const rows = data || [];
+
+  const totalGraded =
+    rows.reduce(
+      (sum,row)=>sum + Number(row.graded_picks || 0),
+      0
+    );
+
+  const totalCorrect =
+    rows.reduce(
+      (sum,row)=>sum + Number(row.correct_picks || 0),
+      0
+    );
+
+  const totalPoints =
+    rows.reduce(
+      (sum,row)=>sum + Number(row.points || 0),
+      0
+    );
+
+  $("leaderPlayers").textContent =
+    rows.length;
+
+  $("leaderCorrect").textContent =
+    totalCorrect;
+
+  $("leaderPoints").textContent =
+    totalPoints;
+
+  $("leaderAccuracy").textContent =
+    totalGraded
+      ? Math.round(
+          totalCorrect /
+          totalGraded *
+          100
+        ) + "%"
+      : "0%";
+
+  if(!rows.length){
+
+    $("leaderboardTable").innerHTML = `
+      <tr>
+        <td colspan="6">
+          <div class="empty">
+            <strong>No leaderboard results</strong>
+            Players will appear after making picks.
+          </div>
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  $("leaderboardTable").innerHTML =
+    rows.map((row,index)=>{
+
+      const graded =
+        Number(row.graded_picks || 0);
+
+      const correct =
+        Number(row.correct_picks || 0);
+
+      const accuracy =
+        graded
+          ? Math.round(correct / graded * 100)
+          : 0;
+
+      return `
+        <tr>
+
+          <td>
+            <strong style="font-family:Orbitron">
+              ${index + 1}
+            </strong>
+          </td>
+
+          <td>
+            <strong>${escapeHTML(row.display_name || "Member")}</strong>
+          </td>
+
+          <td>${graded}</td>
+
+          <td>${correct}</td>
+
+          <td>
+            <strong style="color:#fff">
+              ${Number(row.points || 0)}
+            </strong>
+          </td>
+
+          <td>
+            <span class="badge ${
+              accuracy >= 70
+                ? "green"
+                : accuracy >= 50
+                  ? "yellow"
+                  : "red"
+            }">
+              ${accuracy}%
+            </span>
+          </td>
+
+        </tr>
+      `;
+    }).join("");
+}
+
+
+/* ============================================================
+   PLAYER ACTIVITY
+   ============================================================ */
+
+async function loadPlayerActivity(challengeId){
+
+  $("playersTable").innerHTML = `
+    <tr>
+      <td colspan="6">
+        <div class="empty">
+          <span class="loading"></span> Loading activity...
+        </div>
+      </td>
+    </tr>
+  `;
+
+  const {data:picks,error} = await sb
+    .from("pickem_picks")
+    .select(`
+      id,
+      user_id,
+      is_correct,
+      points_awarded,
+      picked_at,
+      updated_at
+    `)
+    .eq("challenge_id",challengeId)
+    .order("picked_at",{ascending:false});
+
+  if(error){
+
+    $("playersTable").innerHTML = `
+      <tr>
+        <td colspan="6">
+          <div class="empty">${escapeHTML(error.message)}</div>
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  const map = {};
+
+  (picks || []).forEach(pick=>{
+
+    if(!map[pick.user_id]){
+
+      map[pick.user_id] = {
+        user_id:pick.user_id,
+        picks:0,
+        correct:0,
+        points:0,
+        last_pick:null
+      };
+
+    }
+
+    const row = map[pick.user_id];
+
+    row.picks++;
+
+    if(pick.is_correct){
+      row.correct++;
+    }
+
+    row.points +=
+      Number(pick.points_awarded || 0);
+
+    if(
+      !row.last_pick ||
+      new Date(pick.picked_at) >
+      new Date(row.last_pick)
+    ){
+      row.last_pick = pick.picked_at;
+    }
+
+  });
+
+  const userIds =
+    Object.keys(map);
+
+  let members = [];
+
+  if(userIds.length){
+
+    const result =
+      await sb
+        .from("members")
+        .select(`
+          user_id,
+          display_name,
+          username,
+          first_name,
+          last_name
+        `)
+        .in("user_id",userIds);
+
+    if(!result.error){
+      members = result.data || [];
+    }
+
+  }
+
+  const memberMap = {};
+
+  members.forEach(member=>{
+    memberMap[member.user_id] = member;
+  });
+
+  const rows =
+    Object.values(map)
+      .sort(
+        (a,b)=>
+          b.points-a.points ||
+          b.correct-a.correct
+      );
+
+  if(!rows.length){
+
+    $("playersTable").innerHTML = `
+      <tr>
+        <td colspan="6">
+          <div class="empty">
+            <strong>No player activity</strong>
+            No members have submitted picks yet.
+          </div>
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  $("playersTable").innerHTML =
+    rows.map(row=>{
+
+      const member =
+        memberMap[row.user_id] || {};
+
+      const name =
+        member.display_name ||
+        member.username ||
+        [
+          member.first_name,
+          member.last_name
+        ].filter(Boolean).join(" ") ||
+        "Member";
+
+      const accuracy =
+        row.picks
+          ? Math.round(
+              row.correct /
+              row.picks *
+              100
+            )
+          : 0;
+
+      return `
+        <tr>
+
+          <td>
+            <strong>${escapeHTML(name)}</strong>
+          </td>
+
+          <td>${row.picks}</td>
+
+          <td>${row.correct}</td>
+
+          <td>
+            <strong>${row.points}</strong>
+          </td>
+
+          <td>
+            <span class="badge ${
+              accuracy >= 70
+                ? "green"
+                : accuracy >= 50
+                  ? "yellow"
+                  : "red"
+            }">
+              ${accuracy}%
+            </span>
+          </td>
+
+          <td>
+            ${formatDateTime(row.last_pick)}
+          </td>
+
+        </tr>
+      `;
+
+    }).join("");
+}
+
+
+/* ============================================================
+   WEEKLY SETUP
+   ============================================================ */
+
+async function runWeeklySetup(){
+
+  const buttons = [
+    $("runSetupBtn"),
+    $("setupNowBtn"),
+    $("automationSetupBtn")
+  ];
+
+  buttons.forEach(button=>{
+    if(button) button.disabled = true;
+  });
+
+  try{
+
+    const {data,error} =
+      await sb.rpc(
+        "pickem_setup_week"
+      );
+
+    if(error) throw error;
+
+    showToast(
+      "Weekly Pick ’Em setup completed.",
+      "success"
+    );
+
+    console.log(
+      "pickem_setup_week result:",
+      data
+    );
+
+    await loadChallenges();
+    await loadDashboard();
+
+  }catch(error){
+
+    console.error(error);
+
+    showToast(
+      error.message ||
+      "Weekly setup failed.",
+      "error"
+    );
+
+  }finally{
+
+    buttons.forEach(button=>{
+      if(button) button.disabled = false;
+    });
+
+  }
+}
+
+
+/* ============================================================
+   REALTIME
+   ============================================================ */
+
+function subscribeRealtime(){
+
+  sb.channel("pickem-admin-live")
+
+    .on(
+      "postgres_changes",
+      {
+        event:"*",
+        schema:"public",
+        table:"pickem_challenges"
+      },
+      async()=>{
+        await loadChallenges();
+      }
+    )
+
+    .on(
+      "postgres_changes",
+      {
+        event:"*",
+        schema:"public",
+        table:"pickem_games"
+      },
+      async()=>{
+        if(currentChallenge){
+          await loadChallengeGames(
+            currentChallenge.id
+          );
+        }
+      }
+    )
+
+    .on(
+      "postgres_changes",
+      {
+        event:"*",
+        schema:"public",
+        table:"pickem_picks"
+      },
+      async()=>{
+        if(currentChallenge){
+          await loadChallengeStats(
+            currentChallenge.id
+          );
+        }
+      }
+    )
+
+    .subscribe();
+
+}
+
+
+/* ============================================================
+   EVENT HANDLERS
+   ============================================================ */
+
+$("runSetupBtn")
+  .addEventListener(
+    "click",
+    runWeeklySetup
+  );
+
+$("setupNowBtn")
+  .addEventListener(
+    "click",
+    runWeeklySetup
+  );
+
+$("automationSetupBtn")
+  .addEventListener(
+    "click",
+    runWeeklySetup
+  );
+
+$("refreshBtn")
+  .addEventListener(
+    "click",
+    async()=>{
+      await loadDashboard();
+      showToast(
+        "Pick ’Em Admin refreshed.",
+        "success"
+      );
+    }
+  );
+
+$("refreshChallengesBtn")
+  .addEventListener(
+    "click",
+    loadChallenges
+  );
+
+$("newChallengeBtn")
+  .addEventListener(
+    "click",
+    openNewChallenge
+  );
+
+$("closeEditorBtn")
+  .addEventListener(
+    "click",
+    ()=>{
+      $("challengeEditor").style.display =
+        "none";
+    }
+  );
+
+$("cancelChallengeBtn")
+  .addEventListener(
+    "click",
+    ()=>{
+      $("challengeEditor").style.display =
+        "none";
+    }
+  );
+
+$("saveChallengeBtn")
+  .addEventListener(
+    "click",
+    saveChallenge
+  );
+
+$("dashboardGamesBtn")
+  .addEventListener(
+    "click",
+    ()=>{
+      document.querySelector(
+        '[data-page="games"]'
+      ).click();
+    }
+  );
+
+$("editCurrentBtn")
+  .addEventListener(
+    "click",
+    ()=>{
+      if(currentChallenge){
+        editChallenge(
+          currentChallenge.id
+        );
+      }
+    }
+  );
+
+$("loadAvailableGamesBtn")
+  .addEventListener(
+    "click",
+    loadAvailableGames
+  );
+
+$("closeAvailableGamesBtn")
+  .addEventListener(
+    "click",
+    ()=>{
+      $("availableGamesPanel").style.display =
+        "none";
+    }
+  );
+
+$("attachWeekGamesBtn")
+  .addEventListener(
+    "click",
+    async()=>{
+      const id =
+        $("gameChallengeSelect").value ||
+        currentChallenge?.id;
+
+      await autoAttachWeek(id);
+    }
+  );
+
+$("refreshLeaderboardBtn")
+  .addEventListener(
+    "click",
+    ()=>{
+      const id =
+        $("leaderboardChallengeSelect").value;
+
+      if(id){
+        loadLeaderboard(id);
+      }
+    }
+  );
+
+
+$("signOutBtn")
+  .addEventListener(
+    "click",
+    async()=>{
+      await sb.auth.signOut();
+      window.location.reload();
+    }
+  );
+
+$("accessSignOutBtn")
+  .addEventListener(
+    "click",
+    async()=>{
+      await sb.auth.signOut();
+      window.location.reload();
+    }
+  );
+
+
+$("saveSettingsBtn")
+  .addEventListener(
+    "click",
+    ()=>{
+      /*
+       * These are browser-local defaults for the
+       * admin interface. Challenge records remain
+       * authoritative in Supabase.
+       */
+
+      const settings = {
+        points:$("settingPoints").value,
+        minPicks:$("settingMinPicks").value,
+        maxPicks:$("settingMaxPicks").value,
+        leagues:$("settingLeagues").value
+      };
+
+      localStorage.setItem(
+        "crowrules_pickem_admin_defaults",
+        JSON.stringify(settings)
+      );
+
+      showToast(
+        "Admin defaults saved.",
+        "success"
+      );
+    }
+  );
+
+
+/* ============================================================
+   LOAD LOCAL SETTINGS
+   ============================================================ */
+
+function loadLocalSettings(){
+
+  try{
+
+    const raw =
+      localStorage.getItem(
+        "crowrules_pickem_admin_defaults"
+      );
+
+    if(!raw) return;
+
+    const settings =
+      JSON.parse(raw);
+
+    if(settings.points)
+      $("settingPoints").value =
+        settings.points;
+
+    if(settings.minPicks)
+      $("settingMinPicks").value =
+        settings.minPicks;
+
+    if(settings.maxPicks)
+      $("settingMaxPicks").value =
+        settings.maxPicks;
+
+    if(settings.leagues)
+      $("settingLeagues").value =
+        settings.leagues;
+
+  }catch(error){
+
+    console.warn(
+      "Could not load local Pick ’Em defaults.",
+      error
+    );
+
+  }
+}
+
+
+/* ============================================================
+   AUTH STATE
+   ============================================================ */
+
+sb.auth.onAuthStateChange(
+  async(event,session)=>{
+
+    if(event === "SIGNED_OUT"){
+      window.location.reload();
+    }
+
+    if(event === "SIGNED_IN" && session){
+      currentUser = session.user;
+    }
+
+  }
+);
+
+
+/* ============================================================
+   INITIALIZE
+   ============================================================ */
+
+loadLocalSettings();
+
+initialize();
+
+</script>
+
+</body>
+</html>
