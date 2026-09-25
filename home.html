@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="CrowRules Sports 6.0 — a personalized sports feed built around your teams, leagues, Pick 'Em activity and alerts.">
-<title>CrowRules Sports 9.0 | Real Game Follow + Alerts</title>
+<title>CrowRules Sports 12.0 | Real-Time Sports Command Center</title>
 <link rel="stylesheet" href="css/sports.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/sports.js"></script>
@@ -20,7 +20,7 @@
 <script>shell('home')</script>
 <main>
 <section class="hero"><div class="hero-inner">
-<div class="kicker">● CROWRULES SPORTS 9.0</div>
+<div class="kicker">● CROWRULES SPORTS 12.0</div>
 <h1>YOUR FEED.<br><em>YOUR GAMES.</em></h1>
 <p>The CrowRules Sports homepage now uses your saved account preferences to build a live personal feed: My Teams first, Followed Leagues next, Pick 'Em activity and your notifications alongside the game center.</p>
 <div class="actions"><a class="button active" href="#feed">OPEN MY FEED</a><a class="button" href="account.html">MANAGE MY SPORTS</a><a class="button" href="schedule.html">GAME CENTER</a></div>
@@ -28,13 +28,17 @@
 </div></section>
 
 <section class="live-dashboard" id="liveDashboard"><div class="wrap">
-<div class="head"><div><div class="eyebrow">CROWRULES SPORTS 9.0</div><h2>LIVE PERSONAL DASHBOARD</h2><p>Live Now, Next Up and Finals — with your teams and leagues pushed to the front.</p></div><span class="chip" id="liveSync">LIVE SYNC</span></div>
+<div class="head"><div><div class="eyebrow">CROWRULES SPORTS 12.0</div><h2>REAL-TIME COMMAND CENTER</h2><p>Live Now, Next Up and Finals — with your teams and leagues pushed to the front.</p></div><span class="chip" id="liveSync">LIVE SYNC</span></div>
 <div class="alert-strip"><strong>PERSONAL SCORE WATCH</strong> <span id="scoreAlertText">Watching your saved teams for live scores and status changes.</span></div>
 <div class="my-board"><div class="board-stat"><strong id="liveCount">0</strong><span>Live Now</span></div><div class="board-stat"><strong id="nextCount">0</strong><span>Next Up</span></div><div class="board-stat"><strong id="finalCount">0</strong><span>Recent Finals</span></div><div class="board-stat"><strong id="priorityCount">0</strong><span>My Sports Games</span></div></div>
 <div class="live-shell" style="margin-top:15px"><div class="live-panel"><h3>LIVE NOW</h3><div class="sub">Games currently in progress, with live scores where available.</div><div class="live-grid" id="liveNow"><div class="notice">Scanning the game board…</div></div></div>
 <div class="live-panel"><h3>NEXT UP</h3><div class="sub">Your next relevant games, ranked by saved teams and leagues.</div><div id="nextUp"><div class="notice">Loading upcoming games…</div></div></div></div>
 <div class="live-panel" style="margin-top:15px"><h3>FINALS</h3><div class="sub">Recently completed games, with your saved sports prioritized.</div><div class="live-grid" id="recentFinals"><div class="notice">Loading recent finals…</div></div></div>
-</div></section><section class="section dark" id="feed"><div class="wrap">
+</div></section><section class="section" id="liveActivitySection"><div class="wrap">
+<div class="head"><div><div class="eyebrow">SPORTS 12.0 • REAL-TIME COMMAND CENTER</div><h2>LIVE ACTIVITY</h2><p>One live stream of game changes and your CrowRules Sports alerts.</p></div><span class="chip" id="realtimeStatus">CONNECTING…</span></div>
+<div class="panel"><div id="liveActivity"><div class="notice">Connecting to the live sports activity stream…</div></div></div>
+</div></section>
+<section class="section dark" id="feed"><div class="wrap">
 <div class="head"><div><div class="eyebrow">PERSONAL SPORTS FEED</div><h2 id="feedTitle">SPORTS FOR YOU</h2><p id="feedSub">Your feed is assembled from your CrowRules Sports preferences.</p></div><a class="button small" href="account.html">EDIT PREFERENCES →</a></div>
 <div class="feed-note" id="feedNote">Guest mode shows the latest available game center. Sign in to prioritize your own teams and leagues.</div>
 <div class="stat-grid">
@@ -357,4 +361,57 @@ document.addEventListener('DOMContentLoaded',async()=>{setTimeout(()=>{const id=
 setInterval(async()=>{if(state.uid)await loadFollowedGames()},60000);
 window.sportsHome9Process=processFollowedGameEvents;
 window.sportsHome9LoadFollows=loadFollowedGames;
+})();</script><script id="sportsCommandCenter12">(function(){
+"use strict";
+const rt={channel:null,notes:[],games:new Map()};
+function rtStatus(t){const e=document.getElementById("realtimeStatus");if(e)e.textContent=t}
+function rtEsc(v){return esc(v==null?"":String(v))}
+function rtTime(v){const d=new Date(v);return isNaN(d)?"":d.toLocaleTimeString([], {hour:"numeric",minute:"2-digit",second:"2-digit"})}
+function rtGameStatus(g){const s=String(g.status||"").toLowerCase();if(/final|completed|closed/.test(s))return"FINAL";if(/live|progress|half|overtime|1st|2nd|3rd|4th/.test(s))return"LIVE";return"UPCOMING"}
+function addActivity(kind,title,body,at){
+ rt.notes.unshift({kind,title,body,at:at||new Date().toISOString()});rt.notes=rt.notes.slice(0,20);renderActivity();
+}
+function renderActivity(){
+ const el=document.getElementById("liveActivity");if(!el)return;
+ if(!rt.notes.length){el.innerHTML='<div class="empty">No live activity yet. Game updates and account alerts will appear here automatically.</div>';return}
+ el.innerHTML=rt.notes.map(x=>'<div class="activity-row"><strong>'+rtEsc(x.kind.toUpperCase())+' • '+rtEsc(x.title)+'</strong><div>'+rtEsc(x.body)+'</div><small>'+rtEsc(rtTime(x.at))+'</small></div>').join("");
+}
+async function hydrateNotes(){
+ if(!state.uid)return;
+ const r=await sb.from("cr_sports_user_notifications").select("id,notification_type,title,body,entity_id,created_at").eq("user_id",state.uid).order("created_at",{ascending:false}).limit(12);
+ if(!r.error)(r.data||[]).reverse().forEach(x=>addActivity("alert",x.title,x.body,x.created_at));
+}
+function gameEvent(g,old){
+ const status=rtGameStatus(g),score=(g.away_score??"—")+"–"+(g.home_score??"—");
+ if(!old){rt.games.set(g.id,{...g});return}
+ if(old.status!==g.status){addActivity(status.toLowerCase(),(g.away?.name||"Away")+" @ "+(g.home?.name||"Home"),"Game status changed to "+status+". "+score,g.updated_at||new Date().toISOString())}
+ else if(old.home_score!==g.home_score||old.away_score!==g.away_score){addActivity("score",(g.away?.name||"Away")+" @ "+(g.home?.name||"Home"),"Score update: "+score,g.updated_at||new Date().toISOString())}
+ rt.games.set(g.id,{...old,...g});
+ if(window.sportsHome7Load) window.sportsHome7Load();
+ if(window.currentGame && window.currentGame.id===g.id && window.openGameCenter) window.openGameCenter(g.id);
+}
+async function hydrateGames(){
+ const r=await sb.from("cr_sports_games").select("id,starts_at,status,home_score,away_score,home_team_id,away_team_id,home:cr_sports_teams!cr_sports_games_home_team_id_fkey(name),away:cr_sports_teams!cr_sports_games_away_team_id_fkey(name),league:cr_sports_leagues!cr_sports_games_league_id_fkey(name)").order("starts_at",{ascending:false}).limit(80);
+ if(!r.error)(r.data||[]).forEach(g=>rt.games.set(g.id,g));
+}
+function subscribe(){
+ if(rt.channel)sb.removeChannel(rt.channel);
+ rt.channel=sb.channel("sports-command-center-12")
+ .on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_games"},p=>{
+   const g=p.new||p.old;if(!g?.id)return;
+   const old=rt.games.get(g.id);if(p.eventType==="DELETE"){rt.games.delete(g.id);addActivity("game","Game removed","A game was removed from the live sports board.");return}
+   if(!old){rt.games.set(g.id,g);if(window.sportsHome7Load)window.sportsHome7Load();return}
+   gameEvent({...g},old);
+ })
+ .on("postgres_changes",{event:"INSERT",schema:"public",table:"cr_sports_user_notifications",filter:state.uid?"user_id=eq."+state.uid:undefined},p=>{
+   const x=p.new;if(!x)return;addActivity("alert",x.title||"Sports Alert",x.body||"",x.created_at);
+   if(window.loadUnread)window.loadUnread();
+ })
+ .subscribe(status=>{rtStatus(status==="SUBSCRIBED"?"● LIVE":"RECONNECTING…");if(status!=="SUBSCRIBED")setTimeout(()=>subscribe(),5000)});
+}
+async function start12(){
+ await hydrateGames();await hydrateNotes();subscribe();rtStatus("● LIVE");
+}
+window.sports12Start=start12;
+document.addEventListener("DOMContentLoaded",()=>setTimeout(start12,1400));
 })();</script></body></html>
