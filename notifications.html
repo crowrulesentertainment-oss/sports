@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CrowRules Sports | Notifications</title><link rel="stylesheet" href="css/sports.css"></head>
+<body><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/sports.js"></script><script>shell('notifications');</script>
+<main class="wrap" style="max-width:1100px;padding:70px 20px 100px">
+<section class="hero"><div class="eyebrow">CROWRULES SPORTS 10.0</div><h1>NOTIFICATION CENTER</h1><p>Game Starting • Live • Score Change • Final</p><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px"><button class="button" id="markAll">MARK ALL READ</button><button class="button" id="refresh">REFRESH</button></div></section>
+<section style="margin-top:30px"><div id="state" class="notice">Connecting to your CrowRules Sports account…</div><div id="list"></div></section>
+</main><script>
+const list=document.getElementById('list'),stateEl=document.getElementById('state');
+function escN(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function fmt(v){const d=new Date(v);return isNaN(d)?'':d.toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}
+function icon(t){return t==='game_final'?'FINAL':t==='game_score_change'?'SCORE':t==='game_live'?'LIVE':t==='game_starting'?'START':'SPORTS'}
+async function load(){
+ const s=await sb.auth.getSession(),u=s.data.session?.user;
+ if(!u){stateEl.textContent='Sign in to view your account notifications.';list.innerHTML='<div class="empty">Your Sports notifications are tied to your CrowRules account.</div>';return}
+ const r=await sb.from('cr_sports_user_notifications').select('id,notification_type,title,body,entity_type,entity_id,read_at,created_at').eq('user_id',u.id).order('created_at',{ascending:false}).limit(100);
+ if(r.error){stateEl.textContent='Notification error: '+r.error.message;return}
+ const rows=r.data||[],unread=rows.filter(x=>!x.read_at).length;
+ stateEl.textContent=unread+' unread • '+rows.length+' recent notifications';
+ list.innerHTML=rows.length?rows.map(x=>'<article class="game-panel" style="margin:12px 0;opacity:'+(x.read_at?'0.72':'1')+'"><div style="display:flex;justify-content:space-between;gap:15px;align-items:start"><div><span class="tag '+(x.notification_type==='game_final'?'team':'')+'">'+icon(x.notification_type)+'</span><h3 style="margin:10px 0 5px">'+escN(x.title)+'</h3><div class="muted">'+escN(x.body||'')+'</div></div><small class="muted">'+fmt(x.created_at)+'</small></div><div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">'+(!x.read_at?'<button class="button small" data-read="'+x.id+'">MARK READ</button>':'<span class="muted">READ</span>')+(x.entity_type==='game'&&x.entity_id?'<a class="button small" href="home.html?game='+encodeURIComponent(x.entity_id)+'">OPEN GAME</a>':'')+'</div></article>').join(''):'<div class="empty">No notifications yet. Follow a game from the Game Center and alerts will appear here.</div>';
+ list.querySelectorAll('[data-read]').forEach(b=>b.onclick=async()=>{await sb.from('cr_sports_user_notifications').update({read_at:new Date().toISOString()}).eq('id',b.dataset.read).eq('user_id',u.id);loadUnread();load()});
+}
+document.getElementById('refresh').onclick=load;
+document.getElementById('markAll').onclick=async()=>{const s=await sb.auth.getSession(),u=s.data.session?.user;if(!u)return;await sb.from('cr_sports_user_notifications').update({read_at:new Date().toISOString()}).eq('user_id',u.id).is('read_at',null);loadUnread();load()};
+sb.auth.onAuthStateChange(()=>setTimeout(load,50));load();
+</script><script>function loadUnread(){const el=document.querySelector('.navlinks a[href="notifications.html"]');if(!el)return;sb.auth.getSession().then(({data})=>{if(!data.session){el.textContent='NOTIFICATIONS';return}sb.from('cr_sports_user_notifications').select('id',{count:'exact',head:true}).eq('user_id',data.session.user.id).is('read_at',null).then(r=>el.textContent='NOTIFICATIONS'+(r.count?' ('+r.count+')':''))})}</script>
+</body></html>
