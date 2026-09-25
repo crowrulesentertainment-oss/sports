@@ -249,73 +249,128 @@ document.getElementById('liveSync').textContent='UPDATED '+new Date().toLocaleTi
 if(window.sportsHome9Process)window.sportsHome9Process(g);g.forEach(x=>{const o=d.prev.get(x.id);if(o&&(o.home_score!==x.home_score||o.away_score!==x.away_score||o.status!==x.status)&&pri(x)>0)document.getElementById('scoreAlertText').textContent=(x.away?.name||'Away')+' '+(x.away_score??'—')+'–'+(x.home_score??'—')+' '+(x.home?.name||'Home')+' • '+x.status;d.prev.set(x.id,{home_score:x.home_score,away_score:x.away_score,status:x.status})})}
 function tick(){document.querySelectorAll('[data-count]').forEach(x=>x.textContent=cd(new Date(x.dataset.count).getTime()))}
 window.sportsHome7Load=load;setInterval(tick,30000);setInterval(load,60000);document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{if(window.sportsHome7Load)window.sportsHome7Load()},500));
-})();</script><script id="sportsGameCenter9">(function(){
-let currentGame=null;
-state.followedGameIds=state.followedGameIds||[];state.followedGameSettings=state.followedGameSettings||{};
-const FOLLOW_TABLE='cr_sports_user_followed_games';
-const NOTIFY_TABLE='cr_sports_user_notifications';
-const EVENT_TYPES={start:'game_starting',live:'game_live',score:'game_score_change',final:'game_final'};
-const localFallbackKey='crowrules_followed_games';
+})();</script>
+<script id="sportsGameCenter14">(function(){
+"use strict";
+const FOLLOW_TABLE="cr_sports_user_followed_games";
+const NOTIFY_TABLE="cr_sports_user_notifications";
+let followedChannel=null,gameChannel=null,hydratedGames=new Map(),activity=[];
+window.currentGame=null;
 
-function localIds(){try{return JSON.parse(localStorage.getItem(localFallbackKey)||'[]')}catch(e){return[]}}
-function setLocalIds(ids){try{localStorage.setItem(localFallbackKey,JSON.stringify([...new Set(ids)]))}catch(e){}}
-function gameStatus(g){const s=String(g.status||'').toLowerCase();if(/live|progress|half|overtime|1st|2nd|3rd|4th/.test(s)&&!/final|completed|closed/.test(s))return'LIVE';if(/final|completed|closed/.test(s))return'FINAL';return'UPCOMING'}
-function esc2(v){return esc(v==null?'':String(v))}
-function followedIds(){return state.uid?(state.followedGameIds||[]):localIds()}
-function followSettings(id){return state.followedGameSettings?.[id]||{start:true,live:true,score:true,final:true}}
-function isFollowed(id){return followedIds().includes(id)}
-function refreshFollowedCount(){const n=document.getElementById('followedGameCount');if(n)n.textContent=followedIds().length}
-
+function statusOf(g){const s=String(g?.status||"").toLowerCase();if(/final|completed|closed/.test(s))return"FINAL";if(/live|in progress|progress|half|overtime|1st|2nd|3rd|4th/.test(s))return"LIVE";return"UPCOMING"}
+function teamName(g,side){return g?.[side]?.name||(side==="home"?"Home":"Away")}
+function gameScore(g){return (g?.away_score??"—")+"–"+(g?.home_score??"—")}
+function isMyTeam(g){return state.teamIds.includes(g?.home_team_id)||state.teamIds.includes(g?.away_team_id)}
+function isMyLeague(g){return state.leagueIds.includes(g?.league_id)}
+function isMyFollow(g){return (state.followedGameIds||[]).includes(g?.id)}
+function relationship(g){
+ const r=[];if(isMyTeam(g))r.push("YOUR TEAM");if(isMyLeague(g))r.push("FOLLOWED LEAGUE");if(isMyFollow(g))r.push("FOLLOWED GAME");return r.length?r:["GENERAL"];
+}
+function priority(g){const r=relationship(g);return r.includes("YOUR TEAM")?4:r.includes("FOLLOWED GAME")?3:r.includes("FOLLOWED LEAGUE")?2:1}
+function describeChange(old,g){
+ const out=[],os=statusOf(old),ns=statusOf(g),away=teamName(g,"away"),home=teamName(g,"home");
+ if(os!==ns){
+   if(ns==="LIVE")out.push({kind:"live",title:"GAME LIVE",body:away+" at "+home+" is now live."});
+   else if(ns==="FINAL")out.push({kind:"final",title:"GAME FINAL",body:away+" "+gameScore(g)+" "+home+" — final."});
+   else out.push({kind:"status",title:"STATUS UPDATE",body:away+" at "+home+": "+os+" → "+ns+"."});
+ }
+ if(old && (old.away_score!==g.away_score||old.home_score!==g.home_score)){
+   const aOld=Number(old.away_score),hOld=Number(old.home_score),aNew=Number(g.away_score),hNew=Number(g.home_score);
+   const changed=[];
+   if(Number.isFinite(aNew)&&Number.isFinite(aOld)&&aNew!==aOld)changed.push(away+" "+aOld+" → "+aNew);
+   if(Number.isFinite(hNew)&&Number.isFinite(hOld)&&hNew!==hOld)changed.push(home+" "+hOld+" → "+hNew);
+   out.push({kind:"score",title:"SCORE UPDATE",body:changed.length?changed.join(" • "):away+" "+gameScore(g)+" "+home+"."});
+ }
+ return out;
+}
+function activityLabel(g){
+ const r=relationship(g);return r[0]==="YOUR TEAM"?"YOUR TEAM":r[0]==="FOLLOWED GAME"?"FOLLOWED GAME":r[0]==="FOLLOWED LEAGUE"?"FOLLOWED LEAGUE":"SPORTS";
+}
+function addActivity(g,event){
+ const rel=relationship(g), label=activityLabel(g);
+ const item={id:g.id+"-"+event.title+"-"+Date.now(),title:(label==="YOUR TEAM"?"YOUR TEAM • ":"")+event.title,body:event.body,when:new Date().toISOString(),gameId:g.id,kind:event.kind,rel};
+ activity.unshift(item);activity=activity.slice(0,20);renderActivity();
+}
+function renderActivity(){
+ const el=document.getElementById("liveActivity"),rs=document.getElementById("realtimeStatus");if(!el)return;
+ rs.textContent="● LIVE • PERSONALIZED";
+ el.innerHTML=activity.length?activity.map(x=>'<div class="activity-row"><strong>'+esc(x.title)+'</strong><small>'+esc(x.body)+' • '+formatDate(x.when)+'</small><span class="tag '+(x.rel.includes("YOUR TEAM")?"team":x.rel.includes("FOLLOWED LEAGUE")?"league":"")+"">'+esc(x.rel.join(" • "))+'</span> <button class="button small" onclick="window.openGameCenter&&window.openGameCenter(\''+esc(x.gameId)+'\')">GAME CENTER</button></div>').join(""):'<div class="notice">Live activity is connected. Waiting for the next game change.</div>';
+}
 async function loadFollowedGames(){
- if(!state.uid){state.followedGameIds=localIds();refreshFollowedCount();return}
- const r=await sb.from(FOLLOW_TABLE).select('game_id,notify_start,notify_live,notify_score,notify_final').eq('user_id',state.uid);
- if(r.error){console.warn('Followed games load:',r.error.message);state.followedGameIds=localIds();refreshFollowedCount();return}
- state.followedGameIds=(r.data||[]).map(x=>x.game_id);state.followedGameSettings={};(r.data||[]).forEach(x=>state.followedGameSettings[x.game_id]={start:x.notify_start,live:x.notify_live,score:x.notify_score,final:x.notify_final});
- refreshFollowedCount();
+ if(!state.uid){state.followedGameIds=[];state.followedGameSettings={};return}
+ const r=await sb.from(FOLLOW_TABLE).select("game_id,notify_start,notify_live,notify_score,notify_final").eq("user_id",state.uid);
+ if(r.error){console.warn(r.error.message);return}
+ state.followedGameIds=(r.data||[]).map(x=>x.game_id);
+ state.followedGameSettings={};(r.data||[]).forEach(x=>state.followedGameSettings[x.game_id]={start:x.notify_start,live:x.notify_live,score:x.notify_score,final:x.notify_final});
 }
-
-async function followGame(id,on){
- if(!state.uid){
-   const ids=followedIds();
-   setLocalIds(on?[...ids,id]:ids.filter(x=>x!==id));
-   state.followedGameIds=localIds();refreshFollowedCount();return {ok:true,guest:true};
- }
- if(on){
-   const r=await sb.from(FOLLOW_TABLE).upsert({user_id:state.uid,game_id:id},{onConflict:'user_id,game_id'});
-   if(r.error)return {ok:false,error:r.error.message};
- }else{
-   const r=await sb.from(FOLLOW_TABLE).delete().eq('user_id',state.uid).eq('game_id',id);
-   if(r.error)return {ok:false,error:r.error.message};
- }
- await loadFollowedGames(); return {ok:true};
-}
-
 async function migrateGuestFollows(){
- if(!state.uid)return;
- const ids=localIds();if(!ids.length)return;
- const rows=ids.map(game_id=>({user_id:state.uid,game_id}));
- const r=await sb.from(FOLLOW_TABLE).upsert(rows,{onConflict:'user_id,game_id'});
- if(!r.error){setLocalIds([]);await loadFollowedGames()}
+ if(!state.uid)return;let ids=[];try{ids=JSON.parse(localStorage.getItem("crowrules_followed_games")||"[]")}catch(e){}
+ if(!ids.length)return;
+ const r=await sb.from(FOLLOW_TABLE).upsert(ids.map(game_id=>({user_id:state.uid,game_id})),{onConflict:"user_id,game_id"});
+ if(!r.error){try{localStorage.removeItem("crowrules_followed_games")}catch(e){}await loadFollowedGames()}
 }
-
-async function notifyOnce(game,event,extra){
- if(!state.uid||followSettings(game.id)[event]===false)return;
- const type=EVENT_TYPES[event];if(!type)return;
- const eventKey=game.id+':'+type+':'+String(extra?.score||game.status||'');
- const existing=await sb.from(NOTIFY_TABLE).select('id').eq('user_id',state.uid).eq('entity_id',game.id).eq('notification_type',type).contains('data',{event_key:eventKey}).limit(1);
- if(existing.error)return;
- if((existing.data||[]).length)return;
- const away=game.away?.name||'Away',home=game.home?.name||'Home',score=(game.away_score??'—')+'–'+(game.home_score??'—');
- let title='',body='';
- if(event==='start'){title='Game Starting';body=away+' at '+home+' is starting now.'}
- if(event==='live'){title='Game Live';body=away+' at '+home+' is now live.'}
- if(event==='score'){title='Score Change';body=away+' '+score+' '+home+'.'}
- if(event==='final'){title='Game Final';body=away+' '+score+' '+home+' — final.'}
- await sb.from(NOTIFY_TABLE).insert({user_id:state.uid,notification_type:type,title,body,entity_type:'game',entity_id:game.id,read_at:null,data:{event_key:eventKey,game_id:game.id,away_team:away,home_team:home,score,status:game.status||null}});
+async function loadHydratedGames(){
+ const r=await sb.from("cr_sports_games").select("id,league_id,starts_at,status,home_score,away_score,home_team_id,away_team_id,venue,broadcast,home:cr_sports_teams!cr_sports_games_home_team_id_fkey(name),away:cr_sports_teams!cr_sports_games_away_team_id_fkey(name),league:cr_sports_leagues!cr_sports_games_league_id_fkey(name)").order("starts_at").limit(200);
+ if(r.error){console.warn(r.error.message);return[]}
+ (r.data||[]).forEach(g=>hydratedGames.set(g.id,g));return r.data||[];
 }
+function mergeGame(payload){
+ const old=hydratedGames.get(payload.id)||{};
+ const merged={...old,...payload,home:old.home,away:old.away,league:old.league};
+ hydratedGames.set(merged.id,merged);return {old,merged};
+}
+async function refreshActivityFromSnapshot(){
+ const games=await loadHydratedGames();
+ games.slice().sort((a,b)=>priority(b)-priority(a)).slice(0,30);
+ if(!activity.length){
+   const live=games.filter(g=>statusOf(g)==="LIVE"&&priority(g)>1).slice(0,8);
+   live.forEach(g=>addActivity(g,{kind:"live",title:"LIVE NOW",body:teamName(g,"away")+" "+gameScore(g)+" "+teamName(g,"home")}));
+ }
+}
+function handleGameChange(payload){
+ const {old,merged}=mergeGame(payload.new||payload);
+ const changes=describeChange(old,merged);
+ changes.forEach(e=>addActivity(merged,e));
+ if(window.currentGame&&window.currentGame.id===merged.id&&window.openGameCenter)window.openGameCenter(merged.id);
+ if(window.sportsHome7Load)window.sportsHome7Load();
+}
+function subscribeRealtime(){
+ if(gameChannel)try{sb.removeChannel(gameChannel)}catch(e){}
+ gameChannel=sb.channel("sports-home-14-games")
+ .on("postgres_changes",{event:"UPDATE",schema:"public",table:"cr_sports_games"},handleGameChange)
+ .on("postgres_changes",{event:"INSERT",schema:"public",table:"cr_sports_games"},p=>{const g=p.new;hydratedGames.set(g.id,g);if(priority(g)>1)addActivity(g,{kind:"new",title:"GAME ADDED",body:teamName(g,"away")+" at "+teamName(g,"home")+" is now on the game board."})})
+ .subscribe((s)=>{const rs=document.getElementById("realtimeStatus");if(rs)rs.textContent=s==="SUBSCRIBED"?"● LIVE • PERSONALIZED":s==="CHANNEL_ERROR"?"STREAM ERROR":"CONNECTING…"});
+ if(state.uid){
+   if(followedChannel)try{sb.removeChannel(followedChannel)}catch(e){}
+   followedChannel=sb.channel("sports-home-14-notifications")
+    .on("postgres_changes",{event:"INSERT",schema:"public",table:"cr_sports_user_notifications",filter:"user_id=eq."+state.uid},p=>{const n=p.new||{};addActivity({id:n.entity_id,home:{name:n.data?.home_team},away:{name:n.data?.away_team},home_score:null,away_score:null}, {kind:"alert",title:"ALERT",body:n.title+(n.body?" — "+n.body:"")})})
+    .subscribe();
+ }
+}
+window.openGameCenter=async function(id){
+ const modal=document.getElementById("gameModal"),content=document.getElementById("gameContent");if(!modal||!content)return;
+ modal.classList.add("open");modal.setAttribute("aria-hidden","false");content.innerHTML='<div class="modal-loading">Loading game center…</div>';
+ const local=hydratedGames.get(id);const r=await sb.from("cr_sports_games").select("id,league_id,starts_at,status,home_score,away_score,home_team_id,away_team_id,venue,broadcast,home:cr_sports_teams!cr_sports_games_home_team_id_fkey(name),away:cr_sports_teams!cr_sports_games_away_team_id_fkey(name),league:cr_sports_leagues!cr_sports_games_league_id_fkey(name)").eq("id",id).maybeSingle();
+ const g=r.data||local;if(!g){content.innerHTML='<div class="modal-loading">Game not found.</div>';return}
+ hydratedGames.set(id,g);window.currentGame=g;
+ const rel=relationship(g),follow=isMyFollow(g);
+ content.innerHTML='<div class="game-toolbar" style="margin-top:20px"><div><div class="game-status">'+esc(statusOf(g))+'</div><div class="game-matchup"><div class="game-team"><h2>'+esc(teamName(g,"away"))+'</h2><div class="game-score">'+esc(g.away_score??"—")+'</div></div><div>AT</div><div class="game-team"><h2>'+esc(teamName(g,"home"))+'</h2><div class="game-score">'+esc(g.home_score??"—")+'</div></div></div></div></div><div class="game-body"><div class="game-grid"><div class="game-panel"><h3>PERSONAL CONNECTION</h3><div class="chips">'+rel.map(x=>'<span class="chip">'+esc(x)+'</span>').join("")+'</div><p class="game-note">These labels come from your saved Sports account relationships. Scores and status come directly from the game record.</p></div><div class="game-panel"><h3>GAME DETAILS</h3><div class="game-meta"><div><strong>DATE</strong>'+esc(formatDate(g.starts_at))+'</div><div><strong>LEAGUE</strong>'+esc(g.league?.name||"Sports")+'</div><div><strong>VENUE</strong>'+esc(g.venue||"—")+'</div><div><strong>BROADCAST</strong>'+esc(g.broadcast||"—")+'</div></div></div></div><div class="game-panel" style="margin-top:14px"><h3>LIVE TIMELINE</h3><div class="timeline"><div class="timeline-row"><strong>'+esc(statusOf(g))+'</strong> • '+esc(teamName(g,"away"))+' '+esc(gameScore(g))+' '+esc(teamName(g,"home"))+'<br><small>Latest verified game state. No play-by-play event is inferred here.</small></div></div></div></div>';
+};
+document.getElementById("gameClose")?.addEventListener("click",()=>{document.getElementById("gameModal")?.classList.remove("open")});
+document.getElementById("gameModal")?.addEventListener("click",e=>{if(e.target.id==="gameModal")e.currentTarget.classList.remove("open")});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")document.getElementById("gameModal")?.classList.remove("open")});
 
-async function processFollowedGameEvents(games){
- if(!state.uid)return;
- const followed=new Set(followedIds());
- for(const g of games||[]){
-   if(!followed.has(g.id))continue;
+async function boot14(){
+ try{
+   const s=await sb.auth.getSession();if(s.data.session)state.uid=s.data.session.user.id;
+   await migrateGuestFollows();await loadFollowedGames();await loadHydratedGames();renderActivity();subscribeRealtime();await refreshActivityFromSnapshot();
+ }catch(e){console.error("Sports 14.0:",e);const rs=document.getElementById("realtimeStatus");if(rs)rs.textContent="STREAM ERROR"}
+}
+window.sports14Boot=boot14;
+document.addEventListener("DOMContentLoaded",()=>setTimeout(boot14,650));
+})();</script>
+<script id="sportsHome14Label">
+document.title="CrowRules Sports 14.0 | Personalized Game Intelligence";
+document.querySelectorAll(".kicker,.eyebrow").forEach(x=>{if(x.textContent.includes("SPORTS 13.0")||x.textContent.includes("SPORTS 12.0"))x.textContent=x.textContent.replace("SPORTS 13.0","SPORTS 14.0").replace("SPORTS 12.0","SPORTS 14.0")});
+</script>
+</body></html>
