@@ -350,7 +350,7 @@ window.openGameCenter=async function(id){
 };
 
 function close(){document.getElementById('gameModal').classList.remove('open');document.getElementById('gameModal').setAttribute('aria-hidden','true')}
-document.addEventListener('DOMContentLoaded',async()=>{
+document.addEventListener('DOMContentLoaded',async()=>{setTimeout(()=>{const id=new URLSearchParams(location.search).get('game');if(id&&window.openGameCenter)window.openGameCenter(id)},1200);
  document.getElementById('gameClose').onclick=close;document.getElementById('gameModal').onclick=e=>{if(e.target.id==='gameModal')close()};document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
  setTimeout(async()=>{await loadFollowedGames();await migrateGuestFollows()},900);
 });
