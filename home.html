@@ -20,7 +20,7 @@
 <script>shell('home')</script>
 <main>
 <section class="hero"><div class="hero-inner">
-<div class="kicker">● CROWRULES SPORTS 12.0</div>
+<div class="kicker">● CROWRULES SPORTS 13.0</div>
 <h1>YOUR FEED.<br><em>YOUR GAMES.</em></h1>
 <p>The CrowRules Sports homepage now uses your saved account preferences to build a live personal feed: My Teams first, Followed Leagues next, Pick 'Em activity and your notifications alongside the game center.</p>
 <div class="actions"><a class="button active" href="#feed">OPEN MY FEED</a><a class="button" href="account.html">MANAGE MY SPORTS</a><a class="button" href="schedule.html">GAME CENTER</a></div>
@@ -363,7 +363,13 @@ window.sportsHome9Process=processFollowedGameEvents;
 window.sportsHome9LoadFollows=loadFollowedGames;
 })();</script><script id="sportsCommandCenter12">(function(){
 "use strict";
-const rt={channel:null,notes:[],games:new Map()};
+const rt={channel:null,notes:[],games:new Map(),timeline:new Map()};
+function rtChanged(old,g){
+ const out=[]; const os=rtGameStatus(old||{}), ns=rtGameStatus(g||{});
+ if(old && os!==ns) out.push({kind:ns.toLowerCase(),title:"Status change",body:os+" → "+ns});
+ if(old && (old.away_score!==g.away_score||old.home_score!==g.home_score)) out.push({kind:"score",title:"Score update",body:(g.away?.name||"Away")+" "+(g.away_score??"—")+"–"+(g.home_score??"—")+" "+(g.home?.name||"Home")});
+ return out;
+}
 function rtStatus(t){const e=document.getElementById("realtimeStatus");if(e)e.textContent=t}
 function rtEsc(v){return esc(v==null?"":String(v))}
 function rtTime(v){const d=new Date(v);return isNaN(d)?"":d.toLocaleTimeString([], {hour:"numeric",minute:"2-digit",second:"2-digit"})}
@@ -382,10 +388,10 @@ async function hydrateNotes(){
  if(!r.error)(r.data||[]).reverse().forEach(x=>addActivity("alert",x.title,x.body,x.created_at));
 }
 function gameEvent(g,old){
- const status=rtGameStatus(g),score=(g.away_score??"—")+"–"+(g.home_score??"—");
+ const status=rtGameStatus(g),score=(g.away_score??"—")+"–"+(g.home_score??"—")+" "+(g.home?.name||"Home");
  if(!old){rt.games.set(g.id,{...g});return}
- if(old.status!==g.status){addActivity(status.toLowerCase(),(g.away?.name||"Away")+" @ "+(g.home?.name||"Home"),"Game status changed to "+status+". "+score,g.updated_at||new Date().toISOString())}
- else if(old.home_score!==g.home_score||old.away_score!==g.away_score){addActivity("score",(g.away?.name||"Away")+" @ "+(g.home?.name||"Home"),"Score update: "+score,g.updated_at||new Date().toISOString())}
+ const changes=rtChanged(old,g);
+ changes.forEach(x=>addActivity(x.kind,(g.away?.name||"Away")+" @ "+(g.home?.name||"Home"),x.body,g.updated_at||new Date().toISOString()));
  rt.games.set(g.id,{...old,...g});
  if(window.sportsHome7Load) window.sportsHome7Load();
  if(window.currentGame && window.currentGame.id===g.id && window.openGameCenter) window.openGameCenter(g.id);
@@ -414,4 +420,11 @@ async function start12(){
 }
 window.sports12Start=start12;
 document.addEventListener("DOMContentLoaded",()=>setTimeout(start12,1400));
+})();</script><script id="sportsIntelligence13">(function(){
+"use strict";
+const gi=window.sports12Start;
+window.sports13DescribeChange=function(old,g){
+ const changes=rtChanged(old,g);
+ return changes.length?changes.map(x=>x.title+": "+x.body).join(" • "):"No score or status change.";
+};
 })();</script></body></html>
