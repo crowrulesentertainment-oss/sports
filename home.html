@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="CrowRules Sports 6.0 — a personalized sports feed built around your teams, leagues, Pick 'Em activity and alerts.">
-<title>CrowRules Sports 6.0 | Personalized Sports Feed</title>
+<title>CrowRules Sports 7.0 | Live Personal Dashboard</title>
 <link rel="stylesheet" href="css/sports.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/sports.js"></script>
@@ -74,7 +74,7 @@ const state={uid:null,teamIds:[],leagueIds:[],playerIds:[],teams:[],leagues:[],n
 (async function init(){
   const {data:{session}}=await sb.auth.getSession();
   const accountState=document.getElementById('accountState'),email=document.getElementById('accountEmail'),action=document.getElementById('accountAction');
-  if(!session){accountState.textContent='GUEST SPORTS MODE';email.textContent='Sign in to save your sports universe across devices.';action.textContent='SIGN IN / JOIN';await loadGuestFeed();return}
+  if(!session){accountState.textContent='GUEST SPORTS MODE';email.textContent='Sign in to save your sports universe across devices.';action.textContent='SIGN IN / JOIN';await loadGuestFeed();if(window.sportsHome7Load) await window.sportsHome7Load();return}
   state.uid=session.user.id;accountState.textContent='SIGNED IN • FEED SYNC ACTIVE';email.textContent=session.user.email||'CrowRules member';action.textContent='MANAGE ACCOUNT';
   document.getElementById('feedTitle').textContent='PERSONALIZED FOR '+(session.user.email||'YOU').toUpperCase();
   document.getElementById('feedSub').textContent='My Teams → Followed Leagues → Favorite Players → Pick \'Em → Notifications';
@@ -82,7 +82,7 @@ const state={uid:null,teamIds:[],leagueIds:[],playerIds:[],teams:[],leagues:[],n
   await loadPersonal();
   await loadPickem();
   await renderPersonalFeed();
-  subscribePersonal();
+  subscribePersonal();\n  if(window.sportsHome7Load) await window.sportsHome7Load();
 })();
 
 async function loadGuestFeed(){
