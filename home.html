@@ -350,7 +350,7 @@ window.openGameCenter=async function(id){
  document.getElementById('gameModal').classList.add('open');document.getElementById('gameModal').setAttribute('aria-hidden','false');document.getElementById('gameContent').innerHTML='<div class="modal-loading">Loading game center…</div>';
  const r=await sb.from('cr_sports_games').select('id,league_id,starts_at,status,home_score,away_score,home_team_id,away_team_id,venue,broadcast,home:cr_sports_teams!cr_sports_games_home_team_id_fkey(name),away:cr_sports_teams!cr_sports_games_away_team_id_fkey(name),league:cr_sports_leagues!cr_sports_games_league_id_fkey(name)').eq('id',id).maybeSingle();
  if(r.error||!r.data){document.getElementById('gameContent').innerHTML='<div class="modal-loading">Game details are unavailable.</div>';return}
- currentGame=r.data;render(currentGame);
+ currentGame=r.data;window.currentGame=currentGame;render(currentGame);
 };
 
 function close(){document.getElementById('gameModal').classList.remove('open');document.getElementById('gameModal').setAttribute('aria-hidden','true')}
