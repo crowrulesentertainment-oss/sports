@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Scores | CrowRules Sports</title>
+<link rel="stylesheet" href="css/sports.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/sports.js"></script>
+</head>
+<body>
+<script>shell("scores")</script>
+
+<section class="hero">
+  <div class="eyebrow">CROWRULES SPORTS • GAME CENTER</div>
+  <h1>LIVE <span>SCORES</span></h1>
+  <p>Today's scoreboard, live games, finals and upcoming matchups — powered by the CrowRules Sports database.</p>
+  <div class="actions">
+    <a class="button" href="schedule.html">FULL SCHEDULE</a>
+    <a class="button secondary" href="standings.html">STANDINGS</a>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">SCOREBOARD</div>
+      <h2>GAME DAY</h2>
+    </div>
+    <div class="filters">
+      <button class="button small active" data-filter="all">ALL</button>
+      <button class="button small" data-filter="live">LIVE</button>
+      <button class="button small" data-filter="final">FINAL</button>
+      <button class="button small" data-filter="scheduled">UPCOMING</button>
+    </div>
+  </div>
+  <div id="scoreboard" class="grid3">
+    <div class="card"><div class="loading">Loading scores…</div></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">CROWRULES SPORTS</div>
+      <h2>MORE GAME DATA</h2>
+    </div>
+  </div>
+  <div class="grid3">
+    <a class="card" href="leaders.html"><h3>LEAGUE LEADERS</h3><p>Player and team leaders across the sports universe.</p></a>
+    <a class="card" href="teams.html"><h3>TEAMS</h3><p>Major, minor-league, college and amateur teams.</p></a>
+    <a class="card" href="pickem.html"><h3>PICK 'EM</h3><p>Make your picks and compete in CrowRules challenges.</p></a>
+  </div>
+</section>
+
+<script>
+loadSession();
+
+let games = [];
+let currentFilter = "all";
+
+function gameStatus(g){
+  const s = String(g.status || "").toLowerCase();
+  if (["live","in_progress","in progress","in-progress"].includes(s)) return "live";
+  if (["final","completed","complete"].includes(s)) return "final";
+  return "scheduled";
+}
+
+function teamName(team){ return team?.name || "TBD"; }
+
+function renderScores(){
+  const root = $("#scoreboard");
+  const filtered = games.filter(g => currentFilter === "all" || gameStatus(g) === currentFilter);
+
+  if (!filtered.length){
+    root.innerHTML = '<div class="card"><h3>NO GAMES</h3><p>No games match this scoreboard filter.</p></div>';
+    return;
+  }
+
+  root.innerHTML = filtered.map(g => {
+    const status = gameStatus(g);
+    const rawStatus = String(g.status || "scheduled").toUpperCase();
+    const time = g.starts_at ? new Date(g.starts_at).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"}) : "TBD";
+    const date = g.starts_at ? new Date(g.starts_at).toLocaleDateString([], {month:"short",day:"numeric"}) : "";
+    const awayScore = g.away_score ?? "-";
+    const homeScore = g.home_score ?? "-";
+
+    return '<article class="card score-card">' +
+      '<div class="score-meta"><span class="tag">'+esc(g.cr_sports_leagues?.name || "SPORTS")+'</span><span class="tag '+status+'">'+esc(rawStatus)+'</span></div>' +
+      '<div class="score-date">'+esc(date)+' • '+esc(time)+'</div>' +
+      '<div class="team-row"><span>'+esc(teamName(g.away))+'</span><strong>'+esc(String(awayScore))+'</strong></div>' +
+      '<div class="team-row"><span>'+esc(teamName(g.home))+'</span><strong>'+esc(String(homeScore))+'</strong></div>' +
+      '<div class="score-footer">'+esc(g.venue || "Venue TBD")+'</div>' +
+      '</article>';
+  }).join("");
+}
+
+async function loadScores(){
+  const root = $("#scoreboard");
+  const {data,error} = await sb
+    .from("cr_sports_games")
+    .select("*,cr_sports_leagues(name),home:cr_sports_teams!cr_sports_games_home_team_id_fkey(name),away:cr_sports_teams!cr_sports_games_away_team_id_fkey(name)")
+    .order("starts_at")
+    .limit(200);
+
+  if(error){
+    root.innerHTML = '<div class="card"><h3>SPORTS DATA UNAVAILABLE</h3><p>'+esc(error.message)+'</p><p>Check the Supabase connection and cr_sports_games table.</p></div>';
+    return;
+  }
+
+  games = data || [];
+  renderScores();
+}
+
+document.querySelectorAll("[data-filter]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    currentFilter = btn.dataset.filter;
+    document.querySelectorAll("[data-filter]").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    renderScores();
+  });
+});
+
+loadScores();
+</script>
+<script>footer()</script>
+</body>
+</html>
