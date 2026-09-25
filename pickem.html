@@ -1,1 +1,351 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pick Em | CrowRules Sports</title><link rel="stylesheet" href="css/sports.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/sports.js"></script></head><body><script>shell("pickem")</script><section class="hero"><div class="eyebrow">COMMUNITY PREDICTIONS</div><h1>PICK 'EM <span>CHALLENGE</span></h1><p>Sign in with your CrowRules account to submit picks.</p></section><section class="section"><div class="grid3"><div class="card"><h3>SIGN IN</h3><input id="email" class="input" placeholder="Email"><input id="password" class="input" type="password" placeholder="Password"><div class="actions"><button class="btn primary" onclick="signIn()">SIGN IN</button><button class="btn" onclick="signUp()">CREATE ACCOUNT</button></div></div><div class="card"><h3>SELECT A WEEK</h3><select id="week"></select><p class="muted">Challenges load from Supabase.</p></div><div class="card"><h3>SUBMIT PICKS</h3><textarea id="picks" placeholder='{"game_1":"SEA","game_2":"TAC"}'></textarea><button class="btn primary" onclick="submitPick()">SUBMIT</button><div id="result" class="muted"></div></div></div></section><script>loadSession();(async()=>{const{data}=await sb.from("cr_sports_pickem_weeks").select("*").eq("is_open",true).order("opens_at",{ascending:false});$("#week").innerHTML=(data||[]).map(w=>'<option value="'+w.id+'">'+esc(w.title)+' • '+esc(w.week_label)+'</option>').join("")||'<option>No open challenges</option>'})();async function submitPick(){const session=await loadSession();if(!session)return alert("Sign in first.");let picks;try{picks=JSON.parse($("#picks").value)}catch(e){return alert("Picks must be valid JSON.");}const{error}=await sb.from("cr_sports_pickem_entries").upsert({week_id:$("#week").value,user_id:session.user.id,picks},{onConflict:"week_id,user_id"});$("#result").textContent=error?error.message:"Picks submitted successfully."}</script><script>footer()</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pick 'Em | CrowRules Sports</title>
+<link rel="stylesheet" href="css/sports.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/sports.js"></script>
+</head>
+<body>
+<script>shell("pickem")</script>
+
+<section class="hero">
+  <div class="eyebrow">CROWRULES SPORTS • COMMUNITY CHALLENGE</div>
+  <h1>PICK 'EM <span>CHALLENGE</span></h1>
+  <p>Make your picks, lock them before game time, track your results and build your CrowRules Sports record.</p>
+  <div class="actions">
+    <a class="button" href="scores.html">VIEW SCORES</a>
+    <a class="button secondary" href="standings.html">STANDINGS</a>
+  </div>
+</section>
+
+<section class="section">
+  <div class="grid3">
+    <div class="card">
+      <div class="eyebrow">ACCOUNT</div>
+      <h3 id="authTitle">SIGN IN TO PLAY</h3>
+      <p id="authStatus" class="muted">Your picks are saved to your CrowRules account.</p>
+      <form id="authForm" class="form">
+        <input id="email" type="email" placeholder="Email address" required>
+        <input id="password" type="password" placeholder="Password" minlength="6" required>
+        <div class="actions">
+          <button class="button" type="submit">SIGN IN</button>
+          <button class="button secondary" type="button" id="signupBtn">CREATE ACCOUNT</button>
+        </div>
+      </form>
+      <button class="button secondary hidden" id="signoutBtn">SIGN OUT</button>
+    </div>
+
+    <div class="card">
+      <div class="eyebrow">CHALLENGE</div>
+      <h3>SELECT WEEK</h3>
+      <select id="week" class="input"></select>
+      <div id="weekInfo" class="muted">Loading open challenges…</div>
+    </div>
+
+    <div class="card">
+      <div class="eyebrow">SCORING</div>
+      <h3>HOW IT WORKS</h3>
+      <p>Choose the winner for each available matchup. Picks are saved per challenge and can be updated until the challenge closes.</p>
+      <div class="stat-row"><strong>1</strong><span>point per correct pick</span></div>
+      <div class="stat-row"><strong>0</strong><span>points for an incorrect pick</span></div>
+      <div class="stat-row"><strong>LOCK</strong><span>when the challenge closes</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">MAKE YOUR PICKS</div>
+      <h2>GAME CARD</h2>
+    </div>
+    <div id="saveState" class="muted">Sign in to begin.</div>
+  </div>
+  <div id="games" class="grid3">
+    <div class="card"><p>Loading games…</p></div>
+  </div>
+  <div class="actions">
+    <button class="button" id="submitBtn" disabled>SAVE PICKS</button>
+    <button class="button secondary" id="clearBtn" type="button">CLEAR PICKS</button>
+  </div>
+  <div id="result" class="card hidden"></div>
+</section>
+
+<section class="section">
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">YOUR RECORD</div>
+      <h2>MY PICKS</h2>
+    </div>
+  </div>
+  <div id="myRecord" class="grid3">
+    <div class="card"><p>Sign in to view your saved picks.</p></div>
+  </div>
+</section>
+
+<script>
+loadSession();
+
+let session = null;
+let weeks = [];
+let games = [];
+let selectedWeek = null;
+let savedPicks = {};
+
+const $id = id => document.getElementById(id);
+
+function statusClass(status){
+  const s = String(status || "").toLowerCase();
+  if(s === "live") return "live";
+  if(s === "final") return "final";
+  return "scheduled";
+}
+
+function isLocked(game){
+  if(!game?.starts_at) return false;
+  return new Date(game.starts_at).getTime() <= Date.now() || ["live","final","postponed","cancelled"].includes(String(game.status || "").toLowerCase());
+}
+
+function showResult(message, ok=true){
+  const box = $id("result");
+  box.classList.remove("hidden");
+  box.innerHTML = '<strong>'+esc(ok ? "SUCCESS" : "NOTICE")+'</strong><p>'+esc(message)+'</p>';
+}
+
+function updateAuthUI(){
+  const signedIn = !!session;
+  $id("authForm").classList.toggle("hidden", signedIn);
+  $id("signoutBtn").classList.toggle("hidden", !signedIn);
+  $id("authTitle").textContent = signedIn ? "SIGNED IN" : "SIGN IN TO PLAY";
+  $id("authStatus").textContent = signedIn
+    ? (session.user.email || "CrowRules member") + " is ready to play."
+    : "Your picks are saved to your CrowRules account.";
+  $id("submitBtn").disabled = !signedIn || !selectedWeek;
+  renderGames();
+  loadMyEntry();
+}
+
+async function refreshSession(){
+  const {data} = await sb.auth.getSession();
+  session = data?.session || null;
+  updateAuthUI();
+}
+
+async function auth(mode){
+  const email = $id("email").value.trim();
+  const password = $id("password").value;
+  if(!email || !password) return showResult("Enter your email and password.", false);
+
+  const response = mode === "signup"
+    ? await sb.auth.signUp({email,password})
+    : await sb.auth.signInWithPassword({email,password});
+
+  if(response.error) return showResult(response.error.message, false);
+
+  if(mode === "signup" && !response.data?.session){
+    showResult("Account created. Check your email if email confirmation is enabled, then sign in.", true);
+  } else {
+    session = response.data?.session || null;
+    updateAuthUI();
+    showResult("You're signed in and ready to make picks.");
+  }
+}
+
+$id("authForm").addEventListener("submit", e => { e.preventDefault(); auth("signin"); });
+$id("signupBtn").addEventListener("click", () => auth("signup"));
+$id("signoutBtn").addEventListener("click", async () => {
+  await sb.auth.signOut();
+  session = null;
+  savedPicks = {};
+  updateAuthUI();
+  showResult("Signed out.");
+});
+
+sb.auth.onAuthStateChange((_event,newSession) => {
+  session = newSession;
+  updateAuthUI();
+});
+
+async function loadWeeks(){
+  const {data,error} = await sb.from("cr_sports_pickem_weeks")
+    .select("*")
+    .eq("is_open",true)
+    .order("opens_at",{ascending:false});
+
+  if(error){
+    $id("week").innerHTML = '<option>Unable to load challenges</option>';
+    $id("weekInfo").textContent = error.message;
+    return;
+  }
+
+  weeks = data || [];
+  $id("week").innerHTML = weeks.length
+    ? weeks.map(w => '<option value="'+w.id+'">'+esc(w.title)+' • '+esc(w.week_label)+'</option>').join("")
+    : '<option value="">No open challenges</option>';
+
+  selectedWeek = weeks[0] || null;
+  if(selectedWeek) $id("week").value = selectedWeek.id;
+  renderWeekInfo();
+  await loadGames();
+}
+
+function renderWeekInfo(){
+  if(!selectedWeek){
+    $id("weekInfo").textContent = "No open challenge is currently available.";
+    return;
+  }
+  const close = selectedWeek.closes_at
+    ? new Date(selectedWeek.closes_at).toLocaleString()
+    : "not specified";
+  $id("weekInfo").innerHTML =
+    '<strong>'+esc(selectedWeek.sport || "Sports")+'</strong><br>' +
+    esc(selectedWeek.week_label || "") + '<br>' +
+    'Closes: '+esc(close);
+}
+
+$id("week").addEventListener("change", async e => {
+  selectedWeek = weeks.find(w => w.id === e.target.value) || null;
+  savedPicks = {};
+  renderWeekInfo();
+  await loadGames();
+  await loadMyEntry();
+});
+
+async function loadGames(){
+  const root = $id("games");
+  root.innerHTML = '<div class="card"><p>Loading game card…</p></div>';
+
+  const now = new Date().toISOString();
+  let query = sb.from("cr_sports_games")
+    .select("*,cr_sports_leagues(name),home:cr_sports_teams!cr_sports_games_home_team_id_fkey(id,name),away:cr_sports_teams!cr_sports_games_away_team_id_fkey(id,name)")
+    .order("starts_at")
+    .limit(100);
+
+  const {data,error} = await query;
+  if(error){
+    root.innerHTML = '<div class="card"><h3>GAME DATA UNAVAILABLE</h3><p>'+esc(error.message)+'</p></div>';
+    return;
+  }
+
+  const openWeek = selectedWeek;
+  games = (data || []).filter(g => {
+    if(!openWeek) return false;
+    if(openWeek.closes_at && new Date(openWeek.closes_at).getTime() < Date.now()) return false;
+    return new Date(g.starts_at).getTime() >= Date.now() - 12*60*60*1000 &&
+      !["cancelled","postponed"].includes(String(g.status || "").toLowerCase());
+  }).slice(0,24);
+
+  renderGames();
+}
+
+function renderGames(){
+  const root = $id("games");
+  if(!games.length){
+    root.innerHTML = '<div class="card"><h3>NO MATCHUPS AVAILABLE</h3><p>Games will appear here when the CrowRules Sports schedule contains eligible matchups.</p></div>';
+    return;
+  }
+
+  root.innerHTML = games.map(g => {
+    const locked = isLocked(g);
+    const picked = savedPicks[g.id] || "";
+    const time = new Date(g.starts_at).toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
+    return '<article class="card pick-card">' +
+      '<div class="score-meta"><span class="tag">'+esc(g.cr_sports_leagues?.name || "SPORTS")+'</span><span class="tag '+statusClass(g.status)+'">'+esc(String(g.status || "scheduled").toUpperCase())+'</span></div>' +
+      '<div class="score-date">'+esc(time)+'</div>' +
+      '<h3>'+esc(g.away?.name || "TBD")+' <span>@</span> '+esc(g.home?.name || "TBD")+'</h3>' +
+      '<div class="pick-options">' +
+        '<label><input type="radio" name="pick_'+g.id+'" value="'+esc(g.away?.id || "")+'" '+(picked === g.away?.id ? "checked" : "")+' '+(locked ? "disabled" : "")+'> '+esc(g.away?.name || "Away")+'</label>' +
+        '<label><input type="radio" name="pick_'+g.id+'" value="'+esc(g.home?.id || "")+'" '+(picked === g.home?.id ? "checked" : "")+' '+(locked ? "disabled" : "")+'> '+esc(g.home?.name || "Home")+'</label>' +
+      '</div>' +
+      '<div class="score-footer">'+(locked ? "PICK LOCKED" : "PICK BEFORE GAME TIME")+'</div>' +
+      '</article>';
+  }).join("");
+
+  root.querySelectorAll("input[type=radio]").forEach(input => {
+    input.addEventListener("change", () => {
+      const id = input.name.replace("pick_","");
+      savedPicks[id] = input.value;
+      $id("saveState").textContent = Object.keys(savedPicks).length + " pick(s) selected";
+    });
+  });
+
+  $id("submitBtn").disabled = !session || !selectedWeek;
+}
+
+async function loadMyEntry(){
+  if(!session || !selectedWeek){
+    $id("myRecord").innerHTML = '<div class="card"><p>Sign in to view your saved picks.</p></div>';
+    return;
+  }
+
+  const {data,error} = await sb.from("cr_sports_pickem_entries")
+    .select("id,picks,points,submitted_at")
+    .eq("week_id",selectedWeek.id)
+    .eq("user_id",session.user.id)
+    .maybeSingle();
+
+  if(error){
+    $id("myRecord").innerHTML = '<div class="card"><p>'+esc(error.message)+'</p></div>';
+    return;
+  }
+
+  savedPicks = data?.picks || {};
+  $id("myRecord").innerHTML = data
+    ? '<div class="card"><div class="eyebrow">SAVED ENTRY</div><h3>'+Object.keys(savedPicks).length+' PICKS</h3><p>Points: <strong>'+esc(String(data.points ?? 0))+'</strong></p><p>Submitted: '+esc(new Date(data.submitted_at).toLocaleString())+'</p></div>'
+    : '<div class="card"><p>No entry saved for this challenge yet.</p></div>';
+
+  renderGames();
+}
+
+$id("submitBtn").addEventListener("click", async () => {
+  if(!session) return showResult("Sign in first.", false);
+  if(!selectedWeek) return showResult("Select an open challenge.", false);
+
+  const picks = {};
+  games.forEach(g => {
+    const choice = document.querySelector('input[name="pick_'+g.id+'"]:checked');
+    if(choice && !isLocked(g)) picks[g.id] = choice.value;
+  });
+
+  if(!Object.keys(picks).length) return showResult("Select at least one unlocked game.", false);
+
+  const closes = selectedWeek.closes_at ? new Date(selectedWeek.closes_at).getTime() : null;
+  if(closes && closes <= Date.now()) return showResult("This challenge is closed.", false);
+
+  $id("submitBtn").disabled = true;
+  const {error} = await sb.from("cr_sports_pickem_entries").upsert({
+    week_id:selectedWeek.id,
+    user_id:session.user.id,
+    picks:picks,
+    submitted_at:new Date().toISOString()
+  }, {onConflict:"week_id,user_id"});
+
+  $id("submitBtn").disabled = false;
+  if(error) return showResult(error.message, false);
+
+  savedPicks = picks;
+  $id("saveState").textContent = Object.keys(picks).length + " pick(s) saved";
+  showResult("Your picks have been saved to this challenge.");
+  await loadMyEntry();
+});
+
+$id("clearBtn").addEventListener("click", () => {
+  savedPicks = {};
+  document.querySelectorAll('#games input[type="radio"]').forEach(i => i.checked = false);
+  $id("saveState").textContent = "Picks cleared — choose your matchups.";
+});
+
+(async () => {
+  const {data} = await sb.auth.getSession();
+  session = data?.session || null;
+  updateAuthUI();
+  await loadWeeks();
+})();
+</script>
+
+<script>footer()</script>
+</body>
+</html>
