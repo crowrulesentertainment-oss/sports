@@ -33,7 +33,7 @@
 <div class="stat"><strong id="myPickem">—</strong><span>Pick 'Em</span></div>
 <div class="stat"><strong id="myNotices">—</strong><span>Unread Alerts</span></div>
 </div>
-<div class="feed-grid" style="margin-top:14px">
+<div class="panel" style="margin-top:14px"><div class="head" style="margin-bottom:12px"><div><div class="eyebrow">SMART GAME BOARD</div><h2 style="font-size:20px">WHAT MATTERS NOW</h2><p>Live games and your saved teams/leagues are ranked together so the most relevant games rise to the top.</p></div><span class="chip" id="smartBoardStatus">SYNCING</span></div><div class="games" id="smartBoard"><div class="notice">Building your personalized game board…</div></div></div><div class="feed-grid" style="margin-top:14px">
 <div class="panel"><h3>MY SPORTS SIGNALS</h3><div class="chips" id="signals"><div class="notice">Sign in to activate personalized signals.</div></div></div>
 <div class="panel"><h3>ACCOUNT ACTIVITY</h3><div id="activity"><div class="notice">No account activity loaded.</div></div></div>
 </div>
@@ -123,6 +123,7 @@ async function loadPickem(){
 }
 
 async function renderPersonalFeed(){
+  await renderSmartBoard();
   const teamGames=await gamesForIds('team',state.teamIds,'teamFeed');
   const leagueGames=await gamesForIds('league',state.leagueIds,'leagueFeed');
   if(!state.teamIds.length)document.getElementById('teamFeed').innerHTML='<div class="empty">No My Teams saved. Add teams in My Sports Account and this section will populate automatically.</div>';
@@ -149,11 +150,36 @@ async function gamesForIds(kind,ids,target){
 
 function gameHtml(g,source){
   const status=String(g.status||'SCHEDULED'),live=/live|in progress|halftime/i.test(status);
-  const tag=source==='team'?'<span class="tag team">MY TEAM</span>':'<span class="tag league">FOLLOWED LEAGUE</span>';
+  const tag=source==='team'?'<span class="tag team">MY TEAM</span>':source==='league'?'<span class="tag league">FOLLOWED LEAGUE</span>':'<span class="tag">SMART PICK</span>';
   return '<article class="game '+(live?'live ':'')+(source==='team'?'priority':'')+'"><div class="game-top"><span>'+esc(status.toUpperCase())+'</span><span>'+formatDate(g.starts_at)+'</span></div><div class="teamline"><span>'+esc(g.away?.name||'Away')+'</span><b>'+score(g.away_score)+'</b></div><div class="teamline"><span>'+esc(g.home?.name||'Home')+'</span><b>'+score(g.home_score)+'</b></div>'+tag+'<div class="muted" style="margin-top:8px;font-size:9px">'+esc(g.league?.name||'Sports')+'</div></article>';
 }
 function score(v){return v===null||v===undefined?'—':esc(v)}
 function formatDate(v){if(!v)return'—';const d=new Date(v);return isNaN(d)?'—':d.toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}
+async function renderSmartBoard(){
+  const board=document.getElementById('smartBoard'),badge=document.getElementById('smartBoardStatus');
+  if(!board)return;
+  const {data,error}=await sb.from('cr_sports_games').select('id,league_id,starts_at,status,home_score,away_score,home_team_id,away_team_id,venue,broadcast,home:cr_sports_teams!cr_sports_games_home_team_id_fkey(name),away:cr_sports_teams!cr_sports_games_away_team_id_fkey(name),league:cr_sports_leagues!cr_sports_games_league_id_fkey(name)').order('starts_at').limit(60);
+  if(error){board.innerHTML='<div class="empty">'+esc(error.message)+'</div>';badge.textContent='ERROR';return}
+  const now=Date.now(),teamSet=new Set(state.teamIds),leagueSet=new Set(state.leagueIds);
+  const rank=g=>{
+    const st=String(g.status||'');
+    const live=/live|in progress|halftime/i.test(st);
+    const final=/final|completed/i.test(st);
+    const team=teamSet.has(g.home_team_id)||teamSet.has(g.away_team_id);
+    const league=leagueSet.has(g.league_id);
+    const start=new Date(g.starts_at).getTime();
+    const upcoming=!final&&start>=now;
+    return (live?100000:0)+(team?50000:0)+(league?25000:0)+(upcoming?10000:0)+Math.max(0,5000-Math.abs(start-now)/60000);
+  };
+  const seen=new Set();
+  const games=(data||[]).sort((a,b)=>rank(b)-rank(a)).filter(g=>{if(seen.has(g.id))return false;seen.add(g.id);return true}).slice(0,12);
+  board.innerHTML=games.map(g=>{
+    const team=teamSet.has(g.home_team_id)||teamSet.has(g.away_team_id),league=leagueSet.has(g.league_id);
+    return gameHtml(g,team?'team':league?'league':'smart');
+  }).join('')||'<div class="empty">No games are currently available.</div>';
+  badge.textContent=(state.uid?'PERSONALIZED':'GUEST')+' • '+games.length+' GAMES';
+}
+
 function subscribePersonal(){
   sb.channel('sports-home-5-'+state.uid)
     .on('postgres_changes',{event:'*',schema:'public',table:'cr_sports_user_teams',filter:'user_id=eq.'+state.uid},async()=>{await loadPersonal();await renderPersonalFeed()})
