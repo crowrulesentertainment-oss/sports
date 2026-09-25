@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="CrowRules Sports 6.0 — a personalized sports feed built around your teams, leagues, Pick 'Em activity and alerts.">
-<title>CrowRules Sports 7.0 | Live Personal Dashboard</title>
+<title>CrowRules Sports 9.0 | Real Game Follow + Alerts</title>
 <link rel="stylesheet" href="css/sports.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/sports.js"></script>
@@ -20,7 +20,7 @@
 <script>shell('home')</script>
 <main>
 <section class="hero"><div class="hero-inner">
-<div class="kicker">● CROWRULES SPORTS 6.0</div>
+<div class="kicker">● CROWRULES SPORTS 9.0</div>
 <h1>YOUR FEED.<br><em>YOUR GAMES.</em></h1>
 <p>The CrowRules Sports homepage now uses your saved account preferences to build a live personal feed: My Teams first, Followed Leagues next, Pick 'Em activity and your notifications alongside the game center.</p>
 <div class="actions"><a class="button active" href="#feed">OPEN MY FEED</a><a class="button" href="account.html">MANAGE MY SPORTS</a><a class="button" href="schedule.html">GAME CENTER</a></div>
@@ -28,7 +28,7 @@
 </div></section>
 
 <section class="live-dashboard" id="liveDashboard"><div class="wrap">
-<div class="head"><div><div class="eyebrow">CROWRULES SPORTS 7.0</div><h2>LIVE PERSONAL DASHBOARD</h2><p>Live Now, Next Up and Finals — with your teams and leagues pushed to the front.</p></div><span class="chip" id="liveSync">LIVE SYNC</span></div>
+<div class="head"><div><div class="eyebrow">CROWRULES SPORTS 9.0</div><h2>LIVE PERSONAL DASHBOARD</h2><p>Live Now, Next Up and Finals — with your teams and leagues pushed to the front.</p></div><span class="chip" id="liveSync">LIVE SYNC</span></div>
 <div class="alert-strip"><strong>PERSONAL SCORE WATCH</strong> <span id="scoreAlertText">Watching your saved teams for live scores and status changes.</span></div>
 <div class="my-board"><div class="board-stat"><strong id="liveCount">0</strong><span>Live Now</span></div><div class="board-stat"><strong id="nextCount">0</strong><span>Next Up</span></div><div class="board-stat"><strong id="finalCount">0</strong><span>Recent Finals</span></div><div class="board-stat"><strong id="priorityCount">0</strong><span>My Sports Games</span></div></div>
 <div class="live-shell" style="margin-top:15px"><div class="live-panel"><h3>LIVE NOW</h3><div class="sub">Games currently in progress, with live scores where available.</div><div class="live-grid" id="liveNow"><div class="notice">Scanning the game board…</div></div></div>
@@ -95,7 +95,7 @@ const state={uid:null,teamIds:[],leagueIds:[],playerIds:[],teams:[],leagues:[],n
   await loadPersonal();
   await loadPickem();
   await renderPersonalFeed();
-  subscribePersonal();\n  if(window.sportsHome7Load) await window.sportsHome7Load();\n  if(window.sportsHome7Load) await window.sportsHome7Load();
+  subscribePersonal();\n  if(window.sportsHome7Load) await window.sportsHome7Load();
 })();
 
 async function loadGuestFeed(){
@@ -202,7 +202,7 @@ function subscribePersonal(){
     .on('postgres_changes',{event:'*',schema:'public',table:'cr_sports_user_teams',filter:'user_id=eq.'+state.uid},async()=>{await loadPersonal();await renderPersonalFeed()})
     .on('postgres_changes',{event:'*',schema:'public',table:'cr_sports_user_leagues',filter:'user_id=eq.'+state.uid},async()=>{await loadPersonal();await renderPersonalFeed()})
     .on('postgres_changes',{event:'*',schema:'public',table:'cr_sports_user_players',filter:'user_id=eq.'+state.uid},async()=>{await loadPersonal()})
-    .on('postgres_changes',{event:'*',schema:'public',table:'cr_sports_user_notifications',filter:'user_id=eq.'+state.uid},async()=>{await loadPersonal()})
+    .on('postgres_changes',{event:'*',schema:'public',table:'cr_sports_user_notifications',filter:'user_id=eq.'+state.uid},async()=>{await loadPersonal()}).on('postgres_changes',{event:'*',schema:'public',table:'cr_sports_user_followed_games',filter:'user_id=eq.'+state.uid},async()=>{if(window.sportsHome9LoadFollows)await window.sportsHome9LoadFollows();await renderPersonalFeed()})
     .on('postgres_changes',{event:'*',schema:'public',table:'cr_sports_pickem_entries',filter:'user_id=eq.'+state.uid},async()=>{await loadPickem();await renderPersonalFeed()})
     .on('postgres_changes',{event:'*',schema:'public',table:'cr_sports_games'},async()=>{await renderPersonalFeed()})
     .subscribe();
@@ -241,18 +241,117 @@ document.getElementById('liveCount').textContent=ls.length;document.getElementBy
 document.getElementById('liveNow').innerHTML=ls.slice(0,9).map(card).join('')||'<div class="empty">No games are live right now.</div>';document.getElementById('nextUp').innerHTML=up.map(card).join('')||'<div class="empty">No upcoming games found.</div>';document.getElementById('recentFinals').innerHTML=fs.map(card).join('')||'<div class="empty">No recent finals are available.</div>';
 const watched=my.filter(live);document.getElementById('scoreAlertText').textContent=watched.length?watched.length+' saved-sports game'+(watched.length===1?' is':'s are')+' live now.':state.uid?'No saved-team games are live right now. Your dashboard is watching for updates.':'Sign in to activate saved-team score priority.';
 document.getElementById('liveSync').textContent='UPDATED '+new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});bindCards();
-g.forEach(x=>{const o=d.prev.get(x.id);if(o&&(o.home_score!==x.home_score||o.away_score!==x.away_score||o.status!==x.status)&&pri(x)>0)document.getElementById('scoreAlertText').textContent=(x.away?.name||'Away')+' '+(x.away_score??'—')+'–'+(x.home_score??'—')+' '+(x.home?.name||'Home')+' • '+x.status;d.prev.set(x.id,{home_score:x.home_score,away_score:x.away_score,status:x.status})})}
+if(window.sportsHome9Process)window.sportsHome9Process(g);g.forEach(x=>{const o=d.prev.get(x.id);if(o&&(o.home_score!==x.home_score||o.away_score!==x.away_score||o.status!==x.status)&&pri(x)>0)document.getElementById('scoreAlertText').textContent=(x.away?.name||'Away')+' '+(x.away_score??'—')+'–'+(x.home_score??'—')+' '+(x.home?.name||'Home')+' • '+x.status;d.prev.set(x.id,{home_score:x.home_score,away_score:x.away_score,status:x.status})})}
 function tick(){document.querySelectorAll('[data-count]').forEach(x=>x.textContent=cd(new Date(x.dataset.count).getTime()))}
 window.sportsHome7Load=load;setInterval(tick,30000);setInterval(load,60000);document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{if(window.sportsHome7Load)window.sportsHome7Load()},500));
-})();</script><script id="sportsGameCenter8">(function(){
-let currentGame=null,followed=false;
-function key(){return 'crowrules_followed_games'}
-function followedIds(){try{return JSON.parse(localStorage.getItem(key())||'[]')}catch(e){return[]}}
-function saveFollow(id,on){let a=followedIds();a=on?[...new Set([...a,id])]:a.filter(x=>x!==id);localStorage.setItem(key(),JSON.stringify(a));followed=on}
-function gameStatus(g){const s=String(g.status||'').toLowerCase();if(/live|progress|half|overtime|1st|2nd|3rd|4th/.test(s)&&!/final/.test(s))return'LIVE';if(/final|completed|closed/.test(s))return'FINAL';return'UPCOMING'}
+})();</script><script id="sportsGameCenter9">(function(){
+let currentGame=null;
+const FOLLOW_TABLE='cr_sports_user_followed_games';
+const NOTIFY_TABLE='cr_sports_user_notifications';
+const EVENT_TYPES={start:'game_starting',live:'game_live',score:'game_score_change',final:'game_final'};
+const localFallbackKey='crowrules_followed_games';
+
+function localIds(){try{return JSON.parse(localStorage.getItem(localFallbackKey)||'[]')}catch(e){return[]}}
+function setLocalIds(ids){try{localStorage.setItem(localFallbackKey,JSON.stringify([...new Set(ids)]))}catch(e){}}
+function gameStatus(g){const s=String(g.status||'').toLowerCase();if(/live|progress|half|overtime|1st|2nd|3rd|4th/.test(s)&&!/final|completed|closed/.test(s))return'LIVE';if(/final|completed|closed/.test(s))return'FINAL';return'UPCOMING'}
 function esc2(v){return esc(v==null?'':String(v))}
-function render(g){const status=gameStatus(g),f=followedIds().includes(g.id);followed=f;const when=g.starts_at?new Date(g.starts_at).toLocaleString([], {weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'Time TBD';document.getElementById('gameContent').innerHTML='<div class="game-matchup"><div class="game-team"><div class="eyebrow">AWAY</div><h2>'+esc2(g.away?.name||'Away')+'</h2><div class="game-score">'+(g.away_score??'—')+'</div></div><div><div class="game-status">'+status+'</div><div class="muted" style="margin-top:7px">'+esc2(g.league?.name||'SPORTS')+'</div><button class="button small follow-game '+(f?'active':'')+'" id="followGame" style="margin-top:14px">'+(f?'✓ FOLLOWING GAME':'＋ FOLLOW GAME')+'</button></div><div class="game-team"><div class="eyebrow">HOME</div><h2>'+esc2(g.home?.name||'Home')+'</h2><div class="game-score">'+(g.home_score??'—')+'</div></div></div><div class="game-body"><div class="game-grid"><div class="game-panel"><h3>GAME INFORMATION</h3><div class="game-meta"><div><strong>DATE / TIME</strong>'+esc2(when)+'</div><div><strong>VENUE</strong>'+esc2(g.venue||'Venue TBD')+'</div><div><strong>BROADCAST</strong>'+esc2(g.broadcast||'Broadcast TBD')+'</div><div><strong>GAME ID</strong>'+esc2(g.id)+'</div></div></div><div class="game-panel"><h3>TEAM COMPARISON</h3><div class="team-compare"><div class="compare-box"><span>'+esc2(g.away?.name||'Away')+'</span><strong>'+(g.away_score??'—')+'</strong><small>Current score</small></div><div class="compare-box"><span>'+esc2(g.home?.name||'Home')+'</span><strong>'+(g.home_score??'—')+'</strong><small>Current score</small></div></div></div></div><div class="game-panel" style="margin-top:14px"><h3>STATUS TIMELINE</h3><div class="timeline"><div class="timeline-row"><strong>'+esc2(status)+'</strong> • '+esc2(when)+'</div><div class="timeline-row">Score: '+(g.away_score??'—')+'–'+(g.home_score??'—')+'</div><div class="timeline-row">'+esc2(g.broadcast||'No broadcast information currently available')+'</div></div><p class="game-note" style="margin-top:14px">Play-by-play events will populate here when event-level data is available in the CrowRules Sports data model.</p></div></div>';document.getElementById('followGame').onclick=()=>{saveFollow(g.id,!followed);render(g)}}
-window.openGameCenter=async function(id){document.getElementById('gameModal').classList.add('open');document.getElementById('gameModal').setAttribute('aria-hidden','false');document.getElementById('gameContent').innerHTML='<div class="modal-loading">Loading game center…</div>';const r=await sb.from('cr_sports_games').select('id,league_id,starts_at,status,home_score,away_score,home_team_id,away_team_id,venue,broadcast,home:cr_sports_teams!cr_sports_games_home_team_id_fkey(name),away:cr_sports_teams!cr_sports_games_away_team_id_fkey(name),league:cr_sports_leagues!cr_sports_games_league_id_fkey(name)').eq('id',id).maybeSingle();if(r.error||!r.data){document.getElementById('gameContent').innerHTML='<div class="modal-loading">Game details are unavailable.</div>';return}currentGame=r.data;render(currentGame)}
+function followedIds(){return state.uid?(state.followedGameIds||[]):localIds()}
+function isFollowed(id){return followedIds().includes(id)}
+function refreshFollowedCount(){const n=document.getElementById('followedGameCount');if(n)n.textContent=followedIds().length}
+
+async function loadFollowedGames(){
+ if(!state.uid){state.followedGameIds=localIds();refreshFollowedCount();return}
+ const r=await sb.from(FOLLOW_TABLE).select('game_id,notify_start,notify_live,notify_score,notify_final').eq('user_id',state.uid);
+ if(r.error){console.warn('Followed games load:',r.error.message);state.followedGameIds=localIds();refreshFollowedCount();return}
+ state.followedGameIds=(r.data||[]).map(x=>x.game_id);
+ refreshFollowedCount();
+}
+
+async function followGame(id,on){
+ if(!state.uid){
+   const ids=followedIds();
+   setLocalIds(on?[...ids,id]:ids.filter(x=>x!==id));
+   state.followedGameIds=localIds();refreshFollowedCount();return {ok:true,guest:true};
+ }
+ if(on){
+   const r=await sb.from(FOLLOW_TABLE).upsert({user_id:state.uid,game_id:id},{onConflict:'user_id,game_id'});
+   if(r.error)return {ok:false,error:r.error.message};
+ }else{
+   const r=await sb.from(FOLLOW_TABLE).delete().eq('user_id',state.uid).eq('game_id',id);
+   if(r.error)return {ok:false,error:r.error.message};
+ }
+ await loadFollowedGames(); return {ok:true};
+}
+
+async function migrateGuestFollows(){
+ if(!state.uid)return;
+ const ids=localIds();if(!ids.length)return;
+ const rows=ids.map(game_id=>({user_id:state.uid,game_id}));
+ const r=await sb.from(FOLLOW_TABLE).upsert(rows,{onConflict:'user_id,game_id'});
+ if(!r.error){setLocalIds([]);await loadFollowedGames()}
+}
+
+async function notifyOnce(game,event,extra){
+ if(!state.uid)return;
+ const type=EVENT_TYPES[event];if(!type)return;
+ const eventKey=game.id+':'+type+':'+String(extra?.score||game.status||'');
+ const existing=await sb.from(NOTIFY_TABLE).select('id').eq('user_id',state.uid).eq('entity_id',game.id).eq('notification_type',type).contains('data',{event_key:eventKey}).limit(1);
+ if(existing.error)return;
+ if((existing.data||[]).length)return;
+ const away=game.away?.name||'Away',home=game.home?.name||'Home',score=(game.away_score??'—')+'–'+(game.home_score??'—');
+ let title='',body='';
+ if(event==='start'){title='Game Starting';body=away+' at '+home+' is starting now.'}
+ if(event==='live'){title='Game Live';body=away+' at '+home+' is now live.'}
+ if(event==='score'){title='Score Change';body=away+' '+score+' '+home+'.'}
+ if(event==='final'){title='Game Final';body=away+' '+score+' '+home+' — final.'}
+ await sb.from(NOTIFY_TABLE).insert({user_id:state.uid,notification_type:type,title,body,entity_type:'game',entity_id:game.id,read_at:null,data:{event_key:eventKey,game_id:game.id,away_team:away,home_team:home,score,status:game.status||null}});
+}
+
+async function processFollowedGameEvents(games){
+ if(!state.uid)return;
+ const followed=new Set(followedIds());
+ for(const g of games||[]){
+   if(!followed.has(g.id))continue;
+   const key='crowrules_game_snapshot_'+g.id;
+   let old=null;try{old=JSON.parse(localStorage.getItem(key)||'null')}catch(e){}
+   const now=Date.now(),start=new Date(g.starts_at||0).getTime(),status=gameStatus(g);
+   if(!old){
+     localStorage.setItem(key,JSON.stringify({status:g.status,gameStatus:status,home_score:g.home_score,away_score:g.away_score,starts_at:g.starts_at}));
+     if(start>0&&start<=now&&status==='UPCOMING') await notifyOnce(g,'start');
+     continue;
+   }
+   if(old.gameStatus==='UPCOMING'&&status==='LIVE')await notifyOnce(g,'live');
+   if((old.home_score!==g.home_score||old.away_score!==g.away_score)&&status==='LIVE')await notifyOnce(g,'score',{score:(g.away_score??'—')+'–'+(g.home_score??'—')});
+   if(old.gameStatus!=='FINAL'&&status==='FINAL')await notifyOnce(g,'final');
+   localStorage.setItem(key,JSON.stringify({status:g.status,gameStatus:status,home_score:g.home_score,away_score:g.away_score,starts_at:g.starts_at}));
+ }
+}
+
+function render(g){
+ const status=gameStatus(g),f=isFollowed(g.id);
+ const when=g.starts_at?new Date(g.starts_at).toLocaleString([], {weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'Time TBD';
+ document.getElementById('gameContent').innerHTML='<div class="game-matchup"><div class="game-team"><div class="eyebrow">AWAY</div><h2>'+esc2(g.away?.name||'Away')+'</h2><div class="game-score">'+(g.away_score??'—')+'</div></div><div><div class="game-status">'+status+'</div><div class="muted" style="margin-top:7px">'+esc2(g.league?.name||'SPORTS')+'</div><button class="button small follow-game '+(f?'active':'')+'" id="followGame" style="margin-top:14px">'+(f?'✓ FOLLOWING GAME':'＋ FOLLOW GAME')+'</button></div><div class="game-team"><div class="eyebrow">HOME</div><h2>'+esc2(g.home?.name||'Home')+'</h2><div class="game-score">'+(g.home_score??'—')+'</div></div></div><div class="game-body"><div class="game-grid"><div class="game-panel"><h3>GAME INFORMATION</h3><div class="game-meta"><div><strong>DATE / TIME</strong>'+esc2(when)+'</div><div><strong>VENUE</strong>'+esc2(g.venue||'Venue TBD')+'</div><div><strong>BROADCAST</strong>'+esc2(g.broadcast||'Broadcast TBD')+'</div><div><strong>FOLLOW STATUS</strong>'+(f?'Following on this account':'Not following')+'</div></div></div><div class="game-panel"><h3>TEAM COMPARISON</h3><div class="team-compare"><div class="compare-box"><span>'+esc2(g.away?.name||'Away')+'</span><strong>'+(g.away_score??'—')+'</strong><small>Current score</small></div><div class="compare-box"><span>'+esc2(g.home?.name||'Home')+'</span><strong>'+(g.home_score??'—')+'</strong><small>Current score</small></div></div></div></div><div class="game-panel" style="margin-top:14px"><h3>STATUS TIMELINE</h3><div class="timeline"><div class="timeline-row"><strong>'+esc2(status)+'</strong> • '+esc2(when)+'</div><div class="timeline-row">Score: '+(g.away_score??'—')+'–'+(g.home_score??'—')+'</div><div class="timeline-row">'+esc2(g.broadcast||'No broadcast information currently available')+'</div></div><p class="game-note" style="margin-top:14px">Followed games are checked for lifecycle changes on this dashboard. Event-level play-by-play will populate here when that data becomes available.</p></div></div>';
+ document.getElementById('followGame').onclick=async()=>{
+   const b=document.getElementById('followGame');b.disabled=true;
+   const result=await followGame(g.id,!f);
+   if(!result.ok){b.disabled=false;alert('Could not update Follow Game: '+result.error);return}
+   render(g); if(window.sportsHome7Load)await window.sportsHome7Load();
+ };
+}
+
+window.openGameCenter=async function(id){
+ document.getElementById('gameModal').classList.add('open');document.getElementById('gameModal').setAttribute('aria-hidden','false');document.getElementById('gameContent').innerHTML='<div class="modal-loading">Loading game center…</div>';
+ const r=await sb.from('cr_sports_games').select('id,league_id,starts_at,status,home_score,away_score,home_team_id,away_team_id,venue,broadcast,home:cr_sports_teams!cr_sports_games_home_team_id_fkey(name),away:cr_sports_teams!cr_sports_games_away_team_id_fkey(name),league:cr_sports_leagues!cr_sports_games_league_id_fkey(name)').eq('id',id).maybeSingle();
+ if(r.error||!r.data){document.getElementById('gameContent').innerHTML='<div class="modal-loading">Game details are unavailable.</div>';return}
+ currentGame=r.data;render(currentGame);
+};
+
 function close(){document.getElementById('gameModal').classList.remove('open');document.getElementById('gameModal').setAttribute('aria-hidden','true')}
-document.addEventListener('DOMContentLoaded',()=>{document.getElementById('gameClose').onclick=close;document.getElementById('gameModal').onclick=e=>{if(e.target.id==='gameModal')close()};document.addEventListener('keydown',e=>{if(e.key==='Escape')close()})})
+document.addEventListener('DOMContentLoaded',async()=>{
+ document.getElementById('gameClose').onclick=close;document.getElementById('gameModal').onclick=e=>{if(e.target.id==='gameModal')close()};document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+ setTimeout(async()=>{await loadFollowedGames();await migrateGuestFollows()},900);
+});
+setInterval(async()=>{if(state.uid)await loadFollowedGames()},60000);
+window.sportsHome9Process=processFollowedGameEvents;
+window.sportsHome9LoadFollows=loadFollowedGames;
 })();</script></body></html>
