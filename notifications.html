@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CrowRules Sports | Notifications</title><link rel="stylesheet" href="css/sports.css"></head>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CrowRules Sports 12.0 | Notification Command Center</title><link rel="stylesheet" href="css/sports.css"></head>
 <body><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/sports.js"></script><script>shell('notifications');</script>
 <main class="wrap" style="max-width:1100px;padding:70px 20px 100px">
 <section class="hero"><div class="eyebrow">CROWRULES SPORTS 10.0</div><h1>NOTIFICATION CENTER</h1><p>Game Starting • Live • Score Change • Final</p><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px"><button class="button" id="markAll">MARK ALL READ</button><button class="button" id="refresh">REFRESH</button></div></section>
@@ -22,4 +22,28 @@ document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{currentFilter=b.
 document.getElementById('markAll').onclick=async()=>{const s=await sb.auth.getSession(),u=s.data.session?.user;if(!u)return;await sb.from('cr_sports_user_notifications').update({read_at:new Date().toISOString()}).eq('user_id',u.id).is('read_at',null);loadUnread();load()};
 sb.auth.onAuthStateChange(()=>setTimeout(load,50));load();
 </script><script>function loadUnread(){const el=document.querySelector('.navlinks a[href="notifications.html"]');if(!el)return;sb.auth.getSession().then(({data})=>{if(!data.session){el.textContent='NOTIFICATIONS';return}sb.from('cr_sports_user_notifications').select('id',{count:'exact',head:true}).eq('user_id',data.session.user.id).is('read_at',null).then(r=>el.textContent='NOTIFICATIONS'+(r.count?' ('+r.count+')':''))})}</script>
-</body></html>
+<script id="sportsNotifications12">(function(){
+"use strict";
+let nrt=null;
+function renderRealtimeRow(x){
+ const el=document.getElementById("list");if(!el)return;
+ const a=document.createElement("article");a.className="game-panel";a.style.margin="12px 0";
+ a.innerHTML='<div style="display:flex;justify-content:space-between;gap:15px;align-items:start"><div><span class="tag">LIVE</span><h3 style="margin:10px 0 5px"></h3><div class="muted body"></div></div><small class="muted time"></small></div><div style="margin-top:12px"><a class="button small" href="'+(x.entity_id?'home.html?game='+encodeURIComponent(x.entity_id):'notifications.html')+'">'+(x.entity_id?'OPEN GAME':'OPEN ALERTS')+'</a></div>';
+ a.querySelector("h3").textContent=x.title||"Sports Alert";a.querySelector(".body").textContent=x.body||"";a.querySelector(".time").textContent=fmt(x.created_at);
+ el.prepend(a);
+}
+function startNotificationRealtime(){
+ if(!currentUser)return;
+ if(nrt)sb.removeChannel(nrt);
+ nrt=sb.channel("sports-notifications-12")
+ .on("postgres_changes",{event:"INSERT",schema:"public",table:"cr_sports_user_notifications",filter:"user_id=eq."+currentUser.id},p=>{
+   const x=p.new;if(!x)return;allRows=[x,...allRows].slice(0,100);renderRealtimeRow(x);stateEl.textContent="NEW ALERT • "+x.title;
+   if(window.loadUnread)loadUnread();
+ })
+ .on("postgres_changes",{event:"UPDATE",schema:"public",table:"cr_sports_user_notifications",filter:"user_id=eq."+currentUser.id},p=>{if(p.new?.id)load()})
+ .subscribe(s=>{if(s==="SUBSCRIBED")stateEl.textContent="● LIVE • Notifications updating in real time";});
+}
+const originalLoad=load;
+load=async function(){await originalLoad();if(currentUser)startNotificationRealtime()};
+setTimeout(()=>{if(currentUser)startNotificationRealtime()},1800);
+})();</script></body></html>
