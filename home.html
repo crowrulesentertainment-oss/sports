@@ -99,7 +99,8 @@ const state={uid:null,teamIds:[],leagueIds:[],playerIds:[],teams:[],leagues:[],n
   await loadPersonal();
   await loadPickem();
   await renderPersonalFeed();
-  subscribePersonal();\n  if(window.sportsHome7Load) await window.sportsHome7Load();
+  subscribePersonal();
+  if(window.sportsHome7Load) await window.sportsHome7Load();
 })();
 
 async function loadGuestFeed(){
@@ -318,113 +319,3 @@ async function processFollowedGameEvents(games){
  const followed=new Set(followedIds());
  for(const g of games||[]){
    if(!followed.has(g.id))continue;
-   const key='crowrules_game_snapshot_'+g.id;
-   let old=null;try{old=JSON.parse(localStorage.getItem(key)||'null')}catch(e){}
-   const now=Date.now(),start=new Date(g.starts_at||0).getTime(),status=gameStatus(g);
-   if(!old){
-     localStorage.setItem(key,JSON.stringify({status:g.status,gameStatus:status,home_score:g.home_score,away_score:g.away_score,starts_at:g.starts_at}));
-     if(start>0&&start<=now&&status!=='FINAL') await notifyOnce(g,'start');
-     continue;
-   }
-   if(old.gameStatus==='UPCOMING'&&start>0&&start<=now)await notifyOnce(g,'start');
-   if(old.gameStatus==='UPCOMING'&&status==='LIVE')await notifyOnce(g,'live');
-   if((old.home_score!==g.home_score||old.away_score!==g.away_score)&&status==='LIVE')await notifyOnce(g,'score',{score:(g.away_score??'—')+'–'+(g.home_score??'—')});
-   if(old.gameStatus!=='FINAL'&&status==='FINAL')await notifyOnce(g,'final');
-   localStorage.setItem(key,JSON.stringify({status:g.status,gameStatus:status,home_score:g.home_score,away_score:g.away_score,starts_at:g.starts_at}));
- }
-}
-
-function render(g){
- const status=gameStatus(g),f=isFollowed(g.id);
- const when=g.starts_at?new Date(g.starts_at).toLocaleString([], {weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'Time TBD';
- document.getElementById('gameContent').innerHTML='<div class="game-matchup"><div class="game-team"><div class="eyebrow">AWAY</div><h2>'+esc2(g.away?.name||'Away')+'</h2><div class="game-score">'+(g.away_score??'—')+'</div></div><div><div class="game-status">'+status+'</div><div class="muted" style="margin-top:7px">'+esc2(g.league?.name||'SPORTS')+'</div><button class="button small follow-game '+(f?'active':'')+'" id="followGame" style="margin-top:14px">'+(f?'✓ FOLLOWING GAME':'＋ FOLLOW GAME')+'</button></div><div class="game-team"><div class="eyebrow">HOME</div><h2>'+esc2(g.home?.name||'Home')+'</h2><div class="game-score">'+(g.home_score??'—')+'</div></div></div><div class="game-body"><div class="game-grid"><div class="game-panel"><h3>GAME INFORMATION</h3><div class="game-meta"><div><strong>DATE / TIME</strong>'+esc2(when)+'</div><div><strong>VENUE</strong>'+esc2(g.venue||'Venue TBD')+'</div><div><strong>BROADCAST</strong>'+esc2(g.broadcast||'Broadcast TBD')+'</div><div><strong>FOLLOW STATUS</strong>'+(f?'Following on this account':'Not following')+'</div></div></div><div class="game-panel"><h3>TEAM COMPARISON</h3><div class="team-compare"><div class="compare-box"><span>'+esc2(g.away?.name||'Away')+'</span><strong>'+(g.away_score??'—')+'</strong><small>Current score</small></div><div class="compare-box"><span>'+esc2(g.home?.name||'Home')+'</span><strong>'+(g.home_score??'—')+'</strong><small>Current score</small></div></div></div></div><div class="game-panel" style="margin-top:14px"><h3>STATUS TIMELINE</h3><div class="timeline"><div class="timeline-row"><strong>'+esc2(status)+'</strong> • '+esc2(when)+'</div><div class="timeline-row">Score: '+(g.away_score??'—')+'–'+(g.home_score??'—')+'</div><div class="timeline-row">'+esc2(g.broadcast||'No broadcast information currently available')+'</div></div><p class="game-note" style="margin-top:14px">Followed games are checked for lifecycle changes on this dashboard. Event-level play-by-play will populate here when that data becomes available.</p></div></div>';
- document.getElementById('followGame').onclick=async()=>{
-   const b=document.getElementById('followGame');b.disabled=true;
-   const result=await followGame(g.id,!f);
-   if(!result.ok){b.disabled=false;alert('Could not update Follow Game: '+result.error);return}
-   render(g); if(window.sportsHome7Load)await window.sportsHome7Load();
- };
-}
-
-window.openGameCenter=async function(id){
- document.getElementById('gameModal').classList.add('open');document.getElementById('gameModal').setAttribute('aria-hidden','false');document.getElementById('gameContent').innerHTML='<div class="modal-loading">Loading game center…</div>';
- const r=await sb.from('cr_sports_games').select('id,league_id,starts_at,status,home_score,away_score,home_team_id,away_team_id,venue,broadcast,home:cr_sports_teams!cr_sports_games_home_team_id_fkey(name),away:cr_sports_teams!cr_sports_games_away_team_id_fkey(name),league:cr_sports_leagues!cr_sports_games_league_id_fkey(name)').eq('id',id).maybeSingle();
- if(r.error||!r.data){document.getElementById('gameContent').innerHTML='<div class="modal-loading">Game details are unavailable.</div>';return}
- currentGame=r.data;window.currentGame=currentGame;render(currentGame);
-};
-
-function close(){document.getElementById('gameModal').classList.remove('open');document.getElementById('gameModal').setAttribute('aria-hidden','true')}
-document.addEventListener('DOMContentLoaded',async()=>{setTimeout(()=>{const id=new URLSearchParams(location.search).get('game');if(id&&window.openGameCenter)window.openGameCenter(id)},1200);
- document.getElementById('gameClose').onclick=close;document.getElementById('gameModal').onclick=e=>{if(e.target.id==='gameModal')close()};document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
- setTimeout(async()=>{await loadFollowedGames();await migrateGuestFollows()},900);
-});
-setInterval(async()=>{if(state.uid)await loadFollowedGames()},60000);
-window.sportsHome9Process=processFollowedGameEvents;
-window.sportsHome9LoadFollows=loadFollowedGames;
-})();</script><script id="sportsCommandCenter12">(function(){
-"use strict";
-const rt={channel:null,notes:[],games:new Map(),timeline:new Map()};
-function rtChanged(old,g){
- const out=[]; const os=rtGameStatus(old||{}), ns=rtGameStatus(g||{});
- if(old && os!==ns) out.push({kind:ns.toLowerCase(),title:"Status change",body:os+" → "+ns});
- if(old && (old.away_score!==g.away_score||old.home_score!==g.home_score)) out.push({kind:"score",title:"Score update",body:(g.away?.name||"Away")+" "+(g.away_score??"—")+"–"+(g.home_score??"—")+" "+(g.home?.name||"Home")});
- return out;
-}
-function rtStatus(t){const e=document.getElementById("realtimeStatus");if(e)e.textContent=t}
-function rtEsc(v){return esc(v==null?"":String(v))}
-function rtTime(v){const d=new Date(v);return isNaN(d)?"":d.toLocaleTimeString([], {hour:"numeric",minute:"2-digit",second:"2-digit"})}
-function rtGameStatus(g){const s=String(g.status||"").toLowerCase();if(/final|completed|closed/.test(s))return"FINAL";if(/live|progress|half|overtime|1st|2nd|3rd|4th/.test(s))return"LIVE";return"UPCOMING"}
-function addActivity(kind,title,body,at){
- rt.notes.unshift({kind,title,body,at:at||new Date().toISOString()});rt.notes=rt.notes.slice(0,20);renderActivity();
-}
-function renderActivity(){
- const el=document.getElementById("liveActivity");if(!el)return;
- if(!rt.notes.length){el.innerHTML='<div class="empty">No live activity yet. Game updates and account alerts will appear here automatically.</div>';return}
- el.innerHTML=rt.notes.map(x=>'<div class="activity-row"><strong>'+rtEsc(x.kind.toUpperCase())+' • '+rtEsc(x.title)+'</strong><div>'+rtEsc(x.body)+'</div><small>'+rtEsc(rtTime(x.at))+'</small></div>').join("");
-}
-async function hydrateNotes(){
- if(!state.uid)return;
- const r=await sb.from("cr_sports_user_notifications").select("id,notification_type,title,body,entity_id,created_at").eq("user_id",state.uid).order("created_at",{ascending:false}).limit(12);
- if(!r.error)(r.data||[]).reverse().forEach(x=>addActivity("alert",x.title,x.body,x.created_at));
-}
-function gameEvent(g,old){
- const status=rtGameStatus(g),score=(g.away_score??"—")+"–"+(g.home_score??"—")+" "+(g.home?.name||"Home");
- if(!old){rt.games.set(g.id,{...g});return}
- const changes=rtChanged(old,g);
- changes.forEach(x=>addActivity(x.kind,(g.away?.name||"Away")+" @ "+(g.home?.name||"Home"),x.body,g.updated_at||new Date().toISOString()));
- rt.games.set(g.id,{...old,...g});
- if(window.sportsHome7Load) window.sportsHome7Load();
- if(window.currentGame && window.currentGame.id===g.id && window.openGameCenter) window.openGameCenter(g.id);
-}
-async function hydrateGames(){
- const r=await sb.from("cr_sports_games").select("id,starts_at,status,home_score,away_score,home_team_id,away_team_id,home:cr_sports_teams!cr_sports_games_home_team_id_fkey(name),away:cr_sports_teams!cr_sports_games_away_team_id_fkey(name),league:cr_sports_leagues!cr_sports_games_league_id_fkey(name)").order("starts_at",{ascending:false}).limit(80);
- if(!r.error)(r.data||[]).forEach(g=>rt.games.set(g.id,g));
-}
-function subscribe(){
- if(rt.channel)sb.removeChannel(rt.channel);
- rt.channel=sb.channel("sports-command-center-12")
- .on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_games"},p=>{
-   const g=p.new||p.old;if(!g?.id)return;
-   const old=rt.games.get(g.id);if(p.eventType==="DELETE"){rt.games.delete(g.id);addActivity("game","Game removed","A game was removed from the live sports board.");return}
-   if(!old){rt.games.set(g.id,g);if(window.sportsHome7Load)window.sportsHome7Load();return}
-   gameEvent({...g},old);
- })
- .on("postgres_changes",{event:"INSERT",schema:"public",table:"cr_sports_user_notifications",filter:state.uid?"user_id=eq."+state.uid:undefined},p=>{
-   const x=p.new;if(!x)return;addActivity("alert",x.title||"Sports Alert",x.body||"",x.created_at);
-   if(window.loadUnread)window.loadUnread();
- })
- .subscribe(status=>{rtStatus(status==="SUBSCRIBED"?"● LIVE":"RECONNECTING…");if(status!=="SUBSCRIBED")setTimeout(()=>subscribe(),5000)});
-}
-async function start12(){
- await hydrateGames();await hydrateNotes();subscribe();rtStatus("● LIVE");
-}
-window.sports12Start=start12;
-document.addEventListener("DOMContentLoaded",()=>setTimeout(start12,1400));
-})();</script><script id="sportsIntelligence13">(function(){
-"use strict";
-const gi=window.sports12Start;
-window.sports13DescribeChange=function(old,g){
- const changes=rtChanged(old,g);
- return changes.length?changes.map(x=>x.title+": "+x.body).join(" • "):"No score or status change.";
-};
-})();</script></body></html>
