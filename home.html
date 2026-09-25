@@ -246,6 +246,7 @@ function tick(){document.querySelectorAll('[data-count]').forEach(x=>x.textConte
 window.sportsHome7Load=load;setInterval(tick,30000);setInterval(load,60000);document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{if(window.sportsHome7Load)window.sportsHome7Load()},500));
 })();</script><script id="sportsGameCenter9">(function(){
 let currentGame=null;
+state.followedGameIds=state.followedGameIds||[];state.followedGameSettings=state.followedGameSettings||{};
 const FOLLOW_TABLE='cr_sports_user_followed_games';
 const NOTIFY_TABLE='cr_sports_user_notifications';
 const EVENT_TYPES={start:'game_starting',live:'game_live',score:'game_score_change',final:'game_final'};
@@ -256,6 +257,7 @@ function setLocalIds(ids){try{localStorage.setItem(localFallbackKey,JSON.stringi
 function gameStatus(g){const s=String(g.status||'').toLowerCase();if(/live|progress|half|overtime|1st|2nd|3rd|4th/.test(s)&&!/final|completed|closed/.test(s))return'LIVE';if(/final|completed|closed/.test(s))return'FINAL';return'UPCOMING'}
 function esc2(v){return esc(v==null?'':String(v))}
 function followedIds(){return state.uid?(state.followedGameIds||[]):localIds()}
+function followSettings(id){return state.followedGameSettings?.[id]||{start:true,live:true,score:true,final:true}}
 function isFollowed(id){return followedIds().includes(id)}
 function refreshFollowedCount(){const n=document.getElementById('followedGameCount');if(n)n.textContent=followedIds().length}
 
@@ -263,7 +265,7 @@ async function loadFollowedGames(){
  if(!state.uid){state.followedGameIds=localIds();refreshFollowedCount();return}
  const r=await sb.from(FOLLOW_TABLE).select('game_id,notify_start,notify_live,notify_score,notify_final').eq('user_id',state.uid);
  if(r.error){console.warn('Followed games load:',r.error.message);state.followedGameIds=localIds();refreshFollowedCount();return}
- state.followedGameIds=(r.data||[]).map(x=>x.game_id);
+ state.followedGameIds=(r.data||[]).map(x=>x.game_id);state.followedGameSettings={};(r.data||[]).forEach(x=>state.followedGameSettings[x.game_id]={start:x.notify_start,live:x.notify_live,score:x.notify_score,final:x.notify_final});
  refreshFollowedCount();
 }
 
@@ -292,7 +294,7 @@ async function migrateGuestFollows(){
 }
 
 async function notifyOnce(game,event,extra){
- if(!state.uid)return;
+ if(!state.uid||followSettings(game.id)[event]===false)return;
  const type=EVENT_TYPES[event];if(!type)return;
  const eventKey=game.id+':'+type+':'+String(extra?.score||game.status||'');
  const existing=await sb.from(NOTIFY_TABLE).select('id').eq('user_id',state.uid).eq('entity_id',game.id).eq('notification_type',type).contains('data',{event_key:eventKey}).limit(1);
@@ -317,9 +319,10 @@ async function processFollowedGameEvents(games){
    const now=Date.now(),start=new Date(g.starts_at||0).getTime(),status=gameStatus(g);
    if(!old){
      localStorage.setItem(key,JSON.stringify({status:g.status,gameStatus:status,home_score:g.home_score,away_score:g.away_score,starts_at:g.starts_at}));
-     if(start>0&&start<=now&&status==='UPCOMING') await notifyOnce(g,'start');
+     if(start>0&&start<=now&&status!=='FINAL') await notifyOnce(g,'start');
      continue;
    }
+   if(old.gameStatus==='UPCOMING'&&start>0&&start<=now)await notifyOnce(g,'start');
    if(old.gameStatus==='UPCOMING'&&status==='LIVE')await notifyOnce(g,'live');
    if((old.home_score!==g.home_score||old.away_score!==g.away_score)&&status==='LIVE')await notifyOnce(g,'score',{score:(g.away_score??'—')+'–'+(g.home_score??'—')});
    if(old.gameStatus!=='FINAL'&&status==='FINAL')await notifyOnce(g,'final');
