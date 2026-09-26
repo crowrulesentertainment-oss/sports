@@ -10,7 +10,7 @@
 <style>
 .event-hero{min-height:520px;display:flex;align-items:end;background:radial-gradient(circle at 80% 20%,rgba(225,6,0,.2),transparent 30%),linear-gradient(135deg,#050506,#101017)}
 .event-wrap{max-width:1500px;width:100%;margin:auto;padding:80px 24px 55px}
-.event-title{font:900 clamp(46px,8vw,100px)/.95 Orbitron;letter-spacing:-4px;margin:12px 0}.event-title span{color:#e10600}
+.event-title{font:900 clamp(46px,8vw,100px)/.95 Orbitron;letter-spacing:-4px;margin:12px 0}.event-title span{color:#e10600}.event-art{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.55;pointer-events:none}.event-wrap{position:relative;z-index:1}.event-hero{position:relative;overflow:hidden}.event-hero:after{content:"";position:absolute;inset:auto 0 0;height:45%;background:linear-gradient(transparent,#050506);pointer-events:none}.hero-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.button:disabled{opacity:.55;cursor:not-allowed}.tag.scheduled{border-color:#34343a}.tag.completed{border-color:#303039}.tag.live{border-color:#e10600;color:#fff;background:#220909}.empty-state{padding:30px;border:1px dashed #303036;background:#0a0a0e;text-align:center}
 .event-meta{display:flex;gap:8px;flex-wrap:wrap}.event-grid{display:grid;grid-template-columns:2fr 1fr;gap:18px}
 .panel{background:#0d0d10;border:1px solid #27272b;padding:24px}.panel h2,.panel h3{font-family:Orbitron}
 .muted{color:#888;line-height:1.7}.stat{padding:14px 0;border-bottom:1px solid #222}.stat:last-child{border-bottom:0}
@@ -70,12 +70,20 @@ async function loadEvent(){
 }
 async function renderEvent(){
  const e=eventRecord,league=e.cr_sports_leagues?.name||"SPORTS";document.title=e.title+" | CrowRules Sports";
- document.getElementById("hero").innerHTML='<div class="event-meta"><span class="tag">'+esc(league)+'</span><span class="tag '+statusClass(e.status)+'">'+esc(String(e.status||"scheduled").toUpperCase())+'</span><span class="tag">'+esc(e.event_type||"EVENT")+'</span></div><h1 class="event-title">'+esc(e.title)+'</h1><p class="muted">'+esc(e.description||"Dedicated CrowRules Sports Event Center.")+'</p><div class="actions"><button class="button" id="followBtn">FOLLOW EVENT</button>'+(e.event_url?'<a class="button secondary" href="'+esc(e.event_url)+'" target="_blank" rel="noopener">OFFICIAL EVENT</a>':"")+'<a class="button secondary" href="combat.html">BACK TO COMBAT</a></div>';
- document.getElementById("eventBody").innerHTML='<div class="panel"><div class="eyebrow">EVENT DETAILS</div><h2>'+esc(e.title)+'</h2><div class="stat"><strong>WHEN</strong><div class="muted">'+esc(fmtDate(e.starts_at))+'</div></div><div class="stat"><strong>VENUE</strong><div class="muted">'+esc(e.venue||"Venue TBD")+'</div></div><div class="stat"><strong>LOCATION</strong><div class="muted">'+esc(e.city||"Location TBD")+'</div></div><div class="stat"><strong>BROADCAST</strong><div class="muted">'+esc(e.broadcast||"See official event information")+'</div></div><div class="stat"><strong>LAST PROVIDER UPDATE</strong><div class="muted">'+esc(fmtDate(e.provider_updated_at))+'</div></div></div><aside class="panel"><div class="eyebrow">EVENT STATUS</div><h3>'+esc(String(e.status||"scheduled").toUpperCase())+'</h3><div class="countdown" id="countdown">--:--:--</div><p class="muted">Countdown to the scheduled start. Live status is controlled by the event data source.</p><div class="actions"><a class="button small" href="scores.html">SCORES</a><a class="button small secondary" href="schedule.html">SCHEDULE</a></div></aside>';
- await bindFollow();tick();
+ document.getElementById("hero").innerHTML='<div class="event-art" style="'+(e.image_url?"background-image:linear-gradient(90deg,rgba(5,5,6,.96),rgba(5,5,6,.55)),url(\''+esc(e.image_url)+'\')":"background:linear-gradient(135deg,#0d0d12,#181820)")+'"></div><div class="event-meta"><span class="tag">'+esc(league)+'</span><span class="tag '+statusClass(e.status)+'">'+esc(String(e.status||"scheduled").toUpperCase())+'</span><span class="tag">'+esc(e.event_type||"EVENT")+'</span></div><h1 class="event-title">'+esc(e.title)+'</h1><p class="muted">'+esc(e.description||"Dedicated CrowRules Sports Event Center.")+'</p><div class="actions"><button class="button" id="followBtn">FOLLOW EVENT</button>'+(e.event_url?'<a class="button secondary" href="'+esc(e.event_url)+'" target="_blank" rel="noopener">OFFICIAL EVENT</a>':"")+'<a class="button secondary" href="combat.html">BACK TO COMBAT</a></div>';
+ document.getElementById("eventBody").innerHTML='<div class="panel"><div class="eyebrow">EVENT DETAILS</div><h2>'+esc(e.title)+'</h2><div class="stat"><strong>WHEN</strong><div class="muted">'+esc(fmtDate(e.starts_at))+'</div></div><div class="stat"><strong>VENUE</strong><div class="muted">'+esc(e.venue||"Venue TBD")+'</div></div><div class="stat"><strong>LOCATION</strong><div class="muted">'+esc(e.city||"Location TBD")+'</div></div><div class="stat"><strong>BROADCAST</strong><div class="muted">'+esc(e.broadcast||"See official event information")+'</div></div><div class="stat"><strong>LAST PROVIDER UPDATE</strong><div class="muted">'+esc(fmtDate(e.provider_updated_at))+'</div></div></div><aside class="panel"><div class="eyebrow">EVENT STATUS</div><h3>'+esc(String(e.status||"scheduled").toUpperCase())+'</h3><div class="countdown" id="countdown">--:--:--</div><p class="muted">Countdown to the scheduled start. Live status is controlled by the event data source.</p><div class="actions"><a class="button small" href="scores.html">SCORES</a><a class="button small secondary" href="schedule.html">SCHEDULE</a><button class="button small secondary" id="refreshEventBtn">REFRESH</button></div></aside>';
+ await bindFollow();bindShare();document.getElementById("refreshEventBtn")?.addEventListener("click",()=>{const b=document.getElementById("refreshEventBtn");b.textContent="REFRESHING…";loadEvent().finally(()=>{if(b)b.textContent="REFRESH";});});tick();
  if(isUfc()) await loadUfcFightCard();
  else if(["WWE","AEW"].includes(String(eventRecord?.cr_sports_leagues?.code||"").toUpperCase())) await loadWrestlingCard();
  else document.getElementById("fightCardMount").innerHTML="";
+}
+async function bindShare(){
+ const b=document.getElementById("shareBtn");if(!b)return;
+ b.onclick=async()=>{
+   const payload={title:eventRecord?.title||"CrowRules Sports Event",text:"Follow this event in the CrowRules Sports Event Center.",url:location.href};
+   try{if(navigator.share)await navigator.share(payload);else{await navigator.clipboard.writeText(location.href);b.textContent="LINK COPIED";setTimeout(()=>b.textContent="SHARE EVENT",1800);}}
+   catch(e){}
+ };
 }
 async function bindFollow(){
  const b=document.getElementById("followBtn"),s=await sb.auth.getSession(),u=s.data.session?.user;
@@ -85,12 +93,39 @@ async function bindFollow(){
 }
 async function loadWrestlingCard(){
  const mount=document.getElementById("fightCardMount");
- mount.innerHTML='<div class="panel fight-card-panel"><div class="eyebrow">WRESTLING EVENT CENTER</div><h2>Loading Match Card…</h2><p class="muted">Loading WWE / AEW matches from the CrowRules wrestling data layer.</p></div>';
- const r=await sb.from("cr_sports_wrestling_matches").select("*").eq("event_id",eventRecord.id).order("match_order",{ascending:true});
- if(r.error){mount.innerHTML='<div class="panel fight-card-panel"><h2>MATCH CARD UNAVAILABLE</h2><p class="muted">'+esc(r.error.message)+'</p></div>';return;}
+ mount.innerHTML='<div class="panel fight-card-panel"><div class="eyebrow">WRESTLING EVENT CENTER</div><h2>Loading Match Card…</h2><p class="muted">Resolving the synchronized WWE / AEW event and loading its verified matches.</p></div>';
+ const league=String(eventRecord?.cr_sports_leagues?.code||"").toUpperCase();
+ const providerId=eventRecord?.provider_event_id;
+ let wr=null;
+ if(providerId){
+   wr=await sb.from("cr_sports_wrestling_events").select("*").eq("organization",league).eq("provider_event_id",providerId).maybeSingle();
+ }
+ if(wr?.error){
+   mount.innerHTML='<div class="panel fight-card-panel"><h2>WRESTLING DATA ERROR</h2><p class="muted">'+esc(wr.error.message)+'</p><div class="actions"><button class="button small" onclick="loadWrestlingCard()">RETRY</button></div></div>';
+   return;
+ }
+ if(!wr?.data){
+   mount.innerHTML='<div class="panel fight-card-panel"><div class="eyebrow">'+esc(league||"WRESTLING")+' EVENT CENTER</div><h2>EVENT DATA PENDING</h2><p class="muted">The public Sports event exists, but its synchronized wrestling-event record has not arrived yet.</p><div class="sync-note">Provider event ID: '+esc(providerId||"not available")+'</div></div>';
+   return;
+ }
+ const r=await sb.from("cr_sports_wrestling_matches").select("*").eq("event_id",wr.data.id).order("match_order",{ascending:true});
+ if(r.error){
+   mount.innerHTML='<div class="panel fight-card-panel"><h2>MATCH CARD UNAVAILABLE</h2><p class="muted">'+esc(r.error.message)+'</p><div class="actions"><button class="button small" onclick="loadWrestlingCard()">RETRY</button></div></div>';
+   return;
+ }
  const rows=r.data||[];
- if(!rows.length){mount.innerHTML='<div class="panel fight-card-panel"><div class="eyebrow">'+esc(eventRecord.cr_sports_leagues?.code||"WRESTLING")+' EVENT CENTER</div><h2>MATCH CARD PENDING</h2><p class="muted">The event is synchronized, but no verified matches are stored yet.</p><div class="actions"><a class="button small" href="combat.html">BACK TO COMBAT</a></div></div>';return;}
- mount.innerHTML='<div class="panel fight-card-panel"><div class="fight-card-head"><div><div class="eyebrow">'+esc(eventRecord.cr_sports_leagues?.code||"WRESTLING")+' • MATCH CARD</div><h2>'+esc(eventRecord.title)+'</h2></div><div class="tag">'+rows.length+' MATCHES</div></div><p class="muted">Wrestling matches are synchronized separately from UFC fight-bout data.</p><div class="fight-card-grid">'+rows.map((m,i)=>'<article class="bout"><div class="bout-top"><div class="bout-order">MATCH '+String(i+1).padStart(2,"0")+'</div><div class="weight">'+esc(m.match_type||"MATCH")+(m.title_fight?" • TITLE":"")+'</div><div class="bout-status">'+esc(String(m.result||"SCHEDULED").toUpperCase())+'</div></div><div class="fighter-grid"><div class="fighter-card red"><div class="fighter-head"><div><div class="fighter-side">RED / FIRST COMPETITOR</div><div class="fighter-name">'+esc(m.red_name||"TBD")+'</div></div></div></div><div class="versus">VS</div><div class="fighter-card blue"><div class="fighter-head"><div><div class="fighter-side">BLUE / SECOND COMPETITOR</div><div class="fighter-name">'+esc(m.blue_name||"TBD")+'</div></div></div></div></div><div class="result-row"><div class="result">'+esc(m.winner_name||m.result||"SCHEDULED")+(m.method?" • "+esc(m.method):"")+'</div>'+(m.round?'<div class="sync-note">Round / time: '+esc(m.round)+'</div>':"")+(m.title_fight?'<div class="sync-note">Championship match</div>':"")+'</div></article>').join("")+'</div><div class="sync-note">WWE / AEW data • CrowRules wrestling-sync • Supabase Realtime</div></div>';
+ if(!rows.length){
+   mount.innerHTML='<div class="panel fight-card-panel"><div class="eyebrow">'+esc(league||"WRESTLING")+' EVENT CENTER</div><h2>MATCH CARD PENDING</h2><p class="muted">The event is synchronized, but the current provider has not supplied verified match-card records for this event yet.</p><div class="progress-wrap"><div class="progress-top"><span>SYNC STATUS</span><span>EVENT CONNECTED</span></div><div class="sync-note">The Event Center is correctly linked to the wrestling-sync data layer. Match data will appear automatically when the provider supplies it.</div></div></div>';
+   return;
+ }
+ const titleFightCount=rows.filter(x=>x.title_fight).length;
+ mount.innerHTML='<div class="panel fight-card-panel"><div class="fight-card-head"><div><div class="eyebrow">'+esc(league||"WRESTLING")+' • MATCH CARD</div><h2>'+esc(eventRecord.title)+'</h2></div><div class="tag">'+rows.length+' MATCH'+(rows.length===1?"":"ES")+(titleFightCount?" • "+titleFightCount+" TITLE":"")+'</div></div><p class="muted">Verified wrestling matches synchronized by CrowRules. Championship matches are highlighted when the provider identifies a title fight.</p><div class="card-toolbar"><button class="card-filter active" data-filter="all">ALL MATCHES</button><button class="card-filter" data-filter="title">TITLE MATCHES</button><button class="card-filter" data-filter="completed">COMPLETED</button></div><div class="fight-card-grid">'+rows.map((m,i)=>{
+   const title=!!m.title_fight;
+   const completed=!!m.winner_name||String(m.result||"").toLowerCase().includes("win")||String(m.status||"").toLowerCase()==="completed";
+   const filter=title?"title":completed?"completed":"all";
+   return '<article class="bout" data-card="'+filter+'"><div class="bout-top"><div class="bout-order">MATCH '+String(i+1).padStart(2,"0")+'</div><div class="weight">'+esc(m.match_type||"MATCH")+(title?" • TITLE":"")+'</div><div class="bout-status">'+esc(String(m.result||"SCHEDULED").toUpperCase())+'</div></div><div class="fighter-grid"><div class="fighter-card red"><div class="fighter-head"><div><div class="fighter-side">RED / FIRST COMPETITOR</div><div class="fighter-name">'+esc(m.red_name||"TBD")+'</div></div></div></div><div class="versus">VS</div><div class="fighter-card blue"><div class="fighter-head"><div><div class="fighter-side">BLUE / SECOND COMPETITOR</div><div class="fighter-name">'+esc(m.blue_name||"TBD")+'</div></div></div></div></div><div class="result-row"><div class="result">'+esc(m.winner_name||m.result||"SCHEDULED")+(m.method?" • "+esc(m.method):"")+'</div>'+(m.round?'<div class="sync-note">Round / time: '+esc(m.round)+'</div>':"")+(title?'<div class="sync-note" style="color:#e10600">CHAMPIONSHIP MATCH'+(m.champion_name?" • Champion: "+esc(m.champion_name):"")+'</div>':"")+(m.match_url?'<div class="actions"><a class="button small secondary" href="'+esc(m.match_url)+'" target="_blank" rel="noopener">MATCH SOURCE</a></div>':"")+'</div></article>';
+ }).join("")+'</div><div class="sync-note">Source: '+esc(league||"WRESTLING")+' provider • synchronized through wrestling-sync • Last event update: '+esc(fmtDate(eventRecord.provider_updated_at))+'</div></div>';
+ bindCardFilters();
 }
 async function syncUfcCard(){const result=await sb.functions.invoke("ufc-card-sync",{body:{event_id:eventRecord.id}});if(result.error)return{ok:false,error:result.error.message};return result.data||{ok:true};}
 function shouldRefresh(rows){if(!rows.length)return true;const latest=rows.reduce((m,r)=>Math.max(m,new Date(r.provider_updated_at||r.updated_at||0).getTime()),0);return !latest||Date.now()-latest>2*60*60*1000;}
@@ -120,7 +155,7 @@ async function loadLiveCommand(){
   const r=await fetch("https://api.citoapi.com/api/v1/ufc/live/events",{headers:{"Accept":"application/json"}});
   if(!r.ok){box.classList.remove("active");return}
   const p=await r.json(); const list=Array.isArray(p)?p:(p?.data||p?.events||[]);
-  const ev=list.find(x=>String(x.eventSlug||x.slug||x.event_id||x.eventId||"").includes(String(eventRecord.provider_event_id||"")))||list.find(x=>String(x.title||"").toLowerCase().includes("rosas"));
+  const target=String(eventRecord.provider_event_id||"").toLowerCase(); const ev=list.find(x=>target && [x.eventSlug,x.slug,x.event_id,x.eventId].some(v=>String(v||"").toLowerCase()===target));
   if(!ev){box.classList.remove("active");return}
   const bouts=ev.bouts||ev.activeBouts||[]; const b=bouts[0]; if(!b){box.classList.remove("active");return}
   const live=await fetch("https://api.citoapi.com/api/v1/ufc/live/"+encodeURIComponent(b.boutId||b.id||b.providerBoutId),{headers:{"Accept":"application/json"}});
@@ -154,7 +189,7 @@ async function loadUfcFightCard(){
 }
 function tick(){const el=document.getElementById("countdown");if(!el||!eventRecord?.starts_at)return;const d=new Date(eventRecord.starts_at)-Date.now();if(d<=0){el.textContent="LIVE / STARTED";return;}const h=Math.floor(d/36e5),m=Math.floor(d%36e5/6e4),s=Math.floor(d%6e4/1e3);el.textContent=h+"h "+String(m).padStart(2,"0")+"m "+String(s).padStart(2,"0")+"s";}
 loadEvent();setInterval(tick,1000);
-if(id){sb.channel("sports23-event-"+id).on("postgres_changes",{event:"UPDATE",schema:"public",table:"cr_sports_events",filter:"id=eq."+id},p=>{if(p.new){eventRecord={...eventRecord,...p.new};renderEvent();}}).on("postgres_changes",{event:"UPDATE",schema:"public",table:"cr_sports_event_bouts",filter:"event_id=eq."+id},()=>{if(isUfc())loadUfcFightCard();}).on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_wrestling_matches",filter:"event_id=eq."+id},()=>{if(["WWE","AEW"].includes(String(eventRecord?.cr_sports_leagues?.code||"").toUpperCase()))loadWrestlingCard();}).on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_ufc_fighter_stats"},()=>{if(isUfc())loadUfcFightCard();}).on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_ufc_fighter_fights"},()=>{if(isUfc())loadUfcFightCard();}).subscribe();}
+if(id){sb.channel("sports23-event-"+id).on("postgres_changes",{event:"UPDATE",schema:"public",table:"cr_sports_events",filter:"id=eq."+id},p=>{if(p.new){eventRecord={...eventRecord,...p.new};renderEvent();}}).on("postgres_changes",{event:"UPDATE",schema:"public",table:"cr_sports_event_bouts",filter:"event_id=eq."+id},()=>{if(isUfc())loadUfcFightCard();}).on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_wrestling_matches"},()=>{if(["WWE","AEW"].includes(String(eventRecord?.cr_sports_leagues?.code||"").toUpperCase()))loadWrestlingCard();}).on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_ufc_fighter_stats"},()=>{if(isUfc())loadUfcFightCard();}).on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_ufc_fighter_fights"},()=>{if(isUfc())loadUfcFightCard();}).subscribe();}
 </script>
 <script>footer()</script>
 </body>
