@@ -150,15 +150,19 @@ function drawSports(){
 
 async function loadCoverageCounts(){
  const out=new Map();
- const pageSize=500; let from=0;
- while(true){
-  const q=await wait(db.from("cr_sports_teams").select("id,league_id").eq("is_active",true).range(from,from+pageSize-1));
-  if(q.error)throw q.error;
-  const rows=q.data||[];
-  rows.forEach(x=>out.set(x.league_id,(out.get(x.league_id)||0)+1));
-  if(rows.length<pageSize)break;
-  from+=pageSize;
-  if(from>20000)break;
+ try{
+  const pageSize=500; let from=0;
+  while(true){
+   const q=await wait(db.from("cr_sports_teams").select("id,league_id").eq("is_active",true).range(from,from+pageSize-1));
+   if(q.error)throw q.error;
+   const rows=q.data||[];
+   rows.forEach(x=>out.set(x.league_id,(out.get(x.league_id)||0)+1));
+   if(rows.length<pageSize)break;
+   from+=pageSize;
+   if(from>20000)break;
+  }
+ }catch(e){
+  console.warn("Standings coverage lookup failed:",e);
  }
  coverageCounts=out;
 }
@@ -187,7 +191,10 @@ async function loadRows(silent=false){
  }
  let base=db.from("cr_sports_standings").select("*").eq("season",season).order("rank",{ascending:true});
  if(activeLeague)base=base.eq("league_id",activeLeague);
- const source=(await fetchAllRows(base)).filter(x=>!EXCLUDED_LEAGUES.has(String((x.league||{}).code||"").toUpperCase()));
+ const source=(await fetchAllRows(base)).filter(x=>{
+  const l=leagues.find(z=>z.id===x.league_id);
+  return l&&!EXCLUDED_LEAGUES.has(String(l.code||"").toUpperCase());
+ });
  const tids=[...new Set(source.map(x=>x.team_id).filter(Boolean))];
  const lids=[...new Set(source.map(x=>x.league_id).filter(Boolean))];
  const [tr,lr]=await Promise.all([
@@ -205,6 +212,7 @@ async function loadRows(silent=false){
  });
  if(token!==loadToken)return;
  all=[...seen.values()];
+ all.sort((a,b)=>n(a.rank)-n(b.rank)||String(team(a).name||"").localeCompare(String(team(b).name||"")));
  buildFilters();
  render();
  setStatus("SUPABASE CONNECTED • LIVE",true);
@@ -400,7 +408,10 @@ function startRealtime(){
     window.__crowStandingsRefresh=setTimeout(()=>loadRows(true),700);
    }
   })
-  .subscribe(status=>{if(status==="SUBSCRIBED")setStatus("SUPABASE CONNECTED • LIVE",true);});
+  .subscribe(status=>{
+   if(status==="SUBSCRIBED")setStatus("SUPABASE CONNECTED • LIVE",true);
+   else if(status==="CHANNEL_ERROR"||status==="TIMED_OUT")console.warn("Standings realtime:",status);
+  });
 }
 
 function stopRealtime(){
@@ -412,8 +423,13 @@ function stopRealtime(){
 
 async function load(){
  if(!db){fail(new Error("The shared Supabase client did not initialize."));return;}
- try{await loadSeasons();await loadLeagues();await loadCoverageCounts();await loadRows();}
- catch(e){fail(e);}
+ try{
+  await loadSeasons();
+  await loadLeagues();
+  await loadCoverageCounts();
+  await loadRows();
+  window.__CROW_STANDINGS_READY=true;
+ }catch(e){fail(e);}
 }
 
 $("season").onchange=async()=>{
