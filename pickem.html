@@ -13,10 +13,10 @@
 .leader-stat{border:1px solid #ffffff10;background:#ffffff04;border-radius:12px;padding:13px}
 .leader-stat b{display:block;font:800 20px Orbitron;color:#fff}.leader-stat span{font:700 8px Orbitron;color:#727c8e}
 .leaderboard-card{padding:0;overflow:hidden}
-.leader-row{display:grid;grid-template-columns:58px 1fr 90px 90px 90px 110px;gap:12px;align-items:center;padding:14px 16px;border-bottom:1px solid #ffffff09}
+.leader-row{display:grid;grid-template-columns:52px 1fr 82px 82px 82px 82px 82px;gap:12px;align-items:center;padding:14px 16px;border-bottom:1px solid #ffffff09}
 .leader-row:last-child{border-bottom:0}.leader-head{font:700 8px Orbitron;color:#727c8e;background:#ffffff04}
 .leader-rank{font:900 18px Orbitron}.leader-player{display:flex;align-items:center;gap:10px;min-width:0}.leader-avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;background:#ffffff08;display:grid;place-items:center;font:800 10px Orbitron;color:#9da6b8}.leader-name{font:800 12px Montserrat;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.leader-sub{font-size:8px;color:#687285;margin-top:3px}.leader-number{font:800 12px Orbitron;text-align:right}.leader-you{background:#ff304f0b;box-shadow:inset 3px 0 #ff304f}
-@media(max-width:800px){.leaderboard-summary{grid-template-columns:1fr 1fr}.leader-head{display:none}.leader-row{grid-template-columns:42px 1fr 70px 70px}.leader-row .accuracy,.leader-row .entries{display:none}.leader-number{text-align:right}.leader-rank{font-size:15px}}
+@media(max-width:800px){.leaderboard-summary{grid-template-columns:1fr 1fr}.leader-head{display:none}.leader-row{grid-template-columns:42px 1fr 62px 62px 62px}.leader-row .streak,.leader-row .movement,.leader-row .entries{display:none}.leader-number{text-align:right}.movement-up{color:#6fffb0}.movement-down{color:#ff7187}.movement-flat{color:#727c8e}.leader-rank{font-size:15px}}
 </style></head>
 <body>
 <script>shell("pickem")</script>
@@ -449,6 +449,7 @@ $id("leaderboardRefreshBtn").onclick=loadLeaderboard;
   const {data} = await sb.auth.getSession();
   session = data?.session || null;
   updateAuthUI();
+  await loadSeasons();
   await loadWeeks();
   await loadLeaderboard();
 })();
