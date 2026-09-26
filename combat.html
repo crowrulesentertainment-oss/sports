@@ -179,7 +179,7 @@ async function loadWrestlers(){
  const status=document.getElementById("rosterStatus");
  const r=await SB.from("cr_sports_wrestlers").select("id,organization,slug,name,nickname,image_url,country,hometown,gender,weight_class,status,provider,provider_id,provider_updated_at,raw_payload").in("organization",["WWE","AEW"]).order("organization").order("name").limit(1000);
  if(r.error){status.textContent="Roster unavailable";document.getElementById("rosterGrid").innerHTML='<div class="empty error">'+escC(r.error.message)+'</div>';return}
- wrestlers=r.data||[];renderRosterMetrics();renderWrestlers();
+ wrestlers=r.data||[];renderRosterMetrics();renderWrestlers();renderChampions();
 }
 function renderRosterMetrics(){document.getElementById("rosterCount").textContent=wrestlers.length}
 function renderWrestlers(){
