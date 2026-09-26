@@ -90,7 +90,13 @@ tr:hover td{background:#ffffff03}
 </style>
 </head>
 <body>
-<script>shell("standings")</script>
+<script>
+if(typeof shell==="function"){
+  shell("standings");
+}else{
+  document.write('<header class="site-header cr-header"><nav class="nav cr-nav"><a class="brand" href="index.html">CROW<span>RULES</span> SPORTS</a><div class="navlinks"><a href="index.html">HOME</a><a href="scores.html">SCORES</a><a class="active" href="standings.html">STANDINGS</a><a href="leaders.html">LEADERS</a><a href="combat.html">COMBAT / WRESTLING</a><a href="rankings.html">RANKINGS</a><a href="championships.html">CHAMPIONS</a><a href="teams.html">TEAMS</a><a href="media.html">AUDIO / VIDEO</a><a href="pickem.html">PICK EM</a><a href="notifications.html">NOTIFICATIONS</a><a href="sync-health.html">SYNC HEALTH</a><a href="partners.html">PARTNERS</a></div><span class="account">ACCOUNT</span></nav></header>');
+}
+</script>
 
 <section class="hero">
   <div class="hero-grid"></div><div class="hero-glow"></div><div class="hero-line"></div>
@@ -141,7 +147,7 @@ tr:hover td{background:#ffffff03}
 <script>
 (function(){
 "use strict";
-const S=window.sb||window.supabaseClient||window.sbClient;
+const S=window.CrowRulesSports?.supabase||window.sb||window.supabaseClient||window.sbClient;
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const num=v=>Number(v??0)||0;
@@ -280,11 +286,11 @@ async function share(){
   try{await navigator.clipboard.writeText(url);$("shareView").textContent="COPIED";setTimeout(()=>$("shareView").textContent="SHARE VIEW",1300);}catch(_){prompt("Copy standings link:",url);}
 }
 async function boot(){
-  if(!S){errorView(new Error("Supabase client unavailable. The shared Sports engine did not initialize."));return;}
+  if(!S){errorView(new Error("Supabase client unavailable. The shared Sports engine did not initialize. Refresh the page and try again."));return;}
   try{
     setStatus("Connecting to CrowRules Sports…");
     if(typeof loadSession==="function"){try{await timeout(loadSession(),7000);}catch(e){console.warn(e);}}
-    await getSeasons();await getLeagues();await getRows();
+    await getSeasons();\n    await getLeagues();\n    await getRows();\n    setStatus("Supabase connected • standings live",true);
   }catch(e){errorView(e);}
 }
 $("league").onchange=()=>{leagueId=$("league").value;getRows().catch(errorView);};
