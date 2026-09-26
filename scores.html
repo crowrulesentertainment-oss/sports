@@ -3,129 +3,371 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Scores | CrowRules Sports</title>
+<meta name="theme-color" content="#050505">
+<meta name="description" content="CrowRules Sports Scores Center — live scores, finals, upcoming games and event center access.">
+<title>Scores Center | CrowRules Sports</title>
 <link rel="stylesheet" href="css/sports.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/sports.js"></script>
+<style>
+:root{--score-red:#e10600;--score-red2:#ff3b30;--score-panel:#0b0b0b;--score-line:#292929;--score-muted:#858585}
+.scores-shell{max-width:1500px;margin:auto;padding:0 24px 70px}
+.score-hero{position:relative;overflow:hidden;padding:72px 0 45px}
+.score-hero:before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,rgba(225,6,0,.13),transparent 42%,rgba(255,255,255,.025));pointer-events:none}
+.score-hero>*{position:relative}
+.score-hero h1{font:900 clamp(42px,7vw,92px)/.95 Orbitron;margin:14px 0 16px;letter-spacing:-3px}
+.score-hero h1 span{color:var(--score-red)}
+.score-hero p{max-width:820px;color:#aaa;line-height:1.8;margin:0}
+.score-toolbar{position:sticky;top:64px;z-index:7;background:rgba(5,5,5,.96);border:1px solid var(--score-line);padding:14px;margin:0 0 28px;backdrop-filter:blur(12px)}
+.toolbar-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.toolbar-row+.toolbar-row{margin-top:10px}
+.date-nav{display:flex;gap:6px}
+.date-btn{border:1px solid #333;background:#101010;color:#aaa;padding:10px 13px;font:800 9px Montserrat;letter-spacing:1px;cursor:pointer}
+.date-btn:hover,.date-btn.active{background:var(--score-red);border-color:var(--score-red);color:#fff}
+.score-search{flex:1;min-width:220px}
+.score-search input,.score-select{width:100%;background:#0c0c0c;border:1px solid #333;color:#fff;padding:11px 12px;font:500 11px Montserrat}
+.score-select{width:auto;min-width:150px}
+.score-count{margin-left:auto;color:#777;font-size:10px;white-space:nowrap}
+.live-banner{display:flex;align-items:center;gap:10px;border:1px solid #4b1715;background:linear-gradient(90deg,#170707,#0b0b0b);padding:12px 15px;margin-bottom:16px}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#ff3b30;box-shadow:0 0 14px #ff3b30;animation:scorePulse 1.3s infinite}
+@keyframes scorePulse{50%{opacity:.35;transform:scale(.75)}}
+.live-banner strong{font:800 11px Orbitron;letter-spacing:2px}
+.live-banner span{color:#777;font-size:10px}
+.score-section{margin:34px 0}
+.score-section-head{display:flex;align-items:end;justify-content:space-between;gap:15px;margin-bottom:15px}
+.score-section-head h2{font:800 clamp(22px,3vw,34px) Orbitron;margin:5px 0}
+.score-section-head p{color:#666;font-size:10px;margin:0}
+.score-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.game-card{position:relative;background:linear-gradient(145deg,#151515,#090909);border:1px solid var(--score-line);overflow:hidden;transition:transform .2s,border-color .2s}
+.game-card:hover{transform:translateY(-2px);border-color:#555}
+.game-card.live{border-color:#571a17}
+.game-card.favorite{box-shadow:inset 3px 0 0 var(--score-red)}
+.game-top{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:13px 15px;border-bottom:1px solid #202020}
+.game-league{font:800 9px Orbitron;color:#ddd;letter-spacing:1px}
+.game-status{font-size:8px;font-weight:800;letter-spacing:1px;padding:5px 7px;border:1px solid #333;color:#999}
+.game-status.live{border-color:#741d19;color:#ff6b65}
+.game-status.final{color:#ccc}
+.game-status.scheduled{color:#9db5cf;border-color:#304052}
+.game-body{padding:15px}
+.game-date{font-size:9px;color:#666;margin-bottom:12px}
+.team-line{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;padding:9px 0}
+.team-name{font-size:13px;font-weight:700;line-height:1.35}
+.team-record{display:block;color:#666;font-size:9px;font-weight:500;margin-top:3px}
+.team-score{font:900 25px Orbitron;text-align:right}
+.team-score.winner{color:#fff}
+.game-detail{display:flex;justify-content:space-between;gap:10px;border-top:1px solid #202020;margin-top:8px;padding-top:11px;color:#666;font-size:9px}
+.game-actions{display:flex;gap:7px;padding:0 15px 15px;flex-wrap:wrap}
+.game-actions .button{padding:8px 10px;font-size:8px}
+.favorite-btn{margin-left:auto;background:transparent;border:0;color:#666;font-size:15px;cursor:pointer}
+.favorite-btn.active{color:#ff3b30}
+.empty-state{grid-column:1/-1;text-align:center;padding:45px 20px;border:1px dashed #333;background:#090909}
+.empty-state h3{font:800 18px Orbitron;margin:0 0 8px}
+.empty-state p{color:#777;font-size:11px;line-height:1.7;margin:0}
+.status-panel{grid-column:1/-1}
+.error-card{border-color:#5b201d}
+.error-card h3{color:#ff716b}
+.refresh-meta{font-size:9px;color:#666}
+.sport-pills{display:flex;gap:6px;overflow:auto;padding-bottom:2px}
+.sport-pill{flex:0 0 auto;border:1px solid #333;background:#0d0d0d;color:#999;padding:8px 11px;font:800 8px Montserrat;cursor:pointer;letter-spacing:.7px}
+.sport-pill.active{color:#fff;background:#181818;border-color:#666}
+.score-key{display:flex;gap:14px;flex-wrap:wrap;color:#666;font-size:9px}
+.score-key b{color:#aaa}
+@media(max-width:1050px){.score-list{grid-template-columns:repeat(2,minmax(0,1fr))}.score-toolbar{top:57px}}
+@media(max-width:700px){.scores-shell{padding:0 14px 50px}.score-hero{padding:48px 0 32px}.score-toolbar{top:54px}.score-list{grid-template-columns:1fr}.score-count{margin-left:0;width:100%}.score-select{flex:1}.date-nav{width:100%}.date-btn{flex:1}.toolbar-row{align-items:stretch}}
+</style>
 </head>
 <body>
 <script>shell("scores")</script>
 
-<section class="hero">
-  <div class="eyebrow">CROWRULES SPORTS • GAME CENTER</div>
+<main class="scores-shell">
+<section class="score-hero">
+  <div class="eyebrow">CROWRULES SPORTS • SCORES CENTER 3.0</div>
   <h1>LIVE <span>SCORES</span></h1>
-  <p>Today's scoreboard, live games, finals and upcoming matchups — powered by the CrowRules Sports database.</p>
+  <p>The central scoreboard for the CrowRules Sports universe — live games, finals, upcoming matchups and direct access to the Universal Event Center.</p>
   <div class="actions">
     <a class="button" href="schedule.html">FULL SCHEDULE</a>
     <a class="button secondary" href="standings.html">STANDINGS</a>
+    <button class="button secondary" id="refreshBtn" type="button">↻ REFRESH</button>
   </div>
 </section>
 
-<section class="section">
-  <div class="section-head">
-    <div>
-      <div class="eyebrow">SCOREBOARD</div>
-      <h2>GAME DAY</h2>
+<section class="score-toolbar" aria-label="Score filters">
+  <div class="toolbar-row">
+    <div class="date-nav" aria-label="Date navigation">
+      <button class="date-btn" data-date="-1">YESTERDAY</button>
+      <button class="date-btn active" data-date="0">TODAY</button>
+      <button class="date-btn" data-date="1">TOMORROW</button>
     </div>
-    <div class="filters">
-      <button class="button small active" data-filter="all">ALL</button>
-      <button class="button small" data-filter="live">LIVE</button>
-      <button class="button small" data-filter="final">FINAL</button>
-      <button class="button small" data-filter="scheduled">UPCOMING</button>
+    <div class="score-search">
+      <input id="searchInput" type="search" placeholder="Search teams, leagues, venues…">
     </div>
+    <select id="leagueSelect" class="score-select" aria-label="League">
+      <option value="all">ALL LEAGUES</option>
+    </select>
+    <select id="statusSelect" class="score-select" aria-label="Game status">
+      <option value="all">ALL STATUS</option>
+      <option value="live">LIVE</option>
+      <option value="scheduled">UPCOMING</option>
+      <option value="final">FINAL</option>
+    </select>
   </div>
-  <div id="scoreboard" class="grid3">
-    <div class="card"><div class="loading">Loading scores…</div></div>
+  <div class="toolbar-row">
+    <div class="sport-pills" id="sportPills"></div>
+    <span class="score-count" id="scoreCount">Preparing scoreboard…</span>
   </div>
 </section>
 
-<section class="section">
-  <div class="section-head">
-    <div>
-      <div class="eyebrow">CROWRULES SPORTS</div>
-      <h2>MORE GAME DATA</h2>
-    </div>
+<div id="liveBanner" class="live-banner hidden">
+  <span class="live-dot"></span>
+  <strong>LIVE NOW</strong>
+  <span id="liveSummary">Live games are updating automatically.</span>
+</div>
+
+<section class="score-section" id="liveSection">
+  <div class="score-section-head">
+    <div><div class="eyebrow">IN PROGRESS</div><h2>LIVE NOW</h2></div>
+    <p id="liveUpdated">Waiting for data…</p>
   </div>
-  <div class="grid3">
-    <a class="card" href="leaders.html"><h3>LEAGUE LEADERS</h3><p>Player and team leaders across the sports universe.</p></a>
-    <a class="card" href="teams.html"><h3>TEAMS</h3><p>Major, minor-league, college and amateur teams.</p></a>
-    <a class="card" href="pickem.html"><h3>PICK 'EM</h3><p>Make your picks and compete in CrowRules challenges.</p></a>
+  <div id="liveScores" class="score-list"></div>
+</section>
+
+<section class="score-section">
+  <div class="score-section-head">
+    <div><div class="eyebrow">SELECTED DATE</div><h2 id="dateHeading">TODAY</h2></div>
+    <p>All scheduled, live and completed games</p>
+  </div>
+  <div id="scoreboard" class="score-list">
+    <div class="empty-state"><h3>LOADING SCORES</h3><p>Connecting to the CrowRules Sports database…</p></div>
   </div>
 </section>
+
+<section class="score-section">
+  <div class="score-section-head">
+    <div><div class="eyebrow">YOUR SCOREBOARD</div><h2>FAVORITES</h2></div>
+    <p>Saved in this browser</p>
+  </div>
+  <div id="favorites" class="score-list"></div>
+</section>
+
+<section class="score-section">
+  <div class="score-section-head">
+    <div><div class="eyebrow">EVENT CENTER</div><h2>COMBAT & WRESTLING</h2></div>
+    <a class="button small secondary" href="combat.html">OPEN COMBAT CENTER</a>
+  </div>
+  <div id="eventScores" class="score-list">
+    <div class="empty-state"><h3>LOADING EVENTS</h3><p>Checking the event database…</p></div>
+  </div>
+</section>
+
+<section class="score-section">
+  <div class="card">
+    <div class="eyebrow">SCORE STATUS</div>
+    <h3 style="font:800 18px Orbitron;margin:8px 0 12px">UNIVERSAL SCOREBOARD</h3>
+    <div class="score-key">
+      <span><b>LIVE</b> — game in progress</span>
+      <span><b>FINAL</b> — completed</span>
+      <span><b>UPCOMING</b> — scheduled</span>
+      <span id="lastRefresh" class="refresh-meta">Last refresh: —</span>
+    </div>
+  </div>
+</section>
+</main>
 
 <script>
 loadSession();
 
-let games = [];
-let currentFilter = "all";
+const state = {
+  games: [],
+  events: [],
+  dayOffset: 0,
+  status: "all",
+  league: "all",
+  sport: "all",
+  search: "",
+  favorites: new Set(JSON.parse(localStorage.getItem("cr_sports_score_favorites") || "[]"))
+};
 
-function gameStatus(g){
-  const s = String(g.status || "").toLowerCase();
-  if (["live","in_progress","in progress","in-progress"].includes(s)) return "live";
-  if (["final","completed","complete"].includes(s)) return "final";
+const SPORT_ORDER = ["NFL","MLB","MiLB","NHL","NBA","WNBA","NCAA","MLS","UFL","WWE","AEW","UFC"];
+
+function dateKey(d){
+  const x = new Date(d);
+  return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0");
+}
+function selectedDate(){
+  const d = new Date();
+  d.setHours(12,0,0,0);
+  d.setDate(d.getDate()+state.dayOffset);
+  return d;
+}
+function prettyDate(d){
+  return d.toLocaleDateString([], {weekday:"long",month:"long",day:"numeric"});
+}
+function statusOf(g){
+  const s=String(g.status||"").toLowerCase().replace(/[- ]/g,"_");
+  if(["live","in_progress","inprogress","playing","active"].includes(s)) return "live";
+  if(["final","completed","complete","closed"].includes(s)) return "final";
   return "scheduled";
 }
+function leagueName(g){ return g.cr_sports_leagues?.name || g.league_name || g.league || "SPORTS"; }
+function leagueCode(g){ return String(g.cr_sports_leagues?.code || g.league_code || "").toUpperCase(); }
+function sportName(g){
+  const raw=String(g.sport||g.sport_name||g.cr_sports_leagues?.sport||leagueCode(g)||leagueName(g)).toUpperCase();
+  for(const s of SPORT_ORDER) if(raw.includes(s)) return s;
+  if(raw.includes("COLLEGE")) return "NCAA";
+  if(raw.includes("FOOTBALL")) return "NFL";
+  if(raw.includes("BASEBALL")) return "MLB";
+  if(raw.includes("HOCKEY")) return "NHL";
+  if(raw.includes("BASKETBALL")) return "NBA";
+  if(raw.includes("SOCCER")) return "MLS";
+  return raw || "OTHER";
+}
+function teamName(t){return t?.name || t?.short_name || t?.abbreviation || "TBD"}
+function teamRecord(t){return t?.record || t?.wins_losses || ""}
+function timeOf(g){
+  if(!g.starts_at) return "TIME TBD";
+  return new Date(g.starts_at).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
+}
+function dateOf(g){
+  if(!g.starts_at) return "";
+  return new Date(g.starts_at).toLocaleDateString([], {month:"short",day:"numeric"});
+}
+function gameId(g){ return String(g.id || g.game_id || ""); }
+function persistFavorites(){localStorage.setItem("cr_sports_score_favorites",JSON.stringify([...state.favorites]));}
+function favoriteGame(g){return state.favorites.has(gameId(g));}
 
-function teamName(team){ return team?.name || "TBD"; }
+function eventHref(g){
+  const id=encodeURIComponent(gameId(g));
+  return id ? "event.html?id="+id : "event.html";
+}
 
-function renderScores(){
-  const root = $("#scoreboard");
-  const filtered = games.filter(g => currentFilter === "all" || gameStatus(g) === currentFilter);
+function renderGame(g){
+  const st=statusOf(g), fav=favoriteGame(g);
+  const away=g.away || g.away_team || {}, home=g.home || g.home_team || {};
+  const awayScore=g.away_score ?? g.away_points ?? "-";
+  const homeScore=g.home_score ?? g.home_points ?? "-";
+  const awayWinner=st==="final" && Number(awayScore)>Number(homeScore);
+  const homeWinner=st==="final" && Number(homeScore)>Number(awayScore);
+  const clock=g.clock || g.period_clock || g.game_clock || "";
+  const period=g.period || g.period_name || g.inning || g.quarter || "";
+  const venue=g.venue || g.stadium || "Venue TBD";
+  const broadcast=g.broadcast || g.network || g.tv_network || "";
+  const meta=[period,clock].filter(Boolean).join(" • ");
+  return '<article class="game-card '+st+(fav?" favorite":"")+'">'+
+    '<div class="game-top"><span class="game-league">'+esc(leagueName(g))+'</span>'+
+    '<span class="game-status '+st+'">'+esc(st==="live"?"LIVE":st==="final"?"FINAL":"UPCOMING")+'</span>'+
+    '<button class="favorite-btn '+(fav?"active":"")+'" aria-label="'+(fav?"Remove":"Add")+' favorite" data-favorite="'+esc(gameId(g))+'">'+(fav?"★":"☆")+'</button></div>'+
+    '<div class="game-body"><div class="game-date">'+esc(dateOf(g))+(g.starts_at?" • ":"")+esc(timeOf(g))+(meta?" • ":"")+esc(meta)+'</div>'+
+    '<div class="team-line"><div class="team-name">'+esc(teamName(away))+(teamRecord(away)?'<span class="team-record">'+esc(teamRecord(away))+'</span>':"")+'</div><div class="team-score '+(awayWinner?"winner":"")+'">'+esc(String(awayScore))+'</div></div>'+
+    '<div class="team-line"><div class="team-name">'+esc(teamName(home))+(teamRecord(home)?'<span class="team-record">'+esc(teamRecord(home))+'</span>':"")+'</div><div class="team-score '+(homeWinner?"winner":"")+'">'+esc(String(homeScore))+'</div></div>'+
+    '<div class="game-detail"><span>'+esc(venue)+'</span><span>'+esc(broadcast)+'</span></div></div>'+
+    '<div class="game-actions"><a class="button small" href="'+eventHref(g)+'">EVENT CENTER</a><a class="button small secondary" href="'+eventHref(g)+'#boxscore">BOX SCORE</a>'+
+    (g.home_team_id?'<a class="button small secondary" href="teams.html?id='+encodeURIComponent(g.home_team_id)+'">HOME TEAM</a>':"")+
+    '</div></article>';
+}
 
-  if (!filtered.length){
-    root.innerHTML = '<div class="card"><h3>NO GAMES</h3><p>No games match this scoreboard filter.</p></div>';
-    return;
-  }
+function filteredGames(){
+  const key=dateKey(selectedDate());
+  return state.games.filter(g=>{
+    if(g.starts_at && dateKey(g.starts_at)!==key) return false;
+    const st=statusOf(g);
+    if(state.status!=="all" && st!==state.status) return false;
+    if(state.league!=="all" && leagueName(g)!==state.league) return false;
+    if(state.sport!=="all" && sportName(g)!==state.sport) return false;
+    if(state.search){
+      const hay=[leagueName(g),leagueCode(g),sportName(g),teamName(g.away||g.away_team),teamName(g.home||g.home_team),g.venue].join(" ").toLowerCase();
+      if(!hay.includes(state.search.toLowerCase())) return false;
+    }
+    return true;
+  });
+}
 
-  root.innerHTML = filtered.map(g => {
-    const status = gameStatus(g);
-    const rawStatus = String(g.status || "scheduled").toUpperCase();
-    const time = g.starts_at ? new Date(g.starts_at).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"}) : "TBD";
-    const date = g.starts_at ? new Date(g.starts_at).toLocaleDateString([], {month:"short",day:"numeric"}) : "";
-    const awayScore = g.away_score ?? "-";
-    const homeScore = g.home_score ?? "-";
+function empty(title,msg){
+  return '<div class="empty-state"><h3>'+esc(title)+'</h3><p>'+esc(msg)+'</p></div>';
+}
 
-    return '<article class="card score-card">' +
-      '<div class="score-meta"><span class="tag">'+esc(g.cr_sports_leagues?.name || "SPORTS")+'</span><span class="tag '+status+'">'+esc(rawStatus)+'</span></div>' +
-      '<div class="score-date">'+esc(date)+' • '+esc(time)+'</div>' +
-      '<div class="team-row"><span>'+esc(teamName(g.away))+'</span><strong>'+esc(String(awayScore))+'</strong></div>' +
-      '<div class="team-row"><span>'+esc(teamName(g.home))+'</span><strong>'+esc(String(homeScore))+'</strong></div>' +
-      '<div class="score-footer">'+esc(g.venue || "Venue TBD")+'</div>' +
-      '</article>';
-  }).join("");
+function render(){
+  const games=filteredGames();
+  document.getElementById("dateHeading").textContent=state.dayOffset===0?"TODAY":state.dayOffset<0?"YESTERDAY":"TOMORROW";
+  document.getElementById("scoreCount").textContent=games.length+" game"+(games.length===1?"":"s")+" shown";
+  const live=games.filter(g=>statusOf(g)==="live");
+  document.getElementById("liveBanner").classList.toggle("hidden",live.length===0);
+  document.getElementById("liveSummary").textContent=live.length+" live game"+(live.length===1?"":"s")+" updating with the scoreboard.";
+  document.getElementById("liveUpdated").textContent=live.length ? "LIVE • "+live.length+" in progress" : "No live games in this view";
+  document.getElementById("liveScores").innerHTML=live.length?live.map(renderGame).join(""):empty("NO LIVE GAMES","There are no games currently marked live for this date.");
+  document.getElementById("scoreboard").innerHTML=games.length?games.map(renderGame).join(""):empty("NO GAMES FOUND","Try another date, sport, league or search term.");
+  const fav=state.games.filter(g=>favoriteGame(g));
+  document.getElementById("favorites").innerHTML=fav.length?fav.map(renderGame).join(""):empty("NO FAVORITES","Use the ☆ button on a game to save it to your personal scoreboard.");
+  bindFavoriteButtons();
+  renderFilters();
+}
+
+function renderFilters(){
+  const leagues=[...new Set(state.games.map(leagueName))].filter(Boolean).sort();
+  const old=state.league;
+  document.getElementById("leagueSelect").innerHTML='<option value="all">ALL LEAGUES</option>'+leagues.map(l=>'<option value="'+esc(l)+'">'+esc(l.toUpperCase())+'</option>').join("");
+  document.getElementById("leagueSelect").value=leagues.includes(old)?old:"all";
+  state.league=document.getElementById("leagueSelect").value;
+  const sports=[...new Set(state.games.map(sportName))].filter(Boolean);
+  const ordered=[...SPORT_ORDER.filter(x=>sports.includes(x)),...sports.filter(x=>!SPORT_ORDER.includes(x)).sort()];
+  document.getElementById("sportPills").innerHTML='<button class="sport-pill '+(state.sport==="all"?"active":"")+'" data-sport="all">ALL SPORTS</button>'+
+    ordered.map(s=>'<button class="sport-pill '+(state.sport===s?"active":"")+'" data-sport="'+esc(s)+'">'+esc(s)+'</button>').join("");
+  document.querySelectorAll("[data-sport]").forEach(b=>b.onclick=()=>{state.sport=b.dataset.sport;render()});
+}
+
+function bindFavoriteButtons(){
+  document.querySelectorAll("[data-favorite]").forEach(btn=>btn.onclick=()=>{
+    const id=btn.dataset.favorite;
+    if(!id)return;
+    state.favorites.has(id)?state.favorites.delete(id):state.favorites.add(id);
+    persistFavorites();render();
+  });
 }
 
 async function loadScores(){
-  const root = $("#scoreboard");
-  const {data,error} = await sb
-    .from("cr_sports_games")
-    .select("*,cr_sports_leagues(name),home:cr_sports_teams!cr_sports_games_home_team_id_fkey(name),away:cr_sports_teams!cr_sports_games_away_team_id_fkey(name)")
-    .order("starts_at")
-    .limit(200);
-
+  const root=document.getElementById("scoreboard");
+  root.innerHTML=empty("LOADING SCORES","Connecting to the CrowRules Sports database…");
+  const {data,error}=await sb.from("cr_sports_games")
+    .select("*,cr_sports_leagues(name,code,sport),home:cr_sports_teams!cr_sports_games_home_team_id_fkey(*),away:cr_sports_teams!cr_sports_games_away_team_id_fkey(*)")
+    .order("starts_at",{ascending:true}).limit(500);
   if(error){
-    root.innerHTML = '<div class="card"><h3>SPORTS DATA UNAVAILABLE</h3><p>'+esc(error.message)+'</p><p>Check the Supabase connection and cr_sports_games table.</p></div>';
+    root.innerHTML='<div class="empty-state error-card"><h3>SPORTS DATA UNAVAILABLE</h3><p>'+esc(error.message)+'</p><p style="margin-top:8px">The scoreboard remains available when the database feed is restored.</p></div>';
+    document.getElementById("scoreCount").textContent="Data connection error";
     return;
   }
-
-  games = data || [];
-  renderScores();
+  state.games=data||[];
+  render();
+  document.getElementById("lastRefresh").textContent="Last refresh: "+new Date().toLocaleTimeString([], {hour:"numeric",minute:"2-digit",second:"2-digit"});
 }
 
-document.querySelectorAll("[data-filter]").forEach(btn => {
-  btn.addEventListener("click", () => {
-    currentFilter = btn.dataset.filter;
-    document.querySelectorAll("[data-filter]").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    renderScores();
-  });
+async function loadEvents(){
+  const root=document.getElementById("eventScores");
+  const {data,error}=await sb.from("cr_sports_events").select("id,title,event_type,status,starts_at,venue,city,event_url,cr_sports_leagues(code,name)").order("starts_at",{ascending:true}).limit(50);
+  if(error){root.innerHTML=empty("EVENT DATA UNAVAILABLE",error.message);return}
+  state.events=data||[];
+  const relevant=state.events.filter(e=>/wwe|aew|ufc|wrestling|combat|mma|boxing/i.test((e.event_type||"")+" "+(e.title||"")+" "+(e.cr_sports_leagues?.name||"")));
+  root.innerHTML=(relevant.length?relevant:state.events.slice(0,9)).map(e=>{
+    const href=e.event_url||("event.html?id="+encodeURIComponent(e.id));
+    return '<article class="game-card"><div class="game-top"><span class="game-league">'+esc(e.cr_sports_leagues?.name||"EVENT")+'</span><span class="game-status scheduled">'+esc(String(e.status||"scheduled").toUpperCase())+'</span></div><div class="game-body"><div class="game-date">'+esc(e.starts_at?new Date(e.starts_at).toLocaleString():"TIME TBD")+'</div><h3 style="font-size:15px;line-height:1.4;margin:0 0 10px">'+esc(e.title||"Sports Event")+'</h3><div class="game-detail"><span>'+esc(e.venue||"Venue TBD")+'</span><span>'+esc(e.city||"")+'</span></div></div><div class="game-actions"><a class="button small" href="'+esc(href)+'">EVENT CENTER</a>'+(e.event_url?'<a class="button small secondary" href="'+esc(e.event_url)+'" target="_blank" rel="noopener">OFFICIAL</a>':"")+'</div></article>';
+  }).join("")||empty("NO EVENTS","No combat or wrestling events are currently listed.");
+}
+
+document.querySelectorAll("[data-date]").forEach(btn=>btn.onclick=()=>{
+  state.dayOffset=Number(btn.dataset.date);
+  document.querySelectorAll("[data-date]").forEach(b=>b.classList.toggle("active",b===btn));
+  render();
 });
+document.getElementById("searchInput").oninput=e=>{state.search=e.target.value.trim();render()};
+document.getElementById("leagueSelect").onchange=e=>{state.league=e.target.value;render()};
+document.getElementById("statusSelect").onchange=e=>{state.status=e.target.value;render()};
+document.getElementById("refreshBtn").onclick=async()=>{await loadScores();await loadEvents()};
 
 loadScores();
-</script>
+loadEvents();
 
-<section class="section" id="eventScoreboard21"><div class="section-head"><div><div class="eyebrow">SPORTS 21.0 • EVENTS</div><h2>COMBAT & WRESTLING LIVE</h2></div></div><div id="eventScores21" class="grid3"><div class="card"><div class="loading">Loading events…</div></div></div></section>
-<script id="sports21Scores">(async()=>{const root=document.getElementById("eventScores21");const{data,error}=await sb.from("cr_sports_events").select("id,title,event_type,status,starts_at,venue,city,event_url,cr_sports_leagues(code,name)").order("starts_at").limit(50);if(error){root.innerHTML='<div class="card"><h3>EVENT DATA UNAVAILABLE</h3><p>'+esc(error.message)+'</p></div>';return}root.innerHTML=(data||[]).map(e=>'<article class="card score-card"><div class="score-meta"><span class="tag">'+esc(e.cr_sports_leagues?.name||"EVENT")+'</span><span class="tag">'+esc(String(e.status||"scheduled").toUpperCase())+'</span></div><div class="score-date">'+esc(e.starts_at?new Date(e.starts_at).toLocaleString():"TBD")+'</div><h3>'+esc(e.title)+'</h3><p>'+esc(e.event_type||"EVENT")+' • '+esc(e.venue||"Venue TBD")+(e.city?" • "+esc(e.city):"")+'</p><div class="actions"><button class="button small event-follow21" data-id="'+esc(e.id)+'">FOLLOW EVENT</button>'+(e.event_url?'<a class="button small secondary" href="'+esc(e.event_url)+'" target="_blank" rel="noopener">OFFICIAL</a>':"")+'</div></article>').join("")||'<div class="card"><h3>NO EVENTS</h3><p>No combat or wrestling events are scheduled.</p></div>';const s=await sb.auth.getSession();if(s.data.session){const uid=s.data.session.user.id;const f=await sb.from("cr_sports_user_followed_events").select("event_id").eq("user_id",uid);const set=new Set((f.data||[]).map(x=>x.event_id));document.querySelectorAll(".event-follow21").forEach(b=>{if(set.has(b.dataset.id))b.textContent="FOLLOWING";b.onclick=async()=>{if(set.has(b.dataset.id)){await sb.from("cr_sports_user_followed_events").delete().eq("user_id",uid).eq("event_id",b.dataset.id);set.delete(b.dataset.id);b.textContent="FOLLOW EVENT"}else{await sb.from("cr_sports_user_followed_events").upsert({user_id:uid,event_id:b.dataset.id});set.add(b.dataset.id);b.textContent="FOLLOWING"}}})}})();</script>
+setInterval(async()=>{
+  await loadScores();
+},60000);
+</script>
 <script>footer()</script>
 </body>
 </html>
