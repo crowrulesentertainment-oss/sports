@@ -10,7 +10,7 @@ let sb=null;
 if(HAS_SUPABASE){
  sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
  auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true},
- global:{headers:{"x-client-info":"crowrules-sports/20.0"}}
+ global:{headers:{"x-client-info":"crowrules-sports/21.0"}}
  });
 }else{
  console.warn("CrowRules Sports: Supabase JS was not loaded. Navigation remains available.");
@@ -19,7 +19,8 @@ window.sb=sb;
 window.supabaseClient=sb;
 window.sbClient=sb;
 window.CROW_SPORTS_READY=HAS_SUPABASE;
-window.CROW_SPORTS_VERSION="20.0";
+window.CROW_SPORTS_VERSION="21.0";
+window.CROW_SPORTS_SHELL_VERSION="21.0";
 
 const $=s=>document.querySelector(s);
 const $$=s=>Array.from(document.querySelectorAll(s));
@@ -63,7 +64,8 @@ function normalizeActiveKey(active){
 function ensureNavStyles(){
  if(document.getElementById("cr-shared-nav-style"))return;
  const style=document.createElement("style");style.id="cr-shared-nav-style";
- style.textContent=`.cr-header{position:sticky;top:0;z-index:1000;width:100%;background:rgba(5,5,7,.97);border-bottom:1px solid rgba(255,255,255,.08);backdrop-filter:blur(18px);box-shadow:0 8px 30px rgba(0,0,0,.28)}
+ style.textContent=`
+ .cr-header .shell-tools{display:flex;align-items:center;gap:8px;flex:0 0 auto}.shell-search-toggle{border:1px solid #292929;background:#0c0c0c;color:#aaa;border-radius:7px;padding:8px 10px;font:800 8px Orbitron;cursor:pointer}.shell-search-toggle:hover{color:#fff;border-color:#555}.cr-global-search{border-top:1px solid #242424;background:#070707}.cr-search-inner{max-width:1500px;margin:auto;padding:10px 18px}.cr-search-inner input{width:100%;padding:12px 14px;background:#0d0d0d;border:1px solid #333;color:#fff;font:500 12px Montserrat}.cr-global-search[hidden]{display:none}.cr-global-search a{display:flex;align-items:center;gap:10px;padding:9px 4px;color:#ccc}.cr-global-search a:hover{color:#fff}.cr-global-search small{color:#777;font-size:8px}.cr-global-search strong{font-size:10px}.search-empty{padding:10px 4px;color:#666;font-size:10px}@media(max-width:1040px){.cr-header .shell-tools{margin-left:auto}.cr-header .shell-tools .account{display:none}.cr-search-inner{padding:10px}}.cr-header{position:sticky;top:0;z-index:1000;width:100%;background:rgba(5,5,7,.97);border-bottom:1px solid rgba(255,255,255,.08);backdrop-filter:blur(18px);box-shadow:0 8px 30px rgba(0,0,0,.28)}
  .cr-nav{position:relative;min-height:58px;display:flex;align-items:center;gap:10px;padding:0 18px}
  .cr-nav .brand{display:flex;align-items:center;gap:4px;flex:0 0 auto;white-space:nowrap;color:#fff;text-decoration:none;font:900 12px Orbitron,Arial,sans-serif;letter-spacing:1.4px}.cr-nav .brand span{color:#e10600}
  .cr-nav .navlinks{min-width:0;display:flex;align-items:center;justify-content:flex-end;gap:4px;flex:1}.cr-nav .nav-group{position:relative}
@@ -80,6 +82,21 @@ function ensureNavStyles(){
  document.head.appendChild(style);
 }
 
+function bindGlobalSearch(){
+ const toggle=$("#crSearchToggle"),box=$("#crGlobalSearch"),input=$("#crGlobalSearchInput"),results=$("#crGlobalSearchResults");
+ if(!toggle||!box||!input||toggle.dataset.bound)return;
+ toggle.dataset.bound="1";
+ const items=NAV.flatMap(([key,label,url])=>[{type:"PAGE",title:label,url,key}]);
+ function render(q){
+  const term=String(q||"").trim().toLowerCase();
+  const rows=term?items.filter(x=>(x.title+" "+x.key).toLowerCase().includes(term)):items.slice(0,8);
+  results.innerHTML=rows.length?rows.map(x=>'<a href="'+x.url+'"><small>'+x.type+'</small><strong>'+esc(x.title)+'</strong></a>').join(""):'<div class="search-empty">No Sports pages found.</div>';
+ }
+ toggle.addEventListener("click",()=>{const open=!box.hidden;box.hidden=open;toggle.setAttribute("aria-expanded",String(!open));if(!open){input.focus();render(input.value);}});
+ input.addEventListener("input",()=>render(input.value));
+ document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();box.hidden=false;toggle.setAttribute("aria-expanded","true");input.focus();render(input.value)}if(e.key==="Escape"&&!box.hidden){box.hidden=true;toggle.setAttribute("aria-expanded","false")}});
+ render("");
+}
 function bindNav(){
  const toggle=$("#crMenuToggle"),links=$("#crNavLinks");
  if(!toggle||!links||toggle.dataset.bound)return;
@@ -107,8 +124,8 @@ function shell(active){
    <a class="brand" href="index.html" aria-label="CrowRules Sports home">CROW<span>RULES</span> SPORTS</a>
    <button class="cr-menu-toggle" id="crMenuToggle" type="button" aria-expanded="false" aria-controls="crNavLinks">MENU</button>
    <div class="navlinks" id="crNavLinks">${groups}</div>
-   <span class="account" id="account" aria-live="polite">ACCOUNT</span>
-  </nav>
+   <div class="shell-tools"><button class="shell-search-toggle" id="crSearchToggle" type="button" aria-expanded="false" aria-controls="crGlobalSearch">SEARCH</button><span class="account" id="account" aria-live="polite">ACCOUNT</span></div>
+  </nav><div class="cr-global-search" id="crGlobalSearch" hidden><div class="cr-search-inner"><input id="crGlobalSearchInput" type="search" placeholder="Search teams, leagues, pages…" autocomplete="off"><div id="crGlobalSearchResults"></div></div></div>
  </header>`);
  ensureNavStyles();
  queueMicrotask(bindNav);
@@ -186,7 +203,7 @@ function bindAuth(){
  authSubscription=r?.data?.subscription||null;
 }
 
-window.CROW_SPORTS_NAV_VERSION="20.0";
+window.CROW_SPORTS_NAV_VERSION="21.0";
 async function loadPodcastAudio({limit=24,query=""}={}){
  try{
   const term=String(query||"").trim();
@@ -200,7 +217,7 @@ async function loadPodcastAudio({limit=24,query=""}={}){
 }
 
 window.CrowRulesSports={
- version:"20.0",navGroups:NAV_GROUPS,nav:NAV,supabase:sb,$,$,esc,sleep,timeout:withTimeout,normalizeError,reportError,loadPodcastAudio,
+ version:"21.0",shellVersion:"21.0",navGroups:NAV_GROUPS,nav:NAV,supabase:sb,$,$,esc,sleep,timeout:withTimeout,normalizeError,reportError,loadPodcastAudio,
  getSession,loadSession,loadUnread,signIn,signUp,signOut,shell,footer,startBadgeRealtime,
  storage:{get:storageGet,set:storageSet,remove:storageRemove}
 };
@@ -210,7 +227,7 @@ window.signOut=signOut;
 window.startSportsBadgeRealtime=startBadgeRealtime;
 
 if(sb)bindAuth();
-function initShared(){ensureNavStyles();bindNav();loadSession();if(sb)setTimeout(startBadgeRealtime,250);}
+function initShared(){ensureNavStyles();bindNav();bindGlobalSearch();loadSession();if(sb)setTimeout(startBadgeRealtime,250);}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",initShared,{once:true});else initShared();
 
 })();
