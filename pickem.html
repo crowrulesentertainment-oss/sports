@@ -370,69 +370,79 @@ $id("clearBtn").addEventListener("click", () => {
 });
 
 let leaderboardMode="week";
+let seasons=[];
+let selectedSeason=null;
 
 function displayPlayer(member,userId){
   const m=member||{};
   return m.display_name||m.username||[m.first_name,m.last_name].filter(Boolean).join(" ")||"Player "+String(userId||"").slice(0,8);
 }
 function initials(name){return String(name||"P").split(/\\s+/).map(x=>x[0]).join("").slice(0,2).toUpperCase()}
+function movement(v){
+  const n=Number(v||0);
+  return n>0?'<span class="movement-up">▲ '+n+'</span>':n<0?'<span class="movement-down">▼ '+Math.abs(n)+'</span>':'<span class="movement-flat">—</span>';
+}
+async function loadSeasons(){
+  const {data,error}=await sb.from("cr_sports_pickem_seasons").select("id,name,season_label,is_active,starts_at").order("starts_at",{ascending:false});
+  if(error)throw error;
+  seasons=data||[];
+  const sel=$id("leaderboardSeason");
+  sel.innerHTML=seasons.length?seasons.map(s=>'<option value="'+s.id+'">'+esc(s.name||s.season_label)+'</option>').join(""):'<option value="">No seasons</option>';
+  selectedSeason=seasons.find(s=>s.is_active)||seasons[0]||null;
+  if(selectedSeason)sel.value=selectedSeason.id;
+}
 async function loadLeaderboard(){
-  const root=$id("leaderboard"), summary=$id("leaderboardSummary");
-  root.innerHTML='<div class="loading">Loading leaderboard…</div>';
-  summary.innerHTML="";
+  const root=$id("leaderboard"),summary=$id("leaderboardSummary");
+  root.innerHTML='<div class="loading">Loading leaderboard…</div>';summary.innerHTML="";
   try{
-    let query=sb.from("cr_sports_pickem_entries").select("user_id,week_id,picks,points,submitted_at");
+    if(!selectedSeason){root.innerHTML='<div class="empty">No Pick &#39;Em season is configured.</div>';return}
+    let rows=[],headers=[];
     if(leaderboardMode==="week"){
       if(!selectedWeek){root.innerHTML='<div class="empty">No challenge selected.</div>';return}
-      query=query.eq("week_id",selectedWeek.id);
+      const r=await sb.from("cr_sports_pickem_week_stats").select("user_id,points,picks,win_pct,current_streak,best_streak,rank,rank_change").eq("season_id",selectedSeason.id).eq("week_id",selectedWeek.id).order("rank").limit(500);
+      if(r.error)throw r.error;rows=r.data||[];
+      headers=["POINTS","WIN %","STREAK","MOVE","PICKS"];
+    }else{
+      const r=await sb.from("cr_sports_pickem_season_stats").select("user_id,points,picks,win_pct,weeks_played,wins,losses,current_streak,best_streak,rank,rank_change,player_name,avatar_url,season_id").eq("season_id",selectedSeason.id).order("rank").limit(500);
+      if(r.error)throw r.error;rows=r.data||[];
+      headers=["POINTS","WIN %","STREAK","MOVE","W-L"];
     }
-    const {data,error}=await query.order("points",{ascending:false}).limit(500);
-    if(error)throw error;
-    const entries=data||[];
-    if(!entries.length){
-      root.innerHTML='<div class="empty"><h3>NO LEADERBOARD ENTRIES YET</h3><p>Players will appear here after they submit Pick &#39;Em entries.</p></div>';
-      summary.innerHTML='<div class="leader-stat"><b>0</b><span>PLAYERS</span></div><div class="leader-stat"><b>0</b><span>ENTRIES</span></div><div class="leader-stat"><b>0</b><span>POINTS</span></div><div class="leader-stat"><b>—</b><span>TOP SCORE</span></div>';
+    if(leaderboardMode==="history"){
+      const r=await sb.from("cr_sports_pickem_season_stats").select("user_id,points,picks,win_pct,weeks_played,current_streak,best_streak,rank,rank_change,player_name,avatar_url,season_id").order("season_id").order("rank").limit(2000);
+      if(r.error)throw r.error;
+      const ss=await sb.from("cr_sports_pickem_seasons").select("id,name,season_label,starts_at").order("starts_at",{ascending:false});
+      if(ss.error)throw ss.error;
+      const sm=new Map((ss.data||[]).map(x=>[x.id,x]));
+      rows=(r.data||[]).map(x=>({...x,seasonName:sm.get(x.season_id)?.name||sm.get(x.season_id)?.season_label||"Season"}));
+      headers=["POINTS","WIN %","WEEKS","STREAK","MOVE"];
+    }
+    if(!rows.length){
+      root.innerHTML='<div class="empty"><h3>NO '+(leaderboardMode==="history"?"HISTORICAL":"SEASON")+' RESULTS YET</h3><p>Leaderboard records will appear after Pick &#39;Em entries are scored.</p></div>';
+      summary.innerHTML='<div class="leader-stat"><b>0</b><span>PLAYERS</span></div><div class="leader-stat"><b>0</b><span>POINTS</span></div><div class="leader-stat"><b>0%</b><span>WIN %</span></div><div class="leader-stat"><b>0</b><span>STREAK</span></div>';
       return;
     }
-    const ids=[...new Set(entries.map(x=>x.user_id).filter(Boolean))];
-    const members=[];
-    for(let i=0;i<ids.length;i+=100){
-      const chunk=ids.slice(i,i+100);
-      const r=await sb.from("members").select("user_id,display_name,username,first_name,last_name,avatar_url").in("user_id",chunk).limit(100);
-      if(!r.error)members.push(...(r.data||[]));
-    }
+    const ids=[...new Set(rows.map(x=>x.user_id).filter(Boolean))],members=[];
+    for(let i=0;i<ids.length;i+=100){const r=await sb.from("members").select("user_id,display_name,username,first_name,last_name,avatar_url").in("user_id",ids.slice(i,i+100)).limit(100);if(!r.error)members.push(...(r.data||[]))}
     const mm=new Map(members.map(x=>[x.user_id,x]));
-    let rows=entries.map(e=>({
-      ...e,
-      member:mm.get(e.user_id)||null,
-      picks:e.picks&&typeof e.picks==="object"?Object.keys(e.picks).length:0,
-      points:Number(e.points||0)
-    }));
-    if(leaderboardMode==="all"){
-      const grouped=new Map();
-      rows.forEach(e=>{
-        const key=e.user_id;
-        const prev=grouped.get(key)||{user_id:key,member:e.member,entries:0,picks:0,points:0};
-        prev.entries++;prev.picks+=e.picks;prev.points+=e.points;grouped.set(key,prev);
-      });
-      rows=[...grouped.values()];
-    }
-    rows.sort((a,b)=>b.points-a.points||b.picks-a.picks||String(displayPlayer(a.member,a.user_id)).localeCompare(String(displayPlayer(b.member,b.user_id))));
-    const totalPoints=rows.reduce((s,x)=>s+x.points,0);
-    const top=rows[0]?.points||0;
-    summary.innerHTML='<div class="leader-stat"><b>'+rows.length+'</b><span>PLAYERS</span></div><div class="leader-stat"><b>'+rows.reduce((s,x)=>s+(x.entries||1),0)+'</b><span>ENTRIES</span></div><div class="leader-stat"><b>'+totalPoints+'</b><span>TOTAL POINTS</span></div><div class="leader-stat"><b>'+top+'</b><span>TOP SCORE</span></div>';
-    root.innerHTML='<div class="leader-row leader-head"><div>RK</div><div>PLAYER</div><div class="leader-number">POINTS</div><div class="leader-number">PICKS</div><div class="leader-number accuracy">ACCURACY</div><div class="leader-number entries">ENTRIES</div></div>'+rows.map((x,i)=>{
-      const name=displayPlayer(x.member,x.user_id),acc=x.picks?((x.points/x.picks)*100).toFixed(1)+"%":"—";
-      const avatar=x.member?.avatar_url?'<img class="leader-avatar" src="'+esc(x.member.avatar_url)+'" alt="" loading="lazy">':'<div class="leader-avatar">'+esc(initials(name))+'</div>';
-      const you=session&&x.user_id===session.user.id?" leader-you":"";
-      return '<div class="leader-row'+you+'"><div class="leader-rank">'+(i+1)+'</div><div class="leader-player">'+avatar+'<div><div class="leader-name">'+esc(name)+(you?' <span class="tag">YOU</span>':'')+'</div><div class="leader-sub">'+(leaderboardMode==="all"?"All challenges":"Selected challenge")+'</div></div></div><div class="leader-number">'+x.points+'</div><div class="leader-number">'+x.picks+'</div><div class="leader-number accuracy">'+acc+'</div><div class="leader-number entries">'+(x.entries||1)+'</div></div>'
+    const total=rows.reduce((s,x)=>s+Number(x.points||0),0);
+    const avg=rows.reduce((s,x)=>s+Number(x.win_pct||0),0)/rows.length;
+    summary.innerHTML='<div class="leader-stat"><b>'+new Set(rows.map(x=>x.user_id)).size+'</b><span>PLAYERS</span></div><div class="leader-stat"><b>'+total+'</b><span>POINTS</span></div><div class="leader-stat"><b>'+avg.toFixed(1)+'%</b><span>AVG WIN %</span></div><div class="leader-stat"><b>'+Math.max(...rows.map(x=>Number(x.best_streak||0)))+'</b><span>BEST STREAK</span></div>';
+    root.innerHTML='<div class="leader-row leader-head"><div>RK</div><div>PLAYER</div>'+headers.map(h=>'<div class="leader-number">'+h+'</div>').join("")+'</div>'+rows.map(x=>{
+      const m=mm.get(x.user_id),name=x.player_name||displayPlayer(m,x.user_id),you=session&&x.user_id===session.user.id?" leader-you":"";
+      const avatar=m?.avatar_url?'<img class="leader-avatar" src="'+esc(m.avatar_url)+'" alt="" loading="lazy">':'<div class="leader-avatar">'+esc(initials(name))+'</div>';
+      const vals=leaderboardMode==="week"
+        ? [''+(x.points||0),Number(x.win_pct||0).toFixed(1)+'%',(x.current_streak||0)+' / '+(x.best_streak||0),movement(x.rank_change),''+(x.picks||0)]
+        : leaderboardMode==="history"
+        ? [''+(x.points||0),Number(x.win_pct||0).toFixed(1)+'%',x.weeks_played||0,(x.current_streak||0)+' / '+(x.best_streak||0),movement(x.rank_change)]
+        : [''+(x.points||0),Number(x.win_pct||0).toFixed(1)+'%',(x.current_streak||0)+' / '+(x.best_streak||0),movement(x.rank_change),(x.wins||0)+'-'+(x.losses||0)];
+      return '<div class="leader-row'+you+'"><div class="leader-rank">'+esc(String(x.rank||"—"))+'</div><div class="leader-player">'+avatar+'<div><div class="leader-name">'+esc(name)+(you?' <span class="tag">YOU</span>':'')+'</div><div class="leader-sub">'+esc(leaderboardMode==="history"?(x.seasonName||"Historical"):leaderboardMode==="week"?"Selected challenge":selectedSeason.name)+'</div></div></div>'+vals.map(v=>'<div class="leader-number">'+v+'</div>').join("")+'</div>';
     }).join("");
-  }catch(e){
-    root.innerHTML='<div class="error">Leaderboard could not be loaded.<br><small>'+esc(e.message||e)+'</small></div>';
-  }
+  }catch(e){root.innerHTML='<div class="error">Leaderboard could not be loaded.<br><small>'+esc(e.message||e)+'</small></div>'}
 }
-$id("leaderboardWeekBtn").onclick=()=>{leaderboardMode="week";$id("leaderboardWeekBtn").className="button";$id("leaderboardAllBtn").className="button secondary";loadLeaderboard()};
-$id("leaderboardAllBtn").onclick=()=>{leaderboardMode="all";$id("leaderboardWeekBtn").className="button secondary";$id("leaderboardAllBtn").className="button";loadLeaderboard()};
+$id("leaderboardSeason").onchange=()=>{selectedSeason=seasons.find(s=>s.id===$id("leaderboardSeason").value)||null;loadLeaderboard()};
+$id("leaderboardWeekBtn").onclick=()=>{leaderboardMode="week";$id("leaderboardWeekBtn").className="button";$id("leaderboardSeasonBtn").className="button secondary";$id("leaderboardHistoryBtn").className="button secondary";loadLeaderboard()};
+$id("leaderboardSeasonBtn").onclick=()=>{leaderboardMode="season";$id("leaderboardWeekBtn").className="button secondary";$id("leaderboardSeasonBtn").className="button";$id("leaderboardHistoryBtn").className="button secondary";loadLeaderboard()};
+$id("leaderboardHistoryBtn").onclick=()=>{leaderboardMode="history";$id("leaderboardWeekBtn").className="button secondary";$id("leaderboardSeasonBtn").className="button secondary";$id("leaderboardHistoryBtn").className="button";loadLeaderboard()};
 $id("leaderboardRefreshBtn").onclick=loadLeaderboard;
 
 (async () => {
