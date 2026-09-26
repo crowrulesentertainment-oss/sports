@@ -64,115 +64,314 @@ const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const n=v=>Number(v??0)||0;
 const team=x=>x.team||x.cr_sports_teams||{};
 const league=x=>x.league||x.cr_sports_leagues||{};
-const wait=(p,ms=15000)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error("Standings request timed out. Please retry.")),ms))]);
+const wait=(p,ms=15000)=>Promise.race([p,new Promise((_,reject)=>setTimeout(()=>reject(new Error("Standings request timed out.")),ms))]);
+
 let all=[],seasons=[],leagues=[],activeSport="all",activeLeague="",showDetails=true;
 let favs=new Set(),standingsChannel=null,loadToken=0;
-const initialView=(()=>{const p=new URLSearchParams(location.search);return{season:p.get("season")||"",league:p.get("league")||"",sport:p.get("sport")||"all"}})();
-if(initialView.sport)activeSport=initialView.sport;
-if(initialView.league)activeLeague=initialView.league;
-function writeViewState(){const p=new URLSearchParams();if($("season").value)p.set("season",$("season").value);if(activeLeague)p.set("league",activeLeague);if(activeSport!=="all")p.set("sport",activeSport);history.replaceState(null,"",location.pathname+(p.toString()?"?"+p.toString():""))}
-function startRealtime(){if(standingsChannel||!db?.channel)return;standingsChannel=db.channel("crowrules-standings-live").on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_standings"},payload=>{const season=$("season").value;if(!season||String(payload.new?.season||payload.old?.season||"")!==String(season))return;clearTimeout(window.__crowStandingsRefresh);window.__crowStandingsRefresh=setTimeout(()=>load(true),700)}).subscribe(status=>{if(status==="SUBSCRIBED")setStatus("SUPABASE CONNECTED • LIVE",true)})}
-function stopRealtime(){if(standingsChannel&&db?.removeChannel){db.removeChannel(standingsChannel);standingsChannel=null}}try{favs=new Set(JSON.parse(localStorage.getItem("crowrules-standing-favorites")||"[]"))}catch(e){}
+try{favs=new Set(JSON.parse(localStorage.getItem("crowrules-standing-favorites")||"[]"))}catch(_){}
 
-function setStatus(msg,ok=false){$("connection").textContent=msg;$("connection").className="connection"+(ok?" ok":"");$("status").innerHTML='<span><span class="dot '+(ok?"ok":"")+'"></span>'+esc(msg)+'</span>'}
-function fail(e){console.error(e);setStatus("STANDINGS ERROR");$("content").innerHTML='<div class="error"><strong>STANDINGS COULD NOT LOAD</strong>'+esc(e?.message||"Unknown error")+'<br><br><button class="btn" id="retry">TRY AGAIN</button></div>';$("retry").onclick=load}
-function stats(rows){const a=[["TEAMS",rows.length],["LEAGUES",new Set(rows.map(x=>x.league_id)).size],["WINS",rows.reduce((s,x)=>s+n(x.wins),0)],["LOSSES",rows.reduce((s,x)=>s+n(x.losses),0)],["CONFERENCES",new Set(rows.map(x=>x.conference).filter(Boolean)).size],["DIVISIONS",new Set(rows.map(x=>x.division).filter(Boolean)).size]];$("stats").innerHTML=a.map(x=>'<div class="stat"><b>'+x[1]+'</b><span>'+x[0]+'</span></div>').join("")}
+const initialView=(()=>{
+ const p=new URLSearchParams(location.search);
+ return {season:p.get("season")||"",league:p.get("league")||"",sport:p.get("sport")||"all"};
+})();
+activeSport=initialView.sport||"all";
+activeLeague=initialView.league||"";
+
+function writeViewState(){
+ const p=new URLSearchParams();
+ if($("season").value)p.set("season",$("season").value);
+ if(activeLeague)p.set("league",activeLeague);
+ if(activeSport!=="all")p.set("sport",activeSport);
+ history.replaceState(null,"",location.pathname+(p.toString()?"?"+p.toString():""));
+}
+
+function setStatus(msg,ok=false){
+ $("connection").textContent=msg;
+ $("connection").className="connection"+(ok?" ok":"");
+ $("status").innerHTML='<span><span class="dot '+(ok?"ok":"")+'"></span>'+esc(msg)+'</span>';
+}
+
+function fail(e){
+ console.error(e);
+ setStatus("STANDINGS ERROR");
+ $("content").innerHTML='<div class="error"><strong>STANDINGS COULD NOT LOAD</strong>'+esc(e?.message||"Unknown error")+'<br><br><button class="btn" id="retry">TRY AGAIN</button></div>';
+ $("retry").onclick=load;
+}
+
+function renderStats(rows){
+ const cards=[
+  ["TEAMS",rows.length],
+  ["LEAGUES",new Set(rows.map(x=>x.league_id)).size],
+  ["WINS",rows.reduce((s,x)=>s+n(x.wins),0)],
+  ["LOSSES",rows.reduce((s,x)=>s+n(x.losses),0)],
+  ["CONFERENCES",new Set(rows.map(x=>x.conference).filter(Boolean)).size],
+  ["DIVISIONS",new Set(rows.map(x=>x.division).filter(Boolean)).size]
+ ];
+ $("stats").innerHTML=cards.map(x=>`<div class="stat"><b>${x[1]}</b><span>${x[0]}</span></div>`).join("");
+}
+
 async function loadSeasons(){
  setStatus("CONNECTING TO SUPABASE…");
- const r=await wait(db.from("cr_sports_standings").select("season").limit(2000));if(r.error)throw r.error;
- seasons=[...new Set((r.data||[]).map(x=>String(x.season||"")).filter(Boolean))].sort((a,b)=>b.localeCompare(a,undefined,{numeric:true}));
+ const r=await wait(db.from("cr_sports_standings").select("season").limit(2000));
+ if(r.error)throw r.error;
+ seasons=[...new Set((r.data||[]).map(x=>String(x.season||"")).filter(Boolean))]
+   .sort((a,b)=>b.localeCompare(a,undefined,{numeric:true}));
  if(!seasons.length)throw new Error("No standings seasons were found.");
- const current=initialView.season&&seasons.includes(initialView.season)?initialView.season:$("season").value; $("season").innerHTML=seasons.map(s=>'<option value="'+esc(s)+'">'+esc(s)+'</option>').join("");
- if(current&&seasons.includes(current))$("season").value=current;
+ const selected=initialView.season&&seasons.includes(initialView.season)?initialView.season:seasons[0];
+ $("season").innerHTML=seasons.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join("");
+ $("season").value=selected;
 }
+
 async function loadLeagues(){
- const season=$("season").value;if(!season)return;
- const r=await wait(db.from("cr_sports_standings").select("league_id").eq("season",season).limit(2000));if(r.error)throw r.error;
+ const season=$("season").value;
+ const r=await wait(db.from("cr_sports_standings").select("league_id").eq("season",season).limit(2000));
+ if(r.error)throw r.error;
  const ids=[...new Set((r.data||[]).map(x=>x.league_id).filter(Boolean))];
- if(!ids.length){leagues=[];$("league").innerHTML='<option value="">ALL LEAGUES</option>';drawSports();return}
- const q=await wait(db.from("cr_sports_leagues").select("id,name,code,sport,logo_url").in("id",ids).limit(2000));if(q.error)throw q.error;
+ if(!ids.length){
+  leagues=[];activeLeague="";$("league").innerHTML='<option value="">ALL LEAGUES</option>';drawSports();return;
+ }
+ const q=await wait(db.from("cr_sports_leagues").select("id,name,code,sport,logo_url,level").in("id",ids).limit(2000));
+ if(q.error)throw q.error;
  leagues=(q.data||[]).sort((a,b)=>String(a.code||a.name).localeCompare(String(b.code||b.name)));
- $("league").innerHTML='<option value="">ALL LEAGUES</option>'+leagues.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.code||x.name||"")+" — "+esc(x.name||"")+'</option>').join("");
  if(activeLeague&&!leagues.some(x=>x.id===activeLeague))activeLeague="";
- $("league").value=activeLeague;drawSports();
+ $("league").innerHTML='<option value="">ALL LEAGUES</option>'+
+  leagues.map(x=>`<option value="${esc(x.id)}">${esc(x.code||x.name||"")} — ${esc(x.name||"")}</option>`).join("");
+ $("league").value=activeLeague;
+ drawSports();
 }
+
 function drawSports(){
  const sports=[...new Set(leagues.map(x=>x.sport).filter(Boolean))].sort();
- $("sports").innerHTML='<button class="pill '+(activeSport==="all"?"active":"")+'" data-s="all">ALL SPORTS</button>'+sports.map(s=>'<button class="pill '+(activeSport===s?"active":"")+'" data-s="'+esc(s)+'">'+esc(String(s).toUpperCase())+'</button>').join("");
- $("sports").querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{activeSport=b.dataset.s;writeViewState();buildFilters();render()});
+ $("sports").innerHTML='<button class="pill '+(activeSport==="all"?"active":"")+'" data-s="all">ALL SPORTS</button>'+
+  sports.map(s=>`<button class="pill ${activeSport===s?"active":""}" data-s="${esc(s)}">${esc(String(s).toUpperCase())}</button>`).join("");
+ $("sports").querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{
+  activeSport=b.dataset.s;
+  writeViewState();
+  buildFilters();
+  render();
+ });
 }
+
 async function loadRows(silent=false){
  const token=++loadToken;
- const season=$("season").value;if(!season)throw new Error("No season selected.");
- if(!silent)setStatus("LOADING "+season+" STANDINGS…");
- $("content").innerHTML='<div class="loading"><div class="spinner"></div><strong>LOADING '+esc(season)+' STANDINGS</strong><br>Fetching current records and team data…</div>';
- let q=db.from("cr_sports_standings").select("*").eq("season",season).limit(2000);if(activeLeague)q=q.eq("league_id",activeLeague);
- const r=await wait(q);if(r.error)throw r.error;
- const source=r.data||[];const tids=[...new Set(source.map(x=>x.team_id).filter(Boolean))];const lids=[...new Set(source.map(x=>x.league_id).filter(Boolean))];
+ const season=$("season").value;
+ if(!season)throw new Error("No season selected.");
+ if(!silent){
+  setStatus("LOADING "+season+" STANDINGS…");
+  $("content").innerHTML='<div class="loading"><div class="spinner"></div><strong>LOADING '+esc(season)+' STANDINGS</strong><br>Fetching league and team data…</div>';
+ }
+ let q=db.from("cr_sports_standings").select("*").eq("season",season).limit(2000);
+ if(activeLeague)q=q.eq("league_id",activeLeague);
+ const r=await wait(q);
+ if(r.error)throw r.error;
+ const source=r.data||[];
+ const tids=[...new Set(source.map(x=>x.team_id).filter(Boolean))];
+ const lids=[...new Set(source.map(x=>x.league_id).filter(Boolean))];
  const [tr,lr]=await Promise.all([
   tids.length?wait(db.from("cr_sports_teams").select("id,name,short_name,city,state,logo_url").in("id",tids).limit(2000)):Promise.resolve({data:[],error:null}),
-  lids.length?wait(db.from("cr_sports_leagues").select("id,name,code,sport,logo_url").in("id",lids).limit(2000)):Promise.resolve({data:[],error:null})
+  lids.length?wait(db.from("cr_sports_leagues").select("id,name,code,sport,logo_url,level").in("id",lids).limit(2000)):Promise.resolve({data:[],error:null})
  ]);
- if(tr.error)throw tr.error;if(lr.error)throw lr.error;
- const tm=new Map((tr.data||[]).map(x=>[x.id,x])),lm=new Map((lr.data||[]).map(x=>[x.id,x])),seen=new Map();
- source.forEach(x=>{const key=x.league_id+"|"+x.season+"|"+x.team_id;seen.set(key,{...x,team:tm.get(x.team_id)||{},league:lm.get(x.league_id)||{}})});
- if(token!==loadToken)return;all=[...seen.values()];buildFilters();render();setStatus("SUPABASE CONNECTED • LIVE",true);$("updated").textContent=new Date().toLocaleString()+" • "+all.length+" records";writeViewState();startRealtime();
+ if(tr.error)throw tr.error;
+ if(lr.error)throw lr.error;
+ const tm=new Map((tr.data||[]).map(x=>[x.id,x]));
+ const lm=new Map((lr.data||[]).map(x=>[x.id,x]));
+ const seen=new Map();
+ source.forEach(x=>{
+  const key=[x.league_id,x.season,x.team_id].join("|");
+  seen.set(key,{...x,team:tm.get(x.team_id)||{},league:lm.get(x.league_id)||{}});
+ });
+ if(token!==loadToken)return;
+ all=[...seen.values()];
+ buildFilters();
+ render();
+ setStatus("SUPABASE CONNECTED • LIVE",true);
+ $("updated").textContent=new Date().toLocaleString()+" • "+all.length+" records";
+ writeViewState();
+ startRealtime();
 }
+
 function buildFilters(){
  const base=all.filter(x=>activeSport==="all"||String(league(x).sport||"").toLowerCase()===String(activeSport).toLowerCase());
- const cs=[...new Set(base.map(x=>x.conference).filter(Boolean))].sort(),ds=[...new Set(base.map(x=>x.division).filter(Boolean))].sort(),cv=$("conference").value,dv=$("division").value;
- $("conference").innerHTML='<option value="">ALL CONFERENCES</option>'+cs.map(x=>'<option value="'+esc(x)+'">'+esc(x)+'</option>').join("");
- $("division").innerHTML='<option value="">ALL DIVISIONS</option>'+ds.map(x=>'<option value="'+esc(x)+'">'+esc(x)+'</option>').join("");
- if(cs.includes(cv))$("conference").value=cv;if(ds.includes(dv))$("division").value=dv;
+ const conferences=[...new Set(base.map(x=>x.conference).filter(Boolean))].sort();
+ const divisions=[...new Set(base.map(x=>x.division).filter(Boolean))].sort();
+ const oldC=$("conference").value,oldD=$("division").value;
+ $("conference").innerHTML='<option value="">ALL CONFERENCES</option>'+conferences.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join("");
+ $("division").innerHTML='<option value="">ALL DIVISIONS</option>'+divisions.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join("");
+ if(conferences.includes(oldC))$("conference").value=oldC;
+ if(divisions.includes(oldD))$("division").value=oldD;
 }
+
 function filtered(){
- const q=$("search").value.trim().toLowerCase(),c=$("conference").value,d=$("division").value,f=$("favorites").value,s=$("sort").value;
- const rows=all.filter(x=>{const t=team(x),l=league(x),hay=[t.name,t.short_name,t.city,t.state,l.name,l.code,l.sport,x.conference,x.division].filter(Boolean).join(" ").toLowerCase();return(activeSport==="all"||String(l.sport||"").toLowerCase()===String(activeSport).toLowerCase())&&(!activeLeague||x.league_id===activeLeague)&&(!q||hay.includes(q))&&(!c||x.conference===c)&&(!d||x.division===d)&&(f!=="saved"||favs.has(x.team_id))});
- rows.sort((a,b)=>{const ta=team(a),tb=team(b);if(s==="team")return String(ta.name||"").localeCompare(String(tb.name||""));if(s==="winpct")return n(b.win_pct)-n(a.win_pct)||n(a.rank)-n(b.rank);if(s==="wins")return n(b.wins)-n(a.wins)||n(a.rank)-n(b.rank);if(s==="diff")return(n(b.points_for)-n(b.points_against))-(n(a.points_for)-n(a.points_against))||n(a.rank)-n(b.rank);if(s==="points")return n(b.points_for)-n(a.points_for)||n(a.rank)-n(b.rank);return n(a.rank)-n(b.rank)});return rows;
+ const q=$("search").value.trim().toLowerCase();
+ const c=$("conference").value,d=$("division").value,f=$("favorites").value,s=$("sort").value;
+ const rows=all.filter(x=>{
+  const t=team(x),l=league(x);
+  const hay=[t.name,t.short_name,t.city,t.state,l.name,l.code,l.sport,x.conference,x.division].filter(Boolean).join(" ").toLowerCase();
+  return (activeSport==="all"||String(l.sport||"").toLowerCase()===String(activeSport).toLowerCase()) &&
+   (!activeLeague||x.league_id===activeLeague)&&(!q||hay.includes(q))&&(!c||x.conference===c)&&(!d||x.division===d)&&(f!=="saved"||favs.has(x.team_id));
+ });
+ rows.sort((a,b)=>{
+  if(s==="team")return String(team(a).name||"").localeCompare(String(team(b).name||""));
+  if(s==="winpct")return n(b.win_pct)-n(a.win_pct)||n(a.rank)-n(b.rank);
+  if(s==="wins")return n(b.wins)-n(a.wins)||n(a.rank)-n(b.rank);
+  if(s==="diff")return (n(b.points_for)-n(b.points_against))-(n(a.points_for)-n(a.points_against))||n(a.rank)-n(b.rank);
+  if(s==="points")return n(b.points_for)-n(a.points_for)||n(a.rank)-n(b.rank);
+  return n(a.rank)-n(b.rank);
+ });
+ return rows;
 }
-function row(x){
- const t=team(x),l=league(x);
- const diff=n(x.points_for)-n(x.points_against),streak=n(x.streak),id=x.team_id;
- const saved=favs.has(id),pct=n(x.win_pct)<=1?n(x.win_pct)*100:n(x.win_pct);
+
+function teamRow(x){
+ const t=team(x);
+ const diff=n(x.points_for)-n(x.points_against);
+ const streak=n(x.streak);
+ const id=x.team_id;
+ const saved=favs.has(id);
+ const pct=n(x.win_pct)<=1?n(x.win_pct)*100:n(x.win_pct);
  const record=n(x.wins)+"-"+n(x.losses)+(n(x.ties)?"-"+n(x.ties):"");
  const zone=x.clinched_bye?"BYE":x.clinched_division?"DIVISION":x.clinched_wild_card?"WILD CARD":x.eliminated_from_playoff_contention?"ELIMINATED":"";
  const zoneClass=x.eliminated_from_playoff_contention?"out":x.clinched_bye?"bye":x.clinched_division?"division":"wild";
  const form=streak>0?["W","W","W","W","W"]:streak<0?["L","L","L","L","L"]:["—","—","—","—","—"];
- const logo=t.logo_url?'<img class="logo" src="'+esc(t.logo_url)+'" alt="" loading="lazy" onerror="this.remove()">':'<span class="logo"></span>';
- const cls=x.eliminated_from_playoff_contention?"row-eliminated":(x.clinched_bye||x.clinched_division||x.clinched_wild_card?"row-clinched":"");
- const formHtml=form.map(v=>'<span class="formdot '+(v==="W"?"w":v==="L"?"l":"t")+'">'+v+"</span>").join("");
- const statusHtml=zone?'<span class="zone '+zoneClass+'">'+esc(zone)+"</span>":"";
- return `<tr class="${cls}">
- <td><span class="rank ${n(x.rank)<=3?"top":""}">${esc(x.rank??"—")}</span></td>
- <td><div class="team">${logo}<a href="teams.html?id=${encodeURIComponent(id)}"><div class="team-name">${esc(t.short_name||t.name||"Unknown Team")}${saved?" ★":""}</div><div class="team-sub">${esc([t.city,t.state].filter(Boolean).join(", "))}</div></a></div></td>
- <td class="record">${record}</td><td>${pct.toFixed(1)}%</td><td>${n(x.points_for)}</td><td>${n(x.points_against)}</td>
- <td class="${diff>0?"pos":diff<0?"neg":"muted"}">${diff>0?"+":""}${diff}</td>
- <td><div class="formline">${formHtml}</div><div class="${streak>0?"pos":streak<0?"neg":"muted"}" style="font-size:8px;margin-top:3px">${streak>0?"HOT":streak<0?"COLD":"EVEN"} • ${streak>0?"+":""}${streak}</div></td>
- <td><div style="display:flex;gap:5px;align-items:center;justify-content:flex-end">${statusHtml}<button class="mini save" data-fav="${esc(id)}">${saved?"★ SAVED":"☆ SAVE"}</button><button class="mini expand" data-expand="${esc(id)}">STATS</button></div></td>
+ const logo=t.logo_url?`<img class="logo" src="${esc(t.logo_url)}" alt="" loading="lazy" onerror="this.remove()">`:'<span class="logo"></span>';
+ const rowClass=x.eliminated_from_playoff_contention?"row-eliminated":(x.clinched_bye||x.clinched_division||x.clinched_wild_card?"row-clinched":"");
+ return `<tr class="${rowClass}">
+  <td><span class="rank ${n(x.rank)<=3?"top":""}">${esc(x.rank??"—")}</span></td>
+  <td><div class="team">${logo}<a href="teams.html?id=${encodeURIComponent(id)}"><div class="team-name">${esc(t.short_name||t.name||"Unknown Team")}${saved?" ★":""}</div><div class="team-sub">${esc([t.city,t.state].filter(Boolean).join(", "))}</div></a></div></td>
+  <td class="record">${record}</td>
+  <td>${pct.toFixed(1)}%</td><td>${n(x.points_for)}</td><td>${n(x.points_against)}</td>
+  <td class="${diff>0?"pos":diff<0?"neg":"muted"}">${diff>0?"+":""}${diff}</td>
+  <td><div class="formline">${form.map(v=>`<span class="formdot ${v==="W"?"w":v==="L"?"l":"t"}">${v}</span>`).join("")}</div><div class="${streak>0?"pos":streak<0?"neg":"muted"}" style="font-size:8px;margin-top:3px">${streak>0?"HOT":streak<0?"COLD":"EVEN"} • ${streak>0?"+":""}${streak}</div></td>
+  <td><div style="display:flex;gap:5px;align-items:center;justify-content:flex-end">${zone?`<span class="zone ${zoneClass}">${zone}</span>`:""}<button class="mini save" data-fav="${esc(id)}">${saved?"★ SAVED":"☆ SAVE"}</button><button class="mini expand" data-expand="${esc(id)}">STATS</button></div></td>
  </tr>
  <tr class="detail" data-detail="${esc(id)}" style="display:none"><td colspan="9"><div class="detail-box">
- <div class="detail-stat"><b>CONFERENCE</b><span>${n(x.conference_wins)}-${n(x.conference_losses)}</span></div>
- <div class="detail-stat"><b>DIVISION</b><span>${n(x.division_wins)}-${n(x.division_losses)}</span></div>
- <div class="detail-stat"><b>HOME</b><span>${n(x.home_wins)}-${n(x.home_losses)}</span></div>
- <div class="detail-stat"><b>AWAY</b><span>${n(x.away_wins)}-${n(x.away_losses)}</span></div>
- <div class="detail-stat"><b>NET POINTS</b><span>${n(x.net_points)}</span></div>
- <div class="detail-stat"><b>TOUCHDOWNS</b><span>${n(x.touchdowns)}</span></div>
- <div class="detail-stat"><b>STATUS</b><span>${esc(zone||"IN CONTENTION")}</span></div>
- <div class="detail-stat"><b>UPDATED</b><span>${esc(x.updated_at?new Date(x.updated_at).toLocaleDateString():"—")}</span></div>
+  <div class="detail-stat"><b>CONFERENCE</b><span>${n(x.conference_wins)}-${n(x.conference_losses)}</span></div>
+  <div class="detail-stat"><b>DIVISION</b><span>${n(x.division_wins)}-${n(x.division_losses)}</span></div>
+  <div class="detail-stat"><b>HOME</b><span>${n(x.home_wins)}-${n(x.home_losses)}</span></div>
+  <div class="detail-stat"><b>AWAY</b><span>${n(x.away_wins)}-${n(x.away_losses)}</span></div>
+  <div class="detail-stat"><b>NET POINTS</b><span>${n(x.net_points)}</span></div>
+  <div class="detail-stat"><b>TOUCHDOWNS</b><span>${n(x.touchdowns)}</span></div>
+  <div class="detail-stat"><b>STATUS</b><span>${esc(zone||"IN CONTENTION")}</span></div>
+  <div class="detail-stat"><b>UPDATED</b><span>${esc(x.updated_at?new Date(x.updated_at).toLocaleDateString():"—")}</span></div>
  </div></td></tr>`;
 }
+
 function render(){
- const rows=filtered();stats(rows);const groups=new Map();
- rows.forEach(x=>{const l=league(x),key=[x.league_id,x.conference||"GENERAL",x.division||"OVERALL"].join("|");if(!groups.has(key))groups.set(key,{l,season:x.season,c:x.conference,d:x.division,rows:[]});groups.get(key).rows.push(x)});
+ const rows=filtered();
+ renderStats(rows);
+ const groups=new Map();
+ rows.forEach(x=>{
+  const l=league(x);
+  const key=[x.league_id,x.conference||"GENERAL",x.division||"OVERALL"].join("|");
+  if(!groups.has(key))groups.set(key,{l,season:x.season,c:x.conference,d:x.division,rows:[]});
+  groups.get(key).rows.push(x);
+ });
  const list=[...groups.values()].sort((a,b)=>String(a.l.code||a.l.name||"").localeCompare(String(b.l.code||b.l.name||""))||String(a.c||"").localeCompare(String(b.c||""))||String(a.d||"").localeCompare(String(b.d||"")));
- if(!list.length){$("content").innerHTML='<div class="empty"><strong>NO STANDINGS FOUND</strong>Try another filter or search.</div>';return}
- $("content").innerHTML=list.map(g=>'<section class="league"><div class="league-head"><div class="league-title">'+(g.l.logo_url?'<img class="league-logo" src="'+esc(g.l.logo_url)+'" alt="" loading="lazy" onerror="this.remove()">':'<span class="mark">'+esc((g.l.code||g.l.name||"LGE").slice(0,3).toUpperCase())+'</span>')+'<div><div class="league-meta"><h2>'+esc(g.l.code||g.l.name||"LEAGUE")+'</h2><span class="zone">'+esc(String(g.l.sport||"SPORT").toUpperCase())+'</span></div><p>'+esc(g.l.name||"")+" • "+esc(g.season||"")+" • "+esc(g.c||"League Table")+" • "+esc(g.d||"Overall")+" • "+g.rows.length+" teams</p></div></div><div class="actions"><a class="mini" href="scores.html">SCORES</a><a class="mini" href="teams.html">TEAMS</a></div></div><div class="table"><table><thead><tr><th>RK</th><th>TEAM</th><th>W-L</th><th>WIN%</th><th>PF</th><th>PA</th><th>DIFF</th><th>RECENT FORM</th><th>STATUS</th></tr></thead><tbody>'+g.rows.map(row).join("")+'</tbody></table></div></section>').join("");
- $("content").querySelectorAll("[data-fav]").forEach(b=>b.onclick=()=>{const id=b.dataset.fav;if(favs.has(id))favs.delete(id);else favs.add(id);try{localStorage.setItem("crowrules-standing-favorites",JSON.stringify([...favs]))}catch(e){}render()});
- $("content").querySelectorAll("[data-expand]").forEach(b=>b.onclick=()=>{const d=b.closest("tr")?.nextElementSibling;if(!d)return;const open=d.style.display!=="none";d.style.display=open?"none":"table-row";b.textContent=open?"STATS":"HIDE"});
+ if(!list.length){
+  $("content").innerHTML='<div class="empty"><strong>NO STANDINGS FOUND</strong>Try another filter or search.</div>';
+  return;
+ }
+ $("content").innerHTML=list.map(g=>{
+  const llogo=g.l.logo_url?`<img class="league-logo" src="${esc(g.l.logo_url)}" alt="" loading="lazy" onerror="this.remove()">`:`<span class="mark">${esc((g.l.code||g.l.name||"LGE").slice(0,3).toUpperCase())}</span>`;
+  return `<section class="league">
+   <div class="league-head"><div class="league-title">${llogo}<div><div class="league-meta"><h2>${esc(g.l.code||g.l.name||"LEAGUE")}</h2><span class="zone">${esc(String(g.l.sport||"SPORT").toUpperCase())}</span></div><p>${esc(g.l.name||"")} • ${esc(g.season||"")} • ${esc(g.c||"League Table")} • ${esc(g.d||"Overall")} • ${g.rows.length} teams</p></div></div>
+    <div class="actions"><a class="mini" href="scores.html">SCORES</a><a class="mini" href="teams.html">TEAMS</a></div></div>
+   <div class="table"><table><thead><tr><th>RK</th><th>TEAM</th><th>W-L</th><th>WIN%</th><th>PF</th><th>PA</th><th>DIFF</th><th>RECENT FORM</th><th>STATUS</th></tr></thead><tbody>${g.rows.map(teamRow).join("")}</tbody></table></div>
+  </section>`;
+ }).join("");
+ $("content").querySelectorAll("[data-fav]").forEach(b=>b.onclick=()=>{
+  const id=b.dataset.fav;
+  if(favs.has(id))favs.delete(id);else favs.add(id);
+  try{localStorage.setItem("crowrules-standing-favorites",JSON.stringify([...favs]))}catch(_){}
+  render();
+ });
+ $("content").querySelectorAll("[data-expand]").forEach(b=>b.onclick=()=>{
+  const detail=b.closest("tr")?.nextElementSibling;
+  if(!detail)return;
+  const open=detail.style.display!=="none";
+  detail.style.display=open?"none":"table-row";
+  b.textContent=open?"STATS":"HIDE";
+ });
 }
-async function load(){if(!db)return fail(new Error("The shared Supabase client did not initialize."));try{await loadSeasons();await loadLeagues();await loadRows()}catch(e){fail(e)}}
-$("season").onchange=async()=>{activeLeague="";try{await loadLeagues();await loadRows();writeViewState()}catch(e){fail(e)}};$("league").onchange=()=>{activeLeague=$("league").value;writeViewState();loadRows().catch(fail)};$("conference").onchange=render;$("division").onchange=render;$("search").oninput=render;$("favorites").onchange=render;$("sort").onchange=render;$("refresh").onclick=load;$("reset").onclick=()=>{activeSport="all";activeLeague="";$("league").value="";$("conference").value="";$("division").value="";$("search").value="";$("favorites").value="all";$("sort").value="rank";writeViewState();drawSports();render()};$("details").onclick=()=>{showDetails=!showDetails;$("details").textContent=showDetails?"DETAILS ON":"DETAILS OFF";$("details").classList.toggle("active",showDetails);render()};$("export").onclick=()=>{const rows=filtered(),head=["Rank","Team","League","Season","Conference","Division","Wins","Losses","Ties","WinPct","PointsFor","PointsAgainst","Differential","Streak"],lines=[head,...rows.map(x=>{const t=team(x),l=league(x);return[x.rank,t.name||"",l.name||l.code||"",x.season,x.conference||"",x.division||"",x.wins,x.losses,x.ties,x.win_pct,x.points_for,x.points_against,n(x.points_for)-n(x.points_against),x.streak]})].map(r=>r.map(v=>'"'+String(v??"").replaceAll('"','""')+'"').join(","));const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+lines.join("\r\n")],{type:"text/csv"}));a.download="crowrules-standings-"+($("season").value||"season")+".csv";a.click()};$("share").onclick=async()=>{const p=new URLSearchParams();if($("season").value)p.set("season",$("season").value);if(activeLeague)p.set("league",activeLeague);if(activeSport!=="all")p.set("sport",activeSport);const url=location.origin+location.pathname+"?"+p.toString();try{await navigator.clipboard.writeText(url);$("share").textContent="COPIED";setTimeout(()=>$("share").textContent="SHARE VIEW",1200)}catch(e){prompt("Copy standings URL",url)}};
-window.addEventListener("beforeunload",stopRealtime);window.addEventListener("keydown",e=>{const tag=document.activeElement?.tagName?.toLowerCase();if(e.key==="/"&&!["input","select","textarea"].includes(tag)){e.preventDefault();$("search").focus()}if(e.key.toLowerCase()==="r"&&!["input","select","textarea"].includes(tag))load();if(e.key==="Escape"&&tag==="input"){$("search").value="";render()}});
+
+function startRealtime(){
+ if(standingsChannel||!db?.channel)return;
+ standingsChannel=db.channel("crowrules-standings-live")
+  .on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_standings"},payload=>{
+   const season=$("season").value;
+   const changed=String(payload.new?.season||payload.old?.season||"");
+   if(season&&changed===String(season)){
+    clearTimeout(window.__crowStandingsRefresh);
+    window.__crowStandingsRefresh=setTimeout(()=>loadRows(true),700);
+   }
+  })
+  .subscribe(status=>{if(status==="SUBSCRIBED")setStatus("SUPABASE CONNECTED • LIVE",true);});
+}
+
+function stopRealtime(){
+ if(standingsChannel&&db?.removeChannel){
+  db.removeChannel(standingsChannel);
+  standingsChannel=null;
+ }
+}
+
+async function load(){
+ if(!db){fail(new Error("The shared Supabase client did not initialize."));return;}
+ try{await loadSeasons();await loadLeagues();await loadRows();}
+ catch(e){fail(e);}
+}
+
+$("season").onchange=async()=>{
+ activeLeague="";
+ try{await loadLeagues();await loadRows();writeViewState();}catch(e){fail(e);}
+};
+$("league").onchange=()=>{
+ activeLeague=$("league").value;
+ writeViewState();
+ loadRows().catch(fail);
+};
+$("conference").onchange=render;
+$("division").onchange=render;
+$("search").oninput=render;
+$("favorites").onchange=render;
+$("sort").onchange=render;
+$("refresh").onclick=load;
+$("reset").onclick=()=>{
+ activeSport="all";activeLeague="";
+ $("league").value="";$("conference").value="";$("division").value="";
+ $("search").value="";$("favorites").value="all";$("sort").value="rank";
+ writeViewState();drawSports();render();
+};
+$("details").onclick=()=>{
+ showDetails=!showDetails;
+ $("details").textContent=showDetails?"DETAILS ON":"DETAILS OFF";
+ $("details").classList.toggle("active",showDetails);
+ $("content").querySelectorAll(".detail").forEach(x=>{x.style.display=showDetails?"table-row":"none";});
+};
+$("export").onclick=()=>{
+ const rows=filtered();
+ const head=["Rank","Team","League","Season","Conference","Division","Wins","Losses","Ties","WinPct","PointsFor","PointsAgainst","Differential","Streak"];
+ const lines=[head,...rows.map(x=>[x.rank,team(x).name||"",league(x).name||league(x).code||"",x.season,x.conference||"",x.division||"",x.wins,x.losses,x.ties,x.win_pct,x.points_for,x.points_against,n(x.points_for)-n(x.points_against),x.streak])]
+  .map(r=>r.map(v=>'"'+String(v??"").replaceAll('"','""')+'"').join(","));
+ const a=document.createElement("a");
+ a.href=URL.createObjectURL(new Blob(["\ufeff"+lines.join("\r\n")],{type:"text/csv"}));
+ a.download="crowrules-standings-"+($("season").value||"season")+".csv";
+ a.click();
+ setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+};
+$("share").onclick=async()=>{
+ writeViewState();
+ const url=location.href;
+ try{await navigator.clipboard.writeText(url);$("share").textContent="COPIED";setTimeout(()=>$("share").textContent="SHARE VIEW",1200);}
+ catch(_){prompt("Copy standings URL",url);}
+};
+
+window.addEventListener("beforeunload",stopRealtime);
+window.addEventListener("keydown",e=>{
+ const tag=document.activeElement?.tagName?.toLowerCase();
+ if(e.key==="/"&&!["input","select","textarea"].includes(tag)){e.preventDefault();$("search").focus();}
+ if(e.key.toLowerCase()==="r"&&!["input","select","textarea"].includes(tag))load();
+ if(e.key==="Escape"&&tag==="input"){$("search").value="";render();}
+});
 load();
 })();
 </script>
