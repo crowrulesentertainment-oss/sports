@@ -277,6 +277,17 @@ function setLeagueInUrl(value){
   history.replaceState({},document.title,url.href);
  }catch(_){}
 }
+async function populateUniversalLeagueSelector(){
+ const select=document.getElementById("crLeagueSelector");
+ if(!select)return;
+ const current=getActiveLeague();
+ const leagues=await loadSportsLeagues();
+ select.innerHTML='<option value="all">ALL LEAGUES</option>'+leagues.map(l=>'<option value="'+esc(l.code||l.id)+'">'+esc(String(l.code||l.name||"LEAGUE").toUpperCase())+'</option>').join("");
+ const match=leagues.find(l=>String(l.code||l.id).toLowerCase()===String(current||"all").toLowerCase());
+ select.value=match?(match.code||match.id):"all";
+ window.CROW_SPORTS_LEAGUE=select.value;
+ syncLeagueUi(select.value);
+}
 async function loadSportsLeagues(force=false){
  if(!sb)return [];
  if(leagueCatalogCache&&!force)return leagueCatalogCache;
@@ -414,7 +425,7 @@ async function subscribeSportsData(tables,callback){
 
 window.CrowRulesSports={
  version:"22.0",shellVersion:"22.0",navGroups:NAV_GROUPS,nav:NAV,supabase:sb,$,$,esc,sleep,timeout:withTimeout,normalizeError,reportError,loadPodcastAudio,
- dataTables:SPORTS_DATA_TABLES,getActiveLeague,setLeagueInUrl,loadSportsLeagues,resolveLeague,leagueId,leagueQuery,getSportsData,getSportsSnapshot,syncLeagueUi,refreshCurrentSportsPage,subscribeSportsData,
+ dataTables:SPORTS_DATA_TABLES,getActiveLeague,populateUniversalLeagueSelector,setLeagueInUrl,loadSportsLeagues,resolveLeague,leagueId,leagueQuery,getSportsData,getSportsSnapshot,syncLeagueUi,refreshCurrentSportsPage,subscribeSportsData,
  getSession,loadSession,loadUnread,signIn,signUp,signOut,shell,footer,startBadgeRealtime,
  storage:{get:storageGet,set:storageSet,remove:storageRemove}
 };
@@ -424,7 +435,7 @@ window.signOut=signOut;
 window.startSportsBadgeRealtime=startBadgeRealtime;
 
 if(sb)bindAuth();
-function initShared(){ensureNavStyles();bindNav();bindGlobalSearch();bindLeagueSelector();bindUniversalDataLayer();syncLeagueUi();loadSession();if(sb)setTimeout(startBadgeRealtime,250);}
+function initShared(){ensureNavStyles();bindNav();bindGlobalSearch();bindLeagueSelector();bindUniversalDataLayer();syncLeagueUi();populateUniversalLeagueSelector();loadSession();if(sb)setTimeout(startBadgeRealtime,250);}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",initShared,{once:true});else initShared();
 
 })();
