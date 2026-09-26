@@ -68,7 +68,7 @@ const league=x=>x.league||x.cr_sports_leagues||{};
 const wait=(p,ms=15000)=>Promise.race([p,new Promise((_,reject)=>setTimeout(()=>reject(new Error("Standings request timed out.")),ms))]);
 
 const EXCLUDED_LEAGUES=new Set(["AEW","WWE","UFC"]);
-let all=[],seasons=[],leagues=[],activeSport="all",activeLeague="",showDetails=true;
+let all=[],seasons=[],leagues=[],activeSport="all",activeLeague="",showDetails=true;\nlet coverageCounts=new Map();
 let favs=new Set(),standingsChannel=null,loadToken=0,refreshTimer=null,refreshBusy=false;
 try{favs=new Set(JSON.parse(localStorage.getItem("crowrules-standing-favorites")||"[]"))}catch(_){}
 
