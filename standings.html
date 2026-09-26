@@ -18,11 +18,18 @@ body{background:#050508}
 .st-hero p{max-width:820px;color:#aeb6c7;font-size:15px;line-height:1.7;margin:18px 0 0}
 .st-wrap{max-width:1450px;margin:auto;padding:28px 20px 60px}
 .st-toolbar{position:sticky;top:0;z-index:20;padding:14px 0;background:#050508e8;backdrop-filter:blur(14px);border-bottom:1px solid #ffffff0b}
-.st-controls{display:grid;grid-template-columns:1.35fr .65fr .9fr .9fr 1.4fr .9fr auto;gap:10px}
+.st-controls{display:grid;grid-template-columns:1.25fr .65fr .9fr .9fr 1.35fr .8fr .8fr auto;gap:10px}
 .st-controls select,.st-controls input{width:100%;box-sizing:border-box}
 .st-quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .st-quick button{border:1px solid #ffffff12;background:#ffffff05;color:#dce1eb;border-radius:999px;padding:9px 13px;cursor:pointer;font:700 10px Orbitron,Arial}
 .st-quick button.active{border-color:#ff304f66;background:#ff304f12;color:#fff}
+.view-tools{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.view-tools button{border:1px solid #ffffff12;background:#ffffff05;color:#aeb6c7;border-radius:9px;padding:8px 11px;cursor:pointer;font:700 9px Orbitron,Arial}
+.view-tools button.active{border-color:#ff304f55;background:#ff304f10;color:#fff}
+.st-table.compact td{padding-top:6px;padding-bottom:6px}.st-table.compact .detail-row{display:none}
+.fav-only .fav{border-color:#ff304f66;color:#ff8092}
+.pin{font-size:9px;color:#ff7186;letter-spacing:.08em}
+.kpi-note{font-size:9px;color:#697388;margin-top:3px}
 .st-summary{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:20px 0}
 .stat{border:1px solid #ffffff10;border-radius:16px;padding:15px;background:linear-gradient(135deg,#ffffff06,#ffffff02)}
 .stat b{display:block;font:800 23px Orbitron,Arial}.stat span{display:block;color:#8f98aa;font-size:10px;margin-top:5px;letter-spacing:.08em}
@@ -48,6 +55,7 @@ body{background:#050508}
 .loading{padding:35px;text-align:center;color:#7d8799}.skeleton{height:13px;background:#ffffff08;border-radius:5px;margin:10px 0}
 .note{color:#667084;font-size:10px;line-height:1.6;margin-top:12px}
 @media(max-width:1150px){.st-controls{grid-template-columns:1fr 1fr 1fr}.st-summary{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:850px){.st-controls{grid-template-columns:1fr 1fr}.st-controls .wide{grid-column:1/-1}}
 @media(max-width:700px){.st-wrap{padding:20px 12px 45px}.st-hero{padding:50px 0 30px}.st-controls{grid-template-columns:1fr}.st-summary{grid-template-columns:1fr 1fr}.st-status{align-items:flex-start;flex-direction:column}.league-head{align-items:flex-start;flex-direction:column}.st-table{min-width:780px}}
 </style>
 </head>
@@ -70,6 +78,7 @@ body{background:#050508}
       <select id="conference" class="input" aria-label="Conference"><option value="">All conferences</option></select>
       <select id="division" class="input" aria-label="Division"><option value="">All divisions</option></select>
       <input id="search" class="input" placeholder="Search teams, cities, leagues or divisions…" aria-label="Search standings">
+      <select id="favoritesFilter" class="input" aria-label="Favorite filter"><option value="all">All teams</option><option value="favorites">Favorites only</option></select>
       <select id="sort" class="input" aria-label="Sort standings">
         <option value="rank">Sort: Rank</option>
         <option value="winpct">Sort: Win %</option>
@@ -82,6 +91,13 @@ body{background:#050508}
       <button id="refresh" class="btn">REFRESH</button>
     </div>
     <div class="st-quick" id="sports"></div>
+    <div class="view-tools">
+      <button id="viewTable" class="active">TABLE VIEW</button>
+      <button id="viewCompact">COMPACT</button>
+      <button id="toggleDetails">HIDE DETAILS</button>
+      <button id="exportCsv">EXPORT CSV</button>
+      <button id="shareView">SHARE VIEW</button>
+    </div>
   </div>
 
   <section class="st-summary" id="summary"></section>
@@ -102,12 +118,14 @@ body{background:#050508}
   const record = x => num(x.wins)+"-"+num(x.losses)+(num(x.ties)?"-"+num(x.ties):"");
   const diff = x => num(x.points_for)-num(x.points_against);
 
-  let rawRows=[], rows=[], leagues=[], seasons=[], activeSport="all", requestedLeague="";
+  let rawRows=[], rows=[], leagues=[], seasons=[], activeSport="all", requestedLeague=params.get("league")||"", viewMode="table", showDetails=true;
   let favorites=new Set();
   try { favorites=new Set(JSON.parse(localStorage.getItem("cr_standings_favorites")||"[]")); } catch(_){}
 
   const params=new URLSearchParams(location.search);
   const requestedTeam=params.get("team");
+  const requestedSport=params.get("sport")||"";
+  if(requestedSport) activeSport=requestedSport;
 
   function teamOf(x){ return Array.isArray(x.cr_sports_teams)?(x.cr_sports_teams[0]||{}):(x.cr_sports_teams||{}); }
   function leagueOf(x){ return Array.isArray(x.cr_sports_leagues)?(x.cr_sports_leagues[0]||{}):(x.cr_sports_leagues||{}); }
@@ -222,8 +240,10 @@ body{background:#050508}
       const t=teamOf(x),l=leagueOf(x);
       const hay=[t.name,t.short_name,t.city,t.state,l.name,l.code,l.sport,x.conference,x.division].filter(Boolean).join(" ").toLowerCase();
       return (!search||hay.includes(search))&&(!c||x.conference===c)&&(!d||x.division===d)&&(!requestedTeam||x.team_id===requestedTeam)&&
-        (activeSport==="all"||String(l.sport||"").toLowerCase()===String(activeSport).toLowerCase());
+        (activeSport==="all"||String(l.sport||"").toLowerCase()===String(activeSport).toLowerCase())&&
+        (favMode!=="favorites"||favorites.has(x.team_id||t.id));
     });
+    const favMode=q("favoritesFilter").value;
     const sort=q("sort").value;
     out.sort((a,b)=>{
       const ta=teamOf(a),tb=teamOf(b);
@@ -273,7 +293,8 @@ body{background:#050508}
   }
 
   function render(){
-    const data=filtered(); renderSummary(data);
+    const data=filtered();
+    document.body.classList.toggle("fav-only",q("favoritesFilter").value==="favorites"); renderSummary(data);
     const groups=new Map();
     data.forEach(x=>{
       const l=leagueOf(x), key=[x.league_id,x.season,x.conference||"GENERAL",x.division||"OVERALL"].join("|");
@@ -289,16 +310,18 @@ body{background:#050508}
       const l=g.league;
       return '<section class="league-section"><div class="league-head"><div><h2>'+escLocal(l.code||l.name||"STANDINGS")+'</h2><p>'+escLocal(l.name||"")+" • "+escLocal(g.season||"")+" • "+escLocal(g.conference||"League Table")+" • "+escLocal(g.division||"Overall")+" • "+g.rows.length+" teams</p></div>"+
         '<div class="league-actions"><a class="mini-btn" href="scores.html">SCORES</a><a class="mini-btn" href="teams.html">TEAMS</a></div></div>'+
-        '<div class="table-card"><table class="st-table"><thead><tr><th>RK</th><th>TEAM</th><th>W-L</th><th>WIN%</th><th>PF</th><th>PA</th><th>DIFF</th><th>STREAK</th><th>FAV</th></tr></thead><tbody>'+
+        '<div class="table-card"><table class="st-table '+(viewMode==="compact"?"compact":"")+'"><thead><tr><th>RK</th><th>TEAM</th><th>W-L</th><th>WIN%</th><th>PF</th><th>PA</th><th>DIFF</th><th>STREAK</th><th>FAV</th></tr></thead><tbody>'+
         g.rows.map(teamRow).join("")+"</tbody></table></div></section>";
     }).join(""):'<div class="empty">No standings match the current filters. Select ALL LEAGUES or another season to view available tables.</div>';
 
+    q("content").querySelectorAll(".detail-row").forEach(r=>r.style.display=showDetails?"":"none");
     q("content").querySelectorAll(".fav").forEach(btn=>btn.addEventListener("click",()=>{
       const id=btn.dataset.id;if(!id)return;
       favorites.has(id)?favorites.delete(id):favorites.add(id);saveFav();render();
     }));
     setStatus('<span><span class="pulse"></span>'+data.length+" unique team standings displayed</span>");
-    q("updated").textContent="Updated "+new Date().toLocaleTimeString()+" • "+rawRows.length+" source rows • "+rows.length+" unique";
+    const latest=rows.map(x=>Date.parse(x.updated_at||"")).filter(Number.isFinite).sort((a,b)=>b-a)[0];
+    q("updated").textContent=(latest?"DB updated "+new Date(latest).toLocaleString():"Loaded "+new Date().toLocaleTimeString())+" • "+rawRows.length+" source rows • "+rows.length+" unique";
   }
 
   async function boot(){
@@ -321,7 +344,28 @@ body{background:#050508}
   q("division").addEventListener("change",render);
   q("search").addEventListener("input",render);
   q("sort").addEventListener("change",render);
+  q("favoritesFilter").addEventListener("change",render);
   q("refresh").addEventListener("click",boot);
+  q("viewTable").addEventListener("click",()=>{viewMode="table";q("viewTable").classList.add("active");q("viewCompact").classList.remove("active");render();});
+  q("viewCompact").addEventListener("click",()=>{viewMode="compact";q("viewCompact").classList.add("active");q("viewTable").classList.remove("active");render();});
+  q("toggleDetails").addEventListener("click",()=>{showDetails=!showDetails;q("toggleDetails").textContent=showDetails?"HIDE DETAILS":"SHOW DETAILS";render();});
+  q("exportCsv").addEventListener("click",()=>{
+    const data=filtered();
+    const headers=["Rank","Team","League","Season","Conference","Division","Wins","Losses","Ties","Win %","Points For","Points Against","Differential","Streak"];
+    const lines=[headers,...data.map(x=>{const t=teamOf(x),l=leagueOf(x);return[
+      x.rank??"",t.name||"",l.name||l.code||"",x.season||"",x.conference||"",x.division||"",x.wins??0,x.losses??0,x.ties??0,
+      pct(x.win_pct),x.points_for??0,x.points_against??0,diff(x),x.streak??0
+    ]})].map(row=>row.map(v=>"""+String(v).replace(/"/g,'""')+""").join(","));
+    const blob=new Blob([lines.join("\n")],{type:"text/csv;charset=utf-8"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="crowrules-standings-"+(q("season").value||"season")+".csv";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  });
+  q("shareView").addEventListener("click",async()=>{
+    const p=new URLSearchParams();if(q("league").value)p.set("league",q("league").value);if(q("season").value)p.set("season",q("season").value);if(activeSport!=="all")p.set("sport",activeSport);
+    const url=location.origin+location.pathname+(p.toString()?"?"+p.toString():"");
+    try{await navigator.clipboard.writeText(url);q("shareView").textContent="COPIED";setTimeout(()=>q("shareView").textContent="SHARE VIEW",1400);}
+    catch(_){prompt("Copy this standings link:",url);}
+  });
+  window.addEventListener("keydown",e=>{if(e.key==="/"&&document.activeElement.tagName!=="INPUT"){e.preventDefault();q("search").focus();}if(e.key.toLowerCase()==="r"&&document.activeElement.tagName!=="INPUT")boot();});
 
   boot();
 })();
