@@ -87,14 +87,23 @@ function renderDirectory(){
  $("cards").querySelectorAll("[data-fav]").forEach(b=>b.onclick=()=>{const id=b.dataset.fav;favorites.has(id)?favorites.delete(id):favorites.add(id);saveFav();renderDirectory()});
  $("cards").querySelectorAll(".open-team").forEach(b=>b.onclick=()=>openDash(b.dataset.id))
 }
-async function fetchAll(table,select,filter){const pageSize=500;let out=[],from=0;while(true){let q=sb.from(table).select(select).range(from,from+pageSize-1);if(filter)q=filter(q);const r=await q;if(r.error)throw r.error;out.push(...(r.data||[]));if((r.data||[]).length<pageSize)break;from+=pageSize;if(from>10000)break}return out}
+async function fetchTable(table,select,filter,label){
+ if(!window.sb)throw new Error("Supabase client is not initialized. Check the Supabase CDN and js/sports.js.");
+ let q=window.sb.from(table).select(select);
+ if(filter)q=filter(q);
+ q=q.limit(1000);
+ const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+" request timed out after 12 seconds.")),12000));
+ const r=await Promise.race([q,timeout]);
+ if(r.error)throw r.error;
+ return r.data||[];
+}
 async function loadDirectory(){
- $("directoryStatus").textContent="Loading teams…";
+ $("directoryStatus").textContent="Connecting to Sports database…";
  try{
-  const [tdata,ldata]=await Promise.all([
-   fetchAll("cr_sports_teams","id,league_id,name,short_name,city,state,division,level,logo_url,is_active",q=>q.eq("is_active",true).order("name")),
-   fetchAll("cr_sports_leagues","id,name,code,sport,is_active",q=>q.eq("is_active",true).order("name"))
-  ]);
+  if(!window.CROW_SPORTS_READY||!window.sb)throw new Error("Supabase client is unavailable. Reload after the Supabase library finishes loading.");
+  const tdata=await fetchTable("cr_sports_teams","id,league_id,name,short_name,city,state,division,level,logo_url,is_active",q=>q.eq("is_active",true).order("name"),"Teams");
+  $("directoryStatus").textContent="Loading "+tdata.length+" teams…";
+  const ldata=await fetchTable("cr_sports_leagues","id,name,code,sport,is_active",q=>q.eq("is_active",true).order("name"),"Leagues");
   teams=(tdata||[]).map(t=>({...t,cr_sports_leagues:(ldata||[]).find(l=>l.id===t.league_id)||{}}));leagues=ldata||[];
   $("league").innerHTML='<option value="">All leagues</option>'+leagues.map(l=>'<option value="'+esc(l.id)+'">'+esc(l.code||l.name)+' — '+esc(l.name)+'</option>').join("");
   $("level").innerHTML='<option value="">All levels</option>'+[...new Set(teams.map(t=>t.level).filter(Boolean))].sort().map(x=>'<option value="'+esc(x)+'">'+esc(String(x).toUpperCase())+'</option>').join("");
