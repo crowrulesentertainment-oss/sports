@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Game Center | CrowRules Sports</title>
 <link rel="stylesheet" href="css/sports.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/sports.js?v=20.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/sports.js?v=22.0"></script>
 <style>
 .event-hero{position:relative;overflow:hidden;background:radial-gradient(circle at 80% 15%,rgba(225,6,0,.22),transparent 32%),linear-gradient(135deg,#050506,#101017);min-height:470px;display:flex;align-items:end}
 .event-wrap{position:relative;z-index:2;max-width:1500px;width:100%;margin:auto;padding:90px 24px 55px}.event-art{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.42}
@@ -101,6 +101,16 @@ async function renderEvent(){
  q("#liveBanner").classList.toggle("show",isLive);q("#liveText").textContent=isLive?"LIVE NOW • "+e.title:"";tick();bindActions();await loadSpecial(l.code);
 }
 function tick(){const el=q("#countdown");if(!el)return;const d=new Date((gameRecord||eventRecord)?.starts_at||0)-Date.now();if(live((gameRecord||eventRecord)?.status)){el.textContent="LIVE NOW";return}if(final((gameRecord||eventRecord)?.status)){el.textContent="FINAL";return}if(!d||d<=0){el.textContent="STARTING";return}const h=Math.floor(d/36e5),m=Math.floor(d%36e5/6e4),s=Math.floor(d%6e4/1e3);el.textContent=h+"h "+String(m).padStart(2,"0")+"m "+String(s).padStart(2,"0")+"s"}
+function syncUniversalEventContext(){
+ const filter=String(window.CROW_SPORTS_LEAGUE||"all").toUpperCase();
+ const host=q("#related");if(!host)return;
+ const recordLeague=String((gameRecord?.cr_sports_leagues?.code||eventRecord?.cr_sports_leagues?.code||"")).toUpperCase();
+ const label=filter==="ALL"?"ALL LEAGUES":filter;
+ const context='<div class="muted" style="margin-top:10px;font:800 9px Orbitron;letter-spacing:1px">GLOBAL SPORTS FILTER: '+escv(label)+(recordLeague&&filter!=="ALL"&&recordLeague!==filter?' • CURRENT EVENT: '+escv(recordLeague):"")+'</div>';
+ host.insertAdjacentHTML("beforeend",context);
+}
+
+document.addEventListener("crowrules:leaguechange",()=>{if(gameRecord||eventRecord)syncUniversalEventContext()});
 function bindActions(){q("#refreshBtn").onclick=()=>{q("#refreshBtn").textContent="REFRESHING…";load().finally(()=>q("#refreshBtn").textContent="REFRESH")};q("#shareBtn").onclick=async()=>{try{if(navigator.share)await navigator.share({title:document.title,url:location.href});else{await navigator.clipboard.writeText(location.href);q("#shareBtn").textContent="LINK COPIED";setTimeout(()=>q("#shareBtn").textContent="SHARE",1500)}}catch(e){}}}
 load();timer=setInterval(tick,1000);
 if(id){sb.channel("cr-game-center-"+id).on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_games",filter:"id=eq."+id},()=>load()).on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_events",filter:"id=eq."+id},()=>load()).on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_event_bouts",filter:"event_id=eq."+id},()=>load()).on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_game_events",filter:"game_id=eq."+id},()=>load()).subscribe();}
