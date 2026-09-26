@@ -1,4 +1,4 @@
-/* CrowRules Sports — Shared Engine 21.0 */
+/* CrowRules Sports — Shared Engine 22.0 */
 (function(){
 "use strict";
 
@@ -10,7 +10,7 @@ let sb=null;
 if(HAS_SUPABASE){
  sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
  auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true},
- global:{headers:{"x-client-info":"crowrules-sports/21.0"}}
+ global:{headers:{"x-client-info":"crowrules-sports/22.0"}}
  });
 }else{
  console.warn("CrowRules Sports: Supabase JS was not loaded. Navigation remains available.");
@@ -19,8 +19,8 @@ window.sb=sb;
 window.supabaseClient=sb;
 window.sbClient=sb;
 window.CROW_SPORTS_READY=HAS_SUPABASE;
-window.CROW_SPORTS_VERSION="21.0";
-window.CROW_SPORTS_SHELL_VERSION="21.0";
+window.CROW_SPORTS_VERSION="22.0";
+window.CROW_SPORTS_SHELL_VERSION="22.0";
 
 const $=s=>document.querySelector(s);
 const $$=s=>Array.from(document.querySelectorAll(s));
@@ -159,7 +159,7 @@ function shell(active){
  queueMicrotask(bindNav);
 }
 
-function footer(){document.write('<footer class="footer">CROWRULES SPORTS • ONE COMPANY. ONE UNIVERSE. • Built in Tacoma, Washington • <span id="crEngineVersion">Engine 21.0</span></footer>');}
+function footer(){document.write('<footer class="footer">CROWRULES SPORTS • ONE COMPANY. ONE UNIVERSE. • Built in Tacoma, Washington • <span id="crEngineVersion">Engine 22.0</span></footer>');}
 
 async function getSession(){
  if(!sb)return null;
@@ -231,7 +231,8 @@ function bindAuth(){
  authSubscription=r?.data?.subscription||null;
 }
 
-window.CROW_SPORTS_NAV_VERSION="21.0";
+window.CROW_SPORTS_NAV_VERSION="22.0";
+window.CROW_SPORTS_DATA_LAYER_VERSION="22.0";
 async function loadPodcastAudio({limit=24,query=""}={}){
  try{
   const term=String(query||"").trim();
@@ -244,8 +245,170 @@ async function loadPodcastAudio({limit=24,query=""}={}){
  }catch(error){reportError("loadPodcastAudio",error);return {shows:[],episodes:[],source:"CrowRules Podcasting",repository:"crowrulesentertainment-oss/podcasting",repositoryUrl:"https://github.com/crowrulesentertainment-oss/podcasting",error:normalizeError(error)};}
 }
 
+
+const SPORTS_DATA_TABLES={
+ leagues:"cr_sports_leagues",
+ teams:"cr_sports_teams",
+ games:"cr_sports_games",
+ standings:"cr_sports_standings",
+ leaders:"cr_sports_leaders",
+ media:"cr_sports_media",
+ events:"cr_sports_events",
+ championships:"cr_sports_championships"
+};
+let leagueCatalogCache=null;
+let dataChannels=[];
+
+function urlParams(){try{return new URLSearchParams(location.search)}catch(_){return new URLSearchParams()}}
+function activeLeagueFromUrl(){
+ const v=(urlParams().get("league")||"").trim();
+ return v||"";
+}
+function getActiveLeague(){
+ const select=document.getElementById("crLeagueSelector");
+ const url=activeLeagueFromUrl();
+ const value=url||select?.value||window.CROW_SPORTS_LEAGUE||storageGet("cr_sports_league","all")||"all";
+ return String(value||"all");
+}
+function setLeagueInUrl(value){
+ try{
+  const url=new URL(location.href);
+  if(value&&value!=="all")url.searchParams.set("league",value);else url.searchParams.delete("league");
+  history.replaceState({},document.title,url.href);
+ }catch(_){}
+}
+async function loadSportsLeagues(force=false){
+ if(!sb)return [];
+ if(leagueCatalogCache&&!force)return leagueCatalogCache;
+ try{
+  const r=await withTimeout(sb.from(SPORTS_DATA_TABLES.leagues).select("id,name,code,sport,level,logo_url,is_active").eq("is_active",true).order("name"),8000,"League catalog");
+  if(r.error)throw r.error;
+  leagueCatalogCache=r.data||[];
+  return leagueCatalogCache;
+ }catch(e){reportError("loadSportsLeagues",e);return []}
+}
+async function resolveLeague(value){
+ const wanted=String(value||"").trim();
+ if(!wanted||wanted==="all")return null;
+ const leagues=await loadSportsLeagues();
+ return leagues.find(x=>String(x.code||"").toLowerCase()===wanted.toLowerCase()||String(x.id)===wanted||String(x.name||"").toLowerCase()===wanted.toLowerCase())||null;
+}
+async function leagueId(value=getActiveLeague()){
+ const l=await resolveLeague(value);
+ return l?.id||null;
+}
+async function leagueQuery(table,select="*",options={}){
+ if(!sb)throw new Error("Supabase is not available.");
+ let q=sb.from(table).select(select);
+ const code=options.league===undefined?getActiveLeague():options.league;
+ if(code&&code!=="all"&&options.leagueColumn!==false){
+  const id=await leagueId(code);
+  if(id)q=q.eq(options.leagueColumn||"league_id",id);
+ }
+ if(options.eq)for(const [k,v] of Object.entries(options.eq))q=q.eq(k,v);
+ if(options.is)for(const [k,v] of Object.entries(options.is))q=q.is(k,v);
+ if(options.ilike)for(const [k,v] of Object.entries(options.ilike))q=q.ilike(k,v);
+ if(options.order)q=q.order(options.order.column,{ascending:options.order.ascending!==false});
+ if(options.limit)q=q.limit(options.limit);
+ return withTimeout(q,options.timeout||12000,options.label||table);
+}
+async function getSportsData(kind,options={}){
+ const map={
+  leagues:SPORTS_DATA_TABLES.leagues,teams:SPORTS_DATA_TABLES.teams,games:SPORTS_DATA_TABLES.games,
+  standings:SPORTS_DATA_TABLES.standings,leaders:SPORTS_DATA_TABLES.leaders,media:SPORTS_DATA_TABLES.media,
+  events:SPORTS_DATA_TABLES.events,championships:SPORTS_DATA_TABLES.championships
+ };
+ const table=map[kind];
+ if(!table)throw new Error("Unknown Sports data set: "+kind);
+ const r=await leagueQuery(table,options.select||"*",options);
+ if(r.error)throw r.error;
+ return r.data||[];
+}
+async function getSportsSnapshot(options={}){
+ const league=options.league===undefined?getActiveLeague():options.league;
+ const [leagues,teams,games,standings,leaders,media,events,championships]=await Promise.all([
+  loadSportsLeagues(),
+  getSportsData("teams",{league,select:"id,league_id,name,short_name,city,state,division,conference,level,logo_url,is_active",limit:options.limit||500}),
+  getSportsData("games",{league,select:"id,league_id,home_team_id,away_team_id,starts_at,status,home_score,away_score,venue,broadcast",order:{column:"starts_at",ascending:true},limit:options.limit||500}),
+  getSportsData("standings",{league,select:"*",order:{column:"rank",ascending:true},limit:options.limit||500}),
+  getSportsData("leaders",{league,select:"*",order:{column:"value",ascending:false},limit:options.limit||200}),
+  getSportsData("media",{league,select:"*",order:{column:"published_at",ascending:false},limit:options.limit||100}),
+  getSportsData("events",{league,select:"id,league_id,title,event_type,status,starts_at,ends_at,venue,city,broadcast,event_url,image_url,description",order:{column:"starts_at",ascending:true},limit:options.limit||100}),
+  getSportsData("championships",{league,select:"*",order:{column:"updated_at",ascending:false},limit:options.limit||100})
+ ]);
+ return {league,leagues,teams,games,standings,leaders,media,events,championships};
+}
+function syncLeagueUi(value=getActiveLeague()){
+ const league=String(value||"all");
+ document.body.dataset.sportsLeague=league;
+ document.querySelectorAll("#crLeagueSelector").forEach(x=>{if(x.value!==league&&[...x.options].some(o=>o.value===league))x.value=league});
+ ["leagueSelect","league"].forEach(id=>{
+  const el=document.getElementById(id);
+  if(!el)return;
+  const opts=[...el.options];
+  const match=opts.find(o=>o.value===league||o.dataset.code===league);
+  if(match)el.value=match.value;
+ });
+ const label=league==="all"?"ALL LEAGUES":league;
+ document.querySelectorAll("[data-cr-active-league]").forEach(el=>el.textContent=label);
+}
+function dispatchDataRefresh(reason="league"){
+ document.dispatchEvent(new CustomEvent("crowrules:sportsdatarefresh",{detail:{league:getActiveLeague(),reason}}));
+}
+async function refreshCurrentSportsPage(){
+ const page=currentPage();
+ syncLeagueUi();
+ try{
+  if(page==="scores.html"){
+   if(typeof window.loadScores==="function")await window.loadScores();
+   if(typeof window.loadEvents==="function")await window.loadEvents();
+  }else if(page==="schedule.html"){
+   if(typeof window.loadScheduleData==="function")await window.loadScheduleData();
+  }else if(page==="standings.html"){
+   if(typeof window.loadRows==="function")await window.loadRows();
+   else if(typeof window.loadStandings==="function")await window.loadStandings();
+  }else if(page==="rankings.html"){
+   if(typeof window.loadRankings==="function")await window.loadRankings();
+  }else if(page==="teams.html"){
+   if(typeof window.loadDirectory==="function")await window.loadDirectory();
+   if(typeof window.loadDashboard==="function"){
+    const id=urlParams().get("id");
+    if(id)await window.loadDashboard(id);
+   }
+  }else if(page==="media.html"){
+   dispatchDataRefresh("league");
+  }else if(page==="event.html"){
+   dispatchDataRefresh("league");
+  }
+ }catch(e){reportError("refreshCurrentSportsPage",e)}
+}
+function bindUniversalDataLayer(){
+ if(document.body.dataset.crDataLayerBound)return;
+ document.body.dataset.crDataLayerBound="1";
+ document.addEventListener("crowrules:leaguechange",async e=>{
+  const league=e.detail?.league||"all";
+  setLeagueInUrl(league);
+  syncLeagueUi(league);
+  window.CROW_SPORTS_LEAGUE=league;
+  dispatchDataRefresh("league");
+  await refreshCurrentSportsPage();
+ });
+ document.addEventListener("crowrules:sportsdatarefresh",e=>{
+  window.CROW_SPORTS_LAST_REFRESH={at:new Date().toISOString(),...e.detail};
+ });
+}
+async function subscribeSportsData(tables,callback){
+ if(!sb||!Array.isArray(tables)||!tables.length)return null;
+ const channel=sb.channel("cr-sports-data-"+Math.random().toString(36).slice(2));
+ tables.forEach(table=>channel.on("postgres_changes",{event:"*",schema:"public",table},callback));
+ channel.subscribe();
+ dataChannels.push(channel);
+ return channel;
+}
+
 window.CrowRulesSports={
- version:"21.0",shellVersion:"21.0",navGroups:NAV_GROUPS,nav:NAV,supabase:sb,$,$,esc,sleep,timeout:withTimeout,normalizeError,reportError,loadPodcastAudio,
+ version:"22.0",shellVersion:"22.0",navGroups:NAV_GROUPS,nav:NAV,supabase:sb,$,$,esc,sleep,timeout:withTimeout,normalizeError,reportError,loadPodcastAudio,
+ dataTables:SPORTS_DATA_TABLES,getActiveLeague,setLeagueInUrl,loadSportsLeagues,resolveLeague,leagueId,leagueQuery,getSportsData,getSportsSnapshot,syncLeagueUi,refreshCurrentSportsPage,subscribeSportsData,
  getSession,loadSession,loadUnread,signIn,signUp,signOut,shell,footer,startBadgeRealtime,
  storage:{get:storageGet,set:storageSet,remove:storageRemove}
 };
@@ -255,7 +418,7 @@ window.signOut=signOut;
 window.startSportsBadgeRealtime=startBadgeRealtime;
 
 if(sb)bindAuth();
-function initShared(){ensureNavStyles();bindNav();bindGlobalSearch();bindLeagueSelector();loadSession();if(sb)setTimeout(startBadgeRealtime,250);}
+function initShared(){ensureNavStyles();bindNav();bindGlobalSearch();bindLeagueSelector();bindUniversalDataLayer();syncLeagueUi();loadSession();if(sb)setTimeout(startBadgeRealtime,250);}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",initShared,{once:true});else initShared();
 
 })();
