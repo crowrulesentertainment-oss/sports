@@ -182,7 +182,8 @@ function bindAuth(){
  authSubscription=r?.data?.subscription||null;
 }
 
-window.CROW_SPORTS_NAV_VERSION="17.0";\nwindow.CrowRulesSports={
+window.CROW_SPORTS_NAV_VERSION="17.0";
+window.CrowRulesSports={
  version:"17.0",supabase:sb,$,$$,esc,sleep,timeout:withTimeout,normalizeError,reportError,
  getSession,loadSession,loadUnread,signIn,signUp,signOut,shell,footer,startBadgeRealtime,
  storage:{get:storageGet,set:storageSet,remove:storageRemove}
