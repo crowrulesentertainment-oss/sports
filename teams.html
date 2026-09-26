@@ -92,10 +92,10 @@ async function loadDirectory(){
  $("directoryStatus").textContent="Loading teams…";
  try{
   const [tdata,ldata]=await Promise.all([
-   fetchAll("cr_sports_teams","id,league_id,name,short_name,city,state,division,level,logo_url,is_active,cr_sports_leagues(id,name,code,sport)",q=>q.eq("is_active",true).order("name")),
+   fetchAll("cr_sports_teams","id,league_id,name,short_name,city,state,division,level,logo_url,is_active",q=>q.eq("is_active",true).order("name")),
    fetchAll("cr_sports_leagues","id,name,code,sport,is_active",q=>q.eq("is_active",true).order("name"))
   ]);
-  teams=tdata;leagues=ldata;
+  teams=(tdata||[]).map(t=>({...t,cr_sports_leagues:(ldata||[]).find(l=>l.id===t.league_id)||{}}));leagues=ldata||[];
   $("league").innerHTML='<option value="">All leagues</option>'+leagues.map(l=>'<option value="'+esc(l.id)+'">'+esc(l.code||l.name)+' — '+esc(l.name)+'</option>').join("");
   $("level").innerHTML='<option value="">All levels</option>'+[...new Set(teams.map(t=>t.level).filter(Boolean))].sort().map(x=>'<option value="'+esc(x)+'">'+esc(String(x).toUpperCase())+'</option>').join("");
   setLeagueFromGlobal(localStorage.getItem("cr_sports_league")||"all");renderSports();renderDirectory()
@@ -109,7 +109,7 @@ function gameCard(g,id){const home=g.home_team_id===id,opp=home?g.away:g.home,s=
 async function loadDashboard(id){
  const mount=$("dashMount");mount.innerHTML='<div class="loading">Loading team hub…</div>';
  try{
-  const {data:t,error:te}=await sb.from("cr_sports_teams").select("id,league_id,name,short_name,city,state,division,level,logo_url,is_active,cr_sports_leagues(id,name,code,sport)").eq("id",id).maybeSingle();if(te||!t)throw te||new Error("Team not found");
+  const {data:t0,error:te}=await sb.from("cr_sports_teams").select("id,league_id,name,short_name,city,state,division,level,logo_url,is_active").eq("id",id).maybeSingle();if(te||!t0)throw te||new Error("Team not found");const t={...t0,cr_sports_leagues:(leagues||[]).find(l=>l.id===t0.league_id)||{}};
   const [st,ga]=await Promise.all([
    sb.from("cr_sports_standings").select("*").eq("team_id",id).order("season",{ascending:false}).limit(25),
    sb.from("cr_sports_games").select("id,league_id,home_team_id,away_team_id,starts_at,status,home_score,away_score,venue,broadcast,home:cr_sports_teams!cr_sports_games_home_team_id_fkey(id,name,short_name,logo_url),away:cr_sports_teams!cr_sports_games_away_team_id_fkey(id,name,short_name,logo_url),cr_sports_leagues(code,name)").or("home_team_id.eq."+id+",away_team_id.eq."+id).order("starts_at",{ascending:false}).limit(200)
