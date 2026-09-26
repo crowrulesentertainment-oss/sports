@@ -89,24 +89,34 @@ async function loadDirectory(){
 }
 
 async function loadDashboard(id){
- const mount=$("dashMount");mount.innerHTML='<div class="loading">Loading team dashboard…</div>';
+ const mount=$("dashMount");mount.innerHTML='<div class="loading">Loading team hub…</div>';
  const {data:t,error:te}=await sb.from("cr_sports_teams").select("id,league_id,name,short_name,city,state,division,level,logo_url,is_active,cr_sports_leagues(id,name,code,sport)").eq("id",id).maybeSingle();
  if(te||!t){mount.innerHTML='<div class="error">Team could not be loaded.</div>';return;}
- const [{data:st},{data:games,error:ge}]=await Promise.all([
+ const [{data:st,error:se},{data:games,error:ge}]=await Promise.all([
   sb.from("cr_sports_standings").select("*").eq("team_id",id).order("season",{ascending:false}).limit(10),
-  sb.from("cr_sports_games").select("id,league_id,home_team_id,away_team_id,starts_at,status,home_score,away_score,venue,broadcast,home:cr_sports_teams!cr_sports_games_home_team_id_fkey(id,name,short_name,logo_url),away:cr_sports_teams!cr_sports_games_away_team_id_fkey(id,name,short_name,logo_url),cr_sports_leagues(code,name)").or("home_team_id.eq."+id+",away_team_id.eq."+id).order("starts_at",{ascending:false}).limit(30)
+  sb.from("cr_sports_games").select("id,league_id,home_team_id,away_team_id,starts_at,status,home_score,away_score,venue,broadcast,home:cr_sports_teams!cr_sports_games_home_team_id_fkey(id,name,short_name,logo_url),away:cr_sports_teams!cr_sports_games_away_team_id_fkey(id,name,short_name,logo_url),cr_sports_leagues(code,name)").or("home_team_id.eq."+id+",away_team_id.eq."+id).order("starts_at",{ascending:false}).limit(100)
  ]);
- const standings=st||[], current=standings.find(x=>String(x.season)==="2026")||standings[0]||null, allGames=games||[];
- const now=Date.now(), recent=allGames.filter(g=>new Date(g.starts_at||0).getTime()<=now).slice(0,8), upcoming=allGames.filter(g=>new Date(g.starts_at||0).getTime()>now).sort((a,b)=>new Date(a.starts_at)-new Date(b.starts_at)).slice(0,8);
- const rec=gameRecord(recent,id), l=t.cr_sports_leagues||{};
- mount.innerHTML='<div class="dash-hero">'+logo(t).replace("team-logo","dash-logo")+'<div><div class="dash-title">'+esc(t.short_name||t.name)+'</div><div class="dash-sub">'+esc([t.city,t.state].filter(Boolean).join(", "))+' • '+esc(l.code||l.name||"League")+' • '+esc(t.division||t.level||"Team")+'</div></div><div class="dash-actions"><a class="mini" href="standings.html?league='+encodeURIComponent(t.league_id||"")+'&team='+encodeURIComponent(t.id)+'">STANDINGS</a><a class="mini" href="scores.html">SCORES</a></div></div>'+
- '<div class="stats">'+stat(current?record(current):"—","RECORD")+stat(current?pct(current.win_pct):"—","WIN %")+stat(current?n(current.points_for):"—","POINTS FOR")+stat(current?n(current.points_against):"—","POINTS AGAINST")+stat(current?((n(current.points_for)-n(current.points_against)>0?"+":"")+(n(current.points_for)-n(current.points_against))):"—","DIFF")+stat(current?(n(current.streak)>0?"+":"")+n(current.streak):"—","STREAK")+'</div>'+
- '<div class="dash-grid"><div class="panel"><h2>RECENT GAMES</h2>'+gamesHtml(recent,id,true)+'</div><div class="panel"><h2>UPCOMING SCHEDULE</h2>'+gamesHtml(upcoming,id,false)+'</div></div>'+
- '<div class="section-title"><h2>SEASON STANDINGS</h2><a href="standings.html?league='+encodeURIComponent(t.league_id||"")+'&team='+encodeURIComponent(t.id)+'">OPEN FULL STANDINGS →</a></div>'+
- '<div class="panel"><table class="table"><thead><tr><th>SEASON</th><th>RK</th><th>RECORD</th><th>WIN%</th><th>PF</th><th>PA</th><th>DIFF</th><th>STREAK</th></tr></thead><tbody>'+standings.map(x=>'<tr><td>'+esc(x.season)+'</td><td class="stand-rank">'+(x.rank??"—")+'</td><td>'+record(x)+'</td><td>'+pct(x.win_pct)+'</td><td>'+n(x.points_for)+'</td><td>'+n(x.points_against)+'</td><td>'+((n(x.points_for)-n(x.points_against)>0?"+":""))+(n(x.points_for)-n(x.points_against))+'</td><td>'+((n(x.streak)>0?"+":""))+n(x.streak)+'</td></tr>').join("")+'</tbody></table></div>'+
- '<div class="note">'+(ge?"Game feed warning: "+esc(ge.message):allGames.length+" games connected to this team.")+'</div>';
+ const standings=st||[], current=standings[0]||null, allGames=games||[], now=Date.now();
+ const isFinal=s=>["final","completed","complete","closed"].includes(status(s)), isLive=s=>["live","in_progress","inprogress","playing","active"].includes(status(s));
+ const live=allGames.filter(g=>isLive(g.status));
+ const recent=allGames.filter(g=>new Date(g.starts_at||0).getTime()<=now && !isLive(g.status)).sort((a,b)=>new Date(b.starts_at)-new Date(a.starts_at)).slice(0,10);
+ const upcoming=allGames.filter(g=>new Date(g.starts_at||0).getTime()>now && !isLive(g.status)).sort((a,b)=>new Date(a.starts_at)-new Date(b.starts_at));
+ const rec=gameRecord(recent,id), l=t.cr_sports_leagues||{}, form=recent.filter(g=>isFinal(g.status)).slice(0,5).map(g=>resultLetter(g,id)).join("");
+ mount.innerHTML='<div class="dash-hero">'+logo(t).replace("team-logo","dash-logo")+'<div><div class="kicker">'+esc(l.code||"SPORTS")+' • TEAM HUB</div><div class="dash-title">'+esc(t.name||t.short_name)+'</div><div class="dash-sub">'+esc([t.city,t.state].filter(Boolean).join(", "))+' • '+esc(l.name||"League")+' • '+esc(t.division||t.level||"Team")+'</div></div><div class="dash-actions"><a class="mini" href="standings.html?league='+encodeURIComponent(t.league_id||"")+'&team='+encodeURIComponent(t.id)+'">STANDINGS</a><a class="mini" href="scores.html">SCORES</a></div></div>'+
+ (live.length?'<div class="live-strip"><span class="live-dot"></span>'+live.length+' LIVE GAME'+(live.length>1?"S":"")+' NOW • OPEN EVENT CENTER</div>':"")+
+ '<div class="stats">'+stat(current?record(current):"—","RECORD")+stat(current?pct(current.win_pct):"—","WIN %")+stat(current?num(current.rank):"—","RANK")+stat(current?num(current.points_for):"—","POINTS FOR")+stat(current?num(current.points_against):"—","POINTS AGAINST")+stat(current?((num(current.points_for)-num(current.points_against)>0?"+":""))+(num(current.points_for)-num(current.points_against)):"—","DIFF")+'</div>'+
+ '<div class="panel"><div class="section-title"><h2>RECENT FORM</h2><span class="form">'+(form||"—") .split("").map(x=>'<i class="'+(x==="W"?"w":x==="L"?"l":"t")+'">'+x+'</i>').join("")+'</span></div></div>'+
+ '<div class="dash-grid"><div class="panel"><h2>LIVE & RECENT GAMES</h2><div class="schedule">'+(live.concat(recent).slice(0,10).map(g=>gameCard(g,id)).join("")||'<div class="empty">No games found.</div>')+'</div></div><div class="panel"><h2>UPCOMING SCHEDULE</h2><div class="schedule">'+(upcoming.slice(0,10).map(g=>gameCard(g,id)).join("")||'<div class="empty">No upcoming games found.</div>')+'</div></div></div>'+
+ '<div class="section-title"><h2>FULL SEASON SCHEDULE</h2><a href="scores.html">OPEN SCORES →</a></div><div class="panel"><div class="schedule">'+(upcoming.concat(recent).sort((a,b)=>new Date(a.starts_at)-new Date(b.starts_at)).map(g=>gameCard(g,id)).join("")||'<div class="empty">No scheduled games available.</div>')+'</div></div>'+
+ '<div class="section-title"><h2>STANDINGS HISTORY</h2><a href="standings.html?league='+encodeURIComponent(t.league_id||"")+'&team='+encodeURIComponent(t.id)+'">OPEN STANDINGS →</a></div><div class="panel"><table class="table"><thead><tr><th>SEASON</th><th>RK</th><th>RECORD</th><th>WIN%</th><th>PF</th><th>PA</th><th>DIFF</th><th>STREAK</th></tr></thead><tbody>'+standings.map(x=>'<tr><td>'+esc(x.season)+'</td><td class="stand-rank">'+(x.rank??"—")+'</td><td>'+record(x)+'</td><td>'+pct(x.win_pct)+'</td><td>'+n(x.points_for)+'</td><td>'+n(x.points_against)+'</td><td>'+((n(x.points_for)-n(x.points_against)>0?"+":""))+(n(x.points_for)-n(x.points_against))+'</td><td>'+((n(x.streak)>0?"+":""))+n(x.streak)+'</td></tr>').join("")+'</tbody></table></div>'+
+ '<div class="note">'+(se?"Standings feed warning: "+esc(se.message):"")+ (ge?" Game feed warning: "+esc(ge.message):"")+'</div>';
 }
-
+function resultLetter(g,id){const home=g.home_team_id===id,me=home?n(g.home_score):n(g.away_score),opp=home?n(g.away_score):n(g.home_score);return me>opp?"W":me<opp?"L":"T";}
+function gameCard(g,id){
+ const home=g.home_team_id===id,opp=home?g.away:g.home,s=status(g.status),live=["live","in_progress","inprogress","playing","active"].includes(s),final=["final","completed","complete","closed"].includes(s);
+ const me=home?n(g.home_score):n(g.away_score),os=home?n(g.away_score):n(g.home_score),label=live?"LIVE":final?(me>os?"WIN":me<os?"LOSS":"TIE"):fmt(g.starts_at);
+ return '<a class="game-card '+(live?"live":"")+'" href="event.html?id='+encodeURIComponent(g.id)+'"><div class="game-main">'+(opp?.logo_url?'<img class="opp-logo" src="'+esc(opp.logo_url)+'" alt="" loading="lazy">':'<div class="opp-logo"></div>')+'<div><div class="game-kicker">'+(home?"VS":"AT")+' • '+esc(g.cr_sports_leagues?.code||"GAME")+'</div><div class="game-title">'+esc(opp?.short_name||opp?.name||"Opponent")+'</div><div class="game-meta">'+fmt(g.starts_at)+' • '+esc(g.venue||"Venue TBD")+(g.broadcast?" • "+esc(g.broadcast):"")+'</div></div></div><div class="game-score '+(live?"live-label":final?(me>os?"win-label":me<os?"loss-label":"":"") )+'">'+(live?me+"-"+os:final?me+"-"+os:label)+'<div class="game-kicker">'+esc(label)+'</div></div></a>';
+}
 function stat(v,k){return '<div class="stat"><b>'+esc(v)+'</b><span>'+k+'</span></div>';}
 function record(x){return n(x.wins)+"-"+n(x.losses)+(n(x.ties)?"-"+n(x.ties):"");}
 function pct(v){const x=n(v);return (x<=1?x*100:x).toFixed(1)+"%";}
