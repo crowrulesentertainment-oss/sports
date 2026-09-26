@@ -212,7 +212,10 @@ async function loadRows(silent=false){
  });
  if(token!==loadToken)return;
  all=[...seen.values()];
- all.sort((a,b)=>n(a.rank)-n(b.rank)||String(team(a).name||"").localeCompare(String(team(b).name||"")));
+ const rankGroups=new Map();
+ all.forEach(x=>{const k=x.league_id||"__league";if(!rankGroups.has(k))rankGroups.set(k,[]);rankGroups.get(k).push(x);});
+ rankGroups.forEach(rows=>{rows.sort((a,b)=>n(b.win_pct)-n(a.win_pct)||n(b.wins)-n(a.wins)||n(a.losses)-n(b.losses)||n(b.ties)-n(a.ties)||((n(b.points_for)-n(b.points_against))-(n(a.points_for)-n(a.points_against)))||n(b.points_for)-n(a.points_for)||String(team(a).name||"").localeCompare(String(team(b).name||"")));rows.forEach((x,i)=>x.display_rank=i+1);});
+ all.sort((a,b)=>n(a.display_rank)-n(b.display_rank)||String(team(a).name||"").localeCompare(String(team(b).name||"")));
  buildFilters();
  render();
  setStatus("SUPABASE CONNECTED • LIVE",true);
@@ -243,11 +246,11 @@ function filtered(){
  });
  rows.sort((a,b)=>{
   if(s==="team")return String(team(a).name||"").localeCompare(String(team(b).name||""));
-  if(s==="winpct")return n(b.win_pct)-n(a.win_pct)||n(a.rank)-n(b.rank);
-  if(s==="wins")return n(b.wins)-n(a.wins)||n(a.rank)-n(b.rank);
-  if(s==="diff")return (n(b.points_for)-n(b.points_against))-(n(a.points_for)-n(a.points_against))||n(a.rank)-n(b.rank);
-  if(s==="points")return n(b.points_for)-n(a.points_for)||n(a.rank)-n(b.rank);
-  return n(a.rank)-n(b.rank);
+  if(s==="winpct")return n(b.win_pct)-n(a.win_pct)||n(a.display_rank)-n(b.display_rank);
+  if(s==="wins")return n(b.wins)-n(a.wins)||n(a.display_rank)-n(b.display_rank);
+  if(s==="diff")return (n(b.points_for)-n(b.points_against))-(n(a.points_for)-n(a.points_against))||n(a.display_rank)-n(b.display_rank);
+  if(s==="points")return n(b.points_for)-n(a.points_for)||n(a.display_rank)-n(b.display_rank);
+  return n(a.display_rank)-n(b.display_rank);
  });
  return rows;
 }
@@ -266,7 +269,7 @@ function teamRow(x){
  const logo=t.logo_url?`<img class="logo" src="${esc(t.logo_url)}" alt="" loading="lazy" onerror="this.remove()">`:'<span class="logo"></span>';
  const rowClass=x.eliminated_from_playoff_contention?"row-eliminated":(x.clinched_bye||x.clinched_division||x.clinched_wild_card?"row-clinched":"");
  return `<tr class="${rowClass}">
-  <td><span class="rank ${n(x.rank)<=3?"top":""}">${esc(x.rank??"—")}</span></td>
+  <td><span class="rank ${n(x.display_rank)<=3?"top":""}">${esc(x.display_rank??"—")}</span></td>
   <td><div class="team">${logo}<a href="teams.html?id=${encodeURIComponent(id)}"><div class="team-name">${esc(t.short_name||t.name||"Unknown Team")}${saved?" ★":""}</div><div class="team-sub">${esc([t.city,t.state].filter(Boolean).join(", "))}</div></a></div></td>
   <td class="record">${record}</td>
   <td>${pct.toFixed(1)}%</td><td>${n(x.points_for)}</td><td>${n(x.points_against)}</td>
@@ -462,7 +465,7 @@ $("details").onclick=()=>{
 $("export").onclick=()=>{
  const rows=filtered();
  const head=["Rank","Team","League","Season","Conference","Division","Wins","Losses","Ties","WinPct","PointsFor","PointsAgainst","Differential","Streak"];
- const lines=[head,...rows.map(x=>[x.rank,team(x).name||"",league(x).name||league(x).code||"",x.season,x.conference||"",x.division||"",x.wins,x.losses,x.ties,x.win_pct,x.points_for,x.points_against,n(x.points_for)-n(x.points_against),x.streak])]
+ const lines=[head,...rows.map(x=>[x.display_rank,team(x).name||"",league(x).name||league(x).code||"",x.season,x.conference||"",x.division||"",x.wins,x.losses,x.ties,x.win_pct,x.points_for,x.points_against,n(x.points_for)-n(x.points_against),x.streak])]
   .map(r=>r.map(v=>'"'+String(v??"").replaceAll('"','""')+'"').join(","));
  const a=document.createElement("a");
  a.href=URL.createObjectURL(new Blob(["\ufeff"+lines.join("\r\n")],{type:"text/csv"}));
