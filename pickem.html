@@ -6,7 +6,7 @@
 <title>Pick 'Em | CrowRules Sports</title>
 <link rel="stylesheet" href="css/sports.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/sports.js?v=23.0"></script>
+<script src="js/sports.js?v=23.1"></script>
 <style>
 .leaderboard-controls{display:flex;gap:7px;flex-wrap:wrap}
 .leaderboard-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
@@ -120,9 +120,8 @@
 </section>
 
 <script>
-loadSession();
-
 let session = null;
+let authReady = false;
 let weeks = [];
 let games = [];
 let selectedWeek = null;
@@ -164,8 +163,15 @@ function updateAuthUI(){
 }
 
 async function refreshSession(){
-  const {data} = await sb.auth.getSession();
-  session = data?.session || null;
+  try {
+    const {data,error} = await sb.auth.getSession();
+    if(error) throw error;
+    session = data?.session || null;
+  } catch(e) {
+    console.warn("Pick 'Em auth session:", e?.message || e);
+    session = null;
+  }
+  authReady = true;
   updateAuthUI();
 }
 
@@ -200,7 +206,8 @@ $id("signoutBtn").addEventListener("click", async () => {
 });
 
 sb.auth.onAuthStateChange((_event,newSession) => {
-  session = newSession;
+  session = newSession || null;
+  authReady = true;
   updateAuthUI();
 });
 
@@ -323,8 +330,12 @@ function renderGames(){
 }
 
 async function loadMyEntry(){
+  if(!authReady){
+    $id("myRecord").innerHTML = '<div class="card"><p>Checking your CrowRules account…</p></div>';
+    return;
+  }
   if(!session || !selectedWeek){
-    $id("myRecord").innerHTML = '<div class="card"><p>Sign in to view your saved picks.</p></div>';
+    $id("myRecord").innerHTML = '<div class="card"><p>Sign in to view your saved picks.</p><p><a class="button" href="#authForm">SIGN IN / CREATE ACCOUNT</a></p></div>';
     return;
   }
 
@@ -467,9 +478,7 @@ async function awaitPickemBoot(){
 }
 
 (async () => {
-  const {data} = await sb.auth.getSession();
-  session = data?.session || null;
-  updateAuthUI();
+  await refreshSession();
   await loadSeasons();
   await awaitPickemBoot();
   await loadLeaderboard();
