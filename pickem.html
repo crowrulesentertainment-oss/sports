@@ -247,35 +247,27 @@ $id("week").addEventListener("change", async e => {
 
 async function loadGames(){
   const root = $id("games");
-  root.innerHTML = '<div class="card"><p>Loading game card…</p></div>';
-
-  const now = new Date().toISOString();
+  root.innerHTML = '<div class="card"><p>Loading this week’s games across all CrowRules Sports leagues…</p></div>';
+  if(!selectedWeek){ games=[]; renderGames(); return; }
   let query = sb.from("cr_sports_games")
-    .select("*,cr_sports_leagues(name),home:cr_sports_teams!cr_sports_games_home_team_id_fkey(id,name),away:cr_sports_teams!cr_sports_games_away_team_id_fkey(id,name)")
-    .order("starts_at")
-    .limit(100);
-
-  const {data,error} = await query;
+    .select("id,league_id,starts_at,status,home_score,away_score,cr_sports_leagues(id,name,code),home:cr_sports_teams!cr_sports_games_home_team_id_fkey(id,name),away:cr_sports_teams!cr_sports_games_away_team_id_fkey(id,name)")
+    .gte("starts_at", selectedWeek.opens_at)
+    .lte("starts_at", selectedWeek.closes_at || new Date(new Date(selectedWeek.opens_at).getTime()+7*86400000).toISOString())
+    .order("starts_at",{ascending:true})
+    .limit(500);
+  if(selectedWeek.league_id) query=query.eq("league_id",selectedWeek.league_id);
+  const {data,error}=await query;
   if(error){
-    root.innerHTML = '<div class="card"><h3>GAME DATA UNAVAILABLE</h3><p>'+esc(error.message)+'</p></div>';
+    root.innerHTML='<div class="card"><h3>GAME DATA UNAVAILABLE</h3><p>'+esc(error.message)+'</p></div>';
     return;
   }
-
-  const openWeek = selectedWeek;
-  games = (data || []).filter(g => {
-    if(!openWeek) return false;
-    if(openWeek.closes_at && new Date(openWeek.closes_at).getTime() < Date.now()) return false;
-    return new Date(g.starts_at).getTime() >= Date.now() - 12*60*60*1000 &&
-      !["cancelled","postponed"].includes(String(g.status || "").toLowerCase());
-  }).slice(0,24);
-
+  games=(data||[]).filter(g=>!["cancelled","postponed"].includes(String(g.status||"").toLowerCase()) && new Date(g.starts_at).getTime()>Date.now());
   renderGames();
 }
-
 function renderGames(){
   const root = $id("games");
   if(!games.length){
-    root.innerHTML = '<div class="card"><h3>NO MATCHUPS AVAILABLE</h3><p>Games will appear here when the CrowRules Sports schedule contains eligible matchups.</p></div>';
+    root.innerHTML = '<div class="card"><h3>NO MATCHUPS AVAILABLE</h3><p>Games from every supported CrowRules Sports league are eligible. Make as many picks as you want before each game locks.</p></div>';
     return;
   }
 
