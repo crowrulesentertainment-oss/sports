@@ -1,4 +1,4 @@
-/* CrowRules Sports — Shared Engine 18.0 */
+/* CrowRules Sports — Shared Engine 19.0 */
 (function(){
 "use strict";
 
@@ -13,14 +13,14 @@ if(!window.supabase||typeof window.supabase.createClient!=="function"){
 
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
  auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true},
- global:{headers:{"x-client-info":"crowrules-sports/18.0"}}
+ global:{headers:{"x-client-info":"crowrules-sports/19.0"}}
 });
 
 window.sb=sb;
 window.supabaseClient=sb;
 window.sbClient=sb;
 window.CROW_SPORTS_READY=true;
-window.CROW_SPORTS_VERSION="18.0";
+window.CROW_SPORTS_VERSION="19.0";
 
 const $=s=>document.querySelector(s);
 const $$=s=>Array.from(document.querySelectorAll(s));
@@ -42,19 +42,25 @@ function storageGet(key,fallback=null,type="local"){try{const s=storage(type),v=
 function storageSet(key,value,type="local"){try{const s=storage(type);if(!s)return false;s.setItem(key,JSON.stringify(value));return true;}catch(_){return false;}}
 function storageRemove(key,type="local"){try{storage(type)?.removeItem(key);}catch(_){}}
 
-const NAV=[
- ["home","HOME","index.html"],
- ["scores","SCORES","scores.html"],
- ["schedule","SCHEDULE","schedule.html"],
- ["standings","STANDINGS","standings.html"],
- ["leaders","LEADERS","leaders.html"],
- ["combat","COMBAT / WRESTLING","combat.html"],
- ["media","AUDIO / VIDEO","media.html"],
- ["pickem","PICK EM","pickem.html"],
- ["notifications","NOTIFICATIONS","notifications.html"],
- ["partners","PARTNERS","partners.html"],
- ["account","ACCOUNT","account.html"]
+const NAV_GROUPS=[
+ {key:"games",label:"GAMES",items:[
+  ["home","HOME","index.html"],["scores","SCORES","scores.html"],["schedule","SCHEDULE","schedule.html"],["live","LIVE","live.html"]
+ ]},
+ {key:"teams",label:"TEAMS",items:[
+  ["teams","TEAMS","teams.html"],["standings","STANDINGS","standings.html"],["rankings","RANKINGS","rankings.html"],["leaders","LEADERS","leaders.html"]
+ ]},
+ {key:"data",label:"DATA",items:[
+  ["championships","CHAMPIONSHIPS","championships.html"],["championship","CHAMPIONSHIP","championship.html"],["event","EVENTS","event.html"],["sync-health","SYNC HEALTH","sync-health.html"]
+ ]},
+ {key:"media",label:"MEDIA",items:[
+  ["media","AUDIO / VIDEO","media.html"],["combat","COMBAT / WRESTLING","combat.html"]
+ ]},
+ {key:"community",label:"COMMUNITY",items:[
+  ["pickem","PICK EM","pickem.html"],["notifications","NOTIFICATIONS","notifications.html"],["partners","PARTNERS","partners.html"]
+ ]},
+ {key:"account",label:"ACCOUNT",items:[["account","ACCOUNT","account.html"]]}
 ];
+const NAV=NAV_GROUPS.flatMap(group=>group.items);
 
 function currentPage(){return location.pathname.split("/").pop()||"index.html";}
 
@@ -71,15 +77,20 @@ function ensureNavStyles(){
  style.id="cr-shared-nav-style";
  style.textContent=`
  .cr-header{position:relative;z-index:100}
- .cr-nav{position:relative}
+ .cr-nav{position:relative;display:flex;align-items:center;gap:10px}
  .cr-nav .brand{flex:0 0 auto;white-space:nowrap}
- .cr-nav .navlinks{min-width:0;display:flex;align-items:center;justify-content:flex-end;gap:2px;transition:max-height .2s ease;flex:1}
- .cr-nav .navlinks a{white-space:nowrap;border-radius:6px;transition:background .15s ease,color .15s ease}
- .cr-nav .navlinks a.active{color:#fff;background:#e1060014;box-shadow:inset 0 -2px 0 #e10600}
+ .cr-nav .navlinks{min-width:0;display:flex;align-items:center;justify-content:flex-end;gap:3px;transition:max-height .2s ease;flex:1}
+ .cr-nav .nav-group{position:relative}
+ .cr-nav .nav-group>button{font:700 8px Orbitron,Arial,sans-serif;letter-spacing:.7px;color:#ddd;background:transparent;border:1px solid transparent;border-radius:7px;padding:9px 8px;cursor:pointer;white-space:nowrap}
+ .cr-nav .nav-group>button:hover,.cr-nav .nav-group.active>button{color:#fff;background:#ffffff08;border-color:#ffffff12}
+ .cr-nav .nav-group-menu{position:absolute;right:0;top:calc(100% + 7px);min-width:155px;display:none;flex-direction:column;padding:6px;background:#07080d;border:1px solid #ffffff14;border-radius:10px;box-shadow:0 18px 40px #000b;backdrop-filter:blur(18px);z-index:200}
+ .cr-nav .nav-group.open .nav-group-menu{display:flex}
+ .cr-nav .nav-group-menu a{display:block;white-space:nowrap;border-radius:7px;padding:9px 10px;color:#bbb;text-decoration:none;font:700 8px Orbitron,Arial,sans-serif;letter-spacing:.4px}
+ .cr-nav .nav-group-menu a:hover,.cr-nav .nav-group-menu a.active{color:#fff;background:#e1060014;box-shadow:inset 2px 0 #e10600}
  .cr-nav .account{white-space:nowrap;flex:0 0 auto;max-width:180px;overflow:hidden;text-overflow:ellipsis}
  .cr-menu-toggle{display:none;border:1px solid #ffffff18;background:#ffffff06;color:#fff;border-radius:8px;padding:8px 10px;font:700 9px Orbitron,Arial;cursor:pointer}
- @media(max-width:1380px){.cr-nav{gap:8px;padding-left:12px;padding-right:12px}.cr-nav .brand{font-size:12px}.cr-nav .navlinks{overflow-x:auto;scrollbar-width:none}.cr-nav .navlinks::-webkit-scrollbar{display:none}.cr-nav .navlinks a{font-size:7px;padding:8px 5px}.cr-nav .account{font-size:8px;max-width:130px}}
- @media(max-width:1120px){.cr-menu-toggle{display:block;margin-left:auto}.cr-nav .navlinks{position:absolute;left:8px;right:8px;top:100%;display:none;max-height:75vh;overflow:auto;background:#07080d;backdrop-filter:blur(18px);border:1px solid #ffffff12;border-radius:12px;padding:8px;z-index:100}.cr-nav .navlinks.cr-open{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start}.cr-nav .navlinks a{padding:11px 12px;font-size:9px}.cr-nav .account{display:none}}
+ @media(max-width:1380px){.cr-nav{gap:6px;padding-left:12px;padding-right:12px}.cr-nav .brand{font-size:12px}.cr-nav .navlinks{overflow:visible}.cr-nav .nav-group>button{font-size:7px;padding:8px 6px}.cr-nav .account{font-size:8px;max-width:130px}}
+ @media(max-width:1120px){.cr-menu-toggle{display:block;margin-left:auto}.cr-nav .navlinks{position:absolute;left:8px;right:8px;top:100%;display:none;max-height:75vh;overflow:auto;background:#07080d;backdrop-filter:blur(18px);border:1px solid #ffffff12;border-radius:12px;padding:8px;z-index:100}.cr-nav .navlinks.cr-open{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start}.cr-nav .nav-group{width:100%}.cr-nav .nav-group>button{width:100%;text-align:left;padding:12px;font-size:9px}.cr-nav .nav-group-menu{position:static;display:none;box-shadow:none;border:0;border-radius:7px;background:#ffffff04;margin:2px 0 5px}.cr-nav .nav-group.open .nav-group-menu{display:flex}.cr-nav .nav-group-menu a{padding:10px 14px;font-size:9px}.cr-nav .account{display:none}}
  @media(max-width:520px){.cr-nav{padding:11px 10px}.cr-nav .brand{font-size:11px;letter-spacing:1px}}
  `;
  document.head.appendChild(style);
@@ -89,24 +100,29 @@ function bindNav(){
  const toggle=$("#crMenuToggle"),links=$("#crNavLinks");
  if(!toggle||!links||toggle.dataset.bound)return;
  toggle.dataset.bound="1";
- toggle.addEventListener("click",()=>{
-  const open=links.classList.toggle("cr-open");
-  toggle.setAttribute("aria-expanded",String(open));
- });
- document.addEventListener("keydown",e=>{if(e.key==="Escape"){links.classList.remove("cr-open");toggle.setAttribute("aria-expanded","false");}});
- links.addEventListener("click",e=>{
-  if(e.target.closest("a")){links.classList.remove("cr-open");toggle.setAttribute("aria-expanded","false");}
- });
+ toggle.addEventListener("click",()=>{const open=links.classList.toggle("cr-open");toggle.setAttribute("aria-expanded",String(open));});
+ links.querySelectorAll(".nav-group>button").forEach(button=>button.addEventListener("click",()=>{
+  const group=button.closest(".nav-group");
+  links.querySelectorAll(".nav-group.open").forEach(g=>{if(g!==group)g.classList.remove("open");});
+  group.classList.toggle("open");
+ }));
+ document.addEventListener("keydown",e=>{if(e.key==="Escape"){links.classList.remove("cr-open");links.querySelectorAll(".nav-group.open").forEach(g=>g.classList.remove("open"));toggle.setAttribute("aria-expanded","false");}});
+ document.addEventListener("click",e=>{if(!e.target.closest(".cr-nav")){links.querySelectorAll(".nav-group.open").forEach(g=>g.classList.remove("open"));}});
+ links.addEventListener("click",e=>{if(e.target.closest("a")){links.classList.remove("cr-open");links.querySelectorAll(".nav-group.open").forEach(g=>g.classList.remove("open"));toggle.setAttribute("aria-expanded","false");}});
 }
 
 function shell(active){
  const page=normalizeActiveKey(active);
- const links=NAV.map(([key,label,url])=>`<a href="${url}" class="${page===key?"active":""}" data-nav="${key}">${label}</a>`).join("");
- document.write(`<header class="site-header cr-header" data-cr-shell="18">
+ const groups=NAV_GROUPS.map(group=>{
+  const activeGroup=group.items.some(([key])=>key===page);
+  const items=group.items.map(([key,label,url])=>`<a href="${url}" class="${page===key?"active":""}" data-nav="${key}">${label}</a>`).join("");
+  return `<div class="nav-group ${activeGroup?"active":""}"><button type="button" aria-expanded="false">${group.label}<span aria-hidden="true"> ▾</span></button><div class="nav-group-menu">${items}</div></div>`;
+ }).join("");
+ document.write(`<header class="site-header cr-header" data-cr-shell="19">
   <nav class="nav cr-nav" aria-label="CrowRules Sports navigation">
    <a class="brand" href="index.html" aria-label="CrowRules Sports home">CROW<span>RULES</span> SPORTS</a>
    <button class="cr-menu-toggle" id="crMenuToggle" type="button" aria-expanded="false" aria-controls="crNavLinks">MENU</button>
-   <div class="navlinks" id="crNavLinks">${links}</div>
+   <div class="navlinks" id="crNavLinks">${groups}</div>
    <span class="account" id="account" aria-live="polite">ACCOUNT</span>
   </nav>
  </header>`);
@@ -114,7 +130,7 @@ function shell(active){
  queueMicrotask(bindNav);
 }
 
-function footer(){document.write('<footer class="footer">CROWRULES SPORTS • ONE COMPANY. ONE UNIVERSE. • Built in Tacoma, Washington • <span id="crEngineVersion">Engine 18.0</span></footer>');}
+function footer(){document.write('<footer class="footer">CROWRULES SPORTS • ONE COMPANY. ONE UNIVERSE. • Built in Tacoma, Washington • <span id="crEngineVersion">Engine 19.0</span></footer>');}
 
 async function getSession(){
  try{const r=await withTimeout(sb.auth.getSession(),8000,"Session check");return r?.data?.session||null;}
@@ -183,9 +199,9 @@ function bindAuth(){
  authSubscription=r?.data?.subscription||null;
 }
 
-window.CROW_SPORTS_NAV_VERSION="18.0";
+window.CROW_SPORTS_NAV_VERSION="19.0";
 async function loadPodcastAudio({limit=24,query=""}={}){\n try{\n  const term=String(query||"").trim();\n  let pq=sb.from("podcasts").select("id,title,slug,description,artwork_url,author_name,category,status,created_at").eq("status","published").order("created_at",{ascending:false}).limit(Math.max(1,Math.min(100,limit)));\n  if(term)pq=pq.or("title.ilike.%"+term+"%,author_name.ilike.%"+term+"%,category.ilike.%"+term+"%");\n  const [shows,episodes]=await Promise.all([withTimeout(pq,10000,"Podcast shows"),withTimeout(sb.from("podcast_episodes").select("id,podcast_id,title,slug,description,audio_url,thumbnail_url,episode_number,season_number,published_at,duration_seconds,play_count,status,podcasts(id,title,slug,artwork_url,author_name,category)").eq("status","published").order("published_at",{ascending:false}).limit(Math.max(1,Math.min(100,limit))),10000,"Podcast episodes")]);\n  if(shows.error)throw shows.error;\n  if(episodes.error)throw episodes.error;\n  return {shows:shows.data||[],episodes:episodes.data||[],source:"CrowRules Podcasting",repository:"crowrulesentertainment-oss/podcasting",repositoryUrl:"https://github.com/crowrulesentertainment-oss/podcasting"};\n }catch(error){reportError("loadPodcastAudio",error);return {shows:[],episodes:[],source:"CrowRules Podcasting",repository:"crowrulesentertainment-oss/podcasting",repositoryUrl:"https://github.com/crowrulesentertainment-oss/podcasting",error:normalizeError(error)};}\n}\n\nwindow.CrowRulesSports={
- version:"18.0",supabase:sb,$,$,esc,sleep,timeout:withTimeout,normalizeError,reportError,loadPodcastAudio,
+ version:"19.0",navGroups:NAV_GROUPS,nav:NAV,supabase:sb,$,$,esc,sleep,timeout:withTimeout,normalizeError,reportError,loadPodcastAudio,
  getSession,loadSession,loadUnread,signIn,signUp,signOut,shell,footer,startBadgeRealtime,
  storage:{get:storageGet,set:storageSet,remove:storageRemove}
 };
