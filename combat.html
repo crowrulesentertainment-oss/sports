@@ -61,10 +61,11 @@
 <script>
 async function loadCombat(){
  const root=document.getElementById("ufcGames");
- const r=await sb.from("cr_sports_games").select("id,starts_at,status,home_score,away_score,venue,home:cr_sports_teams!cr_sports_games_home_team_id_fkey(name),away:cr_sports_teams!cr_sports_games_away_team_id_fkey(name),league:cr_sports_leagues!cr_sports_games_league_id_fkey(code,name)").eq("league_id",(await sb.from("cr_sports_leagues").select("id").eq("code","UFC").single()).data?.id).order("starts_at").limit(12);
+ const lid=(await sb.from("cr_sports_leagues").select("id").eq("code","UFC").single()).data?.id;
+ const r=await sb.from("cr_sports_events").select("id,title,event_type,status,starts_at,venue,city,event_url").eq("league_id",lid).order("starts_at").limit(12);
  if(r.error){root.innerHTML='<div class="fight"><small>'+esc(r.error.message)+'</small></div>';return}
  const rows=r.data||[];
- root.innerHTML=rows.length?rows.map(g=>'<div class="fight"><strong>'+esc(g.away?.name||"TBD")+' vs '+esc(g.home?.name||"TBD")+'</strong><small>'+esc(String(g.status||"scheduled").toUpperCase())+' • '+esc(g.starts_at?new Date(g.starts_at).toLocaleString():"TBD")+(g.venue?" • "+esc(g.venue):"")+'</small></div>').join(""):'<div class="fight"><small>No UFC bouts are synchronized yet. The UFC league is ready for the provider feed.</small></div>';
+ root.innerHTML=rows.length?rows.map(e=>'<div class="fight"><strong>'+esc(e.title)+'</strong><small>'+esc(String(e.status||"scheduled").toUpperCase())+' • '+esc(e.starts_at?new Date(e.starts_at).toLocaleString():"TBD")+(e.venue?" • "+esc(e.venue):"")+(e.city?" • "+esc(e.city):"")+'</small><div class="actions"><a class="button small" href="event.html?id='+encodeURIComponent(e.id)+'">EVENT CENTER</a>'+(e.event_url?'<a class="button small" href="'+esc(e.event_url)+'" target="_blank" rel="noopener">OFFICIAL EVENT</a>':'')+'</div></div>').join(""):'<div class="fight"><small>No UFC events are synchronized yet.</small></div>';
 }
 async function loadOfficialEvents(code,target){
  const root=document.getElementById(target);
