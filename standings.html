@@ -290,23 +290,28 @@ function teamRow(x){
 }
 
 function renderCoverageOverview(rows){
- const counts=new Map();
- rows.forEach(x=>counts.set(x.league_id,(counts.get(x.league_id)||0)+1));
- const expected={"COLLEGE-FOOTBALL":138,"NFL":32,"NBA":30,"NHL":32,"MLB":30,"WNBA":15,"MLS":30,"NWSL":14,"PWHL":8,"UFL":8};
+ const standingsCounts=new Map(), activeCounts=new Map();
+ rows.forEach(x=>standingsCounts.set(x.league_id,(standingsCounts.get(x.league_id)||0)+1));
+ coverageCounts.forEach((v,k)=>activeCounts.set(k,v));
  const cards=leagues.filter(l=>!EXCLUDED_LEAGUES.has(String(l.code||"").toUpperCase())).map(function(l){
-  const loaded=coverageCounts.has(l.id)?coverageCounts.get(l.id):(counts.get(l.id)||0);
-  const key=String(l.code||l.name||"").toUpperCase().replace(/[^A-Z0-9]+/g,"-").replace(/^-|-$/g,"");
-  const target=expected[key]||null;
-  const pct=target?Math.min(100,(loaded/target)*100):0;
-  const status=target?(loaded>=target?"FULL COVERAGE":"PARTIAL COVERAGE"):"DATABASE COUNT";
-  const cls=target?(loaded>=target?"full":"partial"):"unknown";
-  const detail=target?loaded+" / "+target+" team records":loaded+" loaded team records";
-  return '<div class="coverage-card '+cls+'"><div class="coverage-top"><b>'+esc(l.code||l.name||"LEAGUE")+'</b><span class="coverage-status">'+status+'</span></div><div class="coverage-count">'+loaded+(target?'<small> / '+target+'</small>':"")+'</div><div class="coverage-meta">'+esc(detail+" • "+(l.name||""))+'</div>'+(target?'<div class="coverage-bar"><i style="width:'+pct.toFixed(1)+'%"></i></div>':"")+'</div>';
+  const standings=standingsCounts.get(l.id)||0;
+  const active=activeCounts.get(l.id)||0;
+  const denominator=active||standings;
+  const pct=denominator?Math.min(100,(standings/denominator)*100):0;
+  let status="NO STANDINGS";
+  let cls="unknown";
+  if(standings&&active&&standings>=active){status="FULL COVERAGE";cls="full";}
+  else if(standings){status=active?"PARTIAL COVERAGE":"DATABASE DATA";cls=active?"partial":"unknown";}
+  const detail=active
+    ? standings+" of "+active+" active team records have standings"
+    : standings+" standings records • active team count unavailable";
+  return '<div class="coverage-card '+cls+'"><div class="coverage-top"><b>'+esc(l.code||l.name||"LEAGUE")+'</b><span class="coverage-status">'+status+'</span></div><div class="coverage-count">'+standings+(active?'<small> / '+active+'</small>':"")+'</div><div class="coverage-meta">'+esc(detail+" • "+(l.name||""))+'</div>'+(denominator?'<div class="coverage-bar"><i style="width:'+pct.toFixed(1)+'%"></i></div>':"")+'</div>';
  }).join("");
  $("coverageGrid").innerHTML=cards||'<div class="empty"><strong>NO ACTIVE LEAGUES</strong>No active league definitions were found.</div>';
- $("coverageCount").textContent=leagues.length+" ACTIVE LEAGUES";
+ const totalStandings=[...standingsCounts.values()].reduce((a,b)=>a+b,0);
+ const totalActive=[...activeCounts.values()].reduce((a,b)=>a+b,0);
+ $("coverageCount").textContent=totalStandings+" STANDINGS • "+totalActive+" ACTIVE TEAMS";
 }
-
 function renderStructureOverview(rows){
  const byLeague=new Map();
  rows.forEach(x=>{
