@@ -550,6 +550,7 @@ sb.channel("combat-championship-command-center")
  .on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_wrestling_matches"},loadWrestlerIntelligence)
  .subscribe();
 
+loadChampions();
 loadFighterIntelligence();
 loadWrestlerIntelligence();
 loadCombat();
