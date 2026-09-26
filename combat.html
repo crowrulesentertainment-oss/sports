@@ -44,7 +44,7 @@ body{background:var(--combat-bg)}
 .champion-card:hover{border-color:var(--combat-red);transform:translateY(-2px)}
 .champion-art{height:145px;background:radial-gradient(circle at 50% 30%,rgba(225,6,0,.22),transparent 55%),#09090c;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
 .champion-art:after{content:"TITLE";position:absolute;right:-18px;top:13px;transform:rotate(35deg);font:900 8px Orbitron;letter-spacing:2px;color:#4a2421}
-.champion-art img{width:100%;height:100%;object-fit:cover;opacity:.9}
+.champion-art img{width:100%;height:100%;object-fit:cover;opacity:.92;display:block}.champion-art .champion-org-image{position:absolute;right:12px;bottom:10px;width:48px;height:48px;object-fit:contain;padding:7px;background:rgba(5,5,6,.86);border:1px solid #3a3a40;border-radius:8px;z-index:3}.champion-art .champion-art-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:900 42px Orbitron;color:#333;letter-spacing:2px}.champion-art.has-image .champion-art-fallback{display:none}
 .champion-initial{font:900 52px Orbitron;color:#444}
 .champion-body{padding:16px}.champion-org{font:800 8px Orbitron;color:var(--combat-red);letter-spacing:1px}
 .champion-title{font:800 15px Montserrat;margin:7px 0;color:#ddd;line-height:1.35}.champion-name{font:900 20px Montserrat;color:#fff}
@@ -540,7 +540,18 @@ document.getElementById("refreshBtn").addEventListener("click",async()=>{if(refr
 document.querySelectorAll("[data-jump]").forEach(b=>b.addEventListener("click",()=>applyJump(b.dataset.jump)));
 document.getElementById("shareBtn").addEventListener("click",async()=>{try{if(navigator.share)await navigator.share({title:"CrowRules Sports Combat Center",text:"UFC • WWE • AEW Combat Center",url:location.href});else{await navigator.clipboard.writeText(location.href);document.getElementById("shareBtn").textContent="LINK COPIED";setTimeout(()=>document.getElementById("shareBtn").textContent="SHARE COMBAT CENTER",1600);}}catch(e){}});
 
-sb.channel("combat-championship-command-center")
+
+function enhanceChampionshipImages(){
+ document.querySelectorAll(".champion-card").forEach(card=>{
+  const art=card.querySelector(".champion-art"); if(!art)return;
+  const org=(card.querySelector(".champion-org")?.textContent||"").trim().toUpperCase();
+  const urls={UFC:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/UFC_Logo.svg/320px-UFC_Logo.svg.png",WWE:"https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/WWE_Logo.svg/320px-WWE_Logo.svg.png",AEW:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/All_Elite_Wrestling_Logo.svg/320px-All_Elite_Wrestling_Logo.svg.png"};
+  if(!art.querySelector(".champion-art-fallback")){const f=document.createElement("div");f.className="champion-art-fallback";f.textContent=org||"TITLE";art.appendChild(f)}
+  if(!art.querySelector(".champion-org-image")&&urls[org]){const img=document.createElement("img");img.className="champion-org-image";img.src=urls[org];img.alt=org+" logo";img.loading="lazy";img.onerror=()=>img.remove();art.appendChild(img)}
+  const main=art.querySelector("img:not(.champion-org-image)"); if(main&&main.getAttribute("src")){art.classList.add("has-image");main.onerror=()=>{main.style.display="none";art.classList.remove("has-image")}}
+ });
+}
+\nsb.channel("combat-championship-command-center")
  .on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_championships"},loadChampions)
  .on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_wrestling_matches"},loadTitleFights)
  .on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_wrestling_events"},loadTitleFights)
@@ -554,7 +565,7 @@ loadChampions();
 loadFighterIntelligence();
 loadWrestlerIntelligence();
 loadCombat();
-setTimeout(()=>renderUnifiedIntelligence(),1200);
+setTimeout(()=>{renderUnifiedIntelligence();enhanceChampionshipImages();},1200);
 </script>
 <script>footer()</script>
 </body>
