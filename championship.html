@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Championship Detail | CrowRules Sports</title>
+<link rel="stylesheet" href="css/sports.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/sports.js"></script>
+<style>
+.detail-hero{padding:70px 24px 42px;background:radial-gradient(circle at 80% 10%,rgba(225,6,0,.22),transparent 30%),linear-gradient(135deg,#080808,#130909);border-bottom:1px solid #32100f}
+.back{display:inline-block;margin-bottom:20px}.detail-grid{display:grid;grid-template-columns:1.4fr .6fr;gap:18px}.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stat{padding:18px;background:#101010;border:1px solid #282020}.stat b{display:block;font:900 25px Orbitron;margin-top:7px}.champion{font:900 clamp(30px,5vw,64px) Orbitron;line-height:1;margin:10px 0}.pill{display:inline-block;border:1px solid #472020;padding:7px 10px;font:800 9px Orbitron;letter-spacing:2px;margin:3px}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:12px 10px;border-bottom:1px solid #242020;text-align:left}.table th{font:800 9px Orbitron;color:#ff5b54}.empty{padding:30px;text-align:center;color:#777}@media(max-width:800px){.detail-grid,.stat-grid{grid-template-columns:1fr}.table{font-size:12px}}
+</style>
+</head>
+<body>
+<script>shell("champions")</script>
+<section class="detail-hero"><div class="hero"><a class="button small back" href="championships.html">← CHAMPIONSHIP UNIVERSE</a><div id="eyebrow" class="eyebrow">CHAMPIONSHIP INTELLIGENCE</div><div id="title" class="champion">Loading…</div><div id="holder" class="muted"></div><div id="meta" style="margin-top:14px"></div></div></section>
+<section class="section">
+<div class="detail-grid">
+<div>
+<div class="card"><div class="eyebrow">CURRENT REIGN</div><div class="stat-grid" style="margin-top:14px">
+<div class="stat"><span class="muted">DAYS HELD</span><b id="days">—</b></div>
+<div class="stat"><span class="muted">DEFENSES</span><b id="defenses">0</b></div>
+<div class="stat"><span class="muted">STATUS</span><b id="status">—</b></div>
+</div></div>
+<div class="card" style="margin-top:18px"><div class="eyebrow">TITLE DEFENSES</div><h2>DEFENSE HISTORY</h2><div id="defenseWrap"><div class="empty">Loading defenses…</div></div></div>
+</div>
+<div>
+<div class="card"><div class="eyebrow">TITLE PROFILE</div><div id="profile" class="muted">Loading…</div></div>
+<div class="card" style="margin-top:18px"><div class="eyebrow">LINEAGE</div><h2>CHAMPIONSHIP HISTORY</h2><div id="historyWrap"><div class="empty">Loading history…</div></div></div>
+</div>
+</div>
+</section>
+<script>
+const id=new URLSearchParams(location.search).get("id");
+let championship;
+function daysHeld(start){if(!start)return "—";return Math.max(0,Math.floor((Date.now()-new Date(start+"T00:00:00Z").getTime())/86400000)).toLocaleString()}
+function fmt(v){return v?new Date(v).toLocaleDateString():"—"}
+async function load(){
+ if(!id){location.href="championships.html";return}
+ const r=await sb.from("cr_sports_championships").select("*").eq("id",id).maybeSingle();
+ if(r.error||!r.data){document.getElementById("title").textContent="Championship not found";return}
+ championship=r.data;
+ document.title=championship.title_name+" | CrowRules Sports";
+ document.getElementById("eyebrow").textContent=(championship.organization||"")+" • "+(championship.division||"CHAMPIONSHIP");
+ document.getElementById("title").textContent=championship.title_name;
+ document.getElementById("holder").textContent=championship.champion_name||"VACANT";
+ document.getElementById("meta").innerHTML='<span class="pill">'+esc(championship.title_type||"TITLE")+'</span>'+(championship.brand?'<span class="pill">'+esc(championship.brand)+'</span>':'')+(championship.is_interim?'<span class="pill">INTERIM</span>':'')+(championship.is_womens?'<span class="pill">WOMEN\'S</span>':'');
+ document.getElementById("days").textContent=daysHeld(championship.won_at);
+ document.getElementById("status").textContent=(championship.status||"ACTIVE").toUpperCase();
+ document.getElementById("profile").innerHTML='<p><b>Champion:</b> '+esc(championship.champion_name||"VACANT")+'</p><p><b>Reign began:</b> '+fmt(championship.won_at)+'</p><p><b>Organization:</b> '+esc(championship.organization)+'</p><p><b>Division:</b> '+esc(championship.division||"—")+'</p>'+(championship.source_url?'<p><a class="button small" target="_blank" rel="noopener" href="'+esc(championship.source_url)+'">OFFICIAL SOURCE</a></p>':'');
+ const d=await sb.from("cr_sports_championship_defenses").select("*").eq("championship_id",id).order("defended_at",{ascending:false});
+ document.getElementById("defenses").textContent=(d.data||[]).length;
+ document.getElementById("defenseWrap").innerHTML=d.data?.length?'<table class="table"><thead><tr><th>DATE</th><th>CHALLENGER</th><th>RESULT</th><th>METHOD</th></tr></thead><tbody>'+d.data.map(x=>'<tr><td>'+fmt(x.defended_at)+'</td><td>'+esc(x.challenger_name||"—")+'</td><td>'+esc(x.result||"—")+'</td><td>'+esc(x.method||"—")+'</td></tr>').join("")+'</tbody></table>':'<div class="empty">No verified title defenses have been linked yet.</div>';
+ const h=await sb.from("cr_sports_championship_history").select("*").eq("championship_id",id).order("reign_start",{ascending:false});
+ document.getElementById("historyWrap").innerHTML=h.data?.length?'<table class="table"><thead><tr><th>CHAMPION</th><th>START</th><th>END</th></tr></thead><tbody>'+h.data.map(x=>'<tr><td>'+esc(x.champion_name)+'</td><td>'+fmt(x.reign_start)+'</td><td>'+fmt(x.reign_end)+'</td></tr>').join("")+'</tbody></table>':'<div class="empty">Historical lineage is ready for verified source imports.</div>';
+}
+loadSession();load();
+sb.channel("championship-detail").on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_championships"},()=>load()).subscribe();
+sb.channel("championship-detail-defenses").on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_championship_defenses"},()=>load()).subscribe();
+</script>
+<script>footer()</script>
+</body></html>
