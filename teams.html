@@ -1,1 +1,125 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Teams | CrowRules Sports</title><link rel="stylesheet" href="css/sports.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/sports.js"></script></head><body><script>shell("teams")</script><section class="hero"><div class="eyebrow">TEAM DIRECTORY</div><h1>MAJOR <span>& MINOR</span></h1><p>Professional, college, minor-league and community teams.</p></section><section class="section"><div class="actions"><select id="level"><option value="">All levels</option><option>major</option><option>minor</option><option>college</option><option>amateur</option></select><input id="search" class="input" placeholder="Search teams…" style="max-width:300px"></div><div class="grid3" id="cards" style="margin-top:20px"></div></section><script>loadSession();let teams=[];function render(){let x=teams;if($("#level").value)x=x.filter(t=>t.level===$("#level").value);if($("#search").value)x=x.filter(t=>(t.name+" "+(t.city||"")).toLowerCase().includes($("#search").value.toLowerCase()));$("#cards").innerHTML=x.map(t=>'<div class="card"><span class="tag">'+esc(t.level.toUpperCase())+'</span><h3>'+esc(t.name)+'</h3><p class="muted">'+esc(t.city)+' '+esc(t.state)+' • '+esc(t.cr_sports_leagues?.code)+'</p></div>').join("")||'<div class="card">No teams match.</div>'}(async()=>{const{data}=await sb.from("cr_sports_teams").select("*,cr_sports_leagues(code,name)").order("name");teams=data||[];$("#level").onchange=render;$("#search").oninput=render;render()})()</script><script>footer()</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="CrowRules Sports Team Directory and Team Dashboard">
+<title>Teams & Team Dashboard | CrowRules Sports</title>
+<link rel="stylesheet" href="css/sports.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/sports.js"></script>
+<style>
+body{background:#050508}.team-hero{position:relative;overflow:hidden;background:radial-gradient(circle at 80% 15%,#ff304f18,transparent 35%),linear-gradient(135deg,#07070b,#0c0c12);border-bottom:1px solid #ffffff0b}.team-wrap{max-width:1450px;margin:auto;padding:34px 20px}.team-hero .team-wrap{padding-top:64px;padding-bottom:46px}.kicker{font:700 10px Orbitron;letter-spacing:.2em;color:#ff6075}.team-hero h1{font:900 clamp(38px,6vw,78px)/.95 Orbitron;margin:12px 0}.team-hero p{max-width:800px;color:#a7afbf;line-height:1.7}.directory-toolbar{display:grid;grid-template-columns:1fr 220px 220px auto;gap:10px;margin-bottom:20px}.directory-toolbar>*{min-height:44px;box-sizing:border-box}.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 22px}.chip{border:1px solid #ffffff12;background:#ffffff05;color:#c8cfdb;border-radius:999px;padding:8px 12px;font:700 9px Orbitron;cursor:pointer}.chip.active{border-color:#ff304f66;background:#ff304f12;color:#fff}.directory-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}.team-card{position:relative;border:1px solid #ffffff10;border-radius:17px;padding:18px;background:linear-gradient(145deg,#ffffff06,#ffffff02);transition:.2s}.team-card:hover{transform:translateY(-2px);border-color:#ff304f38}.team-card-head{display:flex;gap:12px;align-items:center}.team-logo{width:54px;height:54px;border-radius:12px;object-fit:contain;background:#ffffff08}.team-name{font:800 17px Montserrat}.team-sub{font-size:10px;color:#737d90;margin-top:4px}.team-meta{display:flex;gap:5px;flex-wrap:wrap;margin:13px 0}.tag{display:inline-block;padding:5px 7px;border:1px solid #ffffff12;border-radius:5px;font:700 8px Orbitron;color:#9da6b8}.team-actions{display:flex;gap:7px}.mini{flex:1;text-align:center;text-decoration:none;border:1px solid #ffffff12;background:#ffffff05;color:#dce1eb;padding:9px 7px;border-radius:8px;font:700 9px Orbitron}.mini:hover{border-color:#ff304f55}.dash{display:none}.dash.show{display:block}.back{margin-bottom:15px}.dash-hero{display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;border:1px solid #ffffff10;border-radius:20px;padding:22px;background:radial-gradient(circle at 80% 20%,#ff304f12,transparent 35%),#0a0a0e}.dash-logo{width:92px;height:92px;object-fit:contain;border-radius:18px;background:#ffffff08}.dash-title{font:900 clamp(25px,4vw,44px) Orbitron}.dash-sub{color:#7f899d;font-size:11px;margin-top:7px}.dash-actions{display:flex;gap:7px;flex-wrap:wrap}.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;margin:15px 0}.stat{border:1px solid #ffffff0e;border-radius:14px;padding:13px;background:#ffffff03}.stat b{display:block;font:800 20px Orbitron}.stat span{font-size:8px;color:#788296;letter-spacing:.08em}.dash-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:16px}.panel{border:1px solid #ffffff10;border-radius:17px;background:#0a0a0e;padding:18px}.panel h2{font:800 16px Orbitron;margin:0 0 13px}.game{display:grid;grid-template-columns:1fr auto;gap:12px;padding:12px 0;border-bottom:1px solid #ffffff09}.game:last-child{border-bottom:0}.opp{font-weight:800}.game-sub{font-size:9px;color:#717b8d;margin-top:4px}.score{font:800 14px Orbitron;text-align:right}.win{color:#65e6a1}.loss{color:#ff7186}.scheduled{color:#b9c0ce}.empty{padding:28px;text-align:center;color:#7d8799}.error{padding:18px;border:1px solid #ff304f33;background:#ff304f0a;border-radius:14px;color:#ff9aaa}.loading{padding:30px;color:#7c8598}.section-title{display:flex;justify-content:space-between;gap:10px;align-items:center;margin:26px 0 12px}.section-title h2{font:800 20px Orbitron;margin:0}.section-title a{font:700 9px Orbitron;color:#aab2c2;text-decoration:none}.table{width:100%;border-collapse:collapse;font-size:11px}.table th,.table td{padding:9px;border-bottom:1px solid #ffffff08;text-align:right}.table th:first-child,.table td:first-child{text-align:left}.table th{font:700 8px Orbitron;color:#727c8e}.stand-rank{font:800 11px Orbitron}.note{font-size:9px;color:#626c7f;line-height:1.6;margin-top:12px}
+@media(max-width:1000px){.directory-toolbar{grid-template-columns:1fr 1fr}.stats{grid-template-columns:repeat(3,1fr)}.dash-grid{grid-template-columns:1fr}}
+@media(max-width:650px){.team-wrap{padding:24px 12px}.directory-toolbar{grid-template-columns:1fr}.dash-hero{grid-template-columns:auto 1fr}.dash-actions{grid-column:1/-1}.dash-logo{width:70px;height:70px}.stats{grid-template-columns:1fr 1fr}.team-name{font-size:15px}}
+</style>
+</head>
+<body>
+<script>shell("teams")</script>
+
+<section class="team-hero">
+ <div class="team-wrap">
+  <div class="kicker">CROWRULES SPORTS • TEAM UNIVERSE</div>
+  <h1>TEAMS</h1>
+  <p>Find a team, open its complete dashboard, review its current standings, recent results and upcoming schedule, then jump directly into the CrowRules Event Center.</p>
+ </div>
+</section>
+
+<main class="team-wrap">
+ <div id="directory">
+  <div class="directory-toolbar">
+   <input id="search" class="input" placeholder="Search teams, cities, states or leagues…" aria-label="Search teams">
+   <select id="league" class="input"><option value="">All leagues</option></select>
+   <select id="level" class="input"><option value="">All levels</option></select>
+   <button id="refresh" class="btn">REFRESH</button>
+  </div>
+  <div class="chips" id="sports"></div>
+  <div id="directoryStatus" class="loading">Loading teams…</div>
+  <div class="directory-grid" id="cards"></div>
+ </div>
+
+ <section class="dash" id="dashboard">
+  <button class="mini back" id="back">← BACK TO TEAMS</button>
+  <div id="dashMount"></div>
+ </section>
+</main>
+
+<script>
+loadSession();
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+const n=v=>Number(v??0)||0;
+const fmt=v=>v?new Date(v).toLocaleString([],{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"}):"TBD";
+const status=v=>String(v||"scheduled").toLowerCase();
+let teams=[],leagues=[],sport="all";
+
+function logo(t){return t.logo_url?'<img class="team-logo" src="'+esc(t.logo_url)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">':'<div class="team-logo"></div>';}
+function leagueOf(t){return t.cr_sports_leagues||{};}
+function openDash(id){history.pushState({team:id},"","teams.html?id="+encodeURIComponent(id));$("directory").style.display="none";$("dashboard").classList.add("show");loadDashboard(id);}
+function closeDash(){history.pushState({},"","teams.html");$("dashboard").classList.remove("show");$("directory").style.display="block";}
+
+function renderSports(){
+ const ss=[...new Set(leagues.map(x=>x.sport).filter(Boolean))].sort();
+ $("sports").innerHTML='<button class="chip '+(sport==="all"?"active":"")+'" data-s="all">ALL SPORTS</button>'+ss.map(s=>'<button class="chip '+(sport===s?"active":"")+'" data-s="'+esc(s)+'">'+esc(String(s).toUpperCase())+'</button>').join("");
+ $("sports").querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{sport=b.dataset.s;renderSports();renderDirectory();});
+}
+function renderDirectory(){
+ const q=$("search").value.trim().toLowerCase(), lid=$("league").value, level=$("level").value;
+ const a=teams.filter(t=>{
+  const l=leagueOf(t),hay=[t.name,t.short_name,t.city,t.state,t.division,l.name,l.code,l.sport,t.level].filter(Boolean).join(" ").toLowerCase();
+  return (!q||hay.includes(q))&&(!lid||t.league_id===lid)&&(!level||t.level===level)&&(sport==="all"||String(l.sport||"").toLowerCase()===String(sport).toLowerCase());
+ });
+ $("directoryStatus").textContent=a.length?a.length+" team"+(a.length===1?"":"s")+" found":"No teams match the current filters.";
+ $("cards").innerHTML=a.map(t=>'<article class="team-card"><div class="team-card-head">'+logo(t)+'<div><div class="team-name">'+esc(t.short_name||t.name)+'</div><div class="team-sub">'+esc([t.city,t.state].filter(Boolean).join(", "))+'</div></div></div><div class="team-meta"><span class="tag">'+esc((leagueOf(t).code||"LEAGUE"))+'</span><span class="tag">'+esc((t.level||"TEAM").toUpperCase())+'</span>'+(t.division?'<span class="tag">'+esc(t.division)+'</span>':"")+'</div><div class="team-actions"><button class="mini open-team" data-id="'+esc(t.id)+'">TEAM DASHBOARD</button><a class="mini" href="standings.html?league='+encodeURIComponent(t.league_id||"")+'&team='+encodeURIComponent(t.id||"")+'">STANDINGS</a></div></article>').join("")||'<div class="empty">No teams match. Try another sport, league, level or search.</div>';
+ $("cards").querySelectorAll(".open-team").forEach(b=>b.onclick=()=>openDash(b.dataset.id));
+}
+
+async function loadDirectory(){
+ $("directoryStatus").textContent="Loading teams…";
+ const [{data:tdata,error:te},{data:ldata,error:le}]=await Promise.all([
+  sb.from("cr_sports_teams").select("id,league_id,name,short_name,city,state,division,level,logo_url,is_active,cr_sports_leagues(id,name,code,sport)").eq("is_active",true).order("name").limit(1000),
+  sb.from("cr_sports_leagues").select("id,name,code,sport,is_active").eq("is_active",true).order("name")
+ ]);
+ if(te){$("directoryStatus").innerHTML='<div class="error">Teams could not be loaded.<br><small>'+esc(te.message)+'</small></div>';return;}
+ teams=tdata||[];leagues=ldata||[];
+ $("league").innerHTML='<option value="">All leagues</option>'+leagues.map(l=>'<option value="'+esc(l.id)+'">'+esc(l.code||l.name)+' — '+esc(l.name)+'</option>').join("");
+ const levels=[...new Set(teams.map(t=>t.level).filter(Boolean))].sort();
+ $("level").innerHTML='<option value="">All levels</option>'+levels.map(x=>'<option value="'+esc(x)+'">'+esc(x.toUpperCase())+'</option>').join("");
+ renderSports();renderDirectory();
+}
+
+async function loadDashboard(id){
+ const mount=$("dashMount");mount.innerHTML='<div class="loading">Loading team dashboard…</div>';
+ const {data:t,error:te}=await sb.from("cr_sports_teams").select("id,league_id,name,short_name,city,state,division,level,logo_url,is_active,cr_sports_leagues(id,name,code,sport)").eq("id",id).maybeSingle();
+ if(te||!t){mount.innerHTML='<div class="error">Team could not be loaded.</div>';return;}
+ const [{data:st},{data:games,error:ge}]=await Promise.all([
+  sb.from("cr_sports_standings").select("*").eq("team_id",id).order("season",{ascending:false}).limit(10),
+  sb.from("cr_sports_games").select("id,league_id,home_team_id,away_team_id,starts_at,status,home_score,away_score,venue,broadcast,home:cr_sports_teams!cr_sports_games_home_team_id_fkey(id,name,short_name,logo_url),away:cr_sports_teams!cr_sports_games_away_team_id_fkey(id,name,short_name,logo_url),cr_sports_leagues(code,name)").or("home_team_id.eq."+id+",away_team_id.eq."+id).order("starts_at",{ascending:false}).limit(30)
+ ]);
+ const standings=st||[], current=standings.find(x=>String(x.season)==="2026")||standings[0]||null, allGames=games||[];
+ const now=Date.now(), recent=allGames.filter(g=>new Date(g.starts_at||0).getTime()<=now).slice(0,8), upcoming=allGames.filter(g=>new Date(g.starts_at||0).getTime()>now).sort((a,b)=>new Date(a.starts_at)-new Date(b.starts_at)).slice(0,8);
+ const rec=gameRecord(recent,id), l=t.cr_sports_leagues||{};
+ mount.innerHTML='<div class="dash-hero">'+logo(t).replace("team-logo","dash-logo")+'<div><div class="dash-title">'+esc(t.short_name||t.name)+'</div><div class="dash-sub">'+esc([t.city,t.state].filter(Boolean).join(", "))+' • '+esc(l.code||l.name||"League")+' • '+esc(t.division||t.level||"Team")+'</div></div><div class="dash-actions"><a class="mini" href="standings.html?league='+encodeURIComponent(t.league_id||"")+'&team='+encodeURIComponent(t.id)+'">STANDINGS</a><a class="mini" href="scores.html">SCORES</a></div></div>'+
+ '<div class="stats">'+stat(current?record(current):"—","RECORD")+stat(current?pct(current.win_pct):"—","WIN %")+stat(current?n(current.points_for):"—","POINTS FOR")+stat(current?n(current.points_against):"—","POINTS AGAINST")+stat(current?((n(current.points_for)-n(current.points_against)>0?"+":"")+(n(current.points_for)-n(current.points_against))):"—","DIFF")+stat(current?(n(current.streak)>0?"+":"")+n(current.streak):"—","STREAK")+'</div>'+
+ '<div class="dash-grid"><div class="panel"><h2>RECENT GAMES</h2>'+gamesHtml(recent,id,true)+'</div><div class="panel"><h2>UPCOMING SCHEDULE</h2>'+gamesHtml(upcoming,id,false)+'</div></div>'+
+ '<div class="section-title"><h2>SEASON STANDINGS</h2><a href="standings.html?league='+encodeURIComponent(t.league_id||"")+'&team='+encodeURIComponent(t.id)+'">OPEN FULL STANDINGS →</a></div>'+
+ '<div class="panel"><table class="table"><thead><tr><th>SEASON</th><th>RK</th><th>RECORD</th><th>WIN%</th><th>PF</th><th>PA</th><th>DIFF</th><th>STREAK</th></tr></thead><tbody>'+standings.map(x=>'<tr><td>'+esc(x.season)+'</td><td class="stand-rank">'+(x.rank??"—")+'</td><td>'+record(x)+'</td><td>'+pct(x.win_pct)+'</td><td>'+n(x.points_for)+'</td><td>'+n(x.points_against)+'</td><td>'+((n(x.points_for)-n(x.points_against)>0?"+":""))+(n(x.points_for)-n(x.points_against))+'</td><td>'+((n(x.streak)>0?"+":""))+n(x.streak)+'</td></tr>').join("")+'</tbody></table></div>'+
+ '<div class="note">'+(ge?"Game feed warning: "+esc(ge.message):allGames.length+" games connected to this team.")+'</div>';
+}
+
+function stat(v,k){return '<div class="stat"><b>'+esc(v)+'</b><span>'+k+'</span></div>';}
+function record(x){return n(x.wins)+"-"+n(x.losses)+(n(x.ties)?"-"+n(x.ties):"");}
+function pct(v){const x=n(v);return (x<=1?x*100:x).toFixed(1)+"%";}
+function gameRecord(games,id){let w=0,l=0,t=0;games.forEach(g=>{if(!["final","completed","complete","closed"].includes(status(g.status)))return;const home=g.home_team_id===id,me=home?n(g.home_score):n(g.away_score),opp=home?n(g.away_score):n(g.home_score);if(me>opp)w++;else if(me<opp)l++;else t++;});return w+"-"+l+(t?"-"+t:"");}
+function gamesHtml(list,id,played){
+ if(!list.length)return '<div class="empty">'+(played?"No recent games found.":"No upcoming games found.")+'</div>';
+ return list.map(g=>{const home=g.home_team_id===id,opp=home?g.away:g.home,me=home?n(g.home_score):n(g.away_score),os=home?n(g.away_score):n(g.home_score),s=status(g.status),final=["final","completed","complete","closed"].includes(s),live=["live","in_progress","inprogress","playing","active"].includes(s);let cls="scheduled",label=fmt(g.starts_at);if(final){cls=me>os?"win":me<os?"loss":"scheduled";label=me>os?"WIN":me<os?"LOSS":"TIE";}else if(live){cls="win";label="LIVE";}return '<div class="game"><div><div class="opp">'+(home?"vs":"@")+' '+esc(opp?.short_name||opp?.name||"Opponent")+'</div><div class="game-sub">'+fmt(g.starts_at)+' • '+esc(g.venue||"Venue TBD")+(g.broadcast?" • "+esc(g.broadcast):"")+'</div></div><div class="score '+cls+'">'+(final||live?me+"-"+os:label)+'</div></div>';}).join("");
+}
+
+$("search").oninput=renderDirectory;$("league").onchange=renderDirectory;$("level").onchange=renderDirectory;$("refresh").onclick=loadDirectory;$("back").onclick=closeDash;
+window.addEventListener("popstate",()=>{const id=new URLSearchParams(location.search).get("id");if(id){$("directory").style.display="none";$("dashboard").classList.add("show");loadDashboard(id);}else closeDash();});
+(async()=>{await loadDirectory();const id=new URLSearchParams(location.search).get("id");if(id)openDash(id);})();
+</script>
+<script>footer()</script>
+</body>
+</html>
