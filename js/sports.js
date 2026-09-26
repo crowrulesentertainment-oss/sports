@@ -92,7 +92,8 @@ function bindNav(){
   const open=links.classList.toggle("cr-open");
   toggle.setAttribute("aria-expanded",String(open));
  });
- document.addEventListener("keydown",e=>{if(e.key==="Escape"){links.classList.remove("cr-open");toggle.setAttribute("aria-expanded","false");}});\n links.addEventListener("click",e=>{
+ document.addEventListener("keydown",e=>{if(e.key==="Escape"){links.classList.remove("cr-open");toggle.setAttribute("aria-expanded","false");}});
+ links.addEventListener("click",e=>{
   if(e.target.closest("a")){links.classList.remove("cr-open");toggle.setAttribute("aria-expanded","false");}
  });
 }
