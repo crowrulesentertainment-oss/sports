@@ -67,7 +67,8 @@ const team=x=>x.team||x.cr_sports_teams||{};
 const league=x=>x.league||x.cr_sports_leagues||{};
 const wait=(p,ms=15000)=>Promise.race([p,new Promise((_,reject)=>setTimeout(()=>reject(new Error("Standings request timed out.")),ms))]);
 
-const EXCLUDED_LEAGUES=new Set(["AEW","WWE","UFC"]);\nlet all=[],seasons=[],leagues=[],activeSport="all",activeLeague="",showDetails=true;
+const EXCLUDED_LEAGUES=new Set(["AEW","WWE","UFC"]);
+let all=[],seasons=[],leagues=[],activeSport="all",activeLeague="",showDetails=true;
 let favs=new Set(),standingsChannel=null,loadToken=0;
 try{favs=new Set(JSON.parse(localStorage.getItem("crowrules-standing-favorites")||"[]"))}catch(_){}
 
@@ -126,7 +127,8 @@ async function loadSeasons(){
 async function loadLeagues(){
  const q=await wait(db.from("cr_sports_leagues").select("id,name,code,sport,logo_url,level,is_active").eq("is_active",true).limit(2000));
  if(q.error)throw q.error;
- const excluded=new Set(["AEW","WWE","UFC"]);\n leagues=(q.data||[]).filter(x=>!excluded.has(String(x.code||"").toUpperCase())).sort((a,b)=>String(a.code||a.name).localeCompare(String(b.code||b.name)));
+ const excluded=new Set(["AEW","WWE","UFC"]);
+ leagues=(q.data||[]).filter(x=>!excluded.has(String(x.code||"").toUpperCase())).sort((a,b)=>String(a.code||a.name).localeCompare(String(b.code||b.name)));
  if(activeLeague&&!leagues.some(x=>x.id===activeLeague))activeLeague="";
  $("league").innerHTML='<option value="">ALL LEAGUES</option>'+leagues.map(function(x){return '<option value="'+esc(x.id)+'">'+esc(x.code||x.name||"")+" — "+esc(x.name||"")+"</option>";}).join("");
  $("league").value=activeLeague;
@@ -435,7 +437,8 @@ $("export").onclick=()=>{
  const lines=[head,...rows.map(x=>[x.rank,team(x).name||"",league(x).name||league(x).code||"",x.season,x.conference||"",x.division||"",x.wins,x.losses,x.ties,x.win_pct,x.points_for,x.points_against,n(x.points_for)-n(x.points_against),x.streak])]
   .map(r=>r.map(v=>'"'+String(v??"").replaceAll('"','""')+'"').join(","));
  const a=document.createElement("a");
- a.href=URL.createObjectURL(new Blob(["\ufeff"+lines.join("\r\n")],{type:"text/csv"}));
+ a.href=URL.createObjectURL(new Blob(["\ufeff"+lines.join("\r
+")],{type:"text/csv"}));
  a.download="crowrules-standings-"+($("season").value||"season")+".csv";
  a.click();
  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
