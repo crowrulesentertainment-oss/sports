@@ -6,7 +6,7 @@
 <title>Combat Center | CrowRules Sports</title>
 <link rel="stylesheet" href="css/sports.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/sports.js?v=22.0"></script>
+<script src="js/sports.js?v=23.0"></script>
 <style>
 :root{--combat-red:#e10600;--combat-bg:#050506;--combat-panel:#0d0d11;--combat-line:#25252b}
 body{background:var(--combat-bg)}
@@ -222,7 +222,7 @@ async function loadChampions(){
  // Critical path: load the active championship board by itself.
  // Reign/lineage data is optional enrichment and must never block the title cards.
  const cr=await sb.from("cr_sports_championships")
-  .select("id,organization,league_code,title_name,division,title_type,champion_name,champion_slug,champion_image_url,won_at,is_interim,is_womens,defense_count,status,provider_updated_at")
+  .select("*")
   .in("organization",["UFC","WWE","AEW"])
   .eq("status","active")
   .order("organization")
