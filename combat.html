@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Combat & Wrestling | CrowRules Sports</title>
+<link rel="stylesheet" href="css/sports.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/sports.js"></script>
+<style>
+.hero{min-height:430px;background:radial-gradient(circle at 80% 20%,rgba(225,6,0,.18),transparent 28%),radial-gradient(circle at 15% 70%,rgba(73,217,255,.08),transparent 30%),linear-gradient(135deg,#050506,#0d0d12)}
+.hero-inner{max-width:1500px;margin:auto;padding:80px 24px}.hero h1{font:900 clamp(48px,8vw,92px)/.92 Orbitron;margin:15px 0;letter-spacing:-4px}.hero h1 span{color:#e10600}.hero p{max-width:800px;color:#999;line-height:1.8}
+.section{padding:48px 24px}.wrap{max-width:1500px;margin:auto}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card{background:#0d0d0f;border:1px solid #27272b;padding:20px}.card h2,.card h3{font-family:Orbitron}.card p{color:#888;font-size:11px;line-height:1.7}.badge{display:inline-block;padding:5px 8px;border:1px solid #333;font:800 8px Orbitron;letter-spacing:1px;color:#aaa}.fight{margin-top:12px;padding:12px;border-top:1px solid #222}.fight strong{font:800 11px Orbitron}.fight small{display:block;color:#666;margin-top:5px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+@media(max-width:900px){.grid3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<script>shell("combat")</script>
+
+<section class="hero">
+ <div class="hero-inner">
+  <div class="eyebrow">CROWRULES SPORTS • COMBAT / WRESTLING</div>
+  <h1>FIGHT <span>NIGHT</span></h1>
+  <p>UFC, WWE and AEW are now part of the CrowRules Sports universe. UFC event data is wired into the sports data fabric; WWE and AEW are tracked as dedicated event categories with links to their official calendars.</p>
+  <div class="actions">
+   <a class="button" href="scores.html">LIVE SCORES</a>
+   <a class="button secondary" href="schedule.html">FULL SCHEDULE</a>
+  </div>
+ </div>
+</section>
+
+<section class="section">
+ <div class="wrap">
+  <div class="section-head"><div><div class="eyebrow">CROWRULES SPORTS</div><h2>UFC • WWE • AEW</h2></div></div>
+  <div class="grid3">
+   <article class="card">
+    <span class="badge">UFC • ESPN FEED</span>
+    <h2>UFC</h2>
+    <p>UFC is registered as a major combat league. UFC bouts can be synchronized into the CrowRules game/event fabric from the ESPN public sports feed.</p>
+    <div id="ufcGames"><div class="loading">Loading UFC events…</div></div>
+    <div class="actions"><a class="button small" href="https://www.ufc.com/events" target="_blank" rel="noopener">UFC EVENTS</a></div>
+   </article>
+   <article class="card">
+    <span class="badge">WWE • OFFICIAL CALENDAR</span>
+    <h2>WWE</h2>
+    <p>WWE is registered as a major wrestling league. CrowRules keeps the category separate from traditional team sports so events can be represented correctly.</p>
+    <div class="fight"><strong>WWE EVENTS</strong><small>Official WWE event schedule and event information.</small></div>
+    <div class="actions"><a class="button small" href="https://www.wwe.com/events" target="_blank" rel="noopener">WWE EVENTS</a></div>
+   </article>
+   <article class="card">
+    <span class="badge">AEW • OFFICIAL CALENDAR</span>
+    <h2>AEW</h2>
+    <p>AEW is registered as a major wrestling league. Its event calendar is surfaced separately from the team-game scoreboard.</p>
+    <div class="fight"><strong>AEW EVENTS</strong><small>Official AEW live-event calendar and ticket information.</small></div>
+    <div class="actions"><a class="button small" href="https://www.allelitewrestling.com/aew-events" target="_blank" rel="noopener">AEW EVENTS</a></div>
+   </article>
+  </div>
+ </div>
+</section>
+
+<script>
+async function loadCombat(){
+ const root=document.getElementById("ufcGames");
+ const r=await sb.from("cr_sports_games").select("id,starts_at,status,home_score,away_score,venue,home:cr_sports_teams!cr_sports_games_home_team_id_fkey(name),away:cr_sports_teams!cr_sports_games_away_team_id_fkey(name),league:cr_sports_leagues!cr_sports_games_league_id_fkey(code,name)").eq("cr_sports_leagues.code","UFC").order("starts_at").limit(12);
+ if(r.error){root.innerHTML='<div class="fight"><small>'+esc(r.error.message)+'</small></div>';return}
+ const rows=r.data||[];
+ root.innerHTML=rows.length?rows.map(g=>'<div class="fight"><strong>'+esc(g.away?.name||"TBD")+' vs '+esc(g.home?.name||"TBD")+'</strong><small>'+esc(String(g.status||"scheduled").toUpperCase())+' • '+esc(g.starts_at?new Date(g.starts_at).toLocaleString():"TBD")+(g.venue?" • "+esc(g.venue):"")+'</small></div>').join(""):'<div class="fight"><small>No UFC bouts are synchronized yet. The UFC league is ready for the provider feed.</small></div>';
+}
+loadSession();loadCombat();
+</script>
+<script>footer()</script>
+</body>
+</html>
