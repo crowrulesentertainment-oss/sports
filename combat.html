@@ -58,6 +58,20 @@ body{background:var(--combat-bg)}
 .history-row b{color:#bbb;font-weight:700}.champion-actions{margin-top:auto;padding:14px 16px 16px}
 .champion-filter{display:flex;gap:8px;flex-wrap:wrap}
 .champion-filter button{border:1px solid #29292f;background:#111116;color:#888;padding:9px 12px;font:800 8px Orbitron;cursor:pointer}.champion-filter button.active{border-color:var(--combat-red);color:#fff}
+.records-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:14px;margin-top:18px}
+.ranking-list,.record-list{background:#0b0b0f;border:1px solid #27272d}
+.ranking-row,.record-row{display:grid;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #1d1d22}
+.ranking-row:last-child,.record-row:last-child{border-bottom:0}
+.ranking-row{grid-template-columns:42px 48px 1fr auto}.record-row{grid-template-columns:44px 1fr auto}
+.rank-number{font:900 18px Orbitron;color:#555}.rank-number.top{color:#ddd}
+.fighter-thumb{width:48px;height:48px;border-radius:50%;object-fit:cover;background:#15151a;border:1px solid #29292f}
+.fighter-fallback{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#15151a;border:1px solid #29292f;font:900 14px Orbitron;color:#555}
+.fighter-name{font:800 12px Montserrat;color:#eee}.fighter-meta{font-size:9px;color:#666;margin-top:4px}
+.record-badge{font:900 11px Orbitron;color:#ddd;text-align:right}.record-badge small{display:block;font:700 7px Montserrat;color:#666;margin-top:3px}
+.record-win{color:#ddd}.ranking-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+.ranking-toolbar select{background:#111116;border:1px solid #2b2b31;color:#ddd;padding:10px 12px;font:700 10px Montserrat;min-width:210px}
+.subnote{color:#666;font-size:9px;line-height:1.6;margin-top:10px}
+@media(max-width:850px){.records-grid{grid-template-columns:1fr}.ranking-row{grid-template-columns:38px 44px 1fr auto}}
 .title-fight-board{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
 .title-fight{background:#0b0b0f;border:1px solid #27272d;padding:16px}.title-fight .tf-org{font:900 8px Orbitron;color:var(--combat-red)}.title-fight h3{font:800 14px Montserrat;margin:8px 0}.title-fight p{color:#777;font-size:9px;line-height:1.6;margin:0}
 @media(max-width:1100px){.grid4{grid-template-columns:repeat(3,1fr)}.champion-grid,.title-fight-board{grid-template-columns:repeat(2,1fr)}}
@@ -110,6 +124,20 @@ body{background:var(--combat-bg)}
   <div id="championGrid" class="champion-grid"><div class="empty">Loading championship records…</div></div>
   <div class="section-head" style="margin-top:42px"><div><div class="eyebrow">TITLE FIGHT RADAR</div><h2>UPCOMING TITLE FIGHTS</h2></div><div class="muted" id="titleFightStatus">Scanning synchronized wrestling cards…</div></div>
   <div id="titleFightBoard" class="title-fight-board"><div class="empty">No upcoming verified title fights yet.</div></div>
+ </div>
+</section>
+
+<section class="section" id="fighter-intelligence" style="padding-top:0">
+ <div class="wrap">
+  <div class="section-head"><div><div class="eyebrow">FIGHTER INTELLIGENCE</div><h2>RECORDS & TOP 10 RANKINGS</h2><p class="muted">UFC fighter records and synchronized ranking positions from the CrowRules fighter dataset.</p></div><div class="muted" id="fighterStatus">Loading fighter intelligence…</div></div>
+  <div class="ranking-toolbar">
+   <select id="rankingDivision"><option value="ALL">ALL WEIGHT CLASSES</option></select>
+   <button class="button small" id="refreshFighters">REFRESH FIGHTERS</button>
+  </div>
+  <div class="records-grid">
+   <div class="card"><div class="eyebrow">UFC RANKINGS</div><h3>TOP 10</h3><div id="rankingList" class="ranking-list"><div class="empty">Loading rankings…</div></div><div class="subnote" id="rankingNote">Rankings shown only where a numeric UFC ranking is synchronized. Missing ranks are not invented.</div></div>
+   <div class="card"><div class="eyebrow">WIN / LOSS RECORDS</div><h3>FIGHTER RECORDS</h3><div id="recordList" class="record-list"><div class="empty">Loading records…</div></div><div class="subnote">Format: wins–losses–draws. Records are read directly from the CrowRules UFC fighter table.</div></div>
+  </div>
  </div>
 </section>
 
@@ -199,6 +227,45 @@ async function loadTitleFights(){
 }
 document.querySelectorAll("[data-champ-org]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-champ-org]").forEach(x=>x.classList.remove("active"));b.classList.add("active");renderChampions(b.dataset.champOrg)}));
 
+let fighterRows=[],rankedRows=[];
+async function loadFighterIntelligence(){
+ const [fr,rr]=await Promise.all([
+  sb.from("cr_sports_ufc_fighters").select("id,slug,name,nickname,image_url,record_wins,record_losses,record_draws,weight_class,ranking,country,provider_updated_at").order("name").limit(500),
+  sb.from("cr_sports_ufc_rankings").select("id,division,champion_name,rankings,provider_updated_at").order("provider_updated_at",{ascending:false}).limit(50)
+ ]);
+ if(fr.error){document.getElementById("fighterStatus").textContent="Fighter data unavailable";document.getElementById("recordList").innerHTML='<div class="empty error">'+escLocal(fr.error.message)+'</div>';return}
+ fighterRows=fr.data||[];
+ rankedRows=fighterRows.filter(x=>/^\\d+$/.test(String(x.ranking||""))).sort((a,b)=>Number(a.ranking)-Number(b.ranking));
+ const divisions=[...new Set(fighterRows.map(x=>x.weight_class).filter(Boolean))].sort();
+ const sel=document.getElementById("rankingDivision"),old=sel.value;
+ sel.innerHTML='<option value="ALL">ALL WEIGHT CLASSES</option>'+divisions.map(d=>'<option value="'+escLocal(d)+'">'+escLocal(d)+'</option>').join("");
+ sel.value=divisions.includes(old)?old:"ALL";
+ renderFighterIntelligence();
+ document.getElementById("fighterStatus").textContent=fighterRows.length+" UFC fighters synchronized • "+rankedRows.length+" ranked records";
+}
+function renderFighterIntelligence(){
+ const div=document.getElementById("rankingDivision").value;
+ const ranked=rankedRows.filter(x=>div==="ALL"||x.weight_class===div).slice(0,10);
+ const rroot=document.getElementById("rankingList");
+ if(!ranked.length){rroot.innerHTML='<div class="empty">No numeric UFC ranking is currently synchronized for this selection.</div>';}
+ else rroot.innerHTML=ranked.map(x=>{
+  const initial=escLocal((x.name||"?").slice(0,1).toUpperCase());
+  const img=x.image_url?'<img class="fighter-thumb" src="'+escLocal(x.image_url)+'" alt="'+escLocal(x.name||"Fighter")+'" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';"><span class="fighter-fallback" style="display:none">'+initial+'</span>':'<span class="fighter-fallback">'+initial+'</span>';
+  const rec=(x.record_wins??0)+"-"+(x.record_losses??0)+"-"+(x.record_draws??0);
+  return '<div class="ranking-row"><div class="rank-number '+(Number(x.ranking)<=3?"top":"")+'">#'+escLocal(x.ranking)+'</div>'+img+'<div><div class="fighter-name">'+escLocal(x.name||"Unknown")+'</div><div class="fighter-meta">'+escLocal(x.weight_class||"UFC")+(x.nickname?" • "+escLocal(x.nickname):"")+'</div></div><div class="record-badge">'+escLocal(rec)+'<small>RECORD</small></div></div>';
+ }).join("");
+ document.getElementById("rankingNote").textContent=ranked.length+" ranked fighter"+(ranked.length===1?"":"s")+" available for this selection. CrowRules displays only synchronized rank values.";
+ const records=fighterRows.filter(x=>(x.record_wins!=null||x.record_losses!=null)).sort((a,b)=>(Number(b.record_wins||0)-Number(a.record_wins||0))||(Number(a.record_losses||0)-Number(b.record_losses||0))).slice(0,12);
+ const root=document.getElementById("recordList");
+ root.innerHTML=records.length?records.map((x,i)=>{
+  const initial=escLocal((x.name||"?").slice(0,1).toUpperCase());
+  const img=x.image_url?'<img class="fighter-thumb" src="'+escLocal(x.image_url)+'" alt="'+escLocal(x.name||"Fighter")+'" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';"><span class="fighter-fallback" style="display:none">'+initial+'</span>':'<span class="fighter-fallback">'+initial+'</span>';
+  const rec=(x.record_wins??0)+"-"+(x.record_losses??0)+"-"+(x.record_draws??0);
+  return '<div class="record-row"><div class="rank-number">'+(i+1)+'</div>'+img.replace("fighter-thumb","fighter-thumb")+'<div><div class="fighter-name">'+escLocal(x.name||"Unknown")+'</div><div class="fighter-meta">'+escLocal(x.weight_class||"UFC")+'</div></div><div class="record-badge record-win">'+escLocal(rec)+'<small>W-L-D</small></div></div>';
+ }).join(""):'<div class="empty">No fighter records synchronized.</div>';
+}
+document.getElementById("rankingDivision").addEventListener("change",renderFighterIntelligence);
+document.getElementById("refreshFighters").addEventListener("click",loadFighterIntelligence);
 let combatEvents=[],refreshing=false;
 
 function escLocal(v){return typeof esc==="function"?esc(v):String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
@@ -272,8 +339,11 @@ sb.channel("combat-championship-command-center")
  .on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_championships"},loadChampions)
  .on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_wrestling_matches"},loadTitleFights)
  .on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_wrestling_events"},loadTitleFights)
+ .on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_ufc_fighters"},loadFighterIntelligence)
+ .on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_ufc_rankings"},loadFighterIntelligence)
  .subscribe();
 
+loadFighterIntelligence();
 loadCombat();
 </script>
 <script>footer()</script>
