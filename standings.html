@@ -85,127 +85,255 @@ body{background:#050508}
 </main>
 
 <script>
-loadSession();
+/* Standings Center 4.0 — defensive boot + live normalized data */
+(() => {
+  "use strict";
 
-const num=v=>Number(v??0)||0;
-const pct=v=>{const n=num(v);return (n<=1?n*100:n).toFixed(1)+"%";};
-const record=x=>num(x.wins)+"-"+num(x.losses)+(num(x.ties)?"-"+num(x.ties):"");
-const diff=x=>num(x.points_for)-num(x.points_against);
+  const S = window.sb || sb;
+  const q = (id) => document.getElementById(id);
+  const escLocal = (v) => String(v ?? "").replace(/[&<>"']/g, ch => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[ch]));
+  const num = v => Number(v ?? 0) || 0;
+  const pct = v => {
+    const n = num(v);
+    return (n <= 1 ? n * 100 : n).toFixed(1) + "%";
+  };
+  const record = x => num(x.wins)+"-"+num(x.losses)+(num(x.ties) ? "-"+num(x.ties) : "");
+  const pointDiff = x => num(x.points_for)-num(x.points_against);
 
-let rows=[], leagues=[], activeSport="all", favoriteTeams=new Set(JSON.parse(localStorage.getItem("cr_standings_favorites")||"[]"));
-const urlParams=new URLSearchParams(location.search), requestedTeam=urlParams.get("team"), requestedLeague=urlParams.get("league");
+  let rows = [];
+  let leagues = [];
+  let activeSport = "all";
+  let favorites = new Set();
 
-function saveFav(){localStorage.setItem("cr_standings_favorites",JSON.stringify([...favoriteTeams]));}
-function teamObj(x){return x.cr_sports_teams||{};}
-function leagueObj(x){return x.cr_sports_leagues||{};}
+  try {
+    favorites = new Set(JSON.parse(localStorage.getItem("cr_standings_favorites") || "[]"));
+  } catch (_) {}
 
-async function loadLeagues(){
-  const {data,error}=await sb.from("cr_sports_leagues").select("id,name,code,sport,is_active").eq("is_active",true).order("name");
-  if(error){$("status").textContent="League feed error: "+error.message;return;}
-  leagues=data||[];
-  const nfl=leagues.find(x=>x.code==="NFL");
-  $("league").innerHTML='<option value="">All leagues</option>'+leagues.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.code||x.name)+' — '+esc(x.name)+'</option>').join("");
-  if(nfl)$("league").value=nfl.id;
-  renderSports();
-}
+  const params = new URLSearchParams(location.search);
+  const requestedTeam = params.get("team");
+  const requestedLeague = params.get("league");
 
-function renderSports(){
-  const sports=[...new Set(leagues.map(x=>x.sport).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b)));
-  $("sports").innerHTML='<button class="'+(activeSport==="all"?"active":"")+'" data-sport="all">ALL SPORTS</button>'+sports.map(s=>'<button class="'+(activeSport===s?"active":"")+'" data-sport="'+esc(s)+'">'+esc(String(s).toUpperCase())+'</button>').join("");
-  $("sports").querySelectorAll("button").forEach(b=>b.onclick=()=>{activeSport=b.dataset.sport;renderSports();loadStandings();});
-}
+  function setStatus(html) { q("status").innerHTML = html; }
+  function setError(message) {
+    q("content").innerHTML = '<div class="error"><strong>Standings Center could not finish loading.</strong><br><small>'+escLocal(message)+'</small><br><br><button class="btn" id="retryStandings">TRY AGAIN</button></div>';
+    q("retryStandings")?.addEventListener("click", boot);
+    setStatus('<span class="pulse"></span>Feed error');
+  }
+  function saveFavorites() {
+    localStorage.setItem("cr_standings_favorites", JSON.stringify([...favorites]));
+  }
+  function teamOf(x) { return x.cr_sports_teams || {}; }
+  function leagueOf(x) { return x.cr_sports_leagues || {}; }
 
-function refillFilters(){
-  const keepC=$("conference").value,keepD=$("division").value;
-  const visible=rows.filter(x=>{
-    const l=leagueObj(x); return activeSport==="all"||String(l.sport||"").toLowerCase()===String(activeSport).toLowerCase();
-  });
-  const cs=[...new Set(visible.map(x=>x.conference).filter(Boolean))].sort();
-  const ds=[...new Set(visible.map(x=>x.division).filter(Boolean))].sort();
-  $("conference").innerHTML='<option value="">All conferences</option>'+cs.map(x=>'<option value="'+esc(x)+'">'+esc(x)+'</option>').join("");
-  $("division").innerHTML='<option value="">All divisions</option>'+ds.map(x=>'<option value="'+esc(x)+'">'+esc(x)+'</option>').join("");
-  if(cs.includes(keepC))$("conference").value=keepC;
-  if(ds.includes(keepD))$("division").value=keepD;
-}
+  async function withTimeout(promise, ms=12000) {
+    let timer;
+    const timeout = new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error("Supabase request timed out after "+Math.round(ms/1000)+" seconds.")), ms);
+    });
+    try { return await Promise.race([promise, timeout]); }
+    finally { clearTimeout(timer); }
+  }
 
-function filtered(){
-  const q=$("search").value.trim().toLowerCase(), c=$("conference").value,d=$("division").value;
-  let a=rows.filter(x=>{
-    const t=teamObj(x),l=leagueObj(x);
-    const hay=[t.name,t.short_name,t.city,t.state,x.conference,x.division,l.name,l.code,l.sport].filter(Boolean).join(" ").toLowerCase();
-    return (!q||hay.includes(q))&&(!c||x.conference===c)&&(!d||x.division===d)&&(!requestedTeam||x.team_id===requestedTeam)&&
-      (activeSport==="all"||String(l.sport||"").toLowerCase()===String(activeSport).toLowerCase());
-  });
-  const s=$("sort").value;
-  a.sort((u,v)=>{
-    if(s==="team")return String(teamObj(u).name||"").localeCompare(String(teamObj(v).name||""));
-    const map={rank:"rank",winpct:"win_pct",wins:"wins",points:"points_for",diff:null,streak:"streak"};
-    if(s==="diff")return diff(v)-diff(u);
-    const k=map[s]||"rank", d=num(u[k])-num(v[k]); return d||String(teamObj(u).name||"").localeCompare(String(teamObj(v).name||""));
-  });
-  return a;
-}
+  async function loadLeagues() {
+    const { data, error } = await withTimeout(
+      S.from("cr_sports_leagues")
+        .select("id,name,code,sport,is_active")
+        .eq("is_active", true)
+        .order("name")
+    );
+    if (error) throw error;
+    leagues = data || [];
 
-function summary(a){
-  const wins=a.reduce((n,x)=>n+num(x.wins),0),loss=a.reduce((n,x)=>n+num(x.losses),0),pf=a.reduce((n,x)=>n+num(x.points_for),0),pa=a.reduce((n,x)=>n+num(x.points_against),0);
-  const fav=a.filter(x=>favoriteTeams.has(x.team_id)).length;
-  $("summary").innerHTML=[
-    [a.length,"TEAMS"],[new Set(a.map(x=>x.conference).filter(Boolean)).size,"CONFERENCES"],[new Set(a.map(x=>x.division).filter(Boolean)).size,"DIVISIONS"],[pf,"POINTS FOR"],[pa,"POINTS AGAINST"]
-  ].map(x=>'<div class="stat"><b>'+x[0]+'</b><span>'+x[1]+'</span></div>').join("");
-  return {wins,loss,pf,pa,fav};
-}
+    const el = q("league");
+    el.innerHTML = '<option value="">All leagues</option>' +
+      leagues.map(x => '<option value="'+escLocal(x.id)+'">'+escLocal(x.code || x.name)+' — '+escLocal(x.name)+'</option>').join("");
 
-function badges(x){
-  const b=[];
-  if(x.clinched_division)b.push('<span class="badge red">DIV CLINCHED</span>');
-  if(x.clinched_wild_card)b.push('<span class="badge">WILD CARD</span>');
-  if(x.clinched_bye)b.push('<span class="badge">BYE</span>');
-  if(x.eliminated_from_playoff_contention)b.push('<span class="badge">ELIMINATED</span>');
-  return b.length?'<div class="badges">'+b.join("")+"</div>":"";
-}
+    if (requestedLeague && leagues.some(x => x.id === requestedLeague)) {
+      el.value = requestedLeague;
+    } else {
+      const nfl = leagues.find(x => x.code === "NFL");
+      if (nfl) el.value = nfl.id;
+    }
+    renderSports();
+  }
 
-function row(x){
-  const t=teamObj(x),fav=favoriteTeams.has(x.team_id),d=diff(x),st=num(x.streak);
-  const logo=t.logo_url?'<img class="logo" src="'+esc(t.logo_url)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">':'<div class="logo"></div>';
-  const href="teams.html?id="+encodeURIComponent(x.team_id||t.id||"");
-  return '<tr><td><span class="rank '+(num(x.rank)<=3?"top":"")+'">'+(x.rank==null?"—":esc(x.rank))+'</span></td><td><div class="team-cell">'+logo+'<a class="team-link" href="'+href+'"><div><div class="team-name">'+esc(t.short_name||t.name||"Unknown Team")+' '+(fav?"★":"")+'</div><div class="team-sub">'+esc([t.city,t.state].filter(Boolean).join(", "))+'</div>'+badges(x)+'</div></a></div></td><td class="record">'+record(x)+'</td><td class="pct">'+pct(x.win_pct)+'</td><td>'+num(x.points_for)+'</td><td>'+num(x.points_against)+'</td><td class="'+(d>0?"positive":d<0?"negative":"")+'">'+(d>0?"+":"")+d+'</td><td class="'+(st>0?"positive":st<0?"negative":"")+'">'+(st>0?"+":"")+st+'</td><td><button class="mini-btn fav" data-id="'+esc(x.team_id)+'" title="Favorite team">'+(fav?"★ SAVED":"☆ SAVE")+'</button></td></tr><tr class="detail-row"><td colspan="9"><div class="detail"><span>CONF '+num(x.conference_wins)+'-'+num(x.conference_losses)+'</span><span>DIV '+num(x.division_wins)+'-'+num(x.division_losses)+'</span><span>HOME '+num(x.home_wins)+'-'+num(x.home_losses)+'</span><span>AWAY '+num(x.away_wins)+'-'+num(x.away_losses)+'</span><span>TD '+num(x.touchdowns)+'</span></div></td></tr>';
-}
+  function renderSports() {
+    const sports = [...new Set(leagues.map(x => x.sport).filter(Boolean))]
+      .sort((a,b) => String(a).localeCompare(String(b)));
+    q("sports").innerHTML =
+      '<button class="'+(activeSport==="all"?"active":"")+'" data-sport="all">ALL SPORTS</button>' +
+      sports.map(s => '<button class="'+(activeSport===s?"active":"")+'" data-sport="'+escLocal(s)+'">'+escLocal(String(s).toUpperCase())+'</button>').join("");
+    q("sports").querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        activeSport = btn.dataset.sport || "all";
+        renderSports();
+        render();
+      });
+    });
+  }
 
-function render(){
-  const a=filtered();summary(a);
-  const groups={};
-  a.forEach(x=>{const l=leagueObj(x),k=(l.code||l.name||"LEAGUE")+" • "+(x.conference||"GENERAL")+" • "+(x.division||"OVERALL");(groups[k]??=[]).push(x);});
-  const keys=Object.keys(groups).sort();
-  $("content").innerHTML=keys.length?keys.map(k=>{
-    const list=groups[k], first=list[0], l=leagueObj(first);
-    return '<section class="league-section"><div class="league-head"><div><h2>'+esc(l.code||l.name||"Standings")+'</h2><p>'+esc(l.name||"")+" • "+esc(first.conference||"League Table")+" • "+esc(first.division||"Overall")+' • '+list.length+' teams</p></div><div class="league-actions"><a class="mini-btn" href="scores.html">SCORES</a><a class="mini-btn" href="teams.html">TEAMS</a></div></div><div class="table-card"><table class="st-table"><thead><tr><th>RK</th><th>TEAM</th><th>W-L</th><th>WIN%</th><th>PF</th><th>PA</th><th>DIFF</th><th>STREAK</th><th>FAV</th></tr></thead><tbody>'+list.map(row).join("")+'</tbody></table></div></section>';
-  }).join(""):'<div class="empty">No standings match the current filters. Try another league, season, sport, conference, division or search.</div>';
-  $("content").querySelectorAll(".fav").forEach(b=>b.onclick=()=>{const id=b.dataset.id;if(!id)return;favoriteTeams.has(id)?favoriteTeams.delete(id):favoriteTeams.add(id);saveFav();render();});
-  $("status").innerHTML='<span><span class="pulse"></span>'+a.length+' team'+(a.length===1?"":"s")+' displayed</span>';
-  $("updated").textContent="Updated "+new Date().toLocaleTimeString();
-}
+  function refillFilters() {
+    const keepC = q("conference").value;
+    const keepD = q("division").value;
+    const visible = rows.filter(x => {
+      const l = leagueOf(x);
+      return activeSport === "all" || String(l.sport || "").toLowerCase() === String(activeSport).toLowerCase();
+    });
+    const conferences = [...new Set(visible.map(x => x.conference).filter(Boolean))].sort();
+    const divisions = [...new Set(visible.map(x => x.division).filter(Boolean))].sort();
+    q("conference").innerHTML = '<option value="">All conferences</option>' + conferences.map(x => '<option value="'+escLocal(x)+'">'+escLocal(x)+'</option>').join("");
+    q("division").innerHTML = '<option value="">All divisions</option>' + divisions.map(x => '<option value="'+escLocal(x)+'">'+escLocal(x)+'</option>').join("");
+    if (conferences.includes(keepC)) q("conference").value = keepC;
+    if (divisions.includes(keepD)) q("division").value = keepD;
+  }
 
-async function loadStandings(){
-  $("status").innerHTML='<span><span class="pulse"></span>Loading standings…</span>';
-  const season=$("season").value.trim();
-  if(!/^\d{4}$/.test(season)){rows=[];$("content").innerHTML='<div class="error">Enter a four-digit season, such as 2026.</div>';return;}
-  let q=sb.from("cr_sports_standings").select("*,cr_sports_teams(id,name,short_name,city,state,logo_url),cr_sports_leagues(id,name,code,sport)").eq("season",season).order("rank",{ascending:true}).limit(2000);
-  if($("league").value)q=q.eq("league_id",$("league").value);
-  const {data,error}=await q;
-  if(error){rows=[];$("content").innerHTML='<div class="error">Standings could not be loaded.<br><small>'+esc(error.message)+'</small></div>';$("status").textContent="Standings feed error";return;}
-  rows=data||[];
-  refillFilters();render();
-}
+  function filteredRows() {
+    const search = q("search").value.trim().toLowerCase();
+    const conference = q("conference").value;
+    const division = q("division").value;
+    const result = rows.filter(x => {
+      const t = teamOf(x), l = leagueOf(x);
+      const hay = [t.name,t.short_name,t.city,t.state,x.conference,x.division,l.name,l.code,l.sport]
+        .filter(Boolean).join(" ").toLowerCase();
+      return (!search || hay.includes(search)) &&
+        (!conference || x.conference === conference) &&
+        (!division || x.division === division) &&
+        (!requestedTeam || x.team_id === requestedTeam) &&
+        (activeSport === "all" || String(l.sport || "").toLowerCase() === String(activeSport).toLowerCase());
+    });
 
-$("league").onchange=loadStandings;
-$("season").onchange=loadStandings;
-$("conference").onchange=render;
-$("division").onchange=render;
-$("search").oninput=render;
-$("sort").onchange=render;
-$("refresh").onclick=loadStandings;
+    const sort = q("sort").value;
+    result.sort((a,b) => {
+      if (sort === "team") return String(teamOf(a).name||"").localeCompare(String(teamOf(b).name||""));
+      if (sort === "diff") return pointDiff(b)-pointDiff(a);
+      const key = ({rank:"rank",winpct:"win_pct",wins:"wins",points:"points_for",streak:"streak"})[sort] || "rank";
+      return (num(a[key])-num(b[key])) || String(teamOf(a).name||"").localeCompare(String(teamOf(b).name||""));
+    });
+    return result;
+  }
 
-(async()=>{await loadLeagues();await loadStandings();})();
+  function renderSummary(a) {
+    const cards = [
+      [a.length,"TEAMS"],
+      [new Set(a.map(x => x.conference).filter(Boolean)).size,"CONFERENCES"],
+      [new Set(a.map(x => x.division).filter(Boolean)).size,"DIVISIONS"],
+      [a.reduce((n,x) => n+num(x.points_for),0),"POINTS FOR"],
+      [a.reduce((n,x) => n+num(x.points_against),0),"POINTS AGAINST"]
+    ];
+    q("summary").innerHTML = cards.map(x => '<div class="stat"><b>'+x[0]+'</b><span>'+x[1]+'</span></div>').join("");
+  }
+
+  function badges(x) {
+    const b = [];
+    if (x.clinched_division) b.push('<span class="badge red">DIV CLINCHED</span>');
+    if (x.clinched_wild_card) b.push('<span class="badge">WILD CARD</span>');
+    if (x.clinched_bye) b.push('<span class="badge">BYE</span>');
+    if (x.eliminated_from_playoff_contention) b.push('<span class="badge">ELIMINATED</span>');
+    return b.length ? '<div class="badges">'+b.join("")+'</div>' : "";
+  }
+
+  function teamRow(x) {
+    const t = teamOf(x);
+    const favorite = favorites.has(x.team_id);
+    const d = pointDiff(x), streak = num(x.streak);
+    const logo = t.logo_url
+      ? '<img class="logo" src="'+escLocal(t.logo_url)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">'
+      : '<div class="logo"></div>';
+    const href = "teams.html?id="+encodeURIComponent(x.team_id || t.id || "");
+    return '<tr>' +
+      '<td><span class="rank '+(num(x.rank)<=3?"top":"")+'">'+(x.rank==null?"—":escLocal(x.rank))+'</span></td>' +
+      '<td><div class="team-cell">'+logo+'<a class="team-link" href="'+href+'"><div><div class="team-name">'+escLocal(t.short_name||t.name||"Unknown Team")+(favorite?" ★":"")+'</div><div class="team-sub">'+escLocal([t.city,t.state].filter(Boolean).join(", "))+'</div>'+badges(x)+'</div></a></div></td>' +
+      '<td class="record">'+record(x)+'</td><td class="pct">'+pct(x.win_pct)+'</td><td>'+num(x.points_for)+'</td><td>'+num(x.points_against)+'</td>' +
+      '<td class="'+(d>0?"positive":d<0?"negative":"")+'">'+(d>0?"+":"")+d+'</td>' +
+      '<td class="'+(streak>0?"positive":streak<0?"negative":"")+'">'+(streak>0?"+":"")+streak+'</td>' +
+      '<td><button class="mini-btn fav" data-id="'+escLocal(x.team_id)+'">'+(favorite?"★ SAVED":"☆ SAVE")+'</button></td>' +
+      '</tr><tr class="detail-row"><td colspan="9"><div class="detail">' +
+      '<span>CONF '+num(x.conference_wins)+'-'+num(x.conference_losses)+'</span><span>DIV '+num(x.division_wins)+'-'+num(x.division_losses)+'</span>' +
+      '<span>HOME '+num(x.home_wins)+'-'+num(x.home_losses)+'</span><span>AWAY '+num(x.away_wins)+'-'+num(x.away_losses)+'</span><span>TD '+num(x.touchdowns)+'</span>' +
+      '</div></td></tr>';
+  }
+
+  function render() {
+    const data = filteredRows();
+    renderSummary(data);
+    const groups = {};
+    data.forEach(x => {
+      const l = leagueOf(x);
+      const key = (l.code||l.name||"LEAGUE")+" • "+(x.conference||"GENERAL")+" • "+(x.division||"OVERALL");
+      (groups[key] ||= []).push(x);
+    });
+
+    const keys = Object.keys(groups).sort();
+    q("content").innerHTML = keys.length ? keys.map(key => {
+      const list = groups[key], first = list[0], l = leagueOf(first);
+      return '<section class="league-section"><div class="league-head"><div><h2>'+escLocal(l.code||l.name||"Standings")+'</h2><p>'+
+        escLocal(l.name||"")+" • "+escLocal(first.conference||"League Table")+" • "+escLocal(first.division||"Overall")+" • "+list.length+" teams</p></div>" +
+        '<div class="league-actions"><a class="mini-btn" href="scores.html">SCORES</a><a class="mini-btn" href="teams.html">TEAMS</a></div></div>' +
+        '<div class="table-card"><table class="st-table"><thead><tr><th>RK</th><th>TEAM</th><th>W-L</th><th>WIN%</th><th>PF</th><th>PA</th><th>DIFF</th><th>STREAK</th><th>FAV</th></tr></thead><tbody>'+
+        list.map(teamRow).join("")+'</tbody></table></div></section>';
+    }).join("") : '<div class="empty">No standings match the current filters. The database currently has no rows for this league/season combination.</div>';
+
+    q("content").querySelectorAll(".fav").forEach(btn => btn.addEventListener("click", () => {
+      const id = btn.dataset.id;
+      if (!id) return;
+      favorites.has(id) ? favorites.delete(id) : favorites.add(id);
+      saveFavorites();
+      render();
+    }));
+    setStatus('<span><span class="pulse"></span>'+data.length+' team'+(data.length===1?"":"s")+' displayed</span>');
+    q("updated").textContent = "Updated "+new Date().toLocaleTimeString();
+  }
+
+  async function loadStandings() {
+    setStatus('<span><span class="pulse"></span>Loading standings…</span>');
+    q("content").innerHTML = '<div class="loading"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>';
+
+    const season = q("season").value.trim();
+    if (!/^\d{4}$/.test(season)) throw new Error("Enter a four-digit season, such as 2026.");
+
+    let request = S.from("cr_sports_standings")
+      .select("*,cr_sports_teams(id,name,short_name,city,state,logo_url),cr_sports_leagues(id,name,code,sport)")
+      .eq("season", season)
+      .order("rank", {ascending:true})
+      .limit(2000);
+
+    if (q("league").value) request = request.eq("league_id", q("league").value);
+
+    const {data,error} = await withTimeout(request);
+    if (error) throw error;
+    rows = data || [];
+    refillFilters();
+    render();
+  }
+
+  async function boot() {
+    try {
+      if (!S) throw new Error("Supabase client is not available. Check js/sports.js and the Supabase CDN.");
+      setStatus('<span><span class="pulse"></span>Connecting to standings feed…</span>');
+      if (typeof loadSession === "function") {
+        try { await withTimeout(loadSession(), 8000); } catch (_) {}
+      }
+      await loadLeagues();
+      await loadStandings();
+    } catch (error) {
+      console.error("CrowRules Standings Center:", error);
+      setError(error?.message || String(error));
+    }
+  }
+
+  q("league").addEventListener("change", loadStandings);
+  q("season").addEventListener("change", loadStandings);
+  q("conference").addEventListener("change", render);
+  q("division").addEventListener("change", render);
+  q("search").addEventListener("input", render);
+  q("sort").addEventListener("change", render);
+  q("refresh").addEventListener("click", boot);
+
+  boot();
+})();
+</script>
 </script>
 <script>footer()</script>
 </body>
