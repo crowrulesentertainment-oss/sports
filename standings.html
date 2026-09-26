@@ -67,7 +67,7 @@ const team=x=>x.team||x.cr_sports_teams||{};
 const league=x=>x.league||x.cr_sports_leagues||{};
 const wait=(p,ms=15000)=>Promise.race([p,new Promise((_,reject)=>setTimeout(()=>reject(new Error("Standings request timed out.")),ms))]);
 
-let all=[],seasons=[],leagues=[],activeSport="all",activeLeague="",showDetails=true;
+const EXCLUDED_LEAGUES=new Set(["AEW","WWE","UFC"]);\nlet all=[],seasons=[],leagues=[],activeSport="all",activeLeague="",showDetails=true;
 let favs=new Set(),standingsChannel=null,loadToken=0;
 try{favs=new Set(JSON.parse(localStorage.getItem("crowrules-standing-favorites")||"[]"))}catch(_){}
 
@@ -126,7 +126,7 @@ async function loadSeasons(){
 async function loadLeagues(){
  const q=await wait(db.from("cr_sports_leagues").select("id,name,code,sport,logo_url,level,is_active").eq("is_active",true).limit(2000));
  if(q.error)throw q.error;
- leagues=(q.data||[]).sort((a,b)=>String(a.code||a.name).localeCompare(String(b.code||b.name)));
+ const excluded=new Set(["AEW","WWE","UFC"]);\n leagues=(q.data||[]).filter(x=>!excluded.has(String(x.code||"").toUpperCase())).sort((a,b)=>String(a.code||a.name).localeCompare(String(b.code||b.name)));
  if(activeLeague&&!leagues.some(x=>x.id===activeLeague))activeLeague="";
  $("league").innerHTML='<option value="">ALL LEAGUES</option>'+leagues.map(function(x){return '<option value="'+esc(x.id)+'">'+esc(x.code||x.name||"")+" — "+esc(x.name||"")+"</option>";}).join("");
  $("league").value=activeLeague;
@@ -184,7 +184,7 @@ async function loadRows(silent=false){
  }
  let base=db.from("cr_sports_standings").select("*").eq("season",season).order("rank",{ascending:true});
  if(activeLeague)base=base.eq("league_id",activeLeague);
- const source=await fetchAllRows(base);
+ const source=(await fetchAllRows(base)).filter(x=>!EXCLUDED_LEAGUES.has(String((x.league||{}).code||"").toUpperCase()));
  const tids=[...new Set(source.map(x=>x.team_id).filter(Boolean))];
  const lids=[...new Set(source.map(x=>x.league_id).filter(Boolean))];
  const [tr,lr]=await Promise.all([
@@ -279,7 +279,7 @@ function renderCoverageOverview(rows){
  const counts=new Map();
  rows.forEach(x=>counts.set(x.league_id,(counts.get(x.league_id)||0)+1));
  const expected={"COLLEGE-FOOTBALL":138,"NFL":32,"NBA":30,"NHL":32,"MLB":30,"WNBA":15,"MLS":30,"NWSL":14,"PWHL":8,"UFL":8};
- const cards=leagues.map(function(l){
+ const cards=leagues.filter(l=>!EXCLUDED_LEAGUES.has(String(l.code||"").toUpperCase())).map(function(l){
   const loaded=coverageCounts.has(l.id)?coverageCounts.get(l.id):(counts.get(l.id)||0);
   const key=String(l.code||l.name||"").toUpperCase().replace(/[^A-Z0-9]+/g,"-").replace(/^-|-$/g,"");
   const target=expected[key]||null;
@@ -320,7 +320,7 @@ function renderStructureOverview(rows){
   "UFL":{a:"CONFERENCES",av:["None — single-table league"],b:"DIVISIONS",bv:["None"]},
   "WNBA":{a:"CONFERENCES",av:["Eastern","Western"],b:"DIVISIONS",bv:["None"]}
  };
- return [...byLeague.values()].sort((a,b)=>a.name.localeCompare(b.name)).map(g=>{
+ return [...byLeague.values()].filter(g=>!EXCLUDED_LEAGUES.has(String(g.name||"").toUpperCase())).sort((a,b)=>a.name.localeCompare(b.name)).map(g=>{
   const c=catalog[g.name]||{};
   const conf=[...g.conferences].sort(),div=[...g.divisions].sort();
   const av=c.av||conf;
