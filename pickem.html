@@ -305,7 +305,7 @@ async function loadMyEntry(){
   }
 
   const {data,error} = await sb.from("cr_sports_pickem_entries")
-    .select("id,picks,points,submitted_at")
+    .select("id,picks,points,correct_picks,scored,scored_game_ids,submitted_at")
     .eq("week_id",selectedWeek.id)
     .eq("user_id",session.user.id)
     .maybeSingle();
@@ -327,7 +327,7 @@ $id("submitBtn").addEventListener("click", async () => {
   if(!session) return showResult("Sign in first.", false);
   if(!selectedWeek) return showResult("Select an open challenge.", false);
 
-  const picks = {};
+  const picks = {...savedPicks};
   games.forEach(g => {
     const choice = document.querySelector('input[name="pick_'+g.id+'"]:checked');
     if(choice && !isLocked(g)) picks[g.id] = choice.value;
