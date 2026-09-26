@@ -188,14 +188,23 @@ async function loadRows(silent=false){
  });
  const tids=[...new Set(source.map(x=>x.team_id).filter(Boolean))];
  const lids=[...new Set(source.map(x=>x.league_id).filter(Boolean))];
- const [tr,lr]=await Promise.all([
-  tids.length?wait(db.from("cr_sports_teams").select("id,name,short_name,city,state,division,logo_url").in("id",tids).limit(2000)):Promise.resolve({data:[],error:null}),
-  lids.length?wait(db.from("cr_sports_leagues").select("id,name,code,sport,logo_url,level").in("id",lids).limit(2000)):Promise.resolve({data:[],error:null})
+ async function fetchByIds(table,select,ids){
+  const out=[];
+  const chunkSize=100;
+  for(let i=0;i<ids.length;i+=chunkSize){
+   const chunk=ids.slice(i,i+chunkSize);
+   const q=await wait(db.from(table).select(select).in("id",chunk).limit(chunkSize));
+   if(q.error)throw q.error;
+   out.push(...(q.data||[]));
+  }
+  return out;
+ }
+ const [teamRows,leagueRows]=await Promise.all([
+  tids.length?fetchByIds("cr_sports_teams","id,name,short_name,city,state,division,logo_url",tids):Promise.resolve([]),
+  lids.length?fetchByIds("cr_sports_leagues","id,name,code,sport,logo_url,level",lids):Promise.resolve([])
  ]);
- if(tr.error)throw tr.error;
- if(lr.error)throw lr.error;
- const tm=new Map((tr.data||[]).map(x=>[x.id,x]));
- const lm=new Map((lr.data||[]).map(x=>[x.id,x]));
+ const tm=new Map(teamRows.map(x=>[x.id,x]));
+ const lm=new Map(leagueRows.map(x=>[x.id,x]));
  const seen=new Map();
  source.forEach(x=>{
   const key=[x.league_id,x.season,x.team_id].join("|");
