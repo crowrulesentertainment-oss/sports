@@ -38,7 +38,32 @@ body{background:var(--combat-bg)}
 .sync{margin-top:16px;color:#666;font-size:10px;line-height:1.6}.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#555;margin-right:7px}.dot.live{background:var(--combat-red);box-shadow:0 0 12px rgba(225,6,0,.7)}
 @media(max-width:1100px){.grid4{grid-template-columns:repeat(3,1fr)}}@media(max-width:1050px){.grid4{grid-template-columns:repeat(2,1fr)}.event-list{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:760px){.grid3,.event-list{grid-template-columns:1fr}.grid4{grid-template-columns:1fr 1fr}.wrestling-row{grid-template-columns:70px 1fr}.wrestling-row .button{grid-column:2}}
-@media(max-width:520px){.grid4{grid-template-columns:1fr}.hero-inner{padding-top:70px}.toolbar input,.toolbar select{width:100%}}\n.champion-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.champion-card{background:linear-gradient(145deg,#111117,#08080b);border:1px solid #29292f;min-height:250px;display:flex;flex-direction:column;overflow:hidden}.champion-art{height:120px;background:radial-gradient(circle at 50% 30%,rgba(225,6,0,.18),transparent 55%),#09090c;display:flex;align-items:center;justify-content:center;position:relative}.champion-art img{width:100%;height:100%;object-fit:cover;opacity:.9}.champion-initial{font:900 46px Orbitron;color:#444}.champion-body{padding:16px}.champion-org{font:800 8px Orbitron;color:var(--combat-red);letter-spacing:1px}.champion-title{font:800 13px Montserrat;margin:7px 0;color:#ddd;line-height:1.35}.champion-name{font:900 18px Montserrat;color:#fff}.champion-meta{color:#666;font-size:9px;margin-top:6px}.champion-actions{margin-top:auto;padding:0 16px 16px}.champion-filter{display:flex;gap:8px;flex-wrap:wrap}.champion-filter button{border:1px solid #29292f;background:#111116;color:#888;padding:9px 12px;font:800 8px Orbitron;cursor:pointer}.champion-filter button.active{border-color:var(--combat-red);color:#fff}@media(max-width:1050px){.champion-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.champion-grid{grid-template-columns:1fr}}
+@media(max-width:520px){.grid4{grid-template-columns:1fr}.hero-inner{padding-top:70px}.toolbar input,.toolbar select{width:100%}}
+.champion-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.champion-card{background:linear-gradient(145deg,#111117,#08080b);border:1px solid #29292f;min-height:390px;display:flex;flex-direction:column;overflow:hidden;position:relative}
+.champion-card:hover{border-color:var(--combat-red);transform:translateY(-2px)}
+.champion-art{height:145px;background:radial-gradient(circle at 50% 30%,rgba(225,6,0,.22),transparent 55%),#09090c;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.champion-art:after{content:"TITLE";position:absolute;right:-18px;top:13px;transform:rotate(35deg);font:900 8px Orbitron;letter-spacing:2px;color:#4a2421}
+.champion-art img{width:100%;height:100%;object-fit:cover;opacity:.9}
+.champion-initial{font:900 52px Orbitron;color:#444}
+.champion-body{padding:16px}.champion-org{font:800 8px Orbitron;color:var(--combat-red);letter-spacing:1px}
+.champion-title{font:800 15px Montserrat;margin:7px 0;color:#ddd;line-height:1.35}.champion-name{font:900 20px Montserrat;color:#fff}
+.champion-meta{color:#777;font-size:9px;margin-top:7px;line-height:1.65}
+.champion-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:13px}
+.champ-stat{background:#0a0a0d;border:1px solid #202027;padding:9px 6px;text-align:center}
+.champ-stat b{display:block;font:900 14px Orbitron;color:#ddd}.champ-stat span{display:block;font:800 7px Orbitron;color:#666;margin-top:4px}
+.champion-history{margin:12px 16px 0;border-top:1px solid #222;padding-top:10px}
+.champion-history summary{cursor:pointer;font:800 8px Orbitron;color:#999;letter-spacing:1px}
+.history-row{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid #19191e;color:#777;font-size:9px}
+.history-row b{color:#bbb;font-weight:700}.champion-actions{margin-top:auto;padding:14px 16px 16px}
+.champion-filter{display:flex;gap:8px;flex-wrap:wrap}
+.champion-filter button{border:1px solid #29292f;background:#111116;color:#888;padding:9px 12px;font:800 8px Orbitron;cursor:pointer}.champion-filter button.active{border-color:var(--combat-red);color:#fff}
+.title-fight-board{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+.title-fight{background:#0b0b0f;border:1px solid #27272d;padding:16px}.title-fight .tf-org{font:900 8px Orbitron;color:var(--combat-red)}.title-fight h3{font:800 14px Montserrat;margin:8px 0}.title-fight p{color:#777;font-size:9px;line-height:1.6;margin:0}
+@media(max-width:1100px){.grid4{grid-template-columns:repeat(3,1fr)}.champion-grid,.title-fight-board{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:1050px){.grid4{grid-template-columns:repeat(2,1fr)}.event-list{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.grid3,.event-list,.champion-grid,.title-fight-board{grid-template-columns:1fr}.grid4{grid-template-columns:1fr 1fr}.wrestling-row{grid-template-columns:70px 1fr}.wrestling-row .button{grid-column:2}}
+@media(max-width:520px){.grid4{grid-template-columns:1fr}.hero-inner{padding-top:70px}.toolbar input,.toolbar select{width:100%}}
 </style>
 </head>
 <body>
@@ -63,7 +88,7 @@ body{background:var(--combat-bg)}
    <div class="metric"><div class="metric-label">UFC EVENTS</div><div class="metric-value" id="ufcCount">—</div><div class="metric-note">CrowRules synchronized</div></div>
    <div class="metric"><div class="metric-label">WWE EVENTS</div><div class="metric-value" id="wweCount">—</div><div class="metric-note">Event calendar</div></div>
    <div class="metric"><div class="metric-label">AEW EVENTS</div><div class="metric-value" id="aewCount">—</div><div class="metric-note">Event calendar</div></div>
-   <div class="metric"><div class="metric-label">NEXT EVENT</div><div class="metric-value" id="nextCount">—</div><div class="metric-note" id="nextNote">Finding next event…</div></div><div class="metric"><div class="metric-label">ACTIVE TITLES</div><div class="metric-value" id="titleCount">—</div><div class="metric-note">UFC • WWE • AEW</div></div>
+   <div class="metric"><div class="metric-label">NEXT EVENT</div><div class="metric-value" id="nextCount">—</div><div class="metric-note" id="nextNote">Finding next event…</div></div><div class="metric"><div class="metric-label">ACTIVE TITLES</div><div class="metric-value" id="titleCount">—</div><div class="metric-note">Live championship board</div></div>
   </div>
  </div>
 </section>
@@ -80,9 +105,11 @@ body{background:var(--combat-bg)}
 
 <section class="section" id="champions" style="padding-top:0">
  <div class="wrap">
-  <div class="section-head"><div><div class="eyebrow">CHAMPIONSHIP UNIVERSE</div><h2>THE CHAMPIONS</h2></div><div class="muted" id="championStatus">Loading champions…</div></div>
+  <div class="section-head"><div><div class="eyebrow">CHAMPIONSHIP COMMAND CENTER</div><h2>THE CHAMPIONS</h2><p class="muted">Live title board, reign clocks, defenses, lineage and upcoming title fights.</p></div><div class="muted" id="championStatus">Loading championship intelligence…</div></div>
   <div class="champion-filter" style="margin:18px 0"><button class="active" data-champ-org="ALL">ALL</button><button data-champ-org="UFC">UFC</button><button data-champ-org="WWE">WWE</button><button data-champ-org="AEW">AEW</button><a class="button small secondary" href="championships.html">FULL CHAMPIONSHIP UNIVERSE</a></div>
   <div id="championGrid" class="champion-grid"><div class="empty">Loading championship records…</div></div>
+  <div class="section-head" style="margin-top:42px"><div><div class="eyebrow">TITLE FIGHT RADAR</div><h2>UPCOMING TITLE FIGHTS</h2></div><div class="muted" id="titleFightStatus">Scanning synchronized wrestling cards…</div></div>
+  <div id="titleFightBoard" class="title-fight-board"><div class="empty">No upcoming verified title fights yet.</div></div>
  </div>
 </section>
 
@@ -121,7 +148,58 @@ body{background:var(--combat-bg)}
 <script>
 loadSession();
 
-\nlet championRows=[];\nasync function loadChampions(){const root=document.getElementById("championGrid");const r=await sb.from("cr_sports_championships").select("id,organization,title_name,division,title_type,champion_name,champion_image_url,won_at,is_interim,defense_count").in("organization",["UFC","WWE","AEW"]).eq("status","active").order("organization").order("title_name");if(r.error){root.innerHTML='<div class="empty error">'+escLocal(r.error.message)+'</div>';return}championRows=r.data||[];renderChampions("ALL")}\nfunction renderChampions(org){const root=document.getElementById("championGrid"),rows=championRows.filter(x=>org==="ALL"||x.organization===org).sort((a,b)=>(a.organization||"").localeCompare(b.organization||"")||(a.title_name||"").localeCompare(b.title_name||""));document.getElementById("championStatus").textContent=rows.length+" championship"+(rows.length===1?"":"s")+" synchronized";if(!rows.length){root.innerHTML='<div class="empty">No championship records available.</div>';return}root.innerHTML=rows.map(x=>{const initial=escLocal((x.champion_name||"?").slice(0,1).toUpperCase());const art=x.champion_image_url?'<img src="'+escLocal(x.champion_image_url)+'" alt="'+escLocal(x.champion_name||"Champion")+'" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';"><span class="champion-initial" style="display:none">'+initial+'</span>':'<span class="champion-initial">'+initial+'</span>';return '<article class="champion-card"><div class="champion-art">'+art+'</div><div class="champion-body"><div class="champion-org">'+escLocal(x.organization)+(x.is_interim?" • INTERIM":"")+'</div><div class="champion-title">'+escLocal(x.title_name)+'</div><div class="champion-name">'+escLocal(x.champion_name||"Champion TBD")+'</div><div class="champion-meta">'+escLocal(x.division||x.title_type||"Singles")+" • "+escLocal((x.defense_count||0)+" defenses")+(x.won_at?" • Won "+escLocal(x.won_at):"")+'</div></div><div class="champion-actions"><a class="button small secondary" href="championships.html#championship-'+encodeURIComponent(x.id)+'">VIEW TITLE</a></div></article>'}).join("")}\ndocument.querySelectorAll("[data-champ-org]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-champ-org]").forEach(x=>x.classList.remove("active"));b.classList.add("active");renderChampions(b.dataset.champOrg)}));\n\nlet combatEvents=[],refreshing=false;
+
+let championRows=[],reignRows=[],titleFightRows=[];
+async function loadChampions(){
+ const root=document.getElementById("championGrid");
+ const [cr,rr]=await Promise.all([
+  sb.from("cr_sports_championships").select("id,organization,league_code,title_name,division,title_type,champion_name,champion_slug,champion_image_url,won_at,is_interim,is_womens,defense_count,status,provider_updated_at").in("organization",["UFC","WWE","AEW"]).eq("status","active").order("organization").order("title_name"),
+  sb.from("cr_sports_championship_reigns").select("id,championship_id,organization,title_name,reign_number,champion_name,started_at,ended_at,won_event_id,lost_event_id,source_url,provider,updated_at").in("organization",["UFC","WWE","AEW"]).order("started_at",{ascending:false}).limit(500)
+ ]);
+ if(cr.error){root.innerHTML='<div class="empty error">'+escLocal(cr.error.message)+'</div>';return}
+ championRows=cr.data||[];reignRows=rr.error?[]:(rr.data||[]);
+ renderChampions("ALL"); loadTitleFights();
+}
+function reignDays(x){
+ const start=x.won_at||x.started_at;if(!start)return "—";
+ const end=x.ended_at?new Date(x.ended_at):new Date();
+ const d=Math.max(0,Math.floor((end-new Date(start+"T00:00:00"))/86400000));
+ return d+"d";
+}
+function historyFor(id){
+ return reignRows.filter(r=>String(r.championship_id)===String(id)).sort((a,b)=>new Date(b.started_at||0)-new Date(a.started_at||0));
+}
+function renderChampions(org){
+ const root=document.getElementById("championGrid");
+ const rows=championRows.filter(x=>org==="ALL"||x.organization===org).sort((a,b)=>(a.organization||"").localeCompare(b.organization||"")||(a.title_name||"").localeCompare(b.title_name||""));
+ document.getElementById("titleCount").textContent=championRows.length;document.getElementById("championStatus").textContent=rows.length+" active title"+(rows.length===1?"":"s")+" • "+reignRows.length+" historical reign record"+(reignRows.length===1?"":"s");
+ if(!rows.length){root.innerHTML='<div class="empty">No active championship records available.</div>';return}
+ root.innerHTML=rows.map(x=>{
+  const initial=escLocal((x.champion_name||"?").slice(0,1).toUpperCase());
+  const art=x.champion_image_url?'<img src="'+escLocal(x.champion_image_url)+'" alt="'+escLocal(x.champion_name||"Champion")+'" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';"><span class="champion-initial" style="display:none">'+initial+'</span>':'<span class="champion-initial">'+initial+'</span>';
+  const hist=historyFor(x.id);
+  const histHtml=hist.length?'<details class="champion-history"><summary>PREVIOUS CHAMPIONS • '+hist.length+'</summary>'+hist.map(r=>'<div class="history-row"><span><b>'+escLocal(r.champion_name||"Unknown")+'</b><br>Reign '+escLocal(r.reign_number??"—")+'</span><span>'+escLocal(reignDays(r))+'</span></div>').join("")+'</details>':'<details class="champion-history"><summary>LINEAGE</summary><div class="history-row"><span>No reign history synchronized yet.</span></div></details>';
+  return '<article class="champion-card"><div class="champion-art">'+art+'</div><div class="champion-body"><div class="champion-org">'+escLocal(x.organization)+(x.is_interim?" • INTERIM":"")+(x.is_womens?" • WOMEN":"")+'</div><div class="champion-title">'+escLocal(x.title_name)+'</div><div class="champion-name">'+escLocal(x.champion_name||"Champion TBD")+'</div><div class="champion-meta">'+escLocal(x.division||x.title_type||"Singles")+' • Current reign '+reignDays(x)+(x.won_at?" • Won "+escLocal(x.won_at):"")+'</div><div class="champion-stats"><div class="champ-stat"><b>'+escLocal(String(x.defense_count||0))+'</b><span>DEFENSES</span></div><div class="champ-stat"><b>'+escLocal(reignDays(x))+'</b><span>REIGN</span></div><div class="champ-stat"><b>'+escLocal(String(hist.length))+'</b><span>HISTORY</span></div></div></div>'+histHtml+'<div class="champion-actions"><a class="button small secondary" href="championships.html#championship-'+encodeURIComponent(x.id)+'">OPEN TITLE UNIVERSE</a></div></article>'
+ }).join("");
+}
+async function loadTitleFights(){
+ const board=document.getElementById("titleFightBoard");
+ const r=await sb.from("cr_sports_wrestling_matches").select("id,event_id,organization,match_order,match_type,title_fight,champion_name,red_name,blue_name,winner_name,result,method,round,match_url,provider_updated_at").eq("title_fight",true).in("organization",["WWE","AEW"]).limit(200);
+ if(r.error){board.innerHTML='<div class="empty error">'+escLocal(r.error.message)+'</div>';return}
+ const matches=r.data||[];
+ if(!matches.length){document.getElementById("titleFightStatus").textContent="No verified title fights synchronized";board.innerHTML='<div class="empty">No upcoming verified title fights yet. The board will populate automatically when synchronized match cards identify title_fight = true.</div>';return}
+ const ids=[...new Set(matches.map(x=>x.event_id).filter(Boolean))];
+ const er=ids.length?await sb.from("cr_sports_wrestling_events").select("id,name,organization,starts_at,venue,city,event_url").in("id",ids):{data:[]};
+ const byId=new Map((er.data||[]).map(x=>[x.id,x]));
+ const future=matches.map(m=>({...m,event:byId.get(m.event_id)})).filter(m=>m.event && new Date(m.event.starts_at||0)>=new Date()).sort((a,b)=>new Date(a.event.starts_at)-new Date(b.event.starts_at));
+ titleFightRows=future;
+ document.getElementById("titleFightStatus").textContent=future.length+" verified upcoming title fight"+(future.length===1?"":"s");
+ if(!future.length){board.innerHTML='<div class="empty">Verified title fights exist, but none are currently dated in the future.</div>';return}
+ board.innerHTML=future.slice(0,12).map(m=>'<article class="title-fight"><div class="tf-org">'+escLocal(m.organization)+' • TITLE FIGHT</div><h3>'+escLocal(m.red_name||"TBD")+' vs '+escLocal(m.blue_name||"TBD")+'</h3><p>'+escLocal(m.event.name||"Event")+" • "+escLocal(fmt(m.event.starts_at))+'<br>'+escLocal([m.event.venue,m.event.city].filter(Boolean).join(" • ")||"Location TBD")+'</p>'+(m.match_url?'<div class="actions"><a class="button small secondary" href="'+escLocal(m.match_url)+'" target="_blank" rel="noopener">SOURCE</a></div>':"")+'</article>').join("");
+}
+document.querySelectorAll("[data-champ-org]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-champ-org]").forEach(x=>x.classList.remove("active"));b.classList.add("active");renderChampions(b.dataset.champOrg)}));
+
+let combatEvents=[],refreshing=false;
 
 function escLocal(v){return typeof esc==="function"?esc(v):String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
 function leagueCode(row){return String(row?.cr_sports_leagues?.code||row?.league_code||"").toUpperCase();}
@@ -186,9 +264,15 @@ function applyJump(code){document.getElementById("org").value=code;document.getE
 document.getElementById("search").addEventListener("input",renderCombat);
 document.getElementById("org").addEventListener("change",renderCombat);
 document.getElementById("window").addEventListener("change",renderCombat);
-document.getElementById("refreshBtn").addEventListener("click",async()=>{if(refreshing)return;refreshing=true;const b=document.getElementById("refreshBtn");b.disabled=true;b.textContent="REFRESHING…";try{await loadChampions();\nloadCombat();}finally{refreshing=false;b.disabled=false;b.textContent="REFRESH";}});
+document.getElementById("refreshBtn").addEventListener("click",async()=>{if(refreshing)return;refreshing=true;const b=document.getElementById("refreshBtn");b.disabled=true;b.textContent="REFRESHING…";try{await loadChampions();await loadCombat();}finally{refreshing=false;b.disabled=false;b.textContent="REFRESH";}});
 document.querySelectorAll("[data-jump]").forEach(b=>b.addEventListener("click",()=>applyJump(b.dataset.jump)));
 document.getElementById("shareBtn").addEventListener("click",async()=>{try{if(navigator.share)await navigator.share({title:"CrowRules Sports Combat Center",text:"UFC • WWE • AEW Combat Center",url:location.href});else{await navigator.clipboard.writeText(location.href);document.getElementById("shareBtn").textContent="LINK COPIED";setTimeout(()=>document.getElementById("shareBtn").textContent="SHARE COMBAT CENTER",1600);}}catch(e){}});
+
+sb.channel("combat-championship-command-center")
+ .on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_championships"},loadChampions)
+ .on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_wrestling_matches"},loadTitleFights)
+ .on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_wrestling_events"},loadTitleFights)
+ .subscribe();
 
 loadCombat();
 </script>
