@@ -1,4 +1,4 @@
-/* CrowRules Sports — Shared Engine 20.0 */
+/* CrowRules Sports — Shared Engine 21.0 */
 (function(){
 "use strict";
 
@@ -65,7 +65,7 @@ function ensureNavStyles(){
  if(document.getElementById("cr-shared-nav-style"))return;
  const style=document.createElement("style");style.id="cr-shared-nav-style";
  style.textContent=`
- .cr-header .shell-tools{display:flex;align-items:center;gap:8px;flex:0 0 auto}.shell-search-toggle{border:1px solid #292929;background:#0c0c0c;color:#aaa;border-radius:7px;padding:8px 10px;font:800 8px Orbitron;cursor:pointer}.shell-search-toggle:hover{color:#fff;border-color:#555}.cr-global-search{border-top:1px solid #242424;background:#070707}.cr-search-inner{max-width:1500px;margin:auto;padding:10px 18px}.cr-search-inner input{width:100%;padding:12px 14px;background:#0d0d0d;border:1px solid #333;color:#fff;font:500 12px Montserrat}.cr-global-search[hidden]{display:none}.cr-global-search a{display:flex;align-items:center;gap:10px;padding:9px 4px;color:#ccc}.cr-global-search a:hover{color:#fff}.cr-global-search small{color:#777;font-size:8px}.cr-global-search strong{font-size:10px}.search-empty{padding:10px 4px;color:#666;font-size:10px}@media(max-width:1040px){.cr-header .shell-tools{margin-left:auto}.cr-header .shell-tools .account{display:none}.cr-search-inner{padding:10px}}.cr-header{position:sticky;top:0;z-index:1000;width:100%;background:rgba(5,5,7,.97);border-bottom:1px solid rgba(255,255,255,.08);backdrop-filter:blur(18px);box-shadow:0 8px 30px rgba(0,0,0,.28)}
+ .cr-header .shell-tools{display:flex;align-items:center;gap:8px;flex:0 0 auto}.shell-league{border:1px solid #292929;background:#0c0c0c;color:#aaa;border-radius:7px;padding:8px 8px;font:800 8px Orbitron;cursor:pointer;max-width:105px}.shell-league:hover{color:#fff;border-color:#555}.shell-search-toggle{border:1px solid #292929;background:#0c0c0c;color:#aaa;border-radius:7px;padding:8px 10px;font:800 8px Orbitron;cursor:pointer}.shell-search-toggle:hover{color:#fff;border-color:#555}.cr-global-search{border-top:1px solid #242424;background:#070707}.cr-search-inner{max-width:1500px;margin:auto;padding:10px 18px}.cr-search-inner input{width:100%;padding:12px 14px;background:#0d0d0d;border:1px solid #333;color:#fff;font:500 12px Montserrat}.cr-global-search[hidden]{display:none}.cr-global-search a{display:flex;align-items:center;gap:10px;padding:9px 4px;color:#ccc}.cr-global-search a:hover{color:#fff}.cr-global-search small{color:#777;font-size:8px}.cr-global-search strong{font-size:10px}.search-empty{padding:10px 4px;color:#666;font-size:10px}@media(max-width:1040px){.cr-header .shell-tools{margin-left:auto}.cr-header .shell-tools .account{display:none}.cr-search-inner{padding:10px}}.cr-header{position:sticky;top:0;z-index:1000;width:100%;background:rgba(5,5,7,.97);border-bottom:1px solid rgba(255,255,255,.08);backdrop-filter:blur(18px);box-shadow:0 8px 30px rgba(0,0,0,.28)}
  .cr-nav{position:relative;min-height:58px;display:flex;align-items:center;gap:10px;padding:0 18px}
  .cr-nav .brand{display:flex;align-items:center;gap:4px;flex:0 0 auto;white-space:nowrap;color:#fff;text-decoration:none;font:900 12px Orbitron,Arial,sans-serif;letter-spacing:1.4px}.cr-nav .brand span{color:#e10600}
  .cr-nav .navlinks{min-width:0;display:flex;align-items:center;justify-content:flex-end;gap:4px;flex:1}.cr-nav .nav-group{position:relative}
@@ -82,15 +82,43 @@ function ensureNavStyles(){
  document.head.appendChild(style);
 }
 
+function bindLeagueSelector(){
+ const select=$("#crLeagueSelector");
+ if(!select||select.dataset.bound)return;
+ select.dataset.bound="1";
+ const saved=storageGet("cr_sports_league","all");
+ if(saved)select.value=saved;
+ select.addEventListener("change",()=>{
+  storageSet("cr_sports_league",select.value);
+  window.CROW_SPORTS_LEAGUE=select.value;
+  document.dispatchEvent(new CustomEvent("crowrules:leaguechange",{detail:{league:select.value}}));
+ });
+ window.CROW_SPORTS_LEAGUE=select.value;
+}
 function bindGlobalSearch(){
  const toggle=$("#crSearchToggle"),box=$("#crGlobalSearch"),input=$("#crGlobalSearchInput"),results=$("#crGlobalSearchResults");
  if(!toggle||!box||!input||toggle.dataset.bound)return;
  toggle.dataset.bound="1";
  const items=NAV.flatMap(([key,label,url])=>[{type:"PAGE",title:label,url,key}]);
- function render(q){
+ async function dbSearch(term){
+  if(!sb||!term)return [];
+  try{
+   const [teams,leagues]=await Promise.all([
+    withTimeout(sb.from("cr_sports_teams").select("id,name,abbreviation").ilike("name","%"+term+"%").limit(6),5000,"Team search"),
+    withTimeout(sb.from("cr_sports_leagues").select("id,name,code").or("name.ilike.%"+term+"%,code.ilike.%"+term+"%").limit(6),5000,"League search")
+   ]);
+   const out=[];
+   (teams.data||[]).forEach(x=>out.push({type:"TEAM",title:x.name,url:"teams.html?id="+encodeURIComponent(x.id)}));
+   (leagues.data||[]).forEach(x=>out.push({type:"LEAGUE",title:x.name||x.code,url:"scores.html?league="+encodeURIComponent(x.code||x.name)}));
+   return out;
+  }catch(e){reportError("globalSearch",e);return [];}
+ }
+ async function render(q){
   const term=String(q||"").trim().toLowerCase();
-  const rows=term?items.filter(x=>(x.title+" "+x.key).toLowerCase().includes(term)):items.slice(0,8);
-  results.innerHTML=rows.length?rows.map(x=>'<a href="'+x.url+'"><small>'+x.type+'</small><strong>'+esc(x.title)+'</strong></a>').join(""):'<div class="search-empty">No Sports pages found.</div>';
+  const base=term?items.filter(x=>(x.title+" "+x.key).toLowerCase().includes(term)):items.slice(0,8);
+  const extra=term?await dbSearch(term):[];
+  const rows=[...base,...extra];
+  results.innerHTML=rows.length?rows.map(x=>'<a href="'+x.url+'"><small>'+x.type+'</small><strong>'+esc(x.title)+'</strong></a>').join(""):'<div class="search-empty">No Sports results found.</div>';
  }
  toggle.addEventListener("click",()=>{const open=!box.hidden;box.hidden=open;toggle.setAttribute("aria-expanded",String(!open));if(!open){input.focus();render(input.value);}});
  input.addEventListener("input",()=>render(input.value));
@@ -119,12 +147,12 @@ function shell(active){
   const items=group.items.map(([key,label,url])=>`<a href="${url}" class="${page===key?"active":""}" data-nav="${key}">${label}</a>`).join("");
   return `<div class="nav-group ${activeGroup?"active":""}"><button type="button" aria-expanded="false"><span aria-hidden="true">${group.icon||""} </span>${group.label}<span aria-hidden="true"> ▾</span></button><div class="nav-group-menu">${items}</div></div>`;
  }).join("");
- document.write(`<header class="site-header cr-header" data-cr-shell="20">
+ document.write(`<header class="site-header cr-header" data-cr-shell="21">
   <nav class="nav cr-nav" aria-label="CrowRules Sports navigation">
    <a class="brand" href="index.html" aria-label="CrowRules Sports home">CROW<span>RULES</span> SPORTS</a>
    <button class="cr-menu-toggle" id="crMenuToggle" type="button" aria-expanded="false" aria-controls="crNavLinks">MENU</button>
    <div class="navlinks" id="crNavLinks">${groups}</div>
-   <div class="shell-tools"><button class="shell-search-toggle" id="crSearchToggle" type="button" aria-expanded="false" aria-controls="crGlobalSearch">SEARCH</button><span class="account" id="account" aria-live="polite">ACCOUNT</span></div>
+   <div class="shell-tools"><select class="shell-league" id="crLeagueSelector" aria-label="League"><option value="all">ALL LEAGUES</option><option value="NFL">NFL</option><option value="MLB">MLB</option><option value="MiLB">MiLB</option><option value="NHL">NHL</option><option value="NBA">NBA</option><option value="WNBA">WNBA</option><option value="NCAA">NCAA</option><option value="MLS">MLS</option><option value="UFL">UFL</option><option value="WWE">WWE</option><option value="AEW">AEW</option><option value="UFC">UFC</option></select><button class="shell-search-toggle" id="crSearchToggle" type="button" aria-expanded="false" aria-controls="crGlobalSearch">SEARCH</button><span class="account" id="account" aria-live="polite">ACCOUNT</span></div>
   </nav><div class="cr-global-search" id="crGlobalSearch" hidden><div class="cr-search-inner"><input id="crGlobalSearchInput" type="search" placeholder="Search teams, leagues, pages…" autocomplete="off"><div id="crGlobalSearchResults"></div></div></div>
  </header>`);
  ensureNavStyles();
@@ -227,7 +255,7 @@ window.signOut=signOut;
 window.startSportsBadgeRealtime=startBadgeRealtime;
 
 if(sb)bindAuth();
-function initShared(){ensureNavStyles();bindNav();bindGlobalSearch();loadSession();if(sb)setTimeout(startBadgeRealtime,250);}
+function initShared(){ensureNavStyles();bindNav();bindGlobalSearch();bindLeagueSelector();loadSession();if(sb)setTimeout(startBadgeRealtime,250);}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",initShared,{once:true});else initShared();
 
 })();
