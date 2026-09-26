@@ -50,7 +50,7 @@
 <div class="tools"><button class="pill active" id="details">DETAILS ON</button><button class="pill" id="export">EXPORT CSV</button><button class="pill" id="share">SHARE VIEW</button><button class="pill" id="reset">RESET</button></div>
 </section>
 <div class="status"><span id="structure"></span><span id="status"><span class="dot"></span>Loading standings…</span><span id="updated">—</span></div>
-<section id="stats" class="stats"></section><section class="coverage-overview"><div class="coverage-head"><div><b>DATA COVERAGE</b><span>ACTUAL CROWRULES RECORDS VS VERIFIED LEAGUE SIZE WHEN KNOWN</span></div><span id="coverageCount"></span></div><div id="coverageGrid" class="coverage-grid"></div><div class="coverage-note">Coverage measures loaded CrowRules team/standings records. League structure is displayed separately and is never used to invent missing team records.</div></section><section class="structure-overview"><div class="structure-overview-head"><div><b>LEAGUE STRUCTURE</b><span>ALL LEAGUES WITH STANDINGS DATA</span></div><span id="structureCount"></span></div><div id="structureGrid" class="structure-grid"></div></section>
+<section id="stats" class="stats"></section><section class="coverage-overview"><div class="coverage-head"><div><b>DATA COVERAGE</b><span>ACTUAL CROWRULES RECORDS VS VERIFIED LEAGUE SIZE WHEN KNOWN</span></div><span id="coverageCount"></span></div><div id="coverageGrid" class="coverage-grid"></div><div class="coverage-note">Coverage measures active CrowRules team records from Supabase. Standings/results are displayed separately and are never invented to make coverage look complete.</div></section><section class="structure-overview"><div class="structure-overview-head"><div><b>LEAGUE STRUCTURE</b><span>ALL LEAGUES WITH STANDINGS DATA</span></div><span id="structureCount"></span></div><div id="structureGrid" class="structure-grid"></div></section>
 <section id="content"><div class="loading"><div class="spinner"></div><strong>LOADING STANDINGS</strong><br>Connecting to CrowRules Sports…</div></section>
 <div class="footer-note">Keyboard: <b>/</b> search • <b>R</b> refresh • <b>Esc</b> clear</div>
 </div></main>
@@ -143,6 +143,21 @@ function drawSports(){
   buildFilters();
   render();
  });
+}
+
+async function loadCoverageCounts(){
+ const out=new Map();
+ const pageSize=500; let from=0;
+ while(true){
+  const q=await wait(db.from("cr_sports_teams").select("id,league_id").eq("is_active",true).range(from,from+pageSize-1));
+  if(q.error)throw q.error;
+  const rows=q.data||[];
+  rows.forEach(x=>out.set(x.league_id,(out.get(x.league_id)||0)+1));
+  if(rows.length<pageSize)break;
+  from+=pageSize;
+  if(from>20000)break;
+ }
+ coverageCounts=out;
 }
 
 async function loadRows(silent=false){
@@ -265,7 +280,7 @@ function renderCoverageOverview(rows){
  rows.forEach(x=>counts.set(x.league_id,(counts.get(x.league_id)||0)+1));
  const expected={"COLLEGE-FOOTBALL":138,"NFL":32,"NBA":30,"NHL":32,"MLB":30,"WNBA":15,"MLS":30,"NWSL":14,"PWHL":8,"UFL":8};
  const cards=leagues.map(function(l){
-  const loaded=counts.get(l.id)||0;
+  const loaded=coverageCounts.has(l.id)?coverageCounts.get(l.id):(counts.get(l.id)||0);
   const key=String(l.code||l.name||"").toUpperCase().replace(/[^A-Z0-9]+/g,"-").replace(/^-|-$/g,"");
   const target=expected[key]||null;
   const pct=target?Math.min(100,(loaded/target)*100):0;
@@ -383,13 +398,15 @@ function stopRealtime(){
 
 async function load(){
  if(!db){fail(new Error("The shared Supabase client did not initialize."));return;}
- try{await loadSeasons();await loadLeagues();await loadRows();}
+ try{await loadSeasons();await loadLeagues();await loadCoverageCounts();await loadRows();}
+ catch(e){fail(e);}
+}
  catch(e){fail(e);}
 }
 
 $("season").onchange=async()=>{
  activeLeague="";
- try{await loadLeagues();await loadRows();writeViewState();}catch(e){fail(e);}
+ try{await loadLeagues();await loadCoverageCounts();await loadRows();writeViewState();}catch(e){fail(e);}
 };
 $("league").onchange=()=>{
  activeLeague=$("league").value;
