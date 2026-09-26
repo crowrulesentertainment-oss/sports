@@ -8,7 +8,7 @@
 <title>Scores Center | CrowRules Sports</title>
 <link rel="stylesheet" href="css/sports.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/sports.js?v=20.0"></script>
+<script src="js/sports.js?v=22.0"></script>
 <style>
 :root{--score-red:#e10600;--score-red2:#ff3b30;--score-panel:#0b0b0b;--score-line:#292929;--score-muted:#858585}
 .scores-shell{max-width:1500px;margin:auto;padding:0 24px 70px}
@@ -314,6 +314,15 @@ function renderFilters(){
   document.querySelectorAll("[data-sport]").forEach(b=>b.onclick=()=>{state.sport=b.dataset.sport;render()});
 }
 
+function syncUniversalLeague(){
+  const code=String(window.CROW_SPORTS_LEAGUE||"all").toUpperCase();
+  if(code==="ALL"){state.league="all";render();return;}
+  const match=state.games.find(g=>String(leagueCode(g)||"").toUpperCase()===code);
+  state.league=match?leagueName(match):"all";
+  const select=document.getElementById("leagueSelect");
+  if(select)select.value=state.league;
+  render();
+}
 function bindFavoriteButtons(){
   document.querySelectorAll("[data-favorite]").forEach(btn=>btn.onclick=()=>{
     const id=btn.dataset.favorite;
@@ -344,7 +353,9 @@ async function loadEvents(){
   const {data,error}=await sb.from("cr_sports_events").select("id,title,event_type,status,starts_at,venue,city,event_url,cr_sports_leagues(code,name)").order("starts_at",{ascending:true}).limit(50);
   if(error){root.innerHTML=empty("EVENT DATA UNAVAILABLE",error.message);return}
   state.events=data||[];
-  const relevant=state.events.filter(e=>/wwe|aew|ufc|wrestling|combat|mma|boxing/i.test((e.event_type||"")+" "+(e.title||"")+" "+(e.cr_sports_leagues?.name||"")));
+  const globalLeague=String(window.CROW_SPORTS_LEAGUE||"all").toUpperCase();
+  const scoped=globalLeague==="ALL"?state.events:state.events.filter(e=>String(e.cr_sports_leagues?.code||"").toUpperCase()===globalLeague);
+  const relevant=scoped.filter(e=>/wwe|aew|ufc|wrestling|combat|mma|boxing/i.test((e.event_type||"")+" "+(e.title||"")+" "+(e.cr_sports_leagues?.name||"")));
   root.innerHTML=(relevant.length?relevant:state.events.slice(0,9)).map(e=>{
     const href=e.event_url||("event.html?id="+encodeURIComponent(e.id));
     return '<article class="game-card"><div class="game-top"><span class="game-league">'+esc(e.cr_sports_leagues?.name||"EVENT")+'</span><span class="game-status scheduled">'+esc(String(e.status||"scheduled").toUpperCase())+'</span></div><div class="game-body"><div class="game-date">'+esc(e.starts_at?new Date(e.starts_at).toLocaleString():"TIME TBD")+'</div><h3 style="font-size:15px;line-height:1.4;margin:0 0 10px">'+esc(e.title||"Sports Event")+'</h3><div class="game-detail"><span>'+esc(e.venue||"Venue TBD")+'</span><span>'+esc(e.city||"")+'</span></div></div><div class="game-actions"><a class="button small" href="'+esc(href)+'">EVENT CENTER</a>'+(e.event_url?'<a class="button small secondary" href="'+esc(e.event_url)+'" target="_blank" rel="noopener">OFFICIAL</a>':"")+'</div></article>';
