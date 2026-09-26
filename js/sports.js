@@ -2,7 +2,7 @@
 (function(){
 "use strict";
 const SUPABASE_URL="https://cevylpnoexugwgygvtgu.supabase.co";
-const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmUiLCJyZWYiOiJjZXZ5bHBub2V4dWd3Z3l2dGd2dHUiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc4ODgxNjE5NiwiZXhwIjoyMTA0MzkyMTk2fQ.bvSF3qRqFNvCtaF5CSDeeEO3yJnsnYt9CXmgUaBWjNQ";
+const SUPABASE_KEY="sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
 const HAS_SUPABASE=!!(window.supabase&&typeof window.supabase.createClient==="function");
 let sb=null;if(HAS_SUPABASE)sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true},global:{headers:{"x-client-info":"crowrules-sports/23.0"}}});
 window.sb=sb;window.supabaseClient=sb;window.sbClient=sb;window.CROW_SPORTS_READY=HAS_SUPABASE;window.CROW_SPORTS_VERSION="23.0";window.CROW_SPORTS_SHELL_VERSION="23.0";
