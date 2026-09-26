@@ -106,7 +106,7 @@ async function loadUfcFightCard(){
 }
 function tick(){const el=document.getElementById("countdown");if(!el||!eventRecord?.starts_at)return;const d=new Date(eventRecord.starts_at)-Date.now();if(d<=0){el.textContent="LIVE / STARTED";return;}const h=Math.floor(d/36e5),m=Math.floor(d%36e5/6e4),s=Math.floor(d%6e4/1e3);el.textContent=h+"h "+String(m).padStart(2,"0")+"m "+String(s).padStart(2,"0")+"s";}
 loadEvent();setInterval(tick,1000);
-if(id){sb.channel("sports23-event-"+id).on("postgres_changes",{event:"UPDATE",schema:"public",table:"cr_sports_events",filter:"id=eq."+id},p=>{if(p.new){eventRecord={...eventRecord,...p.new};renderEvent();}}).on("postgres_changes",{event:"UPDATE",schema:"public",table:"cr_sports_event_bouts",filter:"event_id=eq."+id},()=>{if(isUfc())loadUfcFightCard();}).subscribe();}
+if(id){sb.channel("sports23-event-"+id).on("postgres_changes",{event:"UPDATE",schema:"public",table:"cr_sports_events",filter:"id=eq."+id},p=>{if(p.new){eventRecord={...eventRecord,...p.new};renderEvent();}}).on("postgres_changes",{event:"UPDATE",schema:"public",table:"cr_sports_event_bouts",filter:"event_id=eq."+id},()=>{if(isUfc())loadUfcFightCard();}).on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_ufc_fighter_stats"},()=>{if(isUfc())loadUfcFightCard();}).on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_ufc_fighter_fights"},()=>{if(isUfc())loadUfcFightCard();}).subscribe();}
 </script>
 <script>footer()</script>
 </body>
