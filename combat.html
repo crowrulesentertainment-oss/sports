@@ -21,7 +21,7 @@
  <div class="hero-inner">
   <div class="eyebrow">CROWRULES SPORTS • COMBAT / WRESTLING</div>
   <h1>FIGHT <span>NIGHT</span></h1>
-  <p>UFC, WWE and AEW are now part of the CrowRules Sports universe. UFC event data is wired into the sports data fabric; WWE and AEW are tracked as dedicated event categories with links to their official calendars.</p>
+  <p>UFC, WWE and AEW are first-class CrowRules Sports event categories. Team-game tables remain reserved for team competition; combat and wrestling use the dedicated event model for cards, shows, venues, schedules and official event links.</p>
   <div class="actions">
    <a class="button" href="scores.html">LIVE SCORES</a>
    <a class="button secondary" href="schedule.html">FULL SCHEDULE</a>
@@ -44,14 +44,14 @@
     <span class="badge">WWE • OFFICIAL CALENDAR</span>
     <h2>WWE</h2>
     <p>WWE is registered as a major wrestling league. CrowRules keeps the category separate from traditional team sports so events can be represented correctly.</p>
-    <div class="fight"><strong>WWE EVENTS</strong><small>Official WWE event schedule and event information.</small></div>
+    <div id="wweEvents"><div class="loading">Loading WWE events…</div></div>
     <div class="actions"><a class="button small" href="https://www.wwe.com/events" target="_blank" rel="noopener">WWE EVENTS</a></div>
    </article>
    <article class="card">
     <span class="badge">AEW • OFFICIAL CALENDAR</span>
     <h2>AEW</h2>
     <p>AEW is registered as a major wrestling league. Its event calendar is surfaced separately from the team-game scoreboard.</p>
-    <div class="fight"><strong>AEW EVENTS</strong><small>Official AEW live-event calendar and ticket information.</small></div>
+    <div id="aewEvents"><div class="loading">Loading AEW events…</div></div>
     <div class="actions"><a class="button small" href="https://www.allelitewrestling.com/aew-events" target="_blank" rel="noopener">AEW EVENTS</a></div>
    </article>
   </div>
@@ -61,12 +61,21 @@
 <script>
 async function loadCombat(){
  const root=document.getElementById("ufcGames");
- const r=await sb.from("cr_sports_games").select("id,starts_at,status,home_score,away_score,venue,home:cr_sports_teams!cr_sports_games_home_team_id_fkey(name),away:cr_sports_teams!cr_sports_games_away_team_id_fkey(name),league:cr_sports_leagues!cr_sports_games_league_id_fkey(code,name)").eq("cr_sports_leagues.code","UFC").order("starts_at").limit(12);
+ const r=await sb.from("cr_sports_games").select("id,starts_at,status,home_score,away_score,venue,home:cr_sports_teams!cr_sports_games_home_team_id_fkey(name),away:cr_sports_teams!cr_sports_games_away_team_id_fkey(name),league:cr_sports_leagues!cr_sports_games_league_id_fkey(code,name)").eq("league_id",(await sb.from("cr_sports_leagues").select("id").eq("code","UFC").single()).data?.id).order("starts_at").limit(12);
  if(r.error){root.innerHTML='<div class="fight"><small>'+esc(r.error.message)+'</small></div>';return}
  const rows=r.data||[];
  root.innerHTML=rows.length?rows.map(g=>'<div class="fight"><strong>'+esc(g.away?.name||"TBD")+' vs '+esc(g.home?.name||"TBD")+'</strong><small>'+esc(String(g.status||"scheduled").toUpperCase())+' • '+esc(g.starts_at?new Date(g.starts_at).toLocaleString():"TBD")+(g.venue?" • "+esc(g.venue):"")+'</small></div>').join(""):'<div class="fight"><small>No UFC bouts are synchronized yet. The UFC league is ready for the provider feed.</small></div>';
 }
-loadSession();loadCombat();
+async function loadOfficialEvents(code,target){
+ const root=document.getElementById(target);
+ const lid=(await sb.from("cr_sports_leagues").select("id").eq("code",code).single()).data?.id;
+ if(!lid){root.innerHTML='<div class="fight"><small>League not configured.</small></div>';return}
+ const r=await sb.from("cr_sports_events").select("title,event_type,status,starts_at,venue,city,event_url").eq("league_id",lid).order("starts_at").limit(12);
+ if(r.error){root.innerHTML='<div class="fight"><small>'+esc(r.error.message)+'</small></div>';return}
+ const rows=r.data||[];
+ root.innerHTML=rows.length?rows.map(e=>'<div class="fight"><strong>'+esc(e.title)+'</strong><small>'+esc(String(e.status||"scheduled").toUpperCase())+' • '+esc(e.starts_at?new Date(e.starts_at).toLocaleString():"TBD")+(e.venue?" • "+esc(e.venue):"")+(e.city?" • "+esc(e.city):"")+'</small>'+(e.event_url?'<div class="actions"><a class="button small" href="'+esc(e.event_url)+'" target="_blank" rel="noopener">OFFICIAL EVENT</a></div>':'')+'</div>').join(""):'<div class="fight"><small>No synchronized events yet.</small></div>';
+}
+loadSession();loadCombat();loadOfficialEvents("WWE","wweEvents");loadOfficialEvents("AEW","aewEvents");
 </script>
 <script>footer()</script>
 </body>
