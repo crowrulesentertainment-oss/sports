@@ -401,8 +401,6 @@ async function load(){
  try{await loadSeasons();await loadLeagues();await loadCoverageCounts();await loadRows();}
  catch(e){fail(e);}
 }
- catch(e){fail(e);}
-}
 
 $("season").onchange=async()=>{
  activeLeague="";
