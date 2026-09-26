@@ -50,7 +50,9 @@
 
     <div class="card">
       <div class="eyebrow">CHALLENGE</div>
-      <h3>SELECT WEEK</h3>
+      <h3>SELECT LEAGUE</h3>
+      <select id="pickemLeague" class="input"><option value="all">ALL SPORTS</option></select>
+      <h3 style="margin-top:12px">SELECT WEEK</h3>
       <select id="week" class="input"></select>
       <div id="weekInfo" class="muted">Loading open challenges…</div>
     </div>
@@ -125,6 +127,8 @@ let weeks = [];
 let games = [];
 let selectedWeek = null;
 let savedPicks = {};
+let pickemLeagues = [];
+let selectedPickemLeague = "all";
 
 const $id = id => document.getElementById(id);
 
@@ -200,6 +204,18 @@ sb.auth.onAuthStateChange((_event,newSession) => {
   updateAuthUI();
 });
 
+async function loadPickemLeagues(){
+  const {data,error}=await sb.from("cr_sports_leagues")
+    .select("id,name,code,sport,is_active")
+    .eq("is_active",true)
+    .order("sport",{ascending:true})
+    .order("name",{ascending:true});
+  if(error){ console.warn("Pick 'Em leagues:",error.message); return; }
+  pickemLeagues=data||[];
+  const sel=$id("pickemLeague");
+  sel.innerHTML='<option value="all">ALL SPORTS</option>'+pickemLeagues.map(l=>'<option value="'+esc(l.id)+'">'+esc(l.name)+(l.sport?' • '+esc(l.sport):'')+'</option>').join("");
+  sel.value=selectedPickemLeague;
+}
 async function loadWeeks(){
   const {data,error} = await sb.from("cr_sports_pickem_weeks")
     .select("*")
@@ -237,6 +253,13 @@ function renderWeekInfo(){
     'Closes: '+esc(close);
 }
 
+$id("pickemLeague").addEventListener("change", async e => {
+  selectedPickemLeague=e.target.value;
+  savedPicks={};
+  await loadGames();
+  await loadMyEntry();
+});
+
 $id("week").addEventListener("change", async e => {
   selectedWeek = weeks.find(w => w.id === e.target.value) || null;
   savedPicks = {};
@@ -255,7 +278,8 @@ async function loadGames(){
     .lte("starts_at", selectedWeek.closes_at || new Date(new Date(selectedWeek.opens_at).getTime()+7*86400000).toISOString())
     .order("starts_at",{ascending:true})
     .limit(500);
-  if(selectedWeek.league_id) query=query.eq("league_id",selectedWeek.league_id);
+  const leagueId=selectedPickemLeague!=="all"?selectedPickemLeague:selectedWeek.league_id;
+  if(leagueId) query=query.eq("league_id",leagueId);
   const {data,error}=await query;
   if(error){
     root.innerHTML='<div class="card"><h3>GAME DATA UNAVAILABLE</h3><p>'+esc(error.message)+'</p></div>';
@@ -442,7 +466,7 @@ $id("leaderboardRefreshBtn").onclick=loadLeaderboard;
   session = data?.session || null;
   updateAuthUI();
   await loadSeasons();
-  await loadWeeks();
+  await awaitPickemBoot();
   await loadLeaderboard();
 })();
 </script>
@@ -450,3 +474,9 @@ $id("leaderboardRefreshBtn").onclick=loadLeaderboard;
 <script>footer()</script>
 </body>
 </html>
+<script>
+async function awaitPickemBoot(){
+  await loadPickemLeagues();
+  await loadWeeks();
+}
+</script>
