@@ -1,196 +1,92 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Event Center | CrowRules Sports</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Game Center | CrowRules Sports</title>
 <link rel="stylesheet" href="css/sports.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/sports.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/sports.js"></script>
 <style>
-.event-hero{min-height:520px;display:flex;align-items:end;background:radial-gradient(circle at 80% 20%,rgba(225,6,0,.2),transparent 30%),linear-gradient(135deg,#050506,#101017)}
-.event-wrap{max-width:1500px;width:100%;margin:auto;padding:80px 24px 55px}
-.event-title{font:900 clamp(46px,8vw,100px)/.95 Orbitron;letter-spacing:-4px;margin:12px 0}.event-title span{color:#e10600}.event-art{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.55;pointer-events:none}.event-wrap{position:relative;z-index:1}.event-hero{position:relative;overflow:hidden}.event-hero:after{content:"";position:absolute;inset:auto 0 0;height:45%;background:linear-gradient(transparent,#050506);pointer-events:none}.hero-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.button:disabled{opacity:.55;cursor:not-allowed}.tag.scheduled{border-color:#34343a}.tag.completed{border-color:#303039}.tag.live{border-color:#e10600;color:#fff;background:#220909}.empty-state{padding:30px;border:1px dashed #303036;background:#0a0a0e;text-align:center}
-.event-meta{display:flex;gap:8px;flex-wrap:wrap}.event-grid{display:grid;grid-template-columns:2fr 1fr;gap:18px}
-.panel{background:#0d0d10;border:1px solid #27272b;padding:24px}.panel h2,.panel h3{font-family:Orbitron}
-.muted{color:#888;line-height:1.7}.stat{padding:14px 0;border-bottom:1px solid #222}.stat:last-child{border-bottom:0}
-.countdown{font:800 28px Orbitron}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
-.fight-card-panel{margin-top:18px}.fight-card-head{display:flex;justify-content:space-between;gap:20px;align-items:end;flex-wrap:wrap}
-.fight-card-grid{display:grid;gap:14px;margin-top:20px}.card-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;padding:10px;border:1px solid #242429;background:#09090c}.card-filter{border:1px solid #29292f;background:#111116;color:#aaa;padding:9px 12px;font:800 10px Orbitron;cursor:pointer}.card-filter.active{color:#fff;border-color:#e10600;background:#171114}.bout[data-card="main"]{border-left:3px solid #e10600}.bout[data-card="prelim"]{border-left:3px solid #29292f}.card-badge{display:inline-block;margin-left:8px;padding:4px 6px;border:1px solid #332020;color:#e10600;font:800 8px Orbitron;vertical-align:middle}.progress-wrap{margin-top:14px;background:#09090c;border:1px solid #222;padding:10px}.progress-top{display:flex;justify-content:space-between;gap:10px;font:800 9px Orbitron;color:#777}.progress-track{height:4px;background:#202025;margin-top:8px;overflow:hidden}.progress-fill{height:100%;background:#e10600;transition:width .4s ease}.intel{margin-top:14px;border-top:1px solid #25252a;padding-top:14px}.intel summary{cursor:pointer;list-style:none;font:800 10px Orbitron;color:#aaa}.intel summary::-webkit-details-marker{display:none}.intel-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.intel-box{background:#0a0a0e;border:1px solid #202025;padding:10px}.intel-label{font:800 9px Orbitron;color:#777;text-transform:uppercase}.intel-value{font:800 13px Montserrat;color:#eee;margin-top:6px}.history{margin-top:12px}.history-row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #202025;font-size:11px}.history-row:last-child{border-bottom:0}.live-strip{display:none;margin-top:14px;border:1px solid #442020;background:#120a0a;padding:12px}.live-strip.active{display:block}.live-main{display:flex;justify-content:space-between;gap:12px;align-items:center}.live-round{font:900 18px Orbitron;color:#e10600}.live-clock{font:900 24px Orbitron}.live-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.live-stat{background:#09090c;border:1px solid #242429;padding:8px;text-align:center;font:800 11px Montserrat}
-.bout{background:#09090c;border:1px solid #242429;padding:18px;overflow:hidden}
-.bout-top{display:grid;grid-template-columns:90px 1fr 80px;gap:16px;align-items:center;margin-bottom:16px}
-.bout-order{font:800 12px Orbitron;color:#777}.weight{text-align:center;font:800 11px Orbitron;color:#aaa;text-transform:uppercase}.bout-status{text-align:right;font:800 11px Orbitron;color:#888}
-.fighter-grid{display:grid;grid-template-columns:1fr 80px 1fr;gap:16px;align-items:stretch}
-.fighter-card{position:relative;display:flex;flex-direction:column;min-width:0;background:linear-gradient(180deg,#111116,#08080b);border:1px solid #25252a;padding:18px}
-.fighter-card.blue{border-color:#20242d}.fighter-card.red{border-color:#302020}
-.fighter-head{display:flex;align-items:center;gap:14px;min-width:0}.fighter-card.blue .fighter-head{flex-direction:row-reverse;text-align:right}
-.fighter-card img{width:82px;height:82px;object-fit:cover;border-radius:50%;border:1px solid #3a3a40;background:#15151a;flex:0 0 auto}
-.fighter-name{font:900 clamp(18px,2.2vw,26px)/1.05 Montserrat,Arial,sans-serif}.fighter-side{font:800 10px Orbitron;letter-spacing:1px;color:#777;margin-bottom:6px}
-.fighter-record{font:800 13px Orbitron;color:#ddd;margin-top:6px}.fighter-rank{font:800 10px Orbitron;color:#e10600;margin-top:5px}
-.tape{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:16px}.tape-item{background:#0a0a0e;border:1px solid #202025;padding:9px}.tape-label{font:700 9px Orbitron;color:#777;text-transform:uppercase}.tape-value{font:800 12px Montserrat;margin-top:4px;color:#eee;word-break:break-word}
-.fighter-card.blue .tape{text-align:right}.fighter-card.blue .tape-item{text-align:right}\n.profile-live{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:5px 8px;border:1px solid #25252a;background:#0b0b0f;font:800 9px Orbitron;color:#777;letter-spacing:.6px}.profile-live.complete{border-color:#31313a;color:#ddd}.profile-live.partial{border-color:#3a3020;color:#c7aa73}.profile-live.pending{border-color:#29292e;color:#666}.profile-dot{width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block}
-.versus{display:flex;align-items:center;justify-content:center;font:900 18px Orbitron;color:#e10600}
-.result-row{margin-top:14px;padding-top:12px;border-top:1px solid #25252a;text-align:center}.result{font:800 12px Montserrat;color:#eee}.result.muted-result{color:#777}
-.sync-note{font-size:12px;color:#777;margin-top:12px}.profile-source{font:700 9px Orbitron;color:#666;margin-top:auto;padding-top:14px;text-transform:uppercase;letter-spacing:.6px}
-@media(max-width:900px){.event-grid{grid-template-columns:1fr}.fighter-grid{grid-template-columns:1fr}.versus{min-height:36px}.fighter-card.blue .fighter-head{flex-direction:row;text-align:left}.fighter-card.blue .tape,.fighter-card.blue .tape-item{text-align:left}}
-@media(max-width:620px){.bout-top{grid-template-columns:55px 1fr}.bout-status{grid-column:2;text-align:left}.fighter-head{align-items:flex-start}.fighter-card img{width:68px;height:68px}.tape{grid-template-columns:1fr 1fr}}
-</style>
-</head>
+.event-hero{position:relative;overflow:hidden;background:radial-gradient(circle at 80% 15%,rgba(225,6,0,.22),transparent 32%),linear-gradient(135deg,#050506,#101017);min-height:470px;display:flex;align-items:end}
+.event-wrap{position:relative;z-index:2;max-width:1500px;width:100%;margin:auto;padding:90px 24px 55px}.event-art{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.42}
+.event-title{font:900 clamp(40px,7vw,90px)/.94 Orbitron;letter-spacing:-3px;margin:12px 0}.event-title span{color:#e10600}.event-meta,.actions{display:flex;gap:8px;flex-wrap:wrap}.actions{margin-top:16px}
+.event-grid{display:grid;grid-template-columns:2fr 1fr;gap:18px}.panel{background:#0d0d10;border:1px solid #27272b;padding:24px}.panel h2,.panel h3{font-family:Orbitron}
+.scoreboard{display:grid;grid-template-columns:1fr 180px 1fr;gap:18px;align-items:center;text-align:center;padding:26px;background:linear-gradient(135deg,#0b0b0f,#111116);border:1px solid #29292f;margin-bottom:18px}
+.team-side{min-width:0}.team-logo{width:100px;height:100px;object-fit:contain;background:#fff1;border-radius:16px;padding:10px}.team-name{font:900 clamp(18px,3vw,30px) Montserrat;margin-top:12px}.team-meta{font-size:10px;color:#777;margin-top:6px}.score{font:900 clamp(38px,6vw,68px) Orbitron;letter-spacing:-3px}.score.live{color:#fff}.vs{font:900 13px Orbitron;color:#e10600}.status-live{color:#ff6375;border-color:#e10600!important;background:#1b080b!important}.status-final{color:#d5d5da}
+.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#e10600;box-shadow:0 0 12px #e10600;margin-right:7px}.live-banner{display:none;margin-bottom:18px;padding:12px 15px;border:1px solid #e10600;background:#15090b;font:800 10px Orbitron}.live-banner.show{display:block}
+.stat{padding:14px 0;border-bottom:1px solid #222}.stat:last-child{border-bottom:0}.muted{color:#888;line-height:1.65}.countdown{font:800 28px Orbitron}
+.timeline{position:relative;margin-top:15px;padding-left:22px}.timeline:before{content:"";position:absolute;left:5px;top:4px;bottom:4px;width:2px;background:#25252a}.tl{position:relative;padding:0 0 18px 14px}.tl:before{content:"";position:absolute;left:-20px;top:4px;width:10px;height:10px;border-radius:50%;background:#e10600}.tl-time{font:800 9px Orbitron;color:#777}.tl-title{font-weight:800;margin-top:4px}.tl-detail{font-size:10px;color:#888;margin-top:3px}
+.game-links{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:15px}.game-link{padding:12px;border:1px solid #242429;background:#09090c;text-decoration:none;color:#ddd;text-align:center;font:800 9px Orbitron}.game-link:hover{border-color:#e10600}
+.related{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.related a{padding:14px;border:1px solid #242429;background:#09090c;color:#eee;text-decoration:none}.related a:hover{border-color:#e10600}
+.fight-card-panel{margin-top:18px}.bout{background:#09090c;border:1px solid #242429;padding:18px;margin-top:10px}.fighter-grid{display:grid;grid-template-columns:1fr 60px 1fr;gap:12px;align-items:center}.fighter{padding:15px;background:#101015;border:1px solid #242429}.fighter-name{font:900 18px Montserrat}.fighter-record{font:800 10px Orbitron;color:#888;margin-top:6px}.fighter-image{width:64px;height:64px;border-radius:50%;object-fit:cover;float:left;margin-right:12px}.versus{text-align:center;font:900 16px Orbitron;color:#e10600}
+.empty-state{padding:30px;border:1px dashed #303036;text-align:center;color:#777}.warning{font-size:11px;color:#b0b0b8;margin-top:10px}
+@media(max-width:900px){.event-grid{grid-template-columns:1fr}.scoreboard{grid-template-columns:1fr 120px 1fr}.team-logo{width:75px;height:75px}.fighter-grid{grid-template-columns:1fr}.versus{padding:4px}.game-links{grid-template-columns:1fr}.related{grid-template-columns:1fr}}
+@media(max-width:560px){.scoreboard{grid-template-columns:1fr}.score{order:-1}.event-wrap{padding-top:65px}}
+</style></head>
 <body>
-<script>shell("combat")</script>
-<section class="event-hero"><div class="event-wrap">
- <div class="eyebrow">CROWRULES SPORTS • SPORTS 23.1 EVENT CENTER</div>
- <div id="hero">Loading Event Center…</div>
-</div></section>
-<section class="section">
- <div class="event-grid" id="eventBody"><div class="panel"><h2>Loading…</h2></div></div>
- <div id="fightCardMount"></div>
-</section>
+<script>shell("scores")</script>
+<section class="event-hero"><div class="event-art" id="heroArt"></div><div class="event-wrap"><div class="eyebrow">CROWRULES SPORTS • UNIVERSAL GAME CENTER</div><div id="hero">Loading Game Center…</div></div></section>
+<section class="section"><div id="liveBanner" class="live-banner"><span class="live-dot"></span><span id="liveText">LIVE EVENT</span></div><div id="scoreboard"></div><div class="event-grid"><div><div class="panel"><div class="eyebrow">GAME CENTER</div><h2>Timeline & Game Information</h2><div id="timeline"></div></div><div class="panel" style="margin-top:18px"><div class="eyebrow">RELATED</div><div id="related"></div></div></div><aside><div class="panel"><div class="eyebrow">EVENT STATUS</div><h3 id="statusTitle">—</h3><div class="countdown" id="countdown">—</div><p class="muted" id="statusCopy">Loading current event status.</p><div class="game-links"><a class="game-link" href="scores.html">SCORES</a><a class="game-link" href="teams.html">TEAMS</a><a class="game-link" href="combat.html">COMBAT</a></div><div class="actions"><button class="button small" id="shareBtn">SHARE</button><button class="button small secondary" id="refreshBtn">REFRESH</button></div></div><div class="panel" style="margin-top:18px"><div class="eyebrow">DETAILS</div><div id="details"></div></div></aside></div><div id="specialMount"></div></section>
 <script>
 loadSession();
-const params=new URLSearchParams(location.search),id=params.get("id");let eventRecord=null;
-function fmtDate(v){return v?new Date(v).toLocaleString([],{dateStyle:"full",timeStyle:"short"}):"TBD";}
-function statusClass(s){return String(s||"scheduled").toLowerCase();}
-function isUfc(){return String(eventRecord?.cr_sports_leagues?.code||"").toUpperCase()==="UFC";}
-function val(v,fallback="—"){return v===null||v===undefined||String(v).trim()===""?fallback:String(v);}
-function record(w,l,d){return (w??"—")+"-"+(l??"—")+(d!==null&&d!==undefined?"-"+d:"");}
-async function loadEvent(){
- if(!id){
-  document.getElementById("hero").innerHTML="<h1 class='event-title'>EVENT <span>SELECT AN EVENT</span></h1><p class='muted'>Open an event from Combat, Scores or Schedule to enter the Event Center.</p><div class='actions'><a class='button' href='combat.html'>OPEN COMBAT</a><a class='button secondary' href='schedule.html'>OPEN SCHEDULE</a></div>";
-  document.getElementById("eventBody").innerHTML="";
-  return;
- }
- let r=await sb.from("cr_sports_events").select("id,title,event_type,status,starts_at,ends_at,venue,city,broadcast,event_url,image_url,description,provider_updated_at,provider_event_id,cr_sports_leagues(code,name)").eq("id",id).maybeSingle();
- if((r.error||!r.data)&&id){
-   const byProvider=await sb.from("cr_sports_events").select("id,title,event_type,status,starts_at,ends_at,venue,city,broadcast,event_url,image_url,description,provider_updated_at,provider_event_id,cr_sports_leagues(code,name)").eq("provider_event_id",id).maybeSingle();
-   if(!byProvider.error&&byProvider.data)r=byProvider;
- }
- if(r.error||!r.data){document.getElementById("hero").innerHTML="<h1 class='event-title'>EVENT <span>NOT FOUND</span></h1><p class='muted'>This Event Center record could not be found.</p><div class='actions'><a class='button' href='combat.html'>BACK TO COMBAT</a></div>";return;}
- eventRecord=r.data;await renderEvent();
+const params=new URLSearchParams(location.search),id=params.get("id");let eventRecord=null,gameRecord=null,timer;
+const q=(s)=>document.querySelector(s), n=v=>Number.isFinite(Number(v))?Number(v):0;
+const fmt=v=>v?new Date(v).toLocaleString([],{dateStyle:"full",timeStyle:"short"}):"TBD";
+const escv=v=>esc(v==null?"":String(v));
+function stat(s){return String(s||"").toLowerCase().replace(/[- ]/g,"_")}
+function live(s){return ["live","in_progress","inprogress","playing","active","ongoing"].includes(stat(s))}
+function final(s){return ["final","completed","complete","closed","finished"].includes(stat(s))}
+function resultLabel(g,teamId){if(!final(g.status))return "";const home=g.home_team_id===teamId,me=home?n(g.home_score):n(g.away_score),op=home?n(g.away_score):n(g.home_score);return me>op?"W":me<op?"L":"T"}
+function teamObj(g,side){return side==="home"?g.home:g.away}
+function renderTeam(t,score){return '<div class="team-side">'+(t?.logo_url?'<img class="team-logo" src="'+escv(t.logo_url)+'" alt="" onerror="this.style.display=\'none\'">':'')+'<div class="team-name">'+escv(t?.name||t?.short_name||"TBD")+'</div><div class="team-meta">'+escv([t?.city,t?.state,t?.division].filter(Boolean).join(" • "))+'</div></div>'}
+async function load(){
+ if(!id){renderMissing();return}
+ let er=await sb.from("cr_sports_events").select("id,title,event_type,status,starts_at,ends_at,venue,city,broadcast,event_url,image_url,description,provider_updated_at,provider_event_id,cr_sports_leagues(code,name,sport)").eq("id",id).maybeSingle();
+ if(er.error||!er.data){const pr=await sb.from("cr_sports_events").select("id,title,event_type,status,starts_at,ends_at,venue,city,broadcast,event_url,image_url,description,provider_updated_at,provider_event_id,cr_sports_leagues(code,name,sport)").eq("provider_event_id",id).maybeSingle();if(!pr.error&&pr.data)er=pr}
+ if(er.data){eventRecord=er.data;await renderEvent();return}
+ const gr=await sb.from("cr_sports_games").select("id,league_id,home_team_id,away_team_id,starts_at,status,home_score,away_score,venue,broadcast,home:cr_sports_teams!cr_sports_games_home_team_id_fkey(id,name,short_name,city,state,division,logo_url),away:cr_sports_teams!cr_sports_games_away_team_id_fkey(id,name,short_name,city,state,division,logo_url),cr_sports_leagues(code,name,sport)").eq("id",id).maybeSingle();
+ if(gr.error||!gr.data){renderNotFound(gr.error?.message);return}
+ gameRecord=gr.data;await renderGame();
+}
+function renderMissing(){q("#hero").innerHTML='<h1 class="event-title">GAME <span>CENTER</span></h1><p class="muted">Open a game from Scores or a Team Hub to enter the Universal Game Center.</p><div class="actions"><a class="button" href="scores.html">OPEN SCORES</a><a class="button secondary" href="teams.html">OPEN TEAMS</a></div>';q("#scoreboard").innerHTML=""}
+function renderNotFound(msg){q("#hero").innerHTML='<h1 class="event-title">EVENT <span>NOT FOUND</span></h1><p class="muted">This Game Center record could not be found.</p><p class="warning">'+escv(msg||"")+'</p><div class="actions"><a class="button" href="scores.html">BACK TO SCORES</a></div>'}
+async function renderGame(){
+ const g=gameRecord,l=g.cr_sports_leagues||{},isLive=live(g.status),isFinal=final(g.status),title=(g.home?.short_name||g.home?.name||"Home")+" vs "+(g.away?.short_name||g.away?.name||"Away");
+ document.title=title+" | CrowRules Sports";
+ q("#hero").innerHTML='<div class="event-meta"><span class="tag">'+escv(l.code||"SPORTS")+'</span><span class="tag '+(isLive?"status-live":isFinal?"status-final":"")+'">'+escv(String(g.status||"SCHEDULED").toUpperCase())+'</span></div><h1 class="event-title">'+escv(g.home?.short_name||g.home?.name||"HOME")+' <span>VS</span> '+escv(g.away?.short_name||g.away?.name||"AWAY")+'</h1><p class="muted">'+escv(fmt(g.starts_at))+' • '+escv(g.venue||"Venue TBD")+'</p>';
+ q("#heroArt").style.backgroundImage="linear-gradient(90deg,rgba(5,5,6,.95),rgba(5,5,6,.45))";
+ q("#scoreboard").innerHTML='<div class="scoreboard">'+renderTeam(g.home,g.home_score)+'<div><div class="vs">'+(isLive?"LIVE":"FINAL"===String(g.status).toUpperCase()?"FINAL":"VS")+'</div><div class="score '+(isLive?"live":"")+'">'+n(g.home_score)+' — '+n(g.away_score)+'</div><div class="team-meta">'+escv(l.name||"League")+'</div></div>'+renderTeam(g.away,g.away_score)+'</div>';
+ q("#liveBanner").classList.toggle("show",isLive);q("#liveText").textContent=isLive?"LIVE NOW • "+title:"";
+ q("#statusTitle").textContent=String(g.status||"SCHEDULED").toUpperCase();q("#statusCopy").textContent=isLive?"This game is currently marked live by the CrowRules sports data feed.":isFinal?"The game has been marked final.":"Countdown to scheduled start.";
+ q("#details").innerHTML='<div class="stat"><strong>WHEN</strong><div class="muted">'+escv(fmt(g.starts_at))+'</div></div><div class="stat"><strong>VENUE</strong><div class="muted">'+escv(g.venue||"Venue TBD")+'</div></div><div class="stat"><strong>BROADCAST</strong><div class="muted">'+escv(g.broadcast||"Not listed")+'</div></div><div class="stat"><strong>LEAGUE</strong><div class="muted">'+escv(l.name||"Sports")+'</div></div>';
+ q("#timeline").innerHTML=timelineForGame(g);
+ q("#related").innerHTML='<div class="related"><a href="teams.html?id='+encodeURIComponent(g.home_team_id)+'"><b>'+escv(g.home?.name||"Home Team")+'</b><br><span class="muted">HOME TEAM HUB →</span></a><a href="teams.html?id='+encodeURIComponent(g.away_team_id)+'"><b>'+escv(g.away?.name||"Away Team")+'</b><br><span class="muted">AWAY TEAM HUB →</span></a></div>';
+ q("#specialMount").innerHTML="";
+ tick();bindActions();await loadSpecial(l.code);
+}
+function timelineForGame(g){const rows=[];rows.push({time:g.starts_at,title:"Scheduled Start",detail:(g.venue||"Venue TBD")+" • "+(g.broadcast||"Broadcast TBD")});if(live(g.status))rows.push({time:new Date().toISOString(),title:"LIVE STATUS",detail:"Game currently marked live in the sports feed."});if(final(g.status))rows.push({time:g.starts_at,title:"FINAL",detail:"Final score: "+n(g.home_score)+" — "+n(g.away_score)});return '<div class="timeline">'+rows.map(x=>'<div class="tl"><div class="tl-time">'+escv(fmt(x.time))+'</div><div class="tl-title">'+escv(x.title)+'</div><div class="tl-detail">'+escv(x.detail)+'</div></div>').join("")+'</div>'}
+async function loadSpecial(code){
+ const c=String(code||"").toUpperCase();
+ if(!["UFC","WWE","AEW"].includes(c))return;
+ if(!eventRecord)return;
+ q("#specialMount").innerHTML='<div class="panel fight-card-panel"><div class="eyebrow">'+escv(c)+' • EVENT DATA</div><h2>Loading Event Card…</h2><p class="muted">Resolving the synchronized combat data for this event.</p></div>';
+ if(c==="UFC"){const r=await sb.from("cr_sports_event_bouts").select("*").eq("event_id",eventRecord.id).order("bout_order",{ascending:true});if(r.error||!r.data?.length){q("#specialMount").innerHTML='<div class="panel fight-card-panel"><h2>FIGHT CARD PENDING</h2><p class="muted">The event is connected, but verified UFC bout records are not currently available.</p></div>';return}q("#specialMount").innerHTML='<div class="panel fight-card-panel"><div class="eyebrow">UFC • FIGHT CARD</div><h2>'+escv(eventRecord.title)+'</h2>'+r.data.map(b=>'<article class="bout"><div class="fighter-grid"><div class="fighter"><div class="fighter-name">'+escv(b.red_fighter||"TBD")+'</div><div class="fighter-record">'+escv([b.red_fighter_wins,b.red_fighter_losses,b.red_fighter_draws].filter(x=>x!=null).join("-")||"Record unavailable")+'</div></div><div class="versus">VS</div><div class="fighter"><div class="fighter-name">'+escv(b.blue_fighter||"TBD")+'</div><div class="fighter-record">'+escv([b.blue_fighter_wins,b.blue_fighter_losses,b.blue_fighter_draws].filter(x=>x!=null).join("-")||"Record unavailable")+'</div></div></div><div class="warning">'+escv(b.weight_class||"Bout")+' • '+escv(b.status||"Scheduled")+(b.winner?" • Winner: "+escv(b.winner):"")+'</div></article>').join("")+'</div>';return}
+ const r=await sb.from("cr_sports_wrestling_events").select("*").eq("organization",c).eq("provider_event_id",eventRecord.provider_event_id||"").maybeSingle();if(r.error||!r.data){q("#specialMount").innerHTML='<div class="panel fight-card-panel"><h2>COMBAT CARD PENDING</h2><p class="muted">The event is connected, but synchronized '+escv(c)+' match data has not arrived yet.</p></div>';return}
+ const m=await sb.from("cr_sports_wrestling_matches").select("*").eq("event_id",r.data.id).order("match_order",{ascending:true});q("#specialMount").innerHTML='<div class="panel fight-card-panel"><div class="eyebrow">'+escv(c)+' • MATCH CARD</div><h2>'+escv(eventRecord.title)+'</h2>'+((m.data||[]).map((x,i)=>'<article class="bout"><div class="fighter-grid"><div class="fighter"><div class="fighter-name">'+escv(x.red_name||"TBD")+'</div></div><div class="versus">VS</div><div class="fighter"><div class="fighter-name">'+escv(x.blue_name||"TBD")+'</div></div></div><div class="warning">MATCH '+(i+1)+' • '+escv(x.match_type||"Match")+' • '+escv(x.result||"Scheduled")+(x.winner_name?" • Winner: "+escv(x.winner_name):"")+'</div></article>').join("")||'<div class="empty-state">Match card pending.</div>')+'</div>';
 }
 async function renderEvent(){
- const e=eventRecord,league=e.cr_sports_leagues?.name||"SPORTS";document.title=e.title+" | CrowRules Sports";
- document.getElementById("hero").innerHTML='<div class="event-art" style="'+(e.image_url?"background-image:linear-gradient(90deg,rgba(5,5,6,.96),rgba(5,5,6,.55)),url(\''+esc(e.image_url)+'\')":"background:linear-gradient(135deg,#0d0d12,#181820)")+'"></div><div class="event-meta"><span class="tag">'+esc(league)+'</span><span class="tag '+statusClass(e.status)+'">'+esc(String(e.status||"scheduled").toUpperCase())+'</span><span class="tag">'+esc(e.event_type||"EVENT")+'</span></div><h1 class="event-title">'+esc(e.title)+'</h1><p class="muted">'+esc(e.description||"Dedicated CrowRules Sports Event Center.")+'</p><div class="actions"><button class="button" id="followBtn">FOLLOW EVENT</button>'+(e.event_url?'<a class="button secondary" href="'+esc(e.event_url)+'" target="_blank" rel="noopener">OFFICIAL EVENT</a>':"")+'<a class="button secondary" href="combat.html">BACK TO COMBAT</a></div>';
- document.getElementById("eventBody").innerHTML='<div class="panel"><div class="eyebrow">EVENT DETAILS</div><h2>'+esc(e.title)+'</h2><div class="stat"><strong>WHEN</strong><div class="muted">'+esc(fmtDate(e.starts_at))+'</div></div><div class="stat"><strong>VENUE</strong><div class="muted">'+esc(e.venue||"Venue TBD")+'</div></div><div class="stat"><strong>LOCATION</strong><div class="muted">'+esc(e.city||"Location TBD")+'</div></div><div class="stat"><strong>BROADCAST</strong><div class="muted">'+esc(e.broadcast||"See official event information")+'</div></div><div class="stat"><strong>LAST PROVIDER UPDATE</strong><div class="muted">'+esc(fmtDate(e.provider_updated_at))+'</div></div></div><aside class="panel"><div class="eyebrow">EVENT STATUS</div><h3>'+esc(String(e.status||"scheduled").toUpperCase())+'</h3><div class="countdown" id="countdown">--:--:--</div><p class="muted">Countdown to the scheduled start. Live status is controlled by the event data source.</p><div class="actions"><a class="button small" href="scores.html">SCORES</a><a class="button small secondary" href="schedule.html">SCHEDULE</a><button class="button small secondary" id="refreshEventBtn">REFRESH</button></div></aside>';
- await bindFollow();bindShare();document.getElementById("refreshEventBtn")?.addEventListener("click",()=>{const b=document.getElementById("refreshEventBtn");b.textContent="REFRESHING…";loadEvent().finally(()=>{if(b)b.textContent="REFRESH";});});tick();
- if(isUfc()) await loadUfcFightCard();
- else if(["WWE","AEW"].includes(String(eventRecord?.cr_sports_leagues?.code||"").toUpperCase())) await loadWrestlingCard();
- else document.getElementById("fightCardMount").innerHTML="";
+ const e=eventRecord,l=e.cr_sports_leagues||{},isLive=live(e.status),isFinal=final(e.status);document.title=e.title+" | CrowRules Sports";
+ q("#hero").innerHTML='<div class="event-meta"><span class="tag">'+escv(l.code||"SPORTS")+'</span><span class="tag '+(isLive?"status-live":isFinal?"status-final":"")+'">'+escv(String(e.status||"SCHEDULED").toUpperCase())+'</span><span class="tag">'+escv(e.event_type||"EVENT")+'</span></div><h1 class="event-title">'+escv(e.title)+'</h1><p class="muted">'+escv(e.description||"CrowRules Sports Universal Event Center")+'</p><div class="actions">'+(e.event_url?'<a class="button" href="'+escv(e.event_url)+'" target="_blank" rel="noopener">OFFICIAL EVENT</a>':"")+'<a class="button secondary" href="combat.html">BACK TO COMBAT</a></div>';
+ if(e.image_url)q("#heroArt").style.backgroundImage="linear-gradient(90deg,rgba(5,5,6,.94),rgba(5,5,6,.45)),url('"+String(e.image_url).replace(/'/g,"\\'")+"')";
+ q("#scoreboard").innerHTML='<div class="scoreboard"><div class="team-side"><div class="team-name">'+escv(e.title)+'</div><div class="team-meta">'+escv(l.name||"Event")+'</div></div><div><div class="vs">'+(isLive?"LIVE":isFinal?"FINAL":"EVENT")+'</div><div class="score">'+(isLive?"●":"—")+'</div></div><div class="team-side"><div class="team-name">'+escv(e.city||"CrowRules Sports")+'</div><div class="team-meta">'+escv(e.venue||"Venue TBD")+'</div></div></div>';
+ q("#timeline").innerHTML='<div class="timeline"><div class="tl"><div class="tl-time">'+escv(fmt(e.starts_at))+'</div><div class="tl-title">EVENT START</div><div class="tl-detail">'+escv(e.venue||"Venue TBD")+' • '+escv(e.broadcast||"Broadcast TBD")+'</div></div>'+(e.ends_at?'<div class="tl"><div class="tl-time">'+escv(fmt(e.ends_at))+'</div><div class="tl-title">SCHEDULED END</div></div>':"")+(e.provider_updated_at?'<div class="tl"><div class="tl-time">'+escv(fmt(e.provider_updated_at))+'</div><div class="tl-title">PROVIDER UPDATE</div><div class="tl-detail">Latest synchronized event metadata.</div></div>':"")+'</div>';
+ q("#related").innerHTML='<div class="related"><a href="scores.html"><b>SPORTS SCORES</b><br><span class="muted">OPEN SCOREBOARD →</span></a><a href="combat.html"><b>COMBAT CENTER</b><br><span class="muted">OPEN COMBAT →</span></a></div>';
+ q("#statusTitle").textContent=String(e.status||"SCHEDULED").toUpperCase();q("#statusCopy").textContent=isLive?"This event is currently live in the event feed.":isFinal?"This event is complete.":"Countdown to scheduled start.";
+ q("#details").innerHTML='<div class="stat"><strong>WHEN</strong><div class="muted">'+escv(fmt(e.starts_at))+'</div></div><div class="stat"><strong>VENUE</strong><div class="muted">'+escv(e.venue||"Venue TBD")+'</div></div><div class="stat"><strong>LOCATION</strong><div class="muted">'+escv(e.city||"Location TBD")+'</div></div><div class="stat"><strong>BROADCAST</strong><div class="muted">'+escv(e.broadcast||"Not listed")+'</div></div><div class="stat"><strong>LAST UPDATE</strong><div class="muted">'+escv(fmt(e.provider_updated_at))+'</div></div>';
+ q("#liveBanner").classList.toggle("show",isLive);q("#liveText").textContent=isLive?"LIVE NOW • "+e.title:"";tick();bindActions();await loadSpecial(l.code);
 }
-async function bindShare(){
- const b=document.getElementById("shareBtn");if(!b)return;
- b.onclick=async()=>{
-   const payload={title:eventRecord?.title||"CrowRules Sports Event",text:"Follow this event in the CrowRules Sports Event Center.",url:location.href};
-   try{if(navigator.share)await navigator.share(payload);else{await navigator.clipboard.writeText(location.href);b.textContent="LINK COPIED";setTimeout(()=>b.textContent="SHARE EVENT",1800);}}
-   catch(e){}
- };
-}
-async function bindFollow(){
- const b=document.getElementById("followBtn"),s=await sb.auth.getSession(),u=s.data.session?.user;
- if(!u){b.textContent="SIGN IN TO FOLLOW";b.onclick=()=>location.href="account.html";return;}
- const r=await sb.from("cr_sports_user_followed_events").select("event_id").eq("user_id",u.id).eq("event_id",eventRecord.id).maybeSingle();let following=!!r.data;b.textContent=following?"FOLLOWING":"FOLLOW EVENT";
- b.onclick=async()=>{if(following){await sb.from("cr_sports_user_followed_events").delete().eq("user_id",u.id).eq("event_id",eventRecord.id);following=false;}else{await sb.from("cr_sports_user_followed_events").upsert({user_id:u.id,event_id:eventRecord.id});following=true;}b.textContent=following?"FOLLOWING":"FOLLOW EVENT";};
-}
-async function loadWrestlingCard(){
- const mount=document.getElementById("fightCardMount");
- mount.innerHTML='<div class="panel fight-card-panel"><div class="eyebrow">WRESTLING EVENT CENTER</div><h2>Loading Match Card…</h2><p class="muted">Resolving the synchronized WWE / AEW event and loading its verified matches.</p></div>';
- const league=String(eventRecord?.cr_sports_leagues?.code||"").toUpperCase();
- const providerId=eventRecord?.provider_event_id;
- let wr=null;
- if(providerId){
-   wr=await sb.from("cr_sports_wrestling_events").select("*").eq("organization",league).eq("provider_event_id",providerId).maybeSingle();
- }
- if(wr?.error){
-   mount.innerHTML='<div class="panel fight-card-panel"><h2>WRESTLING DATA ERROR</h2><p class="muted">'+esc(wr.error.message)+'</p><div class="actions"><button class="button small" onclick="loadWrestlingCard()">RETRY</button></div></div>';
-   return;
- }
- if(!wr?.data){
-   mount.innerHTML='<div class="panel fight-card-panel"><div class="eyebrow">'+esc(league||"WRESTLING")+' EVENT CENTER</div><h2>EVENT DATA PENDING</h2><p class="muted">The public Sports event exists, but its synchronized wrestling-event record has not arrived yet.</p><div class="sync-note">Provider event ID: '+esc(providerId||"not available")+'</div></div>';
-   return;
- }
- const r=await sb.from("cr_sports_wrestling_matches").select("*").eq("event_id",wr.data.id).order("match_order",{ascending:true});
- if(r.error){
-   mount.innerHTML='<div class="panel fight-card-panel"><h2>MATCH CARD UNAVAILABLE</h2><p class="muted">'+esc(r.error.message)+'</p><div class="actions"><button class="button small" onclick="loadWrestlingCard()">RETRY</button></div></div>';
-   return;
- }
- const rows=r.data||[];
- if(!rows.length){
-   mount.innerHTML='<div class="panel fight-card-panel"><div class="eyebrow">'+esc(league||"WRESTLING")+' EVENT CENTER</div><h2>MATCH CARD PENDING</h2><p class="muted">The event is synchronized, but the current provider has not supplied verified match-card records for this event yet.</p><div class="progress-wrap"><div class="progress-top"><span>SYNC STATUS</span><span>EVENT CONNECTED</span></div><div class="sync-note">The Event Center is correctly linked to the wrestling-sync data layer. Match data will appear automatically when the provider supplies it.</div></div></div>';
-   return;
- }
- const titleFightCount=rows.filter(x=>x.title_fight).length;
- mount.innerHTML='<div class="panel fight-card-panel"><div class="fight-card-head"><div><div class="eyebrow">'+esc(league||"WRESTLING")+' • MATCH CARD</div><h2>'+esc(eventRecord.title)+'</h2></div><div class="tag">'+rows.length+' MATCH'+(rows.length===1?"":"ES")+(titleFightCount?" • "+titleFightCount+" TITLE":"")+'</div></div><p class="muted">Verified wrestling matches synchronized by CrowRules. Championship matches are highlighted when the provider identifies a title fight.</p><div class="card-toolbar"><button class="card-filter active" data-filter="all">ALL MATCHES</button><button class="card-filter" data-filter="title">TITLE MATCHES</button><button class="card-filter" data-filter="completed">COMPLETED</button></div><div class="fight-card-grid">'+rows.map((m,i)=>{
-   const title=!!m.title_fight;
-   const completed=!!m.winner_name||String(m.result||"").toLowerCase().includes("win")||String(m.status||"").toLowerCase()==="completed";
-   const filter=title?"title":completed?"completed":"all";
-   return '<article class="bout" data-card="'+filter+'"><div class="bout-top"><div class="bout-order">MATCH '+String(i+1).padStart(2,"0")+'</div><div class="weight">'+esc(m.match_type||"MATCH")+(title?" • TITLE":"")+'</div><div class="bout-status">'+esc(String(m.result||"SCHEDULED").toUpperCase())+'</div></div><div class="fighter-grid"><div class="fighter-card red"><div class="fighter-head"><div><div class="fighter-side">RED / FIRST COMPETITOR</div><div class="fighter-name">'+esc(m.red_name||"TBD")+'</div></div></div></div><div class="versus">VS</div><div class="fighter-card blue"><div class="fighter-head"><div><div class="fighter-side">BLUE / SECOND COMPETITOR</div><div class="fighter-name">'+esc(m.blue_name||"TBD")+'</div></div></div></div></div><div class="result-row"><div class="result">'+esc(m.winner_name||m.result||"SCHEDULED")+(m.method?" • "+esc(m.method):"")+'</div>'+(m.round?'<div class="sync-note">Round / time: '+esc(m.round)+'</div>':"")+(title?'<div class="sync-note" style="color:#e10600">CHAMPIONSHIP MATCH'+(m.champion_name?" • Champion: "+esc(m.champion_name):"")+'</div>':"")+(m.match_url?'<div class="actions"><a class="button small secondary" href="'+esc(m.match_url)+'" target="_blank" rel="noopener">MATCH SOURCE</a></div>':"")+'</div></article>';
- }).join("")+'</div><div class="sync-note">Source: '+esc(league||"WRESTLING")+' provider • synchronized through wrestling-sync • Last event update: '+esc(fmtDate(eventRecord.provider_updated_at))+'</div></div>';
- bindCardFilters();
-}
-async function syncUfcCard(){const result=await sb.functions.invoke("ufc-card-sync",{body:{event_id:eventRecord.id}});if(result.error)return{ok:false,error:result.error.message};return result.data||{ok:true};}
-function shouldRefresh(rows){if(!rows.length)return true;const latest=rows.reduce((m,r)=>Math.max(m,new Date(r.provider_updated_at||r.updated_at||0).getTime()),0);return !latest||Date.now()-latest>2*60*60*1000;}
-function findStat(obj,keys){if(!obj||typeof obj!=="object")return null;const wanted=keys.map(k=>k.toLowerCase().replace(/[^a-z0-9]/g,""));if(Array.isArray(obj)){for(const v of obj){const x=findStat(v,keys);if(x!=null)return x}return null}for(const [k,v] of Object.entries(obj)){const nk=k.toLowerCase().replace(/[^a-z0-9]/g,"");if(wanted.includes(nk)&&(typeof v!=="object"&&v!==null))return v;const x=findStat(v,keys);if(x!=null)return x}return null}
-function fighterIntel(slug,profiles,stats,fights){const p=profiles[slug]||{},st=stats[slug]?.stats||{},fh=fights[slug]?.fights||[];const vals=[["AGE",p.age],["COUNTRY",p.country],["WEIGHT CLASS",p.weight_class],["SIG. STRIKE %",findStat(st,["sigStrikeAccuracy","significantStrikeAccuracy","sigStrAccuracy"])],["TAKEDOWN %",findStat(st,["takedownAccuracy","tdAccuracy"])],["STRIKE DEFENSE",findStat(st,["strikeDefense","sigStrikeDefense"])],["TD DEFENSE",findStat(st,["takedownDefense","tdDefense"])]].filter(x=>x[1]!==null&&x[1]!==undefined&&String(x[1]).trim()!=="");const recent=fh.slice(0,5);return '<details class="intel"><summary>VIEW FIGHTER INTELLIGENCE</summary><div class="intel-grid">'+(vals.length?vals.map(x=>'<div class="intel-box"><div class="intel-label">'+esc(x[0])+'</div><div class="intel-value">'+esc(val(x[1]))+'</div></div>').join(""):'<div class="sync-note">Career statistics are still being enriched.</div>')+'</div><div class="history"><div class="intel-label">RECENT FIGHT HISTORY</div>'+(recent.length?recent.map(f=>'<div class="history-row"><span>'+esc(f.opponent||f.opponentName||f.event||"Previous bout")+'</span><strong>'+esc(f.result||f.outcome||"—")+'</strong></div>').join(""):'<div class="sync-note">Fight history is still being enriched.</div>')+'</div></details>'}
-function profileProgress(rows){let total=rows.length*2,complete=0;rows.forEach(b=>["red","blue"].forEach(side=>{const slug=side==="red"?b.red_fighter_slug:b.blue_fighter_slug,h=side==="red"?b.red_fighter_height:b.blue_fighter_height,st=side==="red"?b.red_fighter_stance:b.blue_fighter_stance,w=side==="red"?b.red_fighter_wins:b.blue_fighter_wins,l=side==="red"?b.red_fighter_losses:b.blue_fighter_losses;if(slug&&h&&st&&w!==null&&w!==undefined&&l!==null&&l!==undefined)complete++;}));return{total,complete,percent:total?Math.round(complete/total*100):0};}
-function bindCardFilters(){document.querySelectorAll(".card-filter").forEach(btn=>btn.addEventListener("click",()=>{document.querySelectorAll(".card-filter").forEach(x=>x.classList.remove("active"));btn.classList.add("active");const f=btn.dataset.filter;document.querySelectorAll(".bout").forEach(b=>{b.style.display=f==="all"?"":(b.dataset.card===f?"":"none");});}));}
-function fighterCard(b,side){
- const red=side==="red",name=red?b.red_fighter:b.blue_fighter,image=red?b.red_fighter_image_url:b.blue_fighter_image_url,height=red?b.red_fighter_height:b.blue_fighter_height,reach=red?b.red_fighter_reach:b.blue_fighter_reach,stance=red?b.red_fighter_stance:b.blue_fighter_stance,wins=red?b.red_fighter_wins:b.blue_fighter_wins,losses=red?b.red_fighter_losses:b.blue_fighter_losses,draws=red?b.red_fighter_draws:b.blue_fighter_draws,ranking=red?b.red_fighter_ranking:b.blue_fighter_ranking,slug=red?b.red_fighter_slug:b.blue_fighter_slug,recordText=record(wins,losses,draws);
- const started=!!slug&&(!!image||!!height||!!reach||!!stance||wins!==null&&wins!==undefined||losses!==null&&losses!==undefined||draws!==null&&draws!==undefined||!!ranking);
- const complete=!!slug&&!!height&&!!stance&&wins!==null&&wins!==undefined&&losses!==null&&losses!==undefined;
- const state=complete?"complete":started?"partial":"pending";
- const stateLabel=complete?"PROFILE ENRICHED":started?"PROFILE UPDATING":"ENRICHING PROFILE";
- return '<div class="fighter-card '+(red?"red":"blue")+'"><div class="fighter-head">'+(image?'<img src="'+esc(image)+'" alt="'+esc(name||"Fighter")+'" loading="lazy" onerror="this.style.display=\'none\'">':"")+'<div><div class="fighter-side">'+(red?"RED CORNER":"BLUE CORNER")+'</div><div class="fighter-name">'+esc(name||"TBD")+'</div><div class="fighter-record">'+esc(recordText)+'</div><div class="profile-live '+state+'"><span class="profile-dot"></span>'+stateLabel+'</div>'+(ranking?'<div class="fighter-rank">'+esc(ranking)+'</div>':"")+'</div></div><div class="tape"><div class="tape-item"><div class="tape-label">Height</div><div class="tape-value">'+esc(val(height))+'</div></div><div class="tape-item"><div class="tape-label">Reach</div><div class="tape-value">'+esc(val(reach))+'</div></div><div class="tape-item"><div class="tape-label">Stance</div><div class="tape-value">'+esc(val(stance))+'</div></div><div class="tape-item"><div class="tape-label">Record</div><div class="tape-value">'+esc(recordText)+'</div></div></div><div class="profile-source">'+(complete?"Cito fighter profile • live-enriched":started?"Cito fighter profile • enrichment in progress":"Cito fighter profile • waiting for enrichment")+'</div></div>';
-}
-function renderBout(b,intel={}){
- const order=String(b.bout_order||"").padStart(2,"0"),n=Number(b.bout_order||0)-1000,cardType=n<=5?"main":"prelim",badge=n===1?"<span class='card-badge'>MAIN EVENT</span>":n===2?"<span class='card-badge'>CO-MAIN</span>":"",result=b.winner?'<div class="result">'+esc(b.winner)+(b.method?" • "+esc(b.method):"")+(b.finish_round?" • R"+esc(b.finish_round):"")+(b.finish_time?" "+esc(b.finish_time):"")+'</div>':'<div class="result muted-result">'+esc(String(b.status||"SCHEDULED").toUpperCase())+'</div>';
- return '<article class="bout" data-card="'+cardType+'"><div class="bout-top"><div class="bout-order">CARD '+esc(order)+badge+'</div><div class="weight">'+esc(b.weight_class||"UFC BOUT")+'</div><div class="bout-status">'+esc(String(b.status||"SCHEDULED").toUpperCase())+'</div></div><div class="fighter-grid">'+fighterCard(b,"red")+'<div class="versus">VS</div>'+fighterCard(b,"blue")+'</div><div class="result-row">'+result+(b.referee?'<div class="sync-note">Referee: '+esc(b.referee)+'</div>':"")+fighterIntel(b.red_fighter_slug,intel.profiles||{},intel.stats||{},intel.fights||{})+fighterIntel(b.blue_fighter_slug,intel.profiles||{},intel.stats||{},intel.fights||{})+'</div></article>';
-}
-let liveTimer=null;
-function liveValue(v){return v===undefined||v===null||v===""?"—":esc(v)}
-function findLive(obj,keys){if(!obj||typeof obj!=="object")return null;for(const k of keys){if(obj[k]!==undefined&&obj[k]!==null)return obj[k]}for(const v of Object.values(obj)){if(v&&typeof v==="object"){const x=findLive(v,keys);if(x!==null)return x}}return null}
-async function loadLiveCommand(){
- if(!eventRecord||!isUfc())return;
- const box=document.getElementById("live-command"); if(!box)return;
- try{
-  const r=await fetch("https://api.citoapi.com/api/v1/ufc/live/events",{headers:{"Accept":"application/json"}});
-  if(!r.ok){box.classList.remove("active");return}
-  const p=await r.json(); const list=Array.isArray(p)?p:(p?.data||p?.events||[]);
-  const target=String(eventRecord.provider_event_id||"").toLowerCase(); const ev=list.find(x=>target && [x.eventSlug,x.slug,x.event_id,x.eventId].some(v=>String(v||"").toLowerCase()===target));
-  if(!ev){box.classList.remove("active");return}
-  const bouts=ev.bouts||ev.activeBouts||[]; const b=bouts[0]; if(!b){box.classList.remove("active");return}
-  const live=await fetch("https://api.citoapi.com/api/v1/ufc/live/"+encodeURIComponent(b.boutId||b.id||b.providerBoutId),{headers:{"Accept":"application/json"}});
-  if(!live.ok){box.classList.remove("active");return}
-  const data=await live.json(); const x=data?.data||data;
-  const status=String(findLive(x,["status","state"])||"").toLowerCase();
-  if(!["live","in_progress","inprogress","round"].some(v=>status.includes(v))){box.classList.remove("active");return}
-  box.classList.add("active");
-  document.getElementById("live-bout-title").textContent=String(findLive(x,["title","boutTitle"])||"LIVE BOUT");
-  document.getElementById("live-clock").textContent=String(findLive(x,["clock","roundClock","time"])||"--:--");
-  const round=findLive(x,["round","currentRound"]); document.getElementById("live-status").textContent="ROUND "+(round||"—")+" • "+(findLive(x,["lagSeconds"])??"—")+"s data lag";
-  const rs=findLive(x,["red","redCorner","redFighter","red_stats"])||{}; const bs=findLive(x,["blue","blueCorner","blueFighter","blue_stats"])||{};
-  const rsig=findLive(rs,["significantStrikes","sigStrikes","sig_strikes"]); const bsig=findLive(bs,["significantStrikes","sigStrikes","sig_strikes"]);
-  document.getElementById("live-red-stat").textContent="RED • SIG STRIKES "+liveValue(rsig);
-  document.getElementById("live-blue-stat").textContent="BLUE • SIG STRIKES "+liveValue(bsig);
- }catch(e){box.classList.remove("active")}
-}
-async function loadUfcFightCard(){
- const mount=document.getElementById("fightCardMount");mount.innerHTML='<div class="panel fight-card-panel"><div class="eyebrow">SPORTS 23.1 • UFC FIGHT CARD</div><h2>Loading Fighter Profiles…</h2><p class="muted">Building individual fighter cards and tale-of-the-tape panels.</p></div>';
- let r=await sb.from("cr_sports_event_bouts").select("*").eq("event_id",eventRecord.id).order("bout_order",{ascending:true}),rows=r.data||[];
- if(r.error){mount.innerHTML='<div class="panel fight-card-panel"><h2>FIGHT CARD UNAVAILABLE</h2><p class="muted">'+esc(r.error.message)+'</p></div>';return;}
- let sync=null;
- if(shouldRefresh(rows)){sync=await syncUfcCard();if(sync?.ok){r=await sb.from("cr_sports_event_bouts").select("*").eq("event_id",eventRecord.id).order("bout_order",{ascending:true});rows=r.data||[];}}
- if(!rows.length){
-   const detail=sync?.error?'<div class="sync-note" style="color:#ff7777">Cito sync error: '+esc(sync.error)+'</div>':"";
-   mount.innerHTML='<div class="panel fight-card-panel"><div class="eyebrow">SPORTS 23.1 • UFC FIGHT CARD</div><h2>FIGHT CARD PENDING</h2><p class="muted">CrowRules has not stored any bouts for this event yet. The page attempted a live Cito sync.</p>'+detail+'<div class="actions"><button class="button" id="retryCito">RETRY CITO SYNC</button></div><div class="sync-note">Source: Cito UFC API • fighter profiles are cached server-side.</div></div>';
-   document.getElementById("retryCito")?.addEventListener("click",async()=>{const b=document.getElementById("retryCito");b.disabled=true;b.textContent="SYNCING…";const s=await syncUfcCard();if(s?.ok){await loadUfcFightCard();}else{b.disabled=false;b.textContent="RETRY CITO SYNC";mount.querySelector(".sync-note").insertAdjacentHTML("beforeend",s?.error?'<div style="color:#ff7777;margin-top:8px">Cito sync error: '+esc(s.error)+'</div>':"");}});
-   return;
- }
- const slugs=[...new Set(rows.flatMap(b=>[b.red_fighter_slug,b.blue_fighter_slug]).filter(Boolean))];const [pr,st,fh]=await Promise.all([sb.from("cr_sports_ufc_fighters").select("*").in("slug",slugs),sb.from("cr_sports_ufc_fighter_stats").select("*").in("slug",slugs),sb.from("cr_sports_ufc_fighter_fights").select("*").in("slug",slugs)]);const intel={profiles:Object.fromEntries((pr.data||[]).map(x=>[x.slug,x])),stats:Object.fromEntries((st.data||[]).map(x=>[x.slug,x])),fights:Object.fromEntries((fh.data||[]).map(x=>[x.slug,x]))};mount.innerHTML='<div class="panel fight-card-panel"><div class="fight-card-head"><div><div class="eyebrow">SPORTS 23.1 • UFC FIGHT CARD</div><h2>'+esc(eventRecord.title)+'</h2></div><div class="tag">'+rows.length+' BOUTS</div></div><p class="muted">Every matchup has a live Tale of the Tape with progressive fighter intelligence.</p><div class="progress-wrap"><div class="progress-top"><span>FIGHTER PROFILE ENRICHMENT</span><span>'+profileProgress(rows).complete+'/'+profileProgress(rows).total+' COMPLETE</span></div><div class="progress-track"><div class="progress-fill" style="width:'+profileProgress(rows).percent+'%"></div></div></div><div class="card-toolbar"><button class="card-filter active" data-filter="all">ALL BOUTS</button><button class="card-filter" data-filter="main">MAIN CARD</button><button class="card-filter" data-filter="prelim">PRELIMS</button></div><div id="live-command" class="live-strip"><div class="live-main"><div><div class="eyebrow">LIVE FIGHT COMMAND CENTER</div><div id="live-bout-title" class="live-round">LIVE BOUT</div></div><div id="live-clock" class="live-clock">--:--</div></div><div class="live-stats"><div class="live-stat" id="live-red-stat">RED —</div><div class="live-stat" id="live-blue-stat">BLUE —</div></div><div class="sync-note" id="live-status">Waiting for live Cito data…</div></div><div class="fight-card-grid">'+rows.map(b=>renderBout(b,intel)).join("")+'</div><div class="sync-note">Cito UFC API • profiles, career stats and fight history progressively cached in Supabase.</div></div>';bindCardFilters();
-}
-function tick(){const el=document.getElementById("countdown");if(!el||!eventRecord?.starts_at)return;const d=new Date(eventRecord.starts_at)-Date.now();if(d<=0){el.textContent="LIVE / STARTED";return;}const h=Math.floor(d/36e5),m=Math.floor(d%36e5/6e4),s=Math.floor(d%6e4/1e3);el.textContent=h+"h "+String(m).padStart(2,"0")+"m "+String(s).padStart(2,"0")+"s";}
-loadEvent();setInterval(tick,1000);
-if(id){sb.channel("sports23-event-"+id).on("postgres_changes",{event:"UPDATE",schema:"public",table:"cr_sports_events",filter:"id=eq."+id},p=>{if(p.new){eventRecord={...eventRecord,...p.new};renderEvent();}}).on("postgres_changes",{event:"UPDATE",schema:"public",table:"cr_sports_event_bouts",filter:"event_id=eq."+id},()=>{if(isUfc())loadUfcFightCard();}).on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_wrestling_matches"},()=>{if(["WWE","AEW"].includes(String(eventRecord?.cr_sports_leagues?.code||"").toUpperCase()))loadWrestlingCard();}).on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_ufc_fighter_stats"},()=>{if(isUfc())loadUfcFightCard();}).on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_ufc_fighter_fights"},()=>{if(isUfc())loadUfcFightCard();}).subscribe();}
-</script>
-<script>footer()</script>
-</body>
-</html>
+function tick(){const el=q("#countdown");if(!el)return;const d=new Date((gameRecord||eventRecord)?.starts_at||0)-Date.now();if(live((gameRecord||eventRecord)?.status)){el.textContent="LIVE NOW";return}if(final((gameRecord||eventRecord)?.status)){el.textContent="FINAL";return}if(!d||d<=0){el.textContent="STARTING";return}const h=Math.floor(d/36e5),m=Math.floor(d%36e5/6e4),s=Math.floor(d%6e4/1e3);el.textContent=h+"h "+String(m).padStart(2,"0")+"m "+String(s).padStart(2,"0")+"s"}
+function bindActions(){q("#refreshBtn").onclick=()=>{q("#refreshBtn").textContent="REFRESHING…";load().finally(()=>q("#refreshBtn").textContent="REFRESH")};q("#shareBtn").onclick=async()=>{try{if(navigator.share)await navigator.share({title:document.title,url:location.href});else{await navigator.clipboard.writeText(location.href);q("#shareBtn").textContent="LINK COPIED";setTimeout(()=>q("#shareBtn").textContent="SHARE",1500)}}catch(e){}}}
+load();timer=setInterval(tick,1000);
+if(id){sb.channel("cr-game-center-"+id).on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_games",filter:"id=eq."+id},()=>load()).on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_events",filter:"id=eq."+id},()=>load()).on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_event_bouts",filter:"event_id=eq."+id},()=>load()).subscribe();}
+</script><script>footer()</script>
+</body></html>
