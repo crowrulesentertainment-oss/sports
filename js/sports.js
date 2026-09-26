@@ -177,8 +177,8 @@ function bindAuth(){
 }
 
 window.CROW_SPORTS_NAV_VERSION="17.0";
-window.CrowRulesSports={
- version:"17.0",supabase:sb,$,$$,esc,sleep,timeout:withTimeout,normalizeError,reportError,
+async function loadPodcastAudio({limit=24,query=""}={}){\n try{\n  const term=String(query||"").trim();\n  let pq=sb.from("podcasts").select("id,title,slug,description,artwork_url,author_name,category,status,created_at").eq("status","published").order("created_at",{ascending:false}).limit(Math.max(1,Math.min(100,limit)));\n  if(term)pq=pq.or("title.ilike.%"+term+"%,author_name.ilike.%"+term+"%,category.ilike.%"+term+"%");\n  const [shows,episodes]=await Promise.all([withTimeout(pq,10000,"Podcast shows"),withTimeout(sb.from("podcast_episodes").select("id,podcast_id,title,slug,description,audio_url,thumbnail_url,episode_number,season_number,published_at,duration_seconds,play_count,status,podcasts(id,title,slug,artwork_url,author_name,category)").eq("status","published").order("published_at",{ascending:false}).limit(Math.max(1,Math.min(100,limit))),10000,"Podcast episodes")]);\n  if(shows.error)throw shows.error;\n  if(episodes.error)throw episodes.error;\n  return {shows:shows.data||[],episodes:episodes.data||[],source:"CrowRules Podcasting",repository:"crowrulesentertainment-oss/podcasting",repositoryUrl:"https://github.com/crowrulesentertainment-oss/podcasting"};\n }catch(error){reportError("loadPodcastAudio",error);return {shows:[],episodes:[],source:"CrowRules Podcasting",repository:"crowrulesentertainment-oss/podcasting",repositoryUrl:"https://github.com/crowrulesentertainment-oss/podcasting",error:normalizeError(error)};}\n}\n\nwindow.CrowRulesSports={
+ version:"17.0",supabase:sb,$,$,esc,sleep,timeout:withTimeout,normalizeError,reportError,loadPodcastAudio,
  getSession,loadSession,loadUnread,signIn,signUp,signOut,shell,footer,startBadgeRealtime,
  storage:{get:storageGet,set:storageSet,remove:storageRemove}
 };
