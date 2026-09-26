@@ -70,10 +70,10 @@ async function loadOfficialEvents(code,target){
  const root=document.getElementById(target);
  const lid=(await sb.from("cr_sports_leagues").select("id").eq("code",code).single()).data?.id;
  if(!lid){root.innerHTML='<div class="fight"><small>League not configured.</small></div>';return}
- const r=await sb.from("cr_sports_events").select("title,event_type,status,starts_at,venue,city,event_url").eq("league_id",lid).order("starts_at").limit(12);
+ const r=await sb.from("cr_sports_events").select("id,title,event_type,status,starts_at,venue,city,event_url").eq("league_id",lid).order("starts_at").limit(12);
  if(r.error){root.innerHTML='<div class="fight"><small>'+esc(r.error.message)+'</small></div>';return}
  const rows=r.data||[];
- root.innerHTML=rows.length?rows.map(e=>'<div class="fight"><strong>'+esc(e.title)+'</strong><small>'+esc(String(e.status||"scheduled").toUpperCase())+' • '+esc(e.starts_at?new Date(e.starts_at).toLocaleString():"TBD")+(e.venue?" • "+esc(e.venue):"")+(e.city?" • "+esc(e.city):"")+'</small>'+(e.event_url?'<div class="actions"><a class="button small" href="'+esc(e.event_url)+'" target="_blank" rel="noopener">OFFICIAL EVENT</a></div>':'')+'</div>').join(""):'<div class="fight"><small>No synchronized events yet.</small></div>';
+ root.innerHTML=rows.length?rows.map(e=>'<div class="fight"><strong>'+esc(e.title)+'</strong><small>'+esc(String(e.status||"scheduled").toUpperCase())+' • '+esc(e.starts_at?new Date(e.starts_at).toLocaleString():"TBD")+(e.venue?" • "+esc(e.venue):"")+(e.city?" • "+esc(e.city):"")+'</small>'+(e.event_url?'<div class="actions"><a class="button small" href="event.html?id='+encodeURIComponent(e.id)+'">EVENT CENTER</a>'+(e.event_url?'<a class="button small" href="'+esc(e.event_url)+'" target="_blank" rel="noopener">OFFICIAL EVENT</a>':'')+'</div>':'')+'</div>').join(""):'<div class="fight"><small>No synchronized events yet.</small></div>';
 }
 loadSession();loadCombat();loadOfficialEvents("WWE","wweEvents");loadOfficialEvents("AEW","aewEvents");
 </script>
