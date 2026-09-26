@@ -6,7 +6,7 @@
 <title>Rankings & Champions | CrowRules Sports</title>
 <link rel="stylesheet" href="css/sports.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/sports.js?v=20.0"></script>
+<script src="js/sports.js?v=22.0"></script>
 <style>
 .rank-hero{padding:76px 24px 48px;border-bottom:1px solid #26100f;background:radial-gradient(circle at 75% 20%,rgba(225,6,0,.2),transparent 30%),linear-gradient(135deg,#080808,#0d0909)}
 .rank-hero h1{font:900 clamp(42px,7vw,84px)/.95 Orbitron;margin:12px 0;letter-spacing:-3px}.rank-hero h1 span{color:#e10600}
@@ -20,9 +20,9 @@
 
 <section class="rank-hero">
  <div class="hero">
-  <div class="eyebrow">CROWRULES SPORTS • UFC INTELLIGENCE</div>
+  <div class="eyebrow">CROWRULES SPORTS • UNIVERSAL RANKINGS</div>
   <h1>RANKINGS <span>&</span> CHAMPIONS</h1>
-  <p class="muted">A dedicated combat rankings center. CrowRules stores official Meta UFC rankings and champions separately from the fight-card engine, with automatic server-side synchronization through Cito.</p>
+  <p class="muted">The Universal Rankings Center follows the active CrowRules Sports league. UFC uses the synchronized combat rankings feed; other leagues use their current standings as the ranking board.</p>
   <div class="controls">
    <select id="source" class="input"><option value="meta">META UFC RANKINGS</option></select>
    <select id="division" class="input"><option value="all">ALL DIVISIONS</option></select>
@@ -67,6 +67,26 @@ function render(){
  }).join("")||'<div class="loading">No ranking data is available yet.</div>';
 }
 async function loadRankings(){
+ const active=String(window.CROW_SPORTS_LEAGUE||"all").toUpperCase();
+ if(active!=="ALL" && active!=="UFC"){
+  const league=await window.CrowRulesSports.resolveLeague(active);
+  if(!league){allRows=[];render();return;}
+  const r=await sb.from("cr_sports_standings").select("rank,division,season,team:cr_sports_teams(name,short_name),updated_at").eq("league_id",league.id).order("season",{ascending:false}).order("rank",{ascending:true}).limit(500);
+  if(r.error){document.getElementById("boards").innerHTML='<div class="loading">'+escv(r.error.message)+'</div>';return;}
+  const groups=new Map();
+  (r.data||[]).forEach(x=>{
+   const key=x.division||"ALL";
+   if(!groups.has(key))groups.set(key,{division:key,champion_name:"",rankings:[],provider_updated_at:x.updated_at});
+   groups.get(key).rankings.push({rank:x.rank,name:x.team?.name||x.team?.short_name||"Team",slug:x.team?.short_name||"",rankChange:0});
+  });
+  allRows=[...groups.values()];
+  document.getElementById("source").innerHTML='<option value="standings">STANDINGS RANKINGS</option>';
+  document.getElementById("updated").textContent=allRows[0]?.provider_updated_at?"UPDATED "+new Date(allRows[0].provider_updated_at).toLocaleString():"CURRENT STANDINGS";
+  document.getElementById("division").innerHTML='<option value="all">ALL DIVISIONS</option>'+allRows.map(x=>'<option value="'+escv(x.division)+'">'+escv(x.division)+'</option>').join("");
+  render();
+  return;
+ }
+ document.getElementById("source").innerHTML='<option value="meta">META UFC RANKINGS</option>';
  const r=await sb.from("cr_sports_ufc_rankings").select("source,division,champion_name,rankings,provider_updated_at").eq("source","meta").order("division");
  if(r.error){document.getElementById("boards").innerHTML='<div class="loading">'+escv(r.error.message)+'</div>';return;}
  allRows=r.data||[];
@@ -78,6 +98,7 @@ async function loadRankings(){
 }
 document.getElementById("division").addEventListener("change",render);
 loadSession();loadRankings();
+document.addEventListener("crowrules:leaguechange",()=>loadRankings());
 const ch=sb.channel("sports-ufc-rankings-page").on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_ufc_rankings"},loadRankings).subscribe();
 </script>
 <script>footer()</script>
