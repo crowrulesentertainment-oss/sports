@@ -3,15 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Combat & Wrestling | CrowRules Sports</title>
+<title>Combat Center | CrowRules Sports</title>
 <link rel="stylesheet" href="css/sports.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/sports.js"></script>
 <style>
-.hero{min-height:430px;background:radial-gradient(circle at 80% 20%,rgba(225,6,0,.18),transparent 28%),radial-gradient(circle at 15% 70%,rgba(73,217,255,.08),transparent 30%),linear-gradient(135deg,#050506,#0d0d12)}
-.hero-inner{max-width:1500px;margin:auto;padding:80px 24px}.hero h1{font:900 clamp(48px,8vw,92px)/.92 Orbitron;margin:15px 0;letter-spacing:-4px}.hero h1 span{color:#e10600}.hero p{max-width:800px;color:#999;line-height:1.8}
-.section{padding:48px 24px}.wrap{max-width:1500px;margin:auto}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card{background:#0d0d0f;border:1px solid #27272b;padding:20px}.card h2,.card h3{font-family:Orbitron}.card p{color:#888;font-size:11px;line-height:1.7}.badge{display:inline-block;padding:5px 8px;border:1px solid #333;font:800 8px Orbitron;letter-spacing:1px;color:#aaa}.fight{margin-top:12px;padding:12px;border-top:1px solid #222}.fight strong{font:800 11px Orbitron}.fight small{display:block;color:#666;margin-top:5px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-@media(max-width:900px){.grid3{grid-template-columns:1fr}}
+:root{--combat-red:#e10600;--combat-bg:#050506;--combat-panel:#0d0d11;--combat-line:#25252b}
+body{background:var(--combat-bg)}
+.hero{min-height:560px;position:relative;overflow:hidden;background:radial-gradient(circle at 78% 18%,rgba(225,6,0,.24),transparent 28%),radial-gradient(circle at 18% 70%,rgba(73,217,255,.08),transparent 30%),linear-gradient(135deg,#040405,#111117)}
+.hero:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,5,6,.98),rgba(5,5,6,.62),rgba(5,5,6,.9)),repeating-linear-gradient(135deg,transparent 0 80px,rgba(255,255,255,.018) 80px 82px);pointer-events:none}
+.hero-inner{position:relative;z-index:1;max-width:1500px;margin:auto;padding:92px 24px 70px}
+.hero h1{font:900 clamp(50px,8vw,104px)/.9 Orbitron;margin:16px 0;letter-spacing:-5px}.hero h1 span{color:var(--combat-red)}
+.hero p{max-width:900px;color:#999;line-height:1.85}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.section{padding:48px 24px}.wrap{max-width:1500px;margin:auto}
+.section-head{display:flex;justify-content:space-between;gap:20px;align-items:end;flex-wrap:wrap}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.metric,.card,.event-panel{background:var(--combat-panel);border:1px solid var(--combat-line)}
+.metric{padding:18px}.metric-label{font:800 9px Orbitron;color:#777;letter-spacing:1px}.metric-value{font:900 30px Orbitron;margin-top:8px}.metric-note{color:#666;font-size:10px;margin-top:5px}
+.card{padding:22px}.card h2,.card h3{font-family:Orbitron}.card p{color:#888;font-size:11px;line-height:1.75}
+.badge,.status-pill{display:inline-flex;align-items:center;padding:5px 8px;border:1px solid #333;font:800 8px Orbitron;letter-spacing:1px;color:#aaa}.status-pill.live{border-color:var(--combat-red);color:#fff;background:#230908}.status-pill.completed{color:#777}.status-pill.scheduled{color:#aaa}
+.promo{min-height:190px;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(145deg,#111117,#08080b);border:1px solid #29292f;padding:22px;position:relative;overflow:hidden}
+.promo:after{content:"";position:absolute;width:180px;height:180px;border-radius:50%;right:-70px;top:-70px;border:1px solid rgba(225,6,0,.35);box-shadow:0 0 80px rgba(225,6,0,.08)}
+.promo h2{font:900 30px Orbitron;margin:10px 0}.promo p{max-width:360px;position:relative;z-index:1}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0;padding:12px;background:#09090c;border:1px solid #222}
+.toolbar input,.toolbar select{background:#111116;border:1px solid #2b2b31;color:#ddd;padding:11px 12px;min-width:170px;font:600 11px Montserrat}
+.toolbar button{border:1px solid #29292f;background:#111116;color:#aaa;padding:10px 12px;font:800 9px Orbitron;cursor:pointer}.toolbar button.active{border-color:var(--combat-red);color:#fff;background:#171114}
+.event-list{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.event-panel{padding:18px;display:flex;flex-direction:column;min-height:215px;position:relative;overflow:hidden}
+.event-panel.live{border-color:#4b2020}.event-panel h3{font:800 18px/1.2 Montserrat;margin:12px 0 7px}.event-panel p{color:#777;font-size:10px;line-height:1.6;margin:0}
+.event-top{display:flex;justify-content:space-between;gap:8px;align-items:start}.event-date{font:800 10px Orbitron;color:#aaa}.event-location{color:#666;font-size:10px;margin-top:7px}.event-actions{margin-top:auto}
+.wrestling-row{display:grid;grid-template-columns:90px 1fr auto;gap:15px;align-items:center;padding:14px 0;border-bottom:1px solid #222}.wrestling-row:last-child{border-bottom:0}.org-mark{font:900 12px Orbitron;color:var(--combat-red)}.wrestling-name{font:800 13px Montserrat}.wrestling-meta{color:#666;font-size:10px;margin-top:5px}
+.empty{padding:28px;text-align:center;border:1px dashed #303036;background:#09090c;color:#777;font-size:11px}.error{color:#ff7777}
+.sync{margin-top:16px;color:#666;font-size:10px;line-height:1.6}.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#555;margin-right:7px}.dot.live{background:var(--combat-red);box-shadow:0 0 12px rgba(225,6,0,.7)}
+@media(max-width:1050px){.grid4{grid-template-columns:repeat(2,1fr)}.event-list{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.grid3,.event-list{grid-template-columns:1fr}.grid4{grid-template-columns:1fr 1fr}.wrestling-row{grid-template-columns:70px 1fr}.wrestling-row .button{grid-column:2}}
+@media(max-width:520px){.grid4{grid-template-columns:1fr}.hero-inner{padding-top:70px}.toolbar input,.toolbar select{width:100%}}
 </style>
 </head>
 <body>
@@ -19,64 +46,143 @@
 
 <section class="hero">
  <div class="hero-inner">
-  <div class="eyebrow">CROWRULES SPORTS • COMBAT / WRESTLING</div>
+  <div class="eyebrow">CROWRULES SPORTS • COMBAT CENTER 24.0</div>
   <h1>FIGHT <span>NIGHT</span></h1>
-  <p>UFC, WWE and AEW are first-class CrowRules Sports event categories. Team-game tables remain reserved for team competition; combat and wrestling use the dedicated event model for cards, shows, venues, schedules and official event links.</p>
+  <p>One dedicated command center for UFC, WWE and AEW. Browse synchronized events, open full Event Centers, track live and upcoming action, and keep combat sports separated from the traditional team-game scoreboard.</p>
   <div class="actions">
-   <a class="button" href="scores.html">LIVE SCORES</a>
-   <a class="button secondary" href="schedule.html">FULL SCHEDULE</a>
-  </div>
+   <a class="button" href="schedule.html">FULL SCHEDULE</a>
+   <a class="button secondary" href="scores.html">LIVE SCORES</a>
+   <button class="button secondary" id="shareBtn">SHARE COMBAT CENTER</button>
+ </div>
  </div>
 </section>
 
 <section class="section">
  <div class="wrap">
-  <div class="section-head"><div><div class="eyebrow">CROWRULES SPORTS</div><h2>UFC • WWE • AEW</h2></div></div>
+  <div class="grid4">
+   <div class="metric"><div class="metric-label">UFC EVENTS</div><div class="metric-value" id="ufcCount">—</div><div class="metric-note">CrowRules synchronized</div></div>
+   <div class="metric"><div class="metric-label">WWE EVENTS</div><div class="metric-value" id="wweCount">—</div><div class="metric-note">Event calendar</div></div>
+   <div class="metric"><div class="metric-label">AEW EVENTS</div><div class="metric-value" id="aewCount">—</div><div class="metric-note">Event calendar</div></div>
+   <div class="metric"><div class="metric-label">NEXT EVENT</div><div class="metric-value" id="nextCount">—</div><div class="metric-note" id="nextNote">Finding next event…</div></div>
+  </div>
+ </div>
+</section>
+
+<section class="section" style="padding-top:0">
+ <div class="wrap">
   <div class="grid3">
-   <article class="card">
-    <span class="badge">UFC • ESPN FEED</span>
-    <h2>UFC</h2>
-    <p>UFC is registered as a major combat league. UFC bouts can be synchronized into the CrowRules game/event fabric from the ESPN public sports feed.</p>
-    <div id="ufcGames"><div class="loading">Loading UFC events…</div></div>
-    <div class="actions"><a class="button small" href="https://www.ufc.com/events" target="_blank" rel="noopener">UFC EVENTS</a></div>
-   </article>
-   <article class="card">
-    <span class="badge">WWE • OFFICIAL CALENDAR</span>
-    <h2>WWE</h2>
-    <p>WWE is registered as a major wrestling league. CrowRules keeps the category separate from traditional team sports so events can be represented correctly.</p>
-    <div id="wweEvents"><div class="loading">Loading WWE events…</div></div>
-    <div class="actions"><a class="button small" href="https://www.wwe.com/events" target="_blank" rel="noopener">WWE EVENTS</a></div>
-   </article>
-   <article class="card">
-    <span class="badge">AEW • OFFICIAL CALENDAR</span>
-    <h2>AEW</h2>
-    <p>AEW is registered as a major wrestling league. Its event calendar is surfaced separately from the team-game scoreboard.</p>
-    <div id="aewEvents"><div class="loading">Loading AEW events…</div></div>
-    <div class="actions"><a class="button small" href="https://www.allelitewrestling.com/aew-events" target="_blank" rel="noopener">AEW EVENTS</a></div>
-   </article>
+   <article class="promo"><div><span class="badge">UFC</span><h2>OCTAGON</h2><p>UFC event records, fight cards and fighter intelligence connect through the CrowRules Event Center.</p></div><div class="actions"><button class="button small" data-jump="UFC">VIEW UFC</button></div></article>
+   <article class="promo"><div><span class="badge">WWE</span><h2>WRESTLING</h2><p>WWE shows are handled as wrestling events, with a dedicated synchronized match-card layer.</p></div><div class="actions"><button class="button small" data-jump="WWE">VIEW WWE</button></div></article>
+   <article class="promo"><div><span class="badge">AEW</span><h2>WRESTLING</h2><p>AEW events live in the same wrestling architecture while remaining independently filterable and source-linked.</p></div><div class="actions"><button class="button small" data-jump="AEW">VIEW AEW</button></div></article>
+  </div>
+ </div>
+</section>
+
+<section class="section" id="events">
+ <div class="wrap">
+  <div class="section-head"><div><div class="eyebrow">EVENT COMMAND</div><h2>UPCOMING & RECENT FIGHTS</h2></div><div class="muted" id="eventStatus">Loading combat schedule…</div></div>
+  <div class="toolbar">
+   <input id="search" type="search" placeholder="Search events, venues, cities…">
+   <select id="org"><option value="ALL">ALL ORGANIZATIONS</option><option value="UFC">UFC</option><option value="WWE">WWE</option><option value="AEW">AEW</option></select>
+   <select id="window"><option value="upcoming">UPCOMING</option><option value="all">ALL EVENTS</option><option value="live">LIVE</option><option value="completed">COMPLETED</option></select>
+   <button id="refreshBtn">REFRESH</button>
+  </div>
+  <div id="eventList" class="event-list"><div class="empty">Loading synchronized combat events…</div></div>
+ </div>
+</section>
+
+<section class="section" style="padding-top:0">
+ <div class="wrap">
+  <div class="section-head"><div><div class="eyebrow">WRESTLING LAYER</div><h2>WWE • AEW EVENT FEED</h2></div><div class="muted">Dedicated wrestling-event records</div></div>
+  <div class="card" style="margin-top:18px"><div id="wrestlingList"><div class="empty">Loading wrestling events…</div></div></div>
+  <div class="sync"><span class="dot"></span>Wrestling cards are populated from the CrowRules wrestling synchronization layer. An event may appear before verified match-card data is supplied by its provider.</div>
+ </div>
+</section>
+
+<section class="section" style="padding-top:0">
+ <div class="wrap">
+  <div class="card">
+   <div class="eyebrow">HOW THE CENTER WORKS</div>
+   <h2>EVENT → CARD → CHAMPIONSHIP</h2>
+   <p class="muted">Public sports events are the entry point. UFC events can expose stored bout and fighter intelligence. WWE and AEW events resolve into the dedicated wrestling-event record before loading synchronized matches. Championship and reign information is kept in the wrestling data layer rather than mixed into team-game scoring.</p>
+   <div class="actions"><a class="button small" href="event.html">OPEN EVENT CENTER</a><a class="button small secondary" href="championships.html">CHAMPIONSHIPS</a></div>
   </div>
  </div>
 </section>
 
 <script>
+loadSession();
+
+let combatEvents=[],refreshing=false;
+
+function escLocal(v){return typeof esc==="function"?esc(v):String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
+function leagueCode(row){return String(row?.cr_sports_leagues?.code||row?.league_code||"").toUpperCase();}
+function statusOf(row){return String(row?.status||"scheduled").toLowerCase();}
+function fmt(v){return v?new Date(v).toLocaleString([],{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"}):"TBD";}
+function isLive(e){const s=statusOf(e);return s==="live"||s==="in_progress"||s==="inprogress"||s.includes("live");}
+function isCompleted(e){const s=statusOf(e);return ["completed","final","finished","closed"].includes(s)||s.includes("final");}
+function matchesWindow(e,w){if(w==="live")return isLive(e);if(w==="completed")return isCompleted(e);if(w==="upcoming")return !isCompleted(e)&&new Date(e.starts_at||0)>=new Date(Date.now()-6*60*60*1000);return true;}
+
 async function loadCombat(){
- const root=document.getElementById("ufcGames");
- const lid=(await sb.from("cr_sports_leagues").select("id").eq("code","UFC").single()).data?.id;
- const r=await sb.from("cr_sports_events").select("id,title,event_type,status,starts_at,venue,city,event_url").eq("league_id",lid).order("starts_at").limit(12);
- if(r.error){root.innerHTML='<div class="fight"><small>'+esc(r.error.message)+'</small></div>';return}
- const rows=r.data||[];
- root.innerHTML=rows.length?rows.map(e=>'<div class="fight"><strong>'+esc(e.title)+'</strong><small>'+esc(String(e.status||"scheduled").toUpperCase())+' • '+esc(e.starts_at?new Date(e.starts_at).toLocaleString():"TBD")+(e.venue?" • "+esc(e.venue):"")+(e.city?" • "+esc(e.city):"")+'</small><div class="actions"><a class="button small" href="event.html?id='+encodeURIComponent(e.id)+'">EVENT CENTER</a>'+(e.event_url?'<a class="button small" href="'+esc(e.event_url)+'" target="_blank" rel="noopener">OFFICIAL EVENT</a>':'')+'</div></div>').join(""):'<div class="fight"><small>No UFC events are synchronized yet.</small></div>';
+ const root=document.getElementById("eventList");
+ root.innerHTML='<div class="empty">Loading synchronized combat events…</div>';
+ const leagueRes=await sb.from("cr_sports_leagues").select("id,code,name").in("code",["UFC","WWE","AEW"]);
+ if(leagueRes.error){root.innerHTML='<div class="empty error">'+escLocal(leagueRes.error.message)+'</div>';return;}
+ const leagues=leagueRes.data||[],ids=leagues.map(x=>x.id).filter(Boolean);
+ if(!ids.length){root.innerHTML='<div class="empty">UFC, WWE and AEW are not configured in the Sports league registry yet.</div>';return;}
+ const r=await sb.from("cr_sports_events").select("id,title,event_type,status,starts_at,ends_at,venue,city,broadcast,event_url,image_url,description,provider_event_id,provider_updated_at,cr_sports_leagues(code,name)").in("league_id",ids).order("starts_at",{ascending:true}).limit(150);
+ if(r.error){root.innerHTML='<div class="empty error">'+escLocal(r.error.message)+'</div>';return;}
+ combatEvents=r.data||[];
+ renderCombat();
+ updateMetrics();
+ await loadWrestling();
 }
-async function loadOfficialEvents(code,target){
- const root=document.getElementById(target);
- const lid=(await sb.from("cr_sports_leagues").select("id").eq("code",code).single()).data?.id;
- if(!lid){root.innerHTML='<div class="fight"><small>League not configured.</small></div>';return}
- const r=await sb.from("cr_sports_events").select("id,title,event_type,status,starts_at,venue,city,event_url").eq("league_id",lid).order("starts_at").limit(12);
- if(r.error){root.innerHTML='<div class="fight"><small>'+esc(r.error.message)+'</small></div>';return}
- const rows=r.data||[];
- root.innerHTML=rows.length?rows.map(e=>'<div class="fight"><strong>'+esc(e.title)+'</strong><small>'+esc(String(e.status||"scheduled").toUpperCase())+' • '+esc(e.starts_at?new Date(e.starts_at).toLocaleString():"TBD")+(e.venue?" • "+esc(e.venue):"")+(e.city?" • "+esc(e.city):"")+'</small>'+(e.event_url?'<div class="actions"><a class="button small" href="event.html?id='+encodeURIComponent(e.id)+'">EVENT CENTER</a>'+(e.event_url?'<a class="button small" href="'+esc(e.event_url)+'" target="_blank" rel="noopener">OFFICIAL EVENT</a>':'')+'</div>':'')+'</div>').join(""):'<div class="fight"><small>No synchronized events yet.</small></div>';
+
+function renderCombat(){
+ const root=document.getElementById("eventList"),q=document.getElementById("search").value.trim().toLowerCase(),org=document.getElementById("org").value,w=document.getElementById("window").value;
+ let rows=combatEvents.filter(e=>(org==="ALL"||leagueCode(e)===org)&&matchesWindow(e,w)&&((e.title||"")+" "+(e.venue||"")+" "+(e.city||"")).toLowerCase().includes(q));
+ rows.sort((a,b)=>new Date(a.starts_at||0)-new Date(b.starts_at||0));
+ document.getElementById("eventStatus").textContent=rows.length+" event"+(rows.length===1?"":"s")+" shown";
+ if(!rows.length){root.innerHTML='<div class="empty">No combat events match the current filters.</div>';return;}
+ root.innerHTML=rows.slice(0,60).map(e=>{
+   const code=leagueCode(e),live=isLive(e),done=isCompleted(e),sc=live?"live":done?"completed":"scheduled";
+   return '<article class="event-panel '+(live?"live":"")+'">'+
+    '<div class="event-top"><span class="badge">'+escLocal(code||"COMBAT")+'</span><span class="status-pill '+sc+'"><span class="dot '+(live?"live":"")+'"></span>'+escLocal(String(e.status||"SCHEDULED").toUpperCase())+'</span></div>'+
+    '<h3>'+escLocal(e.title||"Combat Event")+'</h3>'+
+    '<div class="event-date">'+escLocal(fmt(e.starts_at))+'</div>'+
+    '<div class="event-location">'+escLocal([e.venue,e.city].filter(Boolean).join(" • ")||"Location TBD")+'</div>'+
+    '<p style="margin-top:10px">'+escLocal(e.broadcast||e.description||"CrowRules Sports Event Center")+'</p>'+
+    '<div class="event-actions"><div class="actions"><a class="button small" href="event.html?id='+encodeURIComponent(e.id)+'">EVENT CENTER</a>'+(e.event_url?'<a class="button small secondary" href="'+escLocal(e.event_url)+'" target="_blank" rel="noopener">SOURCE</a>':"")+'</div></div>'+
+   '</article>';
+ }).join("");
 }
-loadSession();loadCombat();loadOfficialEvents("WWE","wweEvents");loadOfficialEvents("AEW","aewEvents");
+
+function updateMetrics(){
+ for(const code of ["UFC","WWE","AEW"])document.getElementById(code.toLowerCase()+"Count").textContent=combatEvents.filter(e=>leagueCode(e)===code).length;
+ const next=combatEvents.filter(e=>!isCompleted(e)&&new Date(e.starts_at||0)>=new Date()).sort((a,b)=>new Date(a.starts_at)-new Date(b.starts_at))[0];
+ if(next){document.getElementById("nextCount").textContent=leagueCode(next)||"—";document.getElementById("nextNote").textContent=(next.title||"Next event")+" • "+fmt(next.starts_at);}
+ else{document.getElementById("nextCount").textContent="—";document.getElementById("nextNote").textContent="No upcoming event synchronized";}
+}
+
+async function loadWrestling(){
+ const root=document.getElementById("wrestlingList");
+ const r=await sb.from("cr_sports_wrestling_events").select("*").in("organization",["WWE","AEW"]).order("starts_at",{ascending:true}).limit(80);
+ if(r.error){root.innerHTML='<div class="empty error">'+escLocal(r.error.message)+'</div>';return;}
+ const rows=r.data||[];
+ if(!rows.length){root.innerHTML='<div class="empty">No dedicated WWE / AEW wrestling-event records are currently synchronized.</div>';return;}
+ root.innerHTML=rows.map(e=>'<div class="wrestling-row"><div class="org-mark">'+escLocal(e.organization||"—")+'</div><div><div class="wrestling-name">'+escLocal(e.name||"Wrestling Event")+'</div><div class="wrestling-meta">'+escLocal(fmt(e.starts_at))+' • '+escLocal([e.venue,e.city,e.country].filter(Boolean).join(" • ")||"Location TBD")+'</div></div><a class="button small" href="event.html?id='+encodeURIComponent(e.provider_event_id||"")+'">OPEN</a></div>').join("");
+}
+
+function applyJump(code){document.getElementById("org").value=code;document.getElementById("window").value="upcoming";document.getElementById("events").scrollIntoView({behavior:"smooth"});renderCombat();}
+
+document.getElementById("search").addEventListener("input",renderCombat);
+document.getElementById("org").addEventListener("change",renderCombat);
+document.getElementById("window").addEventListener("change",renderCombat);
+document.getElementById("refreshBtn").addEventListener("click",async()=>{if(refreshing)return;refreshing=true;const b=document.getElementById("refreshBtn");b.disabled=true;b.textContent="REFRESHING…";try{await loadCombat();}finally{refreshing=false;b.disabled=false;b.textContent="REFRESH";}});
+document.querySelectorAll("[data-jump]").forEach(b=>b.addEventListener("click",()=>applyJump(b.dataset.jump)));
+document.getElementById("shareBtn").addEventListener("click",async()=>{try{if(navigator.share)await navigator.share({title:"CrowRules Sports Combat Center",text:"UFC • WWE • AEW Combat Center",url:location.href});else{await navigator.clipboard.writeText(location.href);document.getElementById("shareBtn").textContent="LINK COPIED";setTimeout(()=>document.getElementById("shareBtn").textContent="SHARE COMBAT CENTER",1600);}}catch(e){}});
+
+loadCombat();
 </script>
 <script>footer()</script>
 </body>
