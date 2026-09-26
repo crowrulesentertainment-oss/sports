@@ -1,16 +1,213 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Standings | CrowRules Sports</title><link rel="stylesheet" href="css/sports.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/sports.js"></script><style>
-.toolbar{display:flex;gap:12px;flex-wrap:wrap}.toolbar>*{min-height:44px}.meta{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.chip{padding:7px 11px;border:1px solid #ffffff18;border-radius:999px;font-size:11px;background:#ffffff06}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:16px}.card{border:1px solid #ffffff12;border-radius:18px;overflow:hidden;background:#ffffff03}.head{padding:15px 17px;border-bottom:1px solid #ffffff10;display:flex;justify-content:space-between}.head h3{margin:0}.head small,.sub{opacity:.55}.table{width:100%;border-collapse:collapse;font-size:12px}.table th,.table td{padding:9px 8px;border-bottom:1px solid #ffffff08;text-align:right}.table th:first-child,.table td:first-child,.table th:nth-child(2),.table td:nth-child(2){text-align:left}.team{font-weight:700}.sub{font-size:10px}.detail{display:block;font-size:9px;opacity:.58;text-align:left;padding:0 8px 8px 34px}.pos{color:#67f5a4}.neg{color:#ff7373}.status{font-size:12px;opacity:.65;margin:10px 0 16px}.empty{padding:30px;text-align:center;opacity:.6}
-</style></head><body><script>shell("standings")</script>
-<section class="hero"><div class="eyebrow">CROWRULES SPORTS • SPORTSDATAIO</div><h1>STANDINGS</h1><p>Conference, division, record and playoff intelligence from the normalized CrowRules sports feed.</p></section>
-<section class="section"><div class="toolbar"><select id="league"></select><input class="input" id="season" value="2026" maxlength="4" style="max-width:140px"><select id="conference"><option value="">All conferences</option></select><select id="division"><option value="">All divisions</option></select><button class="btn" id="refresh">REFRESH</button></div><div class="meta" id="meta"></div><div class="status" id="status">Loading standings…</div><div class="grid" id="groups"></div></section>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="CrowRules Sports Standings Center — league, conference, division and team records.">
+<title>Standings Center | CrowRules Sports</title>
+<link rel="stylesheet" href="css/sports.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/sports.js"></script>
+<style>
+:root{--red:#ff304f;--muted:#8992a7}
+body{background:#050508}
+.st-hero{position:relative;overflow:hidden;padding:72px 0 42px;background:radial-gradient(circle at 80% 20%,#ff304f16,transparent 35%),radial-gradient(circle at 15% 70%,#6d4aff12,transparent 32%)}
+.st-hero:after{content:"";position:absolute;inset:auto -10% -80px;height:160px;background:linear-gradient(180deg,transparent,#050508);pointer-events:none}
+.st-kicker{font:700 11px/1 Orbitron,Arial;letter-spacing:.24em;color:#ff5d74;margin-bottom:14px}
+.st-hero h1{font:800 clamp(42px,7vw,84px)/.95 Orbitron,Arial;margin:0;letter-spacing:-.04em}
+.st-hero p{max-width:760px;color:#aeb6c7;font-size:15px;line-height:1.7;margin:18px 0 0}
+.st-wrap{max-width:1450px;margin:auto;padding:28px 20px 60px}
+.st-toolbar{position:sticky;top:0;z-index:20;padding:14px 0;background:#050508e8;backdrop-filter:blur(14px);border-bottom:1px solid #ffffff0b}
+.st-controls{display:grid;grid-template-columns:1.4fr .75fr .9fr .9fr auto;gap:10px}
+.st-controls select,.st-controls input{width:100%;box-sizing:border-box}
+.st-quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.st-quick button{border:1px solid #ffffff12;background:#ffffff05;color:#dce1eb;border-radius:999px;padding:9px 13px;cursor:pointer;font:700 10px Orbitron,Arial}
+.st-quick button.active{border-color:#ff304f66;background:#ff304f12;color:#fff}
+.st-summary{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:20px 0}
+.stat{border:1px solid #ffffff10;border-radius:16px;padding:15px;background:linear-gradient(135deg,#ffffff06,#ffffff02)}
+.stat b{display:block;font:800 23px Orbitron,Arial}.stat span{display:block;color:#8f98aa;font-size:10px;margin-top:5px;letter-spacing:.08em}
+.st-status{display:flex;justify-content:space-between;gap:15px;align-items:center;color:#8992a7;font-size:12px;margin:8px 0 18px}
+.pulse{display:inline-block;width:7px;height:7px;border-radius:50%;background:#ff304f;box-shadow:0 0 12px #ff304f;margin-right:7px}
+.league-section{margin:26px 0 38px}
+.league-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:12px}
+.league-head h2{font:800 22px Orbitron,Arial;margin:0}.league-head p{margin:5px 0 0;color:#7f899d;font-size:11px}
+.league-actions{display:flex;gap:7px}.mini-btn{border:1px solid #ffffff12;background:#ffffff05;color:#dbe1ec;padding:8px 11px;border-radius:9px;font-size:10px;text-decoration:none}
+.table-card{border:1px solid #ffffff10;border-radius:18px;overflow:auto;background:linear-gradient(180deg,#ffffff05,#ffffff01);box-shadow:0 12px 50px #0008}
+.st-table{width:100%;min-width:850px;border-collapse:collapse;font-size:12px}
+.st-table th{padding:12px 9px;color:#778197;font:700 9px Orbitron,Arial;letter-spacing:.08em;text-align:right;background:#08090e;border-bottom:1px solid #ffffff0d;position:sticky;top:0}
+.st-table td{padding:10px 9px;border-bottom:1px solid #ffffff08;text-align:right;vertical-align:middle}
+.st-table th:first-child,.st-table td:first-child{text-align:center}.st-table th:nth-child(2),.st-table td:nth-child(2){text-align:left}
+.st-table tbody tr:hover{background:#ffffff05}
+.rank{font:800 11px Orbitron,Arial;color:#aab3c5}.rank.top{color:#fff}
+.team-cell{display:flex;align-items:center;gap:10px;min-width:220px}.logo{width:30px;height:30px;object-fit:contain;border-radius:7px;background:#ffffff08}.team-name{font-weight:800;color:#f4f6fb}.team-sub{font-size:9px;color:#727c90;margin-top:3px}
+.team-link{color:inherit;text-decoration:none}.team-link:hover .team-name{text-decoration:underline}
+.record{font-weight:800}.pct{color:#dce2ed}.positive{color:#65e6a1}.negative{color:#ff7186}
+.badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}.badge{font-size:8px;padding:3px 5px;border-radius:5px;background:#ffffff09;color:#9da6b8}.badge.red{color:#ff8092;background:#ff304f12}
+.detail-row td{padding:0 10px 10px;border-bottom:1px solid #ffffff0a}.detail{display:flex;gap:16px;flex-wrap:wrap;padding-left:52px;color:#727d90;font-size:9px}
+.empty{padding:45px 20px;text-align:center;color:#7d8799}.error{padding:18px;border:1px solid #ff304f33;background:#ff304f0a;border-radius:14px;color:#ff9aaa}
+.loading{padding:35px;text-align:center;color:#7d8799}.skeleton{height:13px;background:#ffffff08;border-radius:5px;margin:10px 0}
+.note{color:#667084;font-size:10px;line-height:1.6;margin-top:12px}
+@media(max-width:900px){.st-controls{grid-template-columns:1fr 1fr}.st-controls .wide{grid-column:1/-1}.st-summary{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.st-wrap{padding:20px 12px 45px}.st-hero{padding:50px 0 30px}.st-controls{grid-template-columns:1fr}.st-summary{grid-template-columns:1fr 1fr}.st-status{align-items:flex-start;flex-direction:column}.league-head{align-items:flex-start;flex-direction:column}.st-table{min-width:780px}}
+</style>
+</head>
+<body>
+<script>shell("standings")</script>
+
+<section class="st-hero">
+  <div class="st-wrap">
+    <div class="st-kicker">CROWRULES SPORTS • STANDINGS CENTER</div>
+    <h1>STANDINGS</h1>
+    <p>One scoreboard for the CrowRules Sports universe. Browse normalized league tables by season, conference and division, with team records, scoring, streaks and postseason status.</p>
+  </div>
+</section>
+
+<main class="st-wrap">
+  <div class="st-toolbar">
+    <div class="st-controls">
+      <select id="league" class="input" aria-label="League"></select>
+      <input id="season" class="input" inputmode="numeric" maxlength="4" value="2026" placeholder="Season" aria-label="Season">
+      <select id="conference" class="input" aria-label="Conference"><option value="">All conferences</option></select>
+      <select id="division" class="input" aria-label="Division"><option value="">All divisions</option></select>
+      <input id="search" class="input wide" placeholder="Search teams, cities or divisions…" aria-label="Search standings">
+      <select id="sort" class="input" aria-label="Sort standings">
+        <option value="rank">Sort: Rank</option><option value="winpct">Sort: Win %</option><option value="wins">Sort: Wins</option><option value="points">Sort: Points For</option><option value="diff">Sort: Point Differential</option><option value="streak">Sort: Streak</option><option value="team">Sort: Team</option>
+      </select>
+      <button id="refresh" class="btn">REFRESH</button>
+    </div>
+    <div class="st-quick" id="sports"></div>
+  </div>
+
+  <section class="st-summary" id="summary"></section>
+  <div class="st-status"><span id="status"><span class="pulse"></span>Loading standings…</span><span id="updated">—</span></div>
+  <div id="content"><div class="loading"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div></div>
+  <div class="note">Standings are displayed from the CrowRules Supabase sports feed. Conference/division groupings and postseason flags are shown when supplied by the underlying data; no missing values are invented.</div>
+</main>
+
 <script>
 loadSession();
-const $=s=>document.querySelector(s), esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])), N=v=>Number(v??0);
-let rows=[];
-function record(r){return N(r.wins)+"-"+N(r.losses)+(N(r.ties)?"-"+N(r.ties):"")}
-async function leagues(){const{data,error}=await sb.from("cr_sports_leagues").select("id,name,code").eq("is_active",true).order("name");if(error)return $("#status").textContent=error.message;$("#league").innerHTML='<option value="">All leagues</option>'+(data||[]).map(x=>'<option value="'+x.id+'">'+esc(x.code)+' — '+esc(x.name)+'</option>').join("");const nfl=(data||[]).find(x=>x.code==="NFL");if(nfl)$("#league").value=nfl.id}
-function filters(){const cs=[...new Set(rows.map(x=>x.conference).filter(Boolean))].sort(),ds=[...new Set(rows.map(x=>x.division).filter(Boolean))].sort();const c=$("#conference").value,d=$("#division").value;$("#conference").innerHTML='<option value="">All conferences</option>'+cs.map(x=>'<option>'+esc(x)+'</option>').join("");$("#division").innerHTML='<option value="">All divisions</option>'+ds.map(x=>'<option>'+esc(x)+'</option>').join("");$("#conference").value=cs.includes(c)?c:"";$("#division").value=ds.includes(d)?d:""}
-function render(){const c=$("#conference").value,d=$("#division").value,filtered=rows.filter(x=>(!c||x.conference===c)&&(!d||x.division===d)),groups={};filtered.forEach(x=>{const k=(x.conference||"LEAGUE")+" • "+(x.division||"TABLE");(groups[k]??=[]).push(x)});$("#meta").innerHTML='<span class="chip">'+filtered.length+' TEAMS</span><span class="chip">SEASON '+esc($("#season").value)+'</span><span class="chip">PF '+filtered.reduce((a,x)=>a+N(x.points_for),0)+'</span><span class="chip">PA '+filtered.reduce((a,x)=>a+N(x.points_against),0)+'</span>';$("#groups").innerHTML=Object.keys(groups).sort().map(k=>{const list=groups[k].sort((a,b)=>N(a.rank)-N(b.rank));return '<article class="card"><div class="head"><h3>'+esc(k)+'</h3><small>'+list.length+' TEAMS</small></div><table class="table"><thead><tr><th>RK</th><th>TEAM</th><th>W-L</th><th>WIN%</th><th>PF</th><th>PA</th><th>STK</th></tr></thead><tbody>'+list.map(x=>{const t=x.cr_sports_teams||{},st=N(x.streak),flags=[x.clinched_division&&"DIV",x.clinched_wild_card&&"WC",x.clinched_bye&&"BYE",x.eliminated_from_playoff_contention&&"ELIM"].filter(Boolean);return '<tr><td>'+N(x.rank)+'</td><td><div class="team">'+esc(t.short_name||t.name)+'</div><div class="sub">'+esc(t.city||"")+' '+esc(t.name||"")+'</div></td><td>'+record(x)+'</td><td>'+((N(x.win_pct)*100).toFixed(1))+'%</td><td>'+N(x.points_for)+'</td><td>'+N(x.points_against)+'</td><td class="'+(st>0?"pos":st<0?"neg":"")+'">'+(st>0?"+":"")+st+'</td></tr><tr><td colspan="7"><div class="detail">CONF '+N(x.conference_wins)+'-'+N(x.conference_losses)+' • DIV '+N(x.division_wins)+'-'+N(x.division_losses)+' • HOME '+N(x.home_wins)+'-'+N(x.home_losses)+' • AWAY '+N(x.away_wins)+'-'+N(x.away_losses)+' • NET '+N(x.net_points)+' • TD '+N(x.touchdowns)+(flags.length?" • "+flags.join(" • "):"")+'</div></td></tr>'}).join("")+'</tbody></table></article>'}).join("")||'<div class="empty">No standings loaded for this selection.</div>';$("#status").textContent=filtered.length?"Updated "+new Date().toLocaleTimeString():"No standings loaded."}
-async function load(){let q=sb.from("cr_sports_standings").select("*,cr_sports_teams(name,short_name,city),cr_sports_leagues(name,code)").eq("season",String($("#season").value)).order("rank");if($("#league").value)q=q.eq("league_id",$("#league").value);const{data,error}=await q;if(error){$("#status").textContent=error.message;return}rows=data||[];filters();render()}
-$("#league").onchange=load;$("#season").onchange=load;$("#conference").onchange=render;$("#division").onchange=render;$("#refresh").onclick=load;(async()=>{await leagues();await load()})();
-</script><script>footer()</script></body></html>
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+const num=v=>Number(v??0)||0;
+const pct=v=>{const n=num(v);return (n<=1?n*100:n).toFixed(1)+"%";};
+const record=x=>num(x.wins)+"-"+num(x.losses)+(num(x.ties)?"-"+num(x.ties):"");
+const diff=x=>num(x.points_for)-num(x.points_against);
+
+let rows=[], leagues=[], activeSport="all", favoriteTeams=new Set(JSON.parse(localStorage.getItem("cr_standings_favorites")||"[]"));
+
+function saveFav(){localStorage.setItem("cr_standings_favorites",JSON.stringify([...favoriteTeams]));}
+function teamObj(x){return x.cr_sports_teams||{};}
+function leagueObj(x){return x.cr_sports_leagues||{};}
+
+async function loadLeagues(){
+  const {data,error}=await sb.from("cr_sports_leagues").select("id,name,code,sport,is_active").eq("is_active",true).order("name");
+  if(error){$("status").textContent="League feed error: "+error.message;return;}
+  leagues=data||[];
+  const nfl=leagues.find(x=>x.code==="NFL");
+  $("league").innerHTML='<option value="">All leagues</option>'+leagues.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.code||x.name)+' — '+esc(x.name)+'</option>').join("");
+  if(nfl)$("league").value=nfl.id;
+  renderSports();
+}
+
+function renderSports(){
+  const sports=[...new Set(leagues.map(x=>x.sport).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b)));
+  $("sports").innerHTML='<button class="'+(activeSport==="all"?"active":"")+'" data-sport="all">ALL SPORTS</button>'+sports.map(s=>'<button class="'+(activeSport===s?"active":"")+'" data-sport="'+esc(s)+'">'+esc(String(s).toUpperCase())+'</button>').join("");
+  $("sports").querySelectorAll("button").forEach(b=>b.onclick=()=>{activeSport=b.dataset.sport;renderSports();loadStandings();});
+}
+
+function refillFilters(){
+  const keepC=$("conference").value,keepD=$("division").value;
+  const visible=rows.filter(x=>{
+    const l=leagueObj(x); return activeSport==="all"||String(l.sport||"").toLowerCase()===String(activeSport).toLowerCase();
+  });
+  const cs=[...new Set(visible.map(x=>x.conference).filter(Boolean))].sort();
+  const ds=[...new Set(visible.map(x=>x.division).filter(Boolean))].sort();
+  $("conference").innerHTML='<option value="">All conferences</option>'+cs.map(x=>'<option value="'+esc(x)+'">'+esc(x)+'</option>').join("");
+  $("division").innerHTML='<option value="">All divisions</option>'+ds.map(x=>'<option value="'+esc(x)+'">'+esc(x)+'</option>').join("");
+  if(cs.includes(keepC))$("conference").value=keepC;
+  if(ds.includes(keepD))$("division").value=keepD;
+}
+
+function filtered(){
+  const q=$("search").value.trim().toLowerCase(), c=$("conference").value,d=$("division").value;
+  let a=rows.filter(x=>{
+    const t=teamObj(x),l=leagueObj(x);
+    const hay=[t.name,t.short_name,t.city,t.state,x.conference,x.division,l.name,l.code,l.sport].filter(Boolean).join(" ").toLowerCase();
+    return (!q||hay.includes(q))&&(!c||x.conference===c)&&(!d||x.division===d)&&
+      (activeSport==="all"||String(l.sport||"").toLowerCase()===String(activeSport).toLowerCase());
+  });
+  const s=$("sort").value;
+  a.sort((u,v)=>{
+    if(s==="team")return String(teamObj(u).name||"").localeCompare(String(teamObj(v).name||""));
+    const map={rank:"rank",winpct:"win_pct",wins:"wins",points:"points_for",diff:null,streak:"streak"};
+    if(s==="diff")return diff(v)-diff(u);
+    const k=map[s]||"rank", d=num(u[k])-num(v[k]); return d||String(teamObj(u).name||"").localeCompare(String(teamObj(v).name||""));
+  });
+  return a;
+}
+
+function summary(a){
+  const wins=a.reduce((n,x)=>n+num(x.wins),0),loss=a.reduce((n,x)=>n+num(x.losses),0),pf=a.reduce((n,x)=>n+num(x.points_for),0),pa=a.reduce((n,x)=>n+num(x.points_against),0);
+  const fav=a.filter(x=>favoriteTeams.has(x.team_id)).length;
+  $("summary").innerHTML=[
+    [a.length,"TEAMS"],[new Set(a.map(x=>x.conference).filter(Boolean)).size,"CONFERENCES"],[new Set(a.map(x=>x.division).filter(Boolean)).size,"DIVISIONS"],[pf,"POINTS FOR"],[pa,"POINTS AGAINST"]
+  ].map(x=>'<div class="stat"><b>'+x[0]+'</b><span>'+x[1]+'</span></div>').join("");
+  return {wins,loss,pf,pa,fav};
+}
+
+function badges(x){
+  const b=[];
+  if(x.clinched_division)b.push('<span class="badge red">DIV CLINCHED</span>');
+  if(x.clinched_wild_card)b.push('<span class="badge">WILD CARD</span>');
+  if(x.clinched_bye)b.push('<span class="badge">BYE</span>');
+  if(x.eliminated_from_playoff_contention)b.push('<span class="badge">ELIMINATED</span>');
+  return b.length?'<div class="badges">'+b.join("")+"</div>":"";
+}
+
+function row(x){
+  const t=teamObj(x),fav=favoriteTeams.has(x.team_id),d=diff(x),st=num(x.streak);
+  const logo=t.logo_url?'<img class="logo" src="'+esc(t.logo_url)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">':'<div class="logo"></div>';
+  const href="teams.html?id="+encodeURIComponent(x.team_id||t.id||"");
+  return '<tr><td><span class="rank '+(num(x.rank)<=3?"top":"")+'">'+(x.rank==null?"—":esc(x.rank))+'</span></td><td><div class="team-cell">'+logo+'<a class="team-link" href="'+href+'"><div><div class="team-name">'+esc(t.short_name||t.name||"Unknown Team")+' '+(fav?"★":"")+'</div><div class="team-sub">'+esc([t.city,t.state].filter(Boolean).join(", "))+'</div>'+badges(x)+'</div></a></div></td><td class="record">'+record(x)+'</td><td class="pct">'+pct(x.win_pct)+'</td><td>'+num(x.points_for)+'</td><td>'+num(x.points_against)+'</td><td class="'+(d>0?"positive":d<0?"negative":"")+'">'+(d>0?"+":"")+d+'</td><td class="'+(st>0?"positive":st<0?"negative":"")+'">'+(st>0?"+":"")+st+'</td><td><button class="mini-btn fav" data-id="'+esc(x.team_id)+'" title="Favorite team">'+(fav?"★ SAVED":"☆ SAVE")+'</button></td></tr><tr class="detail-row"><td colspan="9"><div class="detail"><span>CONF '+num(x.conference_wins)+'-'+num(x.conference_losses)+'</span><span>DIV '+num(x.division_wins)+'-'+num(x.division_losses)+'</span><span>HOME '+num(x.home_wins)+'-'+num(x.home_losses)+'</span><span>AWAY '+num(x.away_wins)+'-'+num(x.away_losses)+'</span><span>TD '+num(x.touchdowns)+'</span></div></td></tr>';
+}
+
+function render(){
+  const a=filtered();summary(a);
+  const groups={};
+  a.forEach(x=>{const l=leagueObj(x),k=(l.code||l.name||"LEAGUE")+" • "+(x.conference||"GENERAL")+" • "+(x.division||"OVERALL");(groups[k]??=[]).push(x);});
+  const keys=Object.keys(groups).sort();
+  $("content").innerHTML=keys.length?keys.map(k=>{
+    const list=groups[k], first=list[0], l=leagueObj(first);
+    return '<section class="league-section"><div class="league-head"><div><h2>'+esc(l.code||l.name||"Standings")+'</h2><p>'+esc(l.name||"")+" • "+esc(first.conference||"League Table")+" • "+esc(first.division||"Overall")+' • '+list.length+' teams</p></div><div class="league-actions"><a class="mini-btn" href="scores.html">SCORES</a><a class="mini-btn" href="teams.html">TEAMS</a></div></div><div class="table-card"><table class="st-table"><thead><tr><th>RK</th><th>TEAM</th><th>W-L</th><th>WIN%</th><th>PF</th><th>PA</th><th>DIFF</th><th>STREAK</th><th>FAV</th></tr></thead><tbody>'+list.map(row).join("")+'</tbody></table></div></section>';
+  }).join(""):'<div class="empty">No standings match the current filters. Try another league, season, sport, conference, division or search.</div>';
+  $("content").querySelectorAll(".fav").forEach(b=>b.onclick=()=>{const id=b.dataset.id;if(!id)return;favoriteTeams.has(id)?favoriteTeams.delete(id):favoriteTeams.add(id);saveFav();render();});
+  $("status").innerHTML='<span><span class="pulse"></span>'+a.length+' team'+(a.length===1?"":"s")+' displayed</span>';
+  $("updated").textContent="Updated "+new Date().toLocaleTimeString();
+}
+
+async function loadStandings(){
+  $("status").innerHTML='<span><span class="pulse"></span>Loading standings…</span>';
+  const season=$("season").value.trim();
+  if(!/^\d{4}$/.test(season)){rows=[];$("content").innerHTML='<div class="error">Enter a four-digit season, such as 2026.</div>';return;}
+  let q=sb.from("cr_sports_standings").select("*,cr_sports_teams(id,name,short_name,city,state,logo_url),cr_sports_leagues(id,name,code,sport)").eq("season",season).order("rank",{ascending:true}).limit(2000);
+  if($("league").value)q=q.eq("league_id",$("league").value);
+  const {data,error}=await q;
+  if(error){rows=[];$("content").innerHTML='<div class="error">Standings could not be loaded.<br><small>'+esc(error.message)+'</small></div>';$("status").textContent="Standings feed error";return;}
+  rows=data||[];
+  refillFilters();render();
+}
+
+$("league").onchange=loadStandings;
+$("season").onchange=loadStandings;
+$("conference").onchange=render;
+$("division").onchange=render;
+$("search").oninput=render;
+$("sort").onchange=render;
+$("refresh").onclick=loadStandings;
+
+(async()=>{await loadLeagues();await loadStandings();})();
+</script>
+<script>footer()</script>
+</body>
+</html>
