@@ -1,1 +1,145 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CrowRules Sports</title><link rel="stylesheet" href="css/sports.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/sports.js?v=22.0"></script></head><body><script>shell("home")</script><section class="hero"><div class="eyebrow">THE CROWRULES SPORTS COMMAND CENTER</div><h1>EVERY GAME.<br><span>ONE UNIVERSE.</span></h1><p>Major sports, minor leagues, Pacific Northwest coverage, standings, leaders, schedules, original audio and video, Pick 'Em challenges and a growing sports community — connected to Supabase.</p><div class="actions"><a class="btn primary" href="schedule.html">SCORES & SCHEDULE</a><a class="btn" href="pickem.html">PLAY PICK EM</a><a class="btn" href="partners.html">BECOME A PARTNER</a></div></section><section class="section"><div class="grid" id="leagues"></div></section><section class="section"><div class="section-head"><div><div class="eyebrow">PACIFIC NORTHWEST</div><h2>HOME FIELD</h2></div><a class="btn" href="teams.html">EXPLORE TEAMS</a></div><div class="grid3"><div class="card"><div class="kpi">SEA</div><p class="muted">NFL • MLB • WNBA • NHL • MLS</p></div><div class="card"><div class="kpi">TAC</div><p class="muted">MiLB and community sports coverage.</p></div><div class="card"><div class="kpi">PNW</div><p class="muted">Washington, Oregon and regional coverage.</p></div></div></section><script>loadSession();(async()=>{const{data,error}=await sb.from("cr_sports_leagues").select("*").order("sport");$("#leagues").innerHTML=error?'<div class="card">'+esc(error.message)+'</div>':data.map(x=>'<div class="card"><span class="tag">'+esc(x.level.toUpperCase())+'</span><h3>'+esc(x.name)+'</h3><p class="muted">'+esc(x.sport)+' • '+esc(x.code)+'</p></div>').join("")})()</script><script>footer()</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#05060a">
+<title>CrowRules Sports — July 4, 2027</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/sports.js?v=23.0"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Orbitron:wght@500;600;700;800;900&display=swap');
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#03050a;color:#fff;font-family:Montserrat,Arial,sans-serif}
+body{overflow-x:hidden}
+#sky{position:fixed;inset:0;overflow:hidden;background:
+ radial-gradient(circle at 50% 70%,rgba(38,54,105,.32),transparent 42%),
+ radial-gradient(circle at 20% 20%,rgba(24,56,120,.25),transparent 34%),
+ linear-gradient(180deg,#02030a 0%,#071126 58%,#0b0710 100%);z-index:0}
+.stars,.stars:before,.stars:after{position:absolute;inset:-20%;content:"";background-image:radial-gradient(circle,#fff 0 1px,transparent 1.5px);background-size:83px 83px;opacity:.32;animation:drift 90s linear infinite}
+.stars:before{background-size:137px 137px;opacity:.22;animation-duration:130s;transform:rotate(8deg)}
+.stars:after{background-size:211px 211px;opacity:.15;animation-duration:170s;transform:rotate(-12deg)}
+@keyframes drift{to{transform:translate3d(4%,3%,0) rotate(2deg)}}
+.aurora{position:absolute;inset:auto -10% -20%;height:62%;background:radial-gradient(ellipse at 50% 100%,rgba(22,110,255,.22),transparent 52%),radial-gradient(ellipse at 25% 100%,rgba(225,6,0,.16),transparent 45%),radial-gradient(ellipse at 75% 100%,rgba(255,255,255,.09),transparent 42%);filter:blur(30px);animation:pulse 8s ease-in-out infinite alternate}
+@keyframes pulse{to{transform:scale(1.08);opacity:.8}}
+main{position:relative;z-index:2;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:42px 18px}
+.shell{width:min(1180px,100%);text-align:center}
+.brand{font:900 12px Orbitron,sans-serif;letter-spacing:4px;color:#c8cdd9;text-transform:uppercase;animation:fadeUp 1s ease both}
+.brand b{color:#e10600}
+h1{margin:20px 0 8px;font:900 clamp(44px,9vw,112px)/.9 Orbitron,sans-serif;letter-spacing:-4px;text-transform:uppercase;text-shadow:0 0 35px rgba(255,255,255,.12)}
+h1 span{display:block;background:linear-gradient(90deg,#fff 0%,#9ab7ff 35%,#fff 52%,#e10600 78%,#fff 100%);background-size:220% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 6s linear infinite}
+@keyframes shine{to{background-position:-220% center}}
+.subtitle{max-width:760px;margin:22px auto 34px;color:#aab2c3;font-size:clamp(13px,2vw,17px);line-height:1.7}
+.countdown{display:grid;grid-template-columns:repeat(4,minmax(90px,1fr));gap:12px;max-width:850px;margin:0 auto 34px}
+.unit{position:relative;padding:22px 12px 18px;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.025));border:1px solid rgba(255,255,255,.14);border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.3),inset 0 0 30px rgba(255,255,255,.025);backdrop-filter:blur(14px);overflow:hidden}
+.unit:after{content:"";position:absolute;left:10%;right:10%;bottom:0;height:2px;background:linear-gradient(90deg,transparent,#e10600,#fff,transparent);opacity:.7}
+.num{font:900 clamp(32px,6vw,70px)/1 Orbitron,sans-serif;letter-spacing:-2px}
+.label{margin-top:8px;font:800 9px Orbitron,sans-serif;letter-spacing:2px;color:#818a9d}
+.target{font:800 12px Orbitron,sans-serif;letter-spacing:2px;color:#d8dce5;text-transform:uppercase;margin-bottom:26px}
+.vote-card{max-width:700px;margin:0 auto;padding:25px;border:1px solid rgba(255,255,255,.15);border-radius:22px;background:rgba(5,7,14,.62);backdrop-filter:blur(18px);box-shadow:0 25px 80px rgba(0,0,0,.45)}
+.vote-card h2{margin:0 0 8px;font:900 20px Orbitron,sans-serif;letter-spacing:1px}
+.vote-card p{margin:0 0 18px;color:#929bad;font-size:13px}
+.votes{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.vote{min-width:170px;padding:15px 22px;border-radius:12px;border:1px solid #394052;background:#0b0e17;color:#fff;font:900 11px Orbitron,sans-serif;letter-spacing:1px;cursor:pointer;transition:.2s;position:relative;overflow:hidden}
+.vote:hover{transform:translateY(-2px);border-color:#fff;box-shadow:0 10px 35px rgba(255,255,255,.1)}
+.vote.yes:hover,.vote.yes.selected{border-color:#d8e4ff;background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(35,84,180,.25))}
+.vote.no:hover,.vote.no.selected{border-color:#d94a4a;background:rgba(150,0,0,.18)}
+.results{display:none;margin-top:18px;gap:10px;justify-content:center;flex-wrap:wrap}
+.results.show{display:flex}
+.result{padding:9px 13px;border-radius:999px;background:#0b0e17;border:1px solid #252b38;color:#aab2c3;font:700 10px Orbitron,sans-serif}
+.result strong{color:#fff}
+.status{min-height:18px;margin-top:14px;color:#6f7b91;font-size:11px}
+.footer{margin-top:28px;color:#586173;font:700 8px Orbitron,sans-serif;letter-spacing:1.5px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@media(max-width:620px){main{padding:28px 12px}.countdown{gap:7px}.unit{padding:16px 7px}.num{font-size:27px}.label{font-size:7px}.vote{width:100%}h1{letter-spacing:-2px}}
+</style>
+</head>
+<body>
+<div id="sky"><div class="stars"></div><div class="aurora"></div></div>
+<main>
+  <div class="shell">
+    <div class="brand">CROWRULES SPORTS <b>•</b> THE NEXT EVENT</div>
+    <h1>July 4, <span>2027</span></h1>
+    <div class="subtitle">A new CrowRules Sports experience is being imagined for Independence Day 2027. The countdown starts now.</div>
+    <div class="countdown" aria-label="Countdown to July 4 2027">
+      <div class="unit"><div class="num" id="days">000</div><div class="label">DAYS</div></div>
+      <div class="unit"><div class="num" id="hours">00</div><div class="label">HOURS</div></div>
+      <div class="unit"><div class="num" id="minutes">00</div><div class="label">MINUTES</div></div>
+      <div class="unit"><div class="num" id="seconds">00</div><div class="label">SECONDS</div></div>
+    </div>
+    <div class="target">Sunday • July 4, 2027 • Independence Day</div>
+    <section class="vote-card" aria-labelledby="voteTitle">
+      <h2 id="voteTitle">WOULD YOU BE INTERESTED?</h2>
+      <p>Tell CrowRules Sports whether you would be interested in a July 4, 2027 experience.</p>
+      <div class="votes">
+        <button class="vote yes" id="yesBtn">YES — I'M INTERESTED</button>
+        <button class="vote no" id="noBtn">NO — NOT FOR ME</button>
+      </div>
+      <div class="results" id="results">
+        <div class="result">YES <strong id="yesCount">0</strong></div>
+        <div class="result">NO <strong id="noCount">0</strong></div>
+        <div class="result">TOTAL <strong id="totalCount">0</strong></div>
+      </div>
+      <div class="status" id="status" role="status"></div>
+    </section>
+    <div class="footer">CROWRULES ENTERTAINMENT • CROWRULES SPORTS</div>
+  </div>
+</main>
+<script>
+(function(){
+  const target=new Date("2027-07-04T00:00:00").getTime();
+  const ids=["days","hours","minutes","seconds"];
+  function tick(){
+    let d=Math.max(0,target-Date.now());
+    const days=Math.floor(d/86400000); d%=86400000;
+    const hours=Math.floor(d/3600000); d%=3600000;
+    const mins=Math.floor(d/60000); d%=60000;
+    const secs=Math.floor(d/1000);
+    [String(days).padStart(3,"0"),String(hours).padStart(2,"0"),String(mins).padStart(2,"0"),String(secs).padStart(2,"0")].forEach((v,i)=>document.getElementById(ids[i]).textContent=v);
+    if(target-Date.now()<=0) document.querySelector(".subtitle").textContent="The countdown has reached July 4, 2027.";
+  }
+  tick();setInterval(tick,1000);
+
+  const KEY="cr_sports_july4_2027_voter";
+  let voterKey=localStorage.getItem(KEY);
+  if(!voterKey){
+    voterKey=(crypto.randomUUID?crypto.randomUUID():"v-"+Date.now()+"-"+Math.random().toString(36).slice(2));
+    localStorage.setItem(KEY,voterKey);
+  }
+  const status=document.getElementById("status"), results=document.getElementById("results");
+  async function counts(){
+    if(!window.sb)return;
+    const {data,error}=await sb.rpc("get_july4_2027_interest_counts");
+    if(error){status.textContent="Vote totals are temporarily unavailable.";return}
+    const x=Array.isArray(data)?data[0]:data;
+    document.getElementById("yesCount").textContent=x?.yes_count??0;
+    document.getElementById("noCount").textContent=x?.no_count??0;
+    document.getElementById("totalCount").textContent=x?.total_count??0;
+    results.classList.add("show");
+  }
+  async function vote(value,button){
+    if(!window.sb){status.textContent="Voting is temporarily unavailable.";return}
+    document.querySelectorAll(".vote").forEach(b=>b.disabled=true);
+    status.textContent="Recording your response…";
+    const {error}=await sb.from("cr_sports_july4_2027_interest").upsert(
+      {voter_key:voterKey,vote:value},
+      {onConflict:"voter_key"}
+    );
+    if(error){
+      status.textContent="We couldn't record that vote. Please try again.";
+      document.querySelectorAll(".vote").forEach(b=>b.disabled=false);
+      return;
+    }
+    document.querySelectorAll(".vote").forEach(b=>b.classList.remove("selected"));
+    button.classList.add("selected");
+    localStorage.setItem(KEY,voterKey);
+    status.textContent="Thanks — your response has been recorded.";
+    await counts();
+  }
+  document.getElementById("yesBtn").onclick=()=>vote("yes",document.getElementById("yesBtn"));
+  document.getElementById("noBtn").onclick=()=>vote("no",document.getElementById("noBtn"));
+  counts();
+})();
+</script>
+</body>
+</html>
