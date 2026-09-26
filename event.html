@@ -12,44 +12,194 @@
 .event-wrap{max-width:1500px;width:100%;margin:auto;padding:80px 24px 55px}
 .event-title{font:900 clamp(46px,8vw,100px)/.95 Orbitron;letter-spacing:-4px;margin:12px 0}
 .event-title span{color:#e10600}.event-meta{display:flex;gap:8px;flex-wrap:wrap}.event-grid{display:grid;grid-template-columns:2fr 1fr;gap:18px}.panel{background:#0d0d10;border:1px solid #27272b;padding:24px}.panel h2,.panel h3{font-family:Orbitron}.muted{color:#888;line-height:1.7}.stat{padding:14px 0;border-bottom:1px solid #222}.stat:last-child{border-bottom:0}.countdown{font:800 28px Orbitron}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.fight-card-panel{margin-top:18px}.fight-card-head{display:flex;justify-content:space-between;gap:20px;align-items:end;flex-wrap:wrap}.fight-card-grid{display:grid;gap:10px;margin-top:20px}
+.bout{display:grid;grid-template-columns:90px 1fr auto 1fr 150px;gap:14px;align-items:center;background:#09090c;border:1px solid #242429;padding:14px 16px}
+.bout-order{font:800 12px Orbitron;color:#777}.fighter{display:flex;align-items:center;gap:10px;min-width:0}.fighter.right{justify-content:flex-end;text-align:right}.fighter img{width:54px;height:54px;object-fit:cover;border-radius:50%;border:1px solid #333;background:#15151a}.fighter-name{font:800 16px Montserrat,Arial,sans-serif}.versus{font:900 12px Orbitron;color:#e10600;text-align:center}.bout-info{text-align:right}.weight{font:800 11px Orbitron;color:#aaa;text-transform:uppercase}.result{font:700 12px Montserrat;color:#eee;margin-top:5px}.result.muted-result{color:#777}.sync-note{font-size:12px;color:#777;margin-top:12px}
+@media(max-width:1000px){.bout{grid-template-columns:55px 1fr 40px 1fr}.bout-info{grid-column:2/-1;text-align:left}.fighter.right{justify-content:flex-start;text-align:left}}
 @media(max-width:900px){.event-grid{grid-template-columns:1fr}}
+@media(max-width:620px){.bout{grid-template-columns:42px 1fr 36px}.fighter.right{grid-column:2/-1}.versus{grid-column:3;grid-row:1}.bout-info{grid-column:2/-1}}
 </style>
 </head>
 <body>
 <script>shell("combat")</script>
+
 <section class="event-hero"><div class="event-wrap">
- <div class="eyebrow">CROWRULES SPORTS • EVENT CENTER</div>
+ <div class="eyebrow">CROWRULES SPORTS • SPORTS 23.0 EVENT CENTER</div>
  <div id="hero">Loading Event Center…</div>
 </div></section>
-<section class="section"><div class="event-grid" id="eventBody"><div class="panel"><h2>Loading…</h2></div></div></section>
+
+<section class="section">
+ <div class="event-grid" id="eventBody"><div class="panel"><h2>Loading…</h2></div></div>
+ <div id="fightCardMount"></div>
+</section>
+
 <script>
 loadSession();
 const params=new URLSearchParams(location.search), id=params.get("id");
 let eventRecord=null;
-function fmtDate(v){return v?new Date(v).toLocaleString([],{dateStyle:"full",timeStyle:"short"}):"TBD"}
-function statusClass(s){return String(s||"scheduled").toLowerCase()}
-async function loadEvent(){
- if(!id){document.getElementById("hero").innerHTML="<h1 class='event-title'>EVENT <span>NOT FOUND</span></h1>";return}
- const r=await sb.from("cr_sports_events").select("id,title,event_type,status,starts_at,ends_at,venue,city,broadcast,event_url,image_url,description,provider_updated_at,cr_sports_leagues(code,name)").eq("id",id).single();
- if(r.error||!r.data){document.getElementById("hero").innerHTML="<h1 class='event-title'>EVENT <span>NOT FOUND</span></h1><p class='muted'>This Event Center record could not be found.</p>";return}
- eventRecord=r.data; renderEvent();
+
+function fmtDate(v){
+  return v?new Date(v).toLocaleString([],{dateStyle:"full",timeStyle:"short"}):"TBD";
 }
+function statusClass(s){return String(s||"scheduled").toLowerCase()}
+function isUfc(){return String(eventRecord?.cr_sports_leagues?.code||"").toUpperCase()==="UFC"}
+
+async function loadEvent(){
+ if(!id){
+  document.getElementById("hero").innerHTML="<h1 class='event-title'>EVENT <span>NOT FOUND</span></h1>";
+  return;
+ }
+ const r=await sb.from("cr_sports_events")
+   .select("id,title,event_type,status,starts_at,ends_at,venue,city,broadcast,event_url,image_url,description,provider_updated_at,cr_sports_leagues(code,name)")
+   .eq("id",id).single();
+
+ if(r.error||!r.data){
+  document.getElementById("hero").innerHTML="<h1 class='event-title'>EVENT <span>NOT FOUND</span></h1><p class='muted'>This Event Center record could not be found.</p>";
+  return;
+ }
+ eventRecord=r.data;
+ await renderEvent();
+}
+
 async function renderEvent(){
  const e=eventRecord, league=e.cr_sports_leagues?.name||"SPORTS";
  document.title=e.title+" | CrowRules Sports";
- document.getElementById("hero").innerHTML='<div class="event-meta"><span class="tag">'+esc(league)+'</span><span class="tag '+statusClass(e.status)+'">'+esc(String(e.status||"scheduled").toUpperCase())+'</span><span class="tag">'+esc(e.event_type||"EVENT")+'</span></div><h1 class="event-title">'+esc(e.title)+'</h1><p class="muted">'+esc(e.description||"Dedicated CrowRules Sports Event Center.")+'</p><div class="actions"><button class="button" id="followBtn">FOLLOW EVENT</button>'+(e.event_url?'<a class="button secondary" href="'+esc(e.event_url)+'" target="_blank" rel="noopener">OFFICIAL EVENT</a>':"")+'<a class="button secondary" href="combat.html">BACK TO COMBAT</a></div>';
- document.getElementById("eventBody").innerHTML='<div class="panel"><div class="eyebrow">EVENT DETAILS</div><h2>'+esc(e.title)+'</h2><div class="stat"><strong>WHEN</strong><div class="muted">'+esc(fmtDate(e.starts_at))+'</div></div><div class="stat"><strong>VENUE</strong><div class="muted">'+esc(e.venue||"Venue TBD")+'</div></div><div class="stat"><strong>LOCATION</strong><div class="muted">'+esc(e.city||"Location TBD")+'</div></div><div class="stat"><strong>BROADCAST</strong><div class="muted">'+esc(e.broadcast||"See official event information")+'</div></div><div class="stat"><strong>LAST PROVIDER UPDATE</strong><div class="muted">'+esc(fmtDate(e.provider_updated_at))+'</div></div></div><aside class="panel"><div class="eyebrow">EVENT STATUS</div><h3>'+esc(String(e.status||"scheduled").toUpperCase())+'</h3><div class="countdown" id="countdown">--:--:--</div><p class="muted">Countdown to the scheduled start. Live status is controlled by the event data source.</p><div class="actions"><a class="button small" href="scores.html">SCORES</a><a class="button small secondary" href="schedule.html">SCHEDULE</a></div></aside>';
- await bindFollow();tick();
+
+ document.getElementById("hero").innerHTML=
+  '<div class="event-meta"><span class="tag">'+esc(league)+'</span><span class="tag '+statusClass(e.status)+'">'+esc(String(e.status||"scheduled").toUpperCase())+'</span><span class="tag">'+esc(e.event_type||"EVENT")+'</span></div>'+
+  '<h1 class="event-title">'+esc(e.title)+'</h1>'+
+  '<p class="muted">'+esc(e.description||"Dedicated CrowRules Sports Event Center.")+'</p>'+
+  '<div class="actions"><button class="button" id="followBtn">FOLLOW EVENT</button>'+
+  (e.event_url?'<a class="button secondary" href="'+esc(e.event_url)+'" target="_blank" rel="noopener">OFFICIAL EVENT</a>':"")+
+  '<a class="button secondary" href="combat.html">BACK TO COMBAT</a></div>';
+
+ document.getElementById("eventBody").innerHTML=
+  '<div class="panel"><div class="eyebrow">EVENT DETAILS</div><h2>'+esc(e.title)+'</h2>'+
+  '<div class="stat"><strong>WHEN</strong><div class="muted">'+esc(fmtDate(e.starts_at))+'</div></div>'+
+  '<div class="stat"><strong>VENUE</strong><div class="muted">'+esc(e.venue||"Venue TBD")+'</div></div>'+
+  '<div class="stat"><strong>LOCATION</strong><div class="muted">'+esc(e.city||"Location TBD")+'</div></div>'+
+  '<div class="stat"><strong>BROADCAST</strong><div class="muted">'+esc(e.broadcast||"See official event information")+'</div></div>'+
+  '<div class="stat"><strong>LAST PROVIDER UPDATE</strong><div class="muted">'+esc(fmtDate(e.provider_updated_at))+'</div></div></div>'+
+  '<aside class="panel"><div class="eyebrow">EVENT STATUS</div><h3>'+esc(String(e.status||"scheduled").toUpperCase())+'</h3>'+
+  '<div class="countdown" id="countdown">--:--:--</div><p class="muted">Countdown to the scheduled start. Live status is controlled by the event data source.</p>'+
+  '<div class="actions"><a class="button small" href="scores.html">SCORES</a><a class="button small secondary" href="schedule.html">SCHEDULE</a></div></aside>';
+
+ await bindFollow();
+ tick();
+
+ if(isUfc()) await loadUfcFightCard();
+ else document.getElementById("fightCardMount").innerHTML="";
 }
+
 async function bindFollow(){
- const b=document.getElementById("followBtn"),s=await sb.auth.getSession(),u=s.data.session?.user;
+ const b=document.getElementById("followBtn");
+ const s=await sb.auth.getSession(),u=s.data.session?.user;
  if(!u){b.textContent="SIGN IN TO FOLLOW";b.onclick=()=>location.href="account.html";return}
- let following=false;const r=await sb.from("cr_sports_user_followed_events").select("event_id").eq("user_id",u.id).eq("event_id",eventRecord.id).maybeSingle();following=!!r.data;b.textContent=following?"FOLLOWING":"FOLLOW EVENT";
- b.onclick=async()=>{if(following){await sb.from("cr_sports_user_followed_events").delete().eq("user_id",u.id).eq("event_id",eventRecord.id);following=false}else{await sb.from("cr_sports_user_followed_events").upsert({user_id:u.id,event_id:eventRecord.id});following=true}b.textContent=following?"FOLLOWING":"FOLLOW EVENT"};
+ let following=false;
+ const r=await sb.from("cr_sports_user_followed_events").select("event_id").eq("user_id",u.id).eq("event_id",eventRecord.id).maybeSingle();
+ following=!!r.data;
+ b.textContent=following?"FOLLOWING":"FOLLOW EVENT";
+ b.onclick=async()=>{
+  if(following){
+   await sb.from("cr_sports_user_followed_events").delete().eq("user_id",u.id).eq("event_id",eventRecord.id);
+   following=false;
+  }else{
+   await sb.from("cr_sports_user_followed_events").upsert({user_id:u.id,event_id:eventRecord.id});
+   following=true;
+  }
+  b.textContent=following?"FOLLOWING":"FOLLOW EVENT";
+ };
 }
-function tick(){const el=document.getElementById("countdown");if(!el||!eventRecord?.starts_at)return;const d=new Date(eventRecord.starts_at)-Date.now();if(d<=0){el.textContent="LIVE / STARTED";return}const h=Math.floor(d/36e5),m=Math.floor(d%36e5/6e4),s=Math.floor(d%6e4/1e3);el.textContent=h+"h "+String(m).padStart(2,"0")+"m "+String(s).padStart(2,"0")+"s"}
-loadEvent();setInterval(tick,1000);
-if(id){sb.channel("sports22-event-"+id).on("postgres_changes",{event:"UPDATE",schema:"public",table:"cr_sports_events",filter:"id=eq."+id},p=>{if(p.new){eventRecord=p.new;renderEvent()}}).subscribe()}
+
+async function syncUfcCard(){
+ const result=await sb.functions.invoke("ufc-card-sync",{body:{event_id:eventRecord.id}});
+ if(result.error) return {ok:false,error:result.error.message};
+ return result.data||{ok:true};
+}
+
+function shouldRefresh(rows){
+ if(!rows.length)return true;
+ const latest=rows.reduce((m,r)=>Math.max(m,new Date(r.provider_updated_at||r.updated_at||0).getTime()),0);
+ return !latest || Date.now()-latest>2*60*60*1000;
+}
+
+function fighterHtml(name,image,side){
+ const n=esc(name||"TBD");
+ return '<div class="fighter '+(side==="right"?"right":"")+'>'+
+   (image?'<img src="'+esc(image)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">':"")+
+   '<div class="fighter-name">'+n+'</div></div>';
+}
+
+function renderBout(b){
+ const order=String(b.bout_order||"").padStart(2,"0");
+ const result=b.winner
+   ? '<div class="result">'+esc(b.winner)+(b.method?" • "+esc(b.method):"")+(b.finish_round?" • R"+esc(b.finish_round):"")+(b.finish_time?" "+esc(b.finish_time):"")+'</div>'
+   : '<div class="result muted-result">'+esc(String(b.status||"SCHEDULED").toUpperCase())+'</div>';
+ return '<article class="bout">'+
+   '<div class="bout-order">CARD '+esc(order)+'</div>'+
+   fighterHtml(b.red_fighter,b.red_fighter_image_url,"left")+
+   '<div class="versus">VS</div>'+
+   fighterHtml(b.blue_fighter,b.blue_fighter_image_url,"right")+
+   '<div class="bout-info"><div class="weight">'+esc(b.weight_class||"UFC BOUT")+'</div>'+result+'</div>'+
+   '</article>';
+}
+
+async function loadUfcFightCard(){
+ const mount=document.getElementById("fightCardMount");
+ mount.innerHTML='<div class="panel fight-card-panel"><div class="eyebrow">SPORTS 23.0 • UFC FIGHT CARD</div><h2>Loading Fight Card…</h2></div>';
+
+ let r=await sb.from("cr_sports_event_bouts").select("*").eq("event_id",eventRecord.id).order("bout_order",{ascending:true});
+ let rows=r.data||[];
+
+ if(r.error){
+  mount.innerHTML='<div class="panel fight-card-panel"><h2>FIGHT CARD UNAVAILABLE</h2><p class="muted">'+esc(r.error.message)+'</p></div>';
+  return;
+ }
+
+ if(shouldRefresh(rows)){
+  const sync=await syncUfcCard();
+  if(sync?.ok){
+   r=await sb.from("cr_sports_event_bouts").select("*").eq("event_id",eventRecord.id).order("bout_order",{ascending:true});
+   rows=r.data||[];
+  }
+ }
+
+ if(!rows.length){
+  mount.innerHTML='<div class="panel fight-card-panel"><div class="eyebrow">SPORTS 23.0 • UFC FIGHT CARD</div><h2>FIGHT CARD PENDING</h2><p class="muted">The UFC provider has not returned the bout card yet. Refresh shortly.</p><div class="sync-note">Source: Cito UFC API • free REST tier</div></div>';
+  return;
+ }
+
+ mount.innerHTML='<div class="panel fight-card-panel">'+
+  '<div class="fight-card-head"><div><div class="eyebrow">SPORTS 23.0 • UFC FIGHT CARD</div><h2>'+esc(eventRecord.title)+'</h2></div>'+
+  '<div class="tag">'+rows.length+' BOUTS</div></div>'+
+  '<p class="muted">Fight order, fighters, weight class and results are synchronized into CrowRules Sports before being rendered here.</p>'+
+  '<div class="fight-card-grid">'+rows.map(renderBout).join("")+'</div>'+
+  '<div class="sync-note">Provider: Cito UFC API • card data is cached in Supabase • live REST data may be delayed by the provider.</div>'+
+  '</div>';
+}
+
+function tick(){
+ const el=document.getElementById("countdown");
+ if(!el||!eventRecord?.starts_at)return;
+ const d=new Date(eventRecord.starts_at)-Date.now();
+ if(d<=0){el.textContent="LIVE / STARTED";return}
+ const h=Math.floor(d/36e5),m=Math.floor(d%36e5/6e4),s=Math.floor(d%6e4/1e3);
+ el.textContent=h+"h "+String(m).padStart(2,"0")+"m "+String(s).padStart(2,"0")+"s";
+}
+
+loadEvent();
+setInterval(tick,1000);
+
+if(id){
+ sb.channel("sports23-event-"+id)
+  .on("postgres_changes",{event:"UPDATE",schema:"public",table:"cr_sports_events",filter:"id=eq."+id},p=>{
+   if(p.new){eventRecord={...eventRecord,...p.new};renderEvent();}
+  })
+  .on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_event_bouts",filter:"event_id=eq."+id},()=>{
+   if(isUfc())loadUfcFightCard();
+  })
+  .subscribe();
+}
 </script>
 <script>footer()</script>
 </body>
