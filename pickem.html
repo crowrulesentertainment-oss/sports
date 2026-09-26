@@ -51,7 +51,7 @@
     <div class="card">
       <div class="eyebrow">CHALLENGE</div>
       <h3>SELECT LEAGUE</h3>
-      <select id="pickemLeague" class="input"><option value="all">ALL SPORTS</option></select>
+      <select id="pickemLeague" class="input"><option value="all">ALL SPORTS</option></select><div class="muted" style="margin-top:8px">Combat leagues: UFC • WWE • AEW</div>
       <h3 style="margin-top:12px">SELECT WEEK</h3>
       <select id="week" class="input"></select>
       <div id="weekInfo" class="muted">Loading open challenges…</div>
@@ -220,7 +220,11 @@ async function loadPickemLeagues(){
   if(error){ console.warn("Pick 'Em leagues:",error.message); return; }
   pickemLeagues=data||[];
   const sel=$id("pickemLeague");
-  sel.innerHTML='<option value="all">ALL SPORTS</option>'+pickemLeagues.map(l=>'<option value="'+esc(l.id)+'">'+esc(l.name)+(l.sport?' • '+esc(l.sport):'')+'</option>').join("");
+  const combatCodes=["UFC","WWE","AEW"];
+  const combat=pickemLeagues.filter(l=>combatCodes.includes(String(l.code||"").toUpperCase())).sort((a,b)=>combatCodes.indexOf(String(a.code||"").toUpperCase())-combatCodes.indexOf(String(b.code||"").toUpperCase()));
+  const other=pickemLeagues.filter(l=>!combatCodes.includes(String(l.code||"").toUpperCase()));
+  const ordered=[...combat,...other];
+  sel.innerHTML='<option value="all">ALL SPORTS</option>'+ordered.map(l=>'<option value="'+esc(l.id)+'">'+esc(l.name)+(l.sport?' • '+esc(l.sport):'')+'</option>').join("");
   sel.value=selectedPickemLeague;
 }
 async function loadWeeks(){
