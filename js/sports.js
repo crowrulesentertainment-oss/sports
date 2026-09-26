@@ -1,4 +1,4 @@
-/* CrowRules Sports — Shared Engine 16.0 */
+/* CrowRules Sports — Shared Engine 17.0 */
 (function(){
 "use strict";
 
@@ -13,14 +13,14 @@ if(!window.supabase||typeof window.supabase.createClient!=="function"){
 
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
  auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true},
- global:{headers:{"x-client-info":"crowrules-sports/16.0"}}
+ global:{headers:{"x-client-info":"crowrules-sports/17.0"}}
 });
 
 window.sb=sb;
 window.supabaseClient=sb;
 window.sbClient=sb;
 window.CROW_SPORTS_READY=true;
-window.CROW_SPORTS_VERSION="16.0";
+window.CROW_SPORTS_VERSION="17.0";
 
 const $=s=>document.querySelector(s);
 const $$=s=>Array.from(document.querySelectorAll(s));
@@ -43,11 +43,23 @@ function storageSet(key,value,type="local"){try{const s=storage(type);if(!s)retu
 function storageRemove(key,type="local"){try{storage(type)?.removeItem(key);}catch(_){}}
 
 const NAV=[
- ["home","HOME","index.html"],["scores","SCORES","scores.html"],["standings","STANDINGS","standings.html"],
- ["leaders","LEADERS","leaders.html"],["combat","COMBAT / WRESTLING","combat.html"],["rankings","RANKINGS","rankings.html"],
- ["champions","CHAMPIONS","championships.html"],["teams","TEAMS","teams.html"],["media","AUDIO / VIDEO","media.html"],
- ["pickem","PICK EM","pickem.html"],["notifications","NOTIFICATIONS","notifications.html"],
- ["sync-health","SYNC HEALTH","sync-health.html"],["partners","PARTNERS","partners.html"]
+ ["home","HOME","index.html"],
+ ["live","LIVE","live.html"],
+ ["scores","SCORES","scores.html"],
+ ["schedule","SCHEDULE","schedule.html"],
+ ["standings","STANDINGS","standings.html"],
+ ["leaders","LEADERS","leaders.html"],
+ ["teams","TEAMS","teams.html"],
+ ["rankings","RANKINGS","rankings.html"],
+ ["champions","CHAMPIONS","championships.html"],
+ ["combat","COMBAT / WRESTLING","combat.html"],
+ ["event","EVENT CENTER","event.html"],
+ ["media","AUDIO / VIDEO","media.html"],
+ ["pickem","PICK EM","pickem.html"],
+ ["notifications","NOTIFICATIONS","notifications.html"],
+ ["sync-health","SYNC HEALTH","sync-health.html"],
+ ["partners","PARTNERS","partners.html"],
+ ["account","ACCOUNT","account.html"]
 ];
 
 function currentPage(){return location.pathname.split("/").pop()||"index.html";}
@@ -57,12 +69,17 @@ function ensureNavStyles(){
  const style=document.createElement("style");
  style.id="cr-shared-nav-style";
  style.textContent=`
- .cr-header{position:relative}
+ .cr-header{position:relative;z-index:100}
+ .cr-nav{position:relative}
+ .cr-nav .brand{flex:0 0 auto;white-space:nowrap}
+ .cr-nav .navlinks{min-width:0;display:flex;align-items:center;justify-content:flex-end;gap:2px;transition:max-height .2s ease}
+ .cr-nav .navlinks a{white-space:nowrap;border-radius:6px;transition:background .15s ease,color .15s ease}
+ .cr-nav .navlinks a.active{color:#fff;background:#e1060014;box-shadow:inset 0 -2px 0 #e10600}
+ .cr-nav .account{white-space:nowrap;flex:0 0 auto;max-width:180px;overflow:hidden;text-overflow:ellipsis}
  .cr-menu-toggle{display:none;border:1px solid #ffffff18;background:#ffffff06;color:#fff;border-radius:8px;padding:8px 10px;font:700 9px Orbitron,Arial;cursor:pointer}
- .cr-nav .navlinks{min-width:0;transition:max-height .2s ease}
- .cr-nav .account{white-space:nowrap;flex:0 0 auto}
- @media(max-width:1250px){.cr-nav{gap:10px;padding-left:14px;padding-right:14px}.cr-nav .brand{font-size:13px}.cr-nav .navlinks{overflow-x:auto;scrollbar-width:thin}.cr-nav .navlinks a{font-size:8px;padding:8px 6px}}
- @media(max-width:980px){.cr-menu-toggle{display:block;margin-left:auto}.cr-nav .navlinks{position:absolute;left:10px;right:10px;top:100%;display:none;max-height:70vh;overflow:auto;background:#07080d;backdrop-filter:blur(18px);border:1px solid #ffffff12;border-radius:12px;padding:8px;z-index:100}.cr-nav .navlinks.cr-open{display:flex;flex-direction:column}.cr-nav .navlinks a{padding:11px 12px;font-size:9px}.cr-nav .account{display:none}}
+ @media(max-width:1380px){.cr-nav{gap:8px;padding-left:12px;padding-right:12px}.cr-nav .brand{font-size:12px}.cr-nav .navlinks{overflow-x:auto;scrollbar-width:none}.cr-nav .navlinks::-webkit-scrollbar{display:none}.cr-nav .navlinks a{font-size:7px;padding:8px 5px}.cr-nav .account{font-size:8px;max-width:130px}}
+ @media(max-width:1080px){.cr-menu-toggle{display:block;margin-left:auto}.cr-nav .navlinks{position:absolute;left:8px;right:8px;top:100%;display:none;max-height:75vh;overflow:auto;background:#07080d;backdrop-filter:blur(18px);border:1px solid #ffffff12;border-radius:12px;padding:8px;z-index:100}.cr-nav .navlinks.cr-open{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start}.cr-nav .navlinks a{padding:11px 12px;font-size:9px}.cr-nav .account{display:none}}
+ @media(max-width:520px){.cr-nav{padding:11px 10px}.cr-nav .brand{font-size:11px;letter-spacing:1px}}
  `;
  document.head.appendChild(style);
 }
@@ -75,7 +92,7 @@ function bindNav(){
   const open=links.classList.toggle("cr-open");
   toggle.setAttribute("aria-expanded",String(open));
  });
- links.addEventListener("click",e=>{
+ document.addEventListener("keydown",e=>{if(e.key==="Escape"){links.classList.remove("cr-open");toggle.setAttribute("aria-expanded","false");}});\n links.addEventListener("click",e=>{
   if(e.target.closest("a")){links.classList.remove("cr-open");toggle.setAttribute("aria-expanded","false");}
  });
 }
@@ -83,7 +100,7 @@ function bindNav(){
 function shell(active){
  const page=active||currentPage().replace(/\.html$/,"");
  const links=NAV.map(([key,label,url])=>`<a href="${url}" class="${page===key?"active":""}" data-nav="${key}">${label}</a>`).join("");
- document.write(`<header class="site-header cr-header" data-cr-shell="16">
+ document.write(`<header class="site-header cr-header" data-cr-shell="17">
   <nav class="nav cr-nav" aria-label="CrowRules Sports navigation">
    <a class="brand" href="index.html" aria-label="CrowRules Sports home">CROW<span>RULES</span> SPORTS</a>
    <button class="cr-menu-toggle" id="crMenuToggle" type="button" aria-expanded="false" aria-controls="crNavLinks">MENU</button>
@@ -95,7 +112,7 @@ function shell(active){
  queueMicrotask(bindNav);
 }
 
-function footer(){document.write('<footer class="footer">CROWRULES SPORTS • ONE COMPANY. ONE UNIVERSE. • Built in Tacoma, Washington • <span id="crEngineVersion">Engine 16.0</span></footer>');}
+function footer(){document.write('<footer class="footer">CROWRULES SPORTS • ONE COMPANY. ONE UNIVERSE. • Built in Tacoma, Washington • <span id="crEngineVersion">Engine 17.0</span></footer>');}
 
 async function getSession(){
  try{const r=await withTimeout(sb.auth.getSession(),8000,"Session check");return r?.data?.session||null;}
@@ -164,8 +181,8 @@ function bindAuth(){
  authSubscription=r?.data?.subscription||null;
 }
 
-window.CrowRulesSports={
- version:"16.0",supabase:sb,$,$$,esc,sleep,timeout:withTimeout,normalizeError,reportError,
+window.CROW_SPORTS_NAV_VERSION="17.0";\nwindow.CrowRulesSports={
+ version:"17.0",supabase:sb,$,$$,esc,sleep,timeout:withTimeout,normalizeError,reportError,
  getSession,loadSession,loadUnread,signIn,signUp,signOut,shell,footer,startBadgeRealtime,
  storage:{get:storageGet,set:storageSet,remove:storageRemove}
 };
