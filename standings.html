@@ -66,7 +66,13 @@ const team=x=>x.team||x.cr_sports_teams||{};
 const league=x=>x.league||x.cr_sports_leagues||{};
 const wait=(p,ms=15000)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error("Standings request timed out. Please retry.")),ms))]);
 let all=[],seasons=[],leagues=[],activeSport="all",activeLeague="",showDetails=true;
-let favs=new Set();try{favs=new Set(JSON.parse(localStorage.getItem("crowrules-standing-favorites")||"[]"))}catch(e){}
+let favs=new Set(),standingsChannel=null,loadToken=0;
+const initialView=(()=>{const p=new URLSearchParams(location.search);return{season:p.get("season")||"",league:p.get("league")||"",sport:p.get("sport")||"all"}})();
+if(initialView.sport)activeSport=initialView.sport;
+if(initialView.league)activeLeague=initialView.league;
+function writeViewState(){const p=new URLSearchParams();if($("season").value)p.set("season",$("season").value);if(activeLeague)p.set("league",activeLeague);if(activeSport!=="all")p.set("sport",activeSport);history.replaceState(null,"",location.pathname+(p.toString()?"?"+p.toString():""))}
+function startRealtime(){if(standingsChannel||!db?.channel)return;standingsChannel=db.channel("crowrules-standings-live").on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_standings"},payload=>{const season=$("season").value;if(!season||String(payload.new?.season||payload.old?.season||"")!==String(season))return;clearTimeout(window.__crowStandingsRefresh);window.__crowStandingsRefresh=setTimeout(()=>load(true),700)}).subscribe(status=>{if(status==="SUBSCRIBED")setStatus("SUPABASE CONNECTED • LIVE",true)})}
+function stopRealtime(){if(standingsChannel&&db?.removeChannel){db.removeChannel(standingsChannel);standingsChannel=null}}try{favs=new Set(JSON.parse(localStorage.getItem("crowrules-standing-favorites")||"[]"))}catch(e){}
 
 function setStatus(msg,ok=false){$("connection").textContent=msg;$("connection").className="connection"+(ok?" ok":"");$("status").innerHTML='<span><span class="dot '+(ok?"ok":"")+'"></span>'+esc(msg)+'</span>'}
 function fail(e){console.error(e);setStatus("STANDINGS ERROR");$("content").innerHTML='<div class="error"><strong>STANDINGS COULD NOT LOAD</strong>'+esc(e?.message||"Unknown error")+'<br><br><button class="btn" id="retry">TRY AGAIN</button></div>';$("retry").onclick=load}
@@ -76,7 +82,7 @@ async function loadSeasons(){
  const r=await wait(db.from("cr_sports_standings").select("season").limit(2000));if(r.error)throw r.error;
  seasons=[...new Set((r.data||[]).map(x=>String(x.season||"")).filter(Boolean))].sort((a,b)=>b.localeCompare(a,undefined,{numeric:true}));
  if(!seasons.length)throw new Error("No standings seasons were found.");
- const current=$("season").value; $("season").innerHTML=seasons.map(s=>'<option value="'+esc(s)+'">'+esc(s)+'</option>').join("");
+ const current=initialView.season&&seasons.includes(initialView.season)?initialView.season:$("season").value; $("season").innerHTML=seasons.map(s=>'<option value="'+esc(s)+'">'+esc(s)+'</option>').join("");
  if(current&&seasons.includes(current))$("season").value=current;
 }
 async function loadLeagues(){
@@ -93,11 +99,12 @@ async function loadLeagues(){
 function drawSports(){
  const sports=[...new Set(leagues.map(x=>x.sport).filter(Boolean))].sort();
  $("sports").innerHTML='<button class="pill '+(activeSport==="all"?"active":"")+'" data-s="all">ALL SPORTS</button>'+sports.map(s=>'<button class="pill '+(activeSport===s?"active":"")+'" data-s="'+esc(s)+'">'+esc(String(s).toUpperCase())+'</button>').join("");
- $("sports").querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{activeSport=b.dataset.s;buildFilters();render()});
+ $("sports").querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{activeSport=b.dataset.s;writeViewState();buildFilters();render()});
 }
-async function loadRows(){
+async function loadRows(silent=false){
+ const token=++loadToken;
  const season=$("season").value;if(!season)throw new Error("No season selected.");
- setStatus("LOADING "+season+" STANDINGS…");
+ if(!silent)setStatus("LOADING "+season+" STANDINGS…");
  $("content").innerHTML='<div class="loading"><div class="spinner"></div><strong>LOADING '+esc(season)+' STANDINGS</strong><br>Fetching current records and team data…</div>';
  let q=db.from("cr_sports_standings").select("*").eq("season",season).limit(2000);if(activeLeague)q=q.eq("league_id",activeLeague);
  const r=await wait(q);if(r.error)throw r.error;
@@ -109,7 +116,7 @@ async function loadRows(){
  if(tr.error)throw tr.error;if(lr.error)throw lr.error;
  const tm=new Map((tr.data||[]).map(x=>[x.id,x])),lm=new Map((lr.data||[]).map(x=>[x.id,x])),seen=new Map();
  source.forEach(x=>{const key=x.league_id+"|"+x.season+"|"+x.team_id;seen.set(key,{...x,team:tm.get(x.team_id)||{},league:lm.get(x.league_id)||{}})});
- all=[...seen.values()];buildFilters();render();setStatus("SUPABASE CONNECTED • LIVE",true);$("updated").textContent=new Date().toLocaleString()+" • "+all.length+" records";
+ if(token!==loadToken)return;all=[...seen.values()];buildFilters();render();setStatus("SUPABASE CONNECTED • LIVE",true);$("updated").textContent=new Date().toLocaleString()+" • "+all.length+" records";writeViewState();startRealtime();
 }
 function buildFilters(){
  const base=all.filter(x=>activeSport==="all"||String(league(x).sport||"").toLowerCase()===String(activeSport).toLowerCase());
@@ -137,8 +144,8 @@ function render(){
  $("content").querySelectorAll("[data-fav]").forEach(b=>b.onclick=()=>{const id=b.dataset.fav;if(favs.has(id))favs.delete(id);else favs.add(id);try{localStorage.setItem("crowrules-standing-favorites",JSON.stringify([...favs]))}catch(e){}render()});
 }
 async function load(){if(!db)return fail(new Error("The shared Supabase client did not initialize."));try{await loadSeasons();await loadLeagues();await loadRows()}catch(e){fail(e)}}
-$("season").onchange=async()=>{activeLeague="";try{await loadLeagues();await loadRows()}catch(e){fail(e)}};$("league").onchange=()=>{activeLeague=$("league").value;loadRows().catch(fail)};$("conference").onchange=render;$("division").onchange=render;$("search").oninput=render;$("favorites").onchange=render;$("sort").onchange=render;$("refresh").onclick=load;$("reset").onclick=()=>{activeSport="all";activeLeague="";$("league").value="";$("conference").value="";$("division").value="";$("search").value="";$("favorites").value="all";$("sort").value="rank";drawSports();render()};$("details").onclick=()=>{showDetails=!showDetails;$("details").textContent=showDetails?"DETAILS ON":"DETAILS OFF";$("details").classList.toggle("active",showDetails);render()};$("export").onclick=()=>{const rows=filtered(),head=["Rank","Team","League","Season","Conference","Division","Wins","Losses","Ties","WinPct","PointsFor","PointsAgainst","Differential","Streak"],lines=[head,...rows.map(x=>{const t=team(x),l=league(x);return[x.rank,t.name||"",l.name||l.code||"",x.season,x.conference||"",x.division||"",x.wins,x.losses,x.ties,x.win_pct,x.points_for,x.points_against,n(x.points_for)-n(x.points_against),x.streak]})].map(r=>r.map(v=>'"'+String(v??"").replaceAll('"','""')+'"').join(","));const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+lines.join("\r\n")],{type:"text/csv"}));a.download="crowrules-standings-"+($("season").value||"season")+".csv";a.click()};$("share").onclick=async()=>{const p=new URLSearchParams();if($("season").value)p.set("season",$("season").value);if(activeLeague)p.set("league",activeLeague);if(activeSport!=="all")p.set("sport",activeSport);const url=location.origin+location.pathname+"?"+p.toString();try{await navigator.clipboard.writeText(url);$("share").textContent="COPIED";setTimeout(()=>$("share").textContent="SHARE VIEW",1200)}catch(e){prompt("Copy standings URL",url)}};
-window.addEventListener("keydown",e=>{const tag=document.activeElement?.tagName?.toLowerCase();if(e.key==="/"&&!["input","select","textarea"].includes(tag)){e.preventDefault();$("search").focus()}if(e.key.toLowerCase()==="r"&&!["input","select","textarea"].includes(tag))load();if(e.key==="Escape"&&tag==="input"){$("search").value="";render()}});
+$("season").onchange=async()=>{activeLeague="";try{await loadLeagues();await loadRows();writeViewState()}catch(e){fail(e)}};$("league").onchange=()=>{activeLeague=$("league").value;writeViewState();loadRows().catch(fail)};$("conference").onchange=render;$("division").onchange=render;$("search").oninput=render;$("favorites").onchange=render;$("sort").onchange=render;$("refresh").onclick=load;$("reset").onclick=()=>{activeSport="all";activeLeague="";$("league").value="";$("conference").value="";$("division").value="";$("search").value="";$("favorites").value="all";$("sort").value="rank";drawSports();render()};$("details").onclick=()=>{showDetails=!showDetails;$("details").textContent=showDetails?"DETAILS ON":"DETAILS OFF";$("details").classList.toggle("active",showDetails);render()};$("export").onclick=()=>{const rows=filtered(),head=["Rank","Team","League","Season","Conference","Division","Wins","Losses","Ties","WinPct","PointsFor","PointsAgainst","Differential","Streak"],lines=[head,...rows.map(x=>{const t=team(x),l=league(x);return[x.rank,t.name||"",l.name||l.code||"",x.season,x.conference||"",x.division||"",x.wins,x.losses,x.ties,x.win_pct,x.points_for,x.points_against,n(x.points_for)-n(x.points_against),x.streak]})].map(r=>r.map(v=>'"'+String(v??"").replaceAll('"','""')+'"').join(","));const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+lines.join("\r\n")],{type:"text/csv"}));a.download="crowrules-standings-"+($("season").value||"season")+".csv";a.click()};$("share").onclick=async()=>{const p=new URLSearchParams();if($("season").value)p.set("season",$("season").value);if(activeLeague)p.set("league",activeLeague);if(activeSport!=="all")p.set("sport",activeSport);const url=location.origin+location.pathname+"?"+p.toString();try{await navigator.clipboard.writeText(url);$("share").textContent="COPIED";setTimeout(()=>$("share").textContent="SHARE VIEW",1200)}catch(e){prompt("Copy standings URL",url)}};
+window.addEventListener("beforeunload",stopRealtime);window.addEventListener("keydown",e=>{const tag=document.activeElement?.tagName?.toLowerCase();if(e.key==="/"&&!["input","select","textarea"].includes(tag)){e.preventDefault();$("search").focus()}if(e.key.toLowerCase()==="r"&&!["input","select","textarea"].includes(tag))load();if(e.key==="Escape"&&tag==="input"){$("search").value="";render()}});
 load();
 })();
 </script>
