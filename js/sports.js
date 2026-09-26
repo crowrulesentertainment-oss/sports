@@ -159,7 +159,7 @@ function shell(active){
  queueMicrotask(bindNav);
 }
 
-function footer(){document.write('<footer class="footer">CROWRULES SPORTS • ONE COMPANY. ONE UNIVERSE. • Built in Tacoma, Washington • <span id="crEngineVersion">Engine 20.0</span></footer>');}
+function footer(){document.write('<footer class="footer">CROWRULES SPORTS • ONE COMPANY. ONE UNIVERSE. • Built in Tacoma, Washington • <span id="crEngineVersion">Engine 21.0</span></footer>');}
 
 async function getSession(){
  if(!sb)return null;
