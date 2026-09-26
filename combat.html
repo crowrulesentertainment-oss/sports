@@ -78,6 +78,14 @@ body{background:var(--combat-bg)}
  </div>
 </section>
 
+<section class="section" id="champions" style="padding-top:0">
+ <div class="wrap">
+  <div class="section-head"><div><div class="eyebrow">CHAMPIONSHIP UNIVERSE</div><h2>THE CHAMPIONS</h2></div><div class="muted" id="championStatus">Loading champions…</div></div>
+  <div class="champion-filter" style="margin:18px 0"><button class="active" data-champ-org="ALL">ALL</button><button data-champ-org="UFC">UFC</button><button data-champ-org="WWE">WWE</button><button data-champ-org="AEW">AEW</button><a class="button small secondary" href="championships.html">FULL CHAMPIONSHIP UNIVERSE</a></div>
+  <div id="championGrid" class="champion-grid"><div class="empty">Loading championship records…</div></div>
+ </div>
+</section>
+
 <section class="section" id="events">
  <div class="wrap">
   <div class="section-head"><div><div class="eyebrow">EVENT COMMAND</div><h2>UPCOMING & RECENT FIGHTS</h2></div><div class="muted" id="eventStatus">Loading combat schedule…</div></div>
@@ -113,7 +121,7 @@ body{background:var(--combat-bg)}
 <script>
 loadSession();
 
-let combatEvents=[],refreshing=false;
+\nlet championRows=[];\nasync function loadChampions(){const root=document.getElementById("championGrid");const r=await sb.from("cr_sports_championships").select("id,organization,title_name,division,title_type,champion_name,champion_image_url,won_at,is_interim,defense_count").in("organization",["UFC","WWE","AEW"]).eq("status","active").order("organization").order("title_name");if(r.error){root.innerHTML='<div class="empty error">'+escLocal(r.error.message)+'</div>';return}championRows=r.data||[];renderChampions("ALL")}\nfunction renderChampions(org){const root=document.getElementById("championGrid"),rows=championRows.filter(x=>org==="ALL"||x.organization===org);document.getElementById("championStatus").textContent=rows.length+" championship"+(rows.length===1?"":"s")+" synchronized";if(!rows.length){root.innerHTML='<div class="empty">No championship records available.</div>';return}root.innerHTML=rows.map(x=>{const initial=escLocal((x.champion_name||"?").slice(0,1).toUpperCase());const art=x.champion_image_url?'<img src="'+escLocal(x.champion_image_url)+'" alt="'+escLocal(x.champion_name||"Champion")+'" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';"><span class="champion-initial" style="display:none">'+initial+'</span>':'<span class="champion-initial">'+initial+'</span>';return '<article class="champion-card"><div class="champion-art">'+art+'</div><div class="champion-body"><div class="champion-org">'+escLocal(x.organization)+(x.is_interim?" • INTERIM":"")+'</div><div class="champion-title">'+escLocal(x.title_name)+'</div><div class="champion-name">'+escLocal(x.champion_name||"Champion TBD")+'</div><div class="champion-meta">'+escLocal(x.division||x.title_type||"Singles")+" • "+escLocal((x.defense_count||0)+" defenses")+(x.won_at?" • Won "+escLocal(x.won_at):"")+'</div></div><div class="champion-actions"><a class="button small secondary" href="championships.html#championship-'+encodeURIComponent(x.id)+'">VIEW TITLE</a></div></article>'}).join("")}\ndocument.querySelectorAll("[data-champ-org]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-champ-org]").forEach(x=>x.classList.remove("active"));b.classList.add("active");renderChampions(b.dataset.champOrg)}));\n\nlet combatEvents=[],refreshing=false;
 
 function escLocal(v){return typeof esc==="function"?esc(v):String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
 function leagueCode(row){return String(row?.cr_sports_leagues?.code||row?.league_code||"").toUpperCase();}
@@ -178,7 +186,7 @@ function applyJump(code){document.getElementById("org").value=code;document.getE
 document.getElementById("search").addEventListener("input",renderCombat);
 document.getElementById("org").addEventListener("change",renderCombat);
 document.getElementById("window").addEventListener("change",renderCombat);
-document.getElementById("refreshBtn").addEventListener("click",async()=>{if(refreshing)return;refreshing=true;const b=document.getElementById("refreshBtn");b.disabled=true;b.textContent="REFRESHING…";try{await loadCombat();}finally{refreshing=false;b.disabled=false;b.textContent="REFRESH";}});
+document.getElementById("refreshBtn").addEventListener("click",async()=>{if(refreshing)return;refreshing=true;const b=document.getElementById("refreshBtn");b.disabled=true;b.textContent="REFRESHING…";try{await loadChampions();\nloadCombat();}finally{refreshing=false;b.disabled=false;b.textContent="REFRESH";}});
 document.querySelectorAll("[data-jump]").forEach(b=>b.addEventListener("click",()=>applyJump(b.dataset.jump)));
 document.getElementById("shareBtn").addEventListener("click",async()=>{try{if(navigator.share)await navigator.share({title:"CrowRules Sports Combat Center",text:"UFC • WWE • AEW Combat Center",url:location.href});else{await navigator.clipboard.writeText(location.href);document.getElementById("shareBtn").textContent="LINK COPIED";setTimeout(()=>document.getElementById("shareBtn").textContent="SHARE COMBAT CENTER",1600);}}catch(e){}});
 
