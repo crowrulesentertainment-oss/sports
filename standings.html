@@ -174,7 +174,8 @@ body{background:#050508}
     const el=q("league");
     const keep=requestedLeague||el.value;
     el.innerHTML='<option value="">ALL LEAGUES</option>'+leagues.map(l=>'<option value="'+escLocal(l.id)+'">'+escLocal(l.code||l.name)+' — '+escLocal(l.name||"")+'</option>').join("");
-    if(keep && leagues.some(l=>l.id===keep)) el.value=keep; else el.value="";
+    const matched=leagues.find(l=>l.id===keep||String(l.code||"").toLowerCase()===String(keep||"").toLowerCase());
+    el.value=matched?matched.id:"";
     requestedLeague=el.value;
     renderSports();
   }
