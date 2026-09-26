@@ -145,9 +145,9 @@ body{background:#050508}
   }
 
   async function loadSeasons(){
-    const {data,error}=await timeout(S.from("cr_sports_standings").select("season").order("season",{ascending:false}).limit(5000));
+    const {data,error}=await timeout(S.from("cr_sports_standings").select("season").order("season",{ascending:false}).limit(1000));
     if(error) throw error;
-    seasons=[...new Set((data||[]).map(x=>String(x.season||"").trim()).filter(x=>/^\d{4}$/.test(x)))].sort((a,b)=>Number(b)-Number(a));
+    seasons=[...new Set((data||[]).map(x=>String(x.season||"").trim()).filter(x=>/^\\d{4}$/.test(x)))].sort((a,b)=>Number(b)-Number(a));
     const el=q("season"), current=el.value||params.get("season")||"";
     el.innerHTML=seasons.map(s=>'<option value="'+escLocal(s)+'">'+escLocal(s)+'</option>').join("");
     if(seasons.includes(current)) el.value=current;
@@ -157,22 +157,14 @@ body{background:#050508}
 
   async function loadLeaguesForSeason(){
     const season=q("season").value;
-    const {data,error}=await timeout(
-      S.from("cr_sports_standings")
-       .select("league_id,cr_sports_leagues(id,name,code,sport,is_active)")
-       .eq("season",season).limit(5000)
-    );
+    const {data,error}=await timeout(S.from("cr_sports_standings").select("league_id").eq("season",season).limit(1000));
     if(error) throw error;
-
-    const map=new Map();
-    (data||[]).forEach(x=>{
-      const l=leagueOf(x);
-      if(l.id||x.league_id) map.set(l.id||x.league_id,l.id?l:{id:x.league_id,name:"League",code:"",sport:""});
-    });
-    leagues=[...map.values()].sort((a,b)=>String(a.name||a.code).localeCompare(String(b.name||b.code)));
-
-    const el=q("league");
-    const keep=requestedLeague||el.value;
+    const ids=[...new Set((data||[]).map(x=>x.league_id).filter(Boolean))];
+    if(!ids.length){leagues=[];q("league").innerHTML='<option value="">ALL LEAGUES</option>';renderSports();return;}
+    const lr=await timeout(S.from("cr_sports_leagues").select("id,name,code,sport,is_active").in("id",ids).limit(1000));
+    if(lr.error) throw lr.error;
+    leagues=(lr.data||[]).sort((a,b)=>String(a.name||a.code).localeCompare(String(b.name||b.code)));
+    const el=q("league"),keep=requestedLeague||el.value;
     el.innerHTML='<option value="">ALL LEAGUES</option>'+leagues.map(l=>'<option value="'+escLocal(l.id)+'">'+escLocal(l.code||l.name)+' — '+escLocal(l.name||"")+'</option>').join("");
     const matched=leagues.find(l=>l.id===keep||String(l.code||"").toLowerCase()===String(keep||"").toLowerCase());
     el.value=matched?matched.id:"";
@@ -206,16 +198,27 @@ body{background:#050508}
     setStatus('<span><span class="pulse"></span>Loading all standings…</span>');
     q("content").innerHTML='<div class="loading"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>';
     const season=q("season").value;
-    if(!/^\d{4}$/.test(season)) throw new Error("Select a valid four-digit season.");
+    if(!/^\\d{4}$/.test(season)) throw new Error("Select a valid four-digit season.");
 
-    let request=S.from("cr_sports_standings")
-      .select("*,cr_sports_teams(id,name,short_name,city,state,logo_url),cr_sports_leagues(id,name,code,sport)")
-      .eq("season",season).limit(5000);
+    let request=S.from("cr_sports_standings").select("*").eq("season",season).limit(1000);
     if(requestedLeague) request=request.eq("league_id",requestedLeague);
-
     const {data,error}=await timeout(request);
     if(error) throw error;
+
     rawRows=data||[];
+    const teamIds=[...new Set(rawRows.map(x=>x.team_id).filter(Boolean))];
+    const leagueIds=[...new Set(rawRows.map(x=>x.league_id).filter(Boolean))];
+
+    const [tr,lr]=await Promise.all([
+      teamIds.length?timeout(S.from("cr_sports_teams").select("id,name,short_name,city,state,logo_url").in("id",teamIds).limit(1000)):Promise.resolve({data:[],error:null}),
+      leagueIds.length?timeout(S.from("cr_sports_leagues").select("id,name,code,sport").in("id",leagueIds).limit(1000)):Promise.resolve({data:[],error:null})
+    ]);
+    if(tr.error) throw tr.error;
+    if(lr.error) throw lr.error;
+
+    const tm=new Map((tr.data||[]).map(x=>[x.id,x]));
+    const lm=new Map((lr.data||[]).map(x=>[x.id,x]));
+    rawRows=rawRows.map(x=>({...x,cr_sports_teams:tm.get(x.team_id)||{},cr_sports_leagues:lm.get(x.league_id)||{}}));
     rows=dedupe(rawRows);
     refillFilters();
     render();
