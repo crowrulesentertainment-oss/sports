@@ -3,7 +3,7 @@
 "use strict";
 
 const SUPABASE_URL="https://cevylpnoexugwgygvtgu.supabase.co";
-const SUPABASE_KEY="sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-";
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNldnlscG5vZXh1Z3dneWd2dGd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4MTYxOTYsImV4cCI6MjEwNDM5MjE5Nn0.bvSF3qRqFNvCtaF5CSDeeEO3yJnsnYt9CXmgUaBWjNQ";
 
 const HAS_SUPABASE=!!(window.supabase&&typeof window.supabase.createClient==="function");
 let sb=null;
