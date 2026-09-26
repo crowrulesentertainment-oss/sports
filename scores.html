@@ -372,8 +372,9 @@ document.getElementById("leagueSelect").onchange=e=>{state.league=e.target.value
 document.getElementById("statusSelect").onchange=e=>{state.status=e.target.value;render()};
 document.getElementById("refreshBtn").onclick=async()=>{await loadScores();await loadEvents()};
 
-loadScores();
+loadScores().then(syncUniversalLeague);
 loadEvents();
+document.addEventListener("crowrules:leaguechange",syncUniversalLeague);
 
 setInterval(async()=>{
   await loadScores();
