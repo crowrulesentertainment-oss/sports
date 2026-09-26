@@ -87,8 +87,6 @@ body{background:#050508}
 <script>
 loadSession();
 
-const $=s=>document.querySelector(s);
-const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
 const num=v=>Number(v??0)||0;
 const pct=v=>{const n=num(v);return (n<=1?n*100:n).toFixed(1)+"%";};
 const record=x=>num(x.wins)+"-"+num(x.losses)+(num(x.ties)?"-"+num(x.ties):"");
