@@ -6,7 +6,7 @@
 <title>Championship Universe | CrowRules Sports</title>
 <link rel="stylesheet" href="css/sports.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/sports.js?v=22.0"></script>
+<script src="js/sports.js?v=23.0"></script>
 <style>
 .cu-hero{padding:78px 24px 55px;background:radial-gradient(circle at 80% 15%,rgba(225,6,0,.2),transparent 28%),linear-gradient(135deg,#070707,#110909);border-bottom:1px solid #32100f}
 .cu-hero h1{font:900 clamp(42px,7vw,88px)/.95 Orbitron;letter-spacing:-4px;margin:15px 0}.cu-hero h1 span{color:#e10600}
@@ -99,7 +99,7 @@ async function load(){
  sync.textContent="Refreshing live championship titles…";
  try{
   const r=await sb.from("cr_sports_championships")
-   .select("id,organization,title_name,title_type,champion_name,division,won_at,is_interim,status,source_url,image_url,updated_at")
+   .select("id,organization,title_name,title_type,champion_name,division,won_at,is_interim,status,source_url,champion_image_url,updated_at")
    .eq("status","active")
    .order("organization")
    .order("title_name");
@@ -108,7 +108,7 @@ async function load(){
    document.getElementById("count").textContent="—";
    setState("Championship records unavailable","error");
    document.getElementById("syncStatus").textContent="Database query returned an error.";
-   document.getElementById("recordStatus").textContent=r.error.message;
+   document.getElementById("recordStatus").textContent=[r.error.code,r.error.message,r.error.details,r.error.hint].filter(Boolean).join(" • ");
    return;
   }
 
