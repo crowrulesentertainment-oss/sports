@@ -86,7 +86,8 @@ async function loadUfcFightCard(){
  const mount=document.getElementById("fightCardMount");mount.innerHTML='<div class="panel fight-card-panel"><div class="eyebrow">SPORTS 23.1 • UFC FIGHT CARD</div><h2>Loading Fighter Profiles…</h2><p class="muted">Building individual fighter cards and tale-of-the-tape panels.</p></div>';
  let r=await sb.from("cr_sports_event_bouts").select("*").eq("event_id",eventRecord.id).order("bout_order",{ascending:true}),rows=r.data||[];
  if(r.error){mount.innerHTML='<div class="panel fight-card-panel"><h2>FIGHT CARD UNAVAILABLE</h2><p class="muted">'+esc(r.error.message)+'</p></div>';return;}
- if(shouldRefresh(rows)){const sync=await syncUfcCard();if(sync?.ok){r=await sb.from("cr_sports_event_bouts").select("*").eq("event_id",eventRecord.id).order("bout_order",{ascending:true});rows=r.data||[];}}
+ let sync=null;
+ if(shouldRefresh(rows)){sync=await syncUfcCard();if(sync?.ok){r=await sb.from("cr_sports_event_bouts").select("*").eq("event_id",eventRecord.id).order("bout_order",{ascending:true});rows=r.data||[];}}
  if(!rows.length){
    const detail=sync?.error?'<div class="sync-note" style="color:#ff7777">Cito sync error: '+esc(sync.error)+'</div>':"";
    mount.innerHTML='<div class="panel fight-card-panel"><div class="eyebrow">SPORTS 23.1 • UFC FIGHT CARD</div><h2>FIGHT CARD PENDING</h2><p class="muted">CrowRules has not stored any bouts for this event yet. The page attempted a live Cito sync.</p>'+detail+'<div class="actions"><button class="button" id="retryCito">RETRY CITO SYNC</button></div><div class="sync-note">Source: Cito UFC API • fighter profiles are cached server-side.</div></div>';
