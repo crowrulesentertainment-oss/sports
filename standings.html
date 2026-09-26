@@ -94,7 +94,7 @@ const pct=v=>{const n=num(v);return (n<=1?n*100:n).toFixed(1)+"%";};
 const record=x=>num(x.wins)+"-"+num(x.losses)+(num(x.ties)?"-"+num(x.ties):"");
 const diff=x=>num(x.points_for)-num(x.points_against);
 
-let rows=[], leagues=[], activeSport="all", favoriteTeams=new Set(JSON.parse(localStorage.getItem("cr_standings_favorites")||"[]"));
+let rows=[], leagues=[], activeSport="all", favoriteTeams=new Set(JSON.parse(localStorage.getItem("cr_standings_favorites")||"[]"));\nconst urlParams=new URLSearchParams(location.search), requestedTeam=urlParams.get("team"), requestedLeague=urlParams.get("league");
 
 function saveFav(){localStorage.setItem("cr_standings_favorites",JSON.stringify([...favoriteTeams]));}
 function teamObj(x){return x.cr_sports_teams||{};}
@@ -134,7 +134,7 @@ function filtered(){
   let a=rows.filter(x=>{
     const t=teamObj(x),l=leagueObj(x);
     const hay=[t.name,t.short_name,t.city,t.state,x.conference,x.division,l.name,l.code,l.sport].filter(Boolean).join(" ").toLowerCase();
-    return (!q||hay.includes(q))&&(!c||x.conference===c)&&(!d||x.division===d)&&
+    return (!q||hay.includes(q))&&(!c||x.conference===c)&&(!d||x.division===d)&&(!requestedTeam||x.team_id===requestedTeam)&&
       (activeSport==="all"||String(l.sport||"").toLowerCase()===String(activeSport).toLowerCase());
   });
   const s=$("sort").value;
