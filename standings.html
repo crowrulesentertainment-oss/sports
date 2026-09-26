@@ -236,6 +236,7 @@ body{background:#050508}
 
   function filtered(){
     const search=q("search").value.trim().toLowerCase(), c=q("conference").value, d=q("division").value;
+    const favMode=q("favoritesFilter").value;
     const out=rows.filter(x=>{
       const t=teamOf(x),l=leagueOf(x);
       const hay=[t.name,t.short_name,t.city,t.state,l.name,l.code,l.sport,x.conference,x.division].filter(Boolean).join(" ").toLowerCase();
@@ -243,7 +244,6 @@ body{background:#050508}
         (activeSport==="all"||String(l.sport||"").toLowerCase()===String(activeSport).toLowerCase())&&
         (favMode!=="favorites"||favorites.has(x.team_id||t.id));
     });
-    const favMode=q("favoritesFilter").value;
     const sort=q("sort").value;
     out.sort((a,b)=>{
       const ta=teamOf(a),tb=teamOf(b);
