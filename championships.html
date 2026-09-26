@@ -1,17 +1,158 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Championship Universe | CrowRules Sports</title><link rel="stylesheet" href="css/sports.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/sports.js"></script>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Championship Universe | CrowRules Sports</title>
+<link rel="stylesheet" href="css/sports.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/sports.js"></script>
 <style>
-.cu-hero{padding:78px 24px 55px;background:radial-gradient(circle at 80% 15%,rgba(225,6,0,.2),transparent 28%),linear-gradient(135deg,#070707,#110909);border-bottom:1px solid #32100f}.cu-hero h1{font:900 clamp(42px,7vw,88px)/.95 Orbitron;letter-spacing:-4px;margin:15px 0}.cu-hero h1 span{color:#e10600}.titlebar{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:22px}.titlebar h2{font:900 30px Orbitron;margin:4px 0}.org{margin-top:50px}.champ-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.champ{min-height:205px;position:relative;padding:22px;background:linear-gradient(145deg,#151515,#090909);border:1px solid #2b2020;overflow:hidden}.champ:hover{border-color:#e10600;transform:translateY(-2px)}.champ:after{content:"CHAMPION";position:absolute;right:-25px;top:18px;transform:rotate(35deg);font:900 9px Orbitron;letter-spacing:2px;color:#4a2421}.org-tag{font:800 9px Orbitron;letter-spacing:3px;color:#ff5b54}.champ h3{font:900 21px Orbitron;line-height:1.25;margin:12px 0 8px}.holder{font-size:14px;font-weight:800}.meta{margin-top:12px;color:#777;font-size:10px;line-height:1.6}.actions{margin-top:16px}.filterbar{display:flex;gap:8px;flex-wrap:wrap}.filterbar .button.active{background:#e10600;border-color:#e10600}@media(max-width:950px){.champ-grid{grid-template-columns:1fr 1fr}}@media(max-width:650px){.champ-grid{grid-template-columns:1fr}}
-</style></head>
-<body><script>shell("champions")</script>
-<section class="cu-hero"><div class="hero"><div class="eyebrow">CROWRULES SPORTS • CHAMPIONSHIP UNIVERSE</div><h1>EVERY <span>TITLE.</span><br>ONE UNIVERSE.</h1><p class="muted">Current championship holders across UFC, WWE and AEW, backed by Supabase and designed to grow into championship history, title defenses, reign statistics and upcoming title fights.</p><div class="filterbar"><button class="button active" data-filter="ALL">ALL</button><button class="button" data-filter="UFC">UFC</button><button class="button" data-filter="WWE">WWE</button><button class="button" data-filter="AEW">AEW</button></div></div></section>
-<section class="section"><div class="titlebar"><div><div class="eyebrow">LIVE TITLE BOARD</div><h2>CHAMPIONS</h2></div><div id="count" class="muted"></div></div><div id="grid"><div class="loading">Loading championship universe…</div></div></section>
-<section class="section"><div class="card"><div class="eyebrow">CHAMPIONSHIP COMMAND CENTER</div><h2>EVERY TITLE BECOMES A LIVING RECORD</h2><p class="muted">Open any championship for live reign duration, verified defenses, historical lineage, source links and future Event Center connections.</p></div></section>
+.cu-hero{padding:78px 24px 55px;background:radial-gradient(circle at 80% 15%,rgba(225,6,0,.2),transparent 28%),linear-gradient(135deg,#070707,#110909);border-bottom:1px solid #32100f}
+.cu-hero h1{font:900 clamp(42px,7vw,88px)/.95 Orbitron;letter-spacing:-4px;margin:15px 0}.cu-hero h1 span{color:#e10600}
+.titlebar{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:22px}.titlebar h2{font:900 30px Orbitron;margin:4px 0}
+.org{margin-top:50px}.champ-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.champ{min-height:205px;position:relative;padding:22px;background:linear-gradient(145deg,#151515,#090909);border:1px solid #2b2020;overflow:hidden;transition:.2s}
+.champ:hover{border-color:#e10600;transform:translateY(-2px)}.champ:after{content:"CHAMPION";position:absolute;right:-25px;top:18px;transform:rotate(35deg);font:900 9px Orbitron;letter-spacing:2px;color:#4a2421}
+.org-tag{font:800 9px Orbitron;letter-spacing:3px;color:#ff5b54}.champ h3{font:900 21px Orbitron;line-height:1.25;margin:12px 0 8px}.holder{font-size:14px;font-weight:800}.meta{margin-top:12px;color:#777;font-size:10px;line-height:1.6}.actions{margin-top:16px}
+.filterbar{display:flex;gap:8px;flex-wrap:wrap}.filterbar .button.active{background:#e10600;border-color:#e10600}
+.loading,.state{padding:30px;text-align:center;background:#09090c;border:1px solid #252027;color:#777}.state strong{display:block;color:#ddd;font:800 14px Orbitron;margin-bottom:8px}.state.error{color:#ff8580;border-color:#51201e}
+.live-note{display:flex;align-items:center;gap:8px;margin-top:12px;color:#666;font-size:10px}.dot{width:6px;height:6px;border-radius:50%;background:#e10600;box-shadow:0 0 10px rgba(225,6,0,.6)}
+@media(max-width:950px){.champ-grid{grid-template-columns:1fr 1fr}}@media(max-width:650px){.champ-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<script>shell("champions")</script>
+
+<section class="cu-hero">
+ <div class="hero">
+  <div class="eyebrow">CROWRULES SPORTS • CHAMPIONSHIP UNIVERSE</div>
+  <h1>EVERY <span>TITLE.</span><br>ONE UNIVERSE.</h1>
+  <p class="muted">Current championship holders across UFC, WWE and AEW. Championship cards load independently from optional reign, defense and lineage records so missing history never blocks the live title board.</p>
+  <div class="filterbar">
+   <button class="button active" data-filter="ALL">ALL</button>
+   <button class="button" data-filter="UFC">UFC</button>
+   <button class="button" data-filter="WWE">WWE</button>
+   <button class="button" data-filter="AEW">AEW</button>
+   <button class="button secondary" id="refreshBtn">REFRESH</button>
+  </div>
+  <div class="live-note"><span class="dot"></span><span id="syncStatus">Connecting to championship universe…</span></div>
+ </div>
+</section>
+
+<section class="section">
+ <div class="titlebar">
+  <div><div class="eyebrow">LIVE TITLE BOARD</div><h2>CHAMPIONS</h2></div>
+  <div id="count" class="muted">Loading…</div>
+ </div>
+ <div id="grid"><div class="loading">Loading championship universe…</div></div>
+</section>
+
+<section class="section" style="padding-top:0">
+ <div class="card">
+  <div class="eyebrow">DATA STATUS</div>
+  <h2>LIVE TITLES LOAD INDEPENDENTLY</h2>
+  <p class="muted">Current championship data is the primary source for this page. Reign history, defenses and lineage are optional enrichment records. If those tables are empty or temporarily unavailable, the live title cards still render.</p>
+  <div id="recordStatus" class="live-note"></div>
+ </div>
+</section>
+
 <script>
-let rows=[],filter="ALL";
-function render(){const list=filter==="ALL"?rows:rows.filter(x=>x.organization===filter);document.getElementById("count").textContent=list.length+" TITLES";const groups=[...new Set(list.map(x=>x.organization))];document.getElementById("grid").innerHTML=groups.map(g=>'<div class="org"><div class="titlebar"><div><div class="org-tag">'+esc(g)+'</div><h2>'+(g==='UFC'?'MMA':'WRESTLING')+'</h2></div></div><div class="champ-grid">'+list.filter(x=>x.organization===g).map(x=>'<a class="champ" style="display:block;color:inherit;text-decoration:none" href="championship.html?id='+encodeURIComponent(x.id)+'"><div class="org-tag">'+esc(x.title_type||'TITLE')+'</div><h3>'+esc(x.title_name)+'</h3><div class="holder">'+esc(x.champion_name||'VACANT')+'</div><div class="meta">'+esc(x.division||'')+(x.won_at?' • Reign began '+new Date(x.won_at+'T00:00:00').toLocaleDateString():'')+(x.is_interim?' • INTERIM':'')+'</div><div class="actions"><span class="button small">OPEN TITLE</span></div></a>').join('')+'</div></div>').join('')||'<div class="loading">No championships found.</div>'}
-async function load(){const r=await sb.from("cr_sports_championships").select("*").eq("status","active").order("organization").order("title_name");if(r.error){document.getElementById("grid").innerHTML='<div class="loading">'+esc(r.error.message)+'</div>';return}rows=r.data||[];render()}
-document.querySelectorAll("[data-filter]").forEach(b=>b.onclick=()=>{filter=b.dataset.filter;document.querySelectorAll("[data-filter]").forEach(x=>x.classList.toggle("active",x===b));render()});
-loadSession();load();sb.channel("sports-championship-universe").on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_championships"},load).subscribe();
-</script><script>footer()</script></body></html>
+let rows=[];
+let filter="ALL";
+let loading=false;
+
+function setState(message,type="normal"){
+ const grid=document.getElementById("grid");
+ grid.innerHTML='<div class="state '+(type==="error"?"error":"")+'"><strong>'+esc(message)+'</strong><span>'+(type==="error"?"The live title board could not be refreshed. Try again.":"The title board is ready to render synchronized championship records.")+'</span></div>';
+}
+
+function render(){
+ const list=filter==="ALL"?rows:rows.filter(x=>String(x.organization||"").toUpperCase()===filter);
+ document.getElementById("count").textContent=list.length+" TITLES";
+ const groups=[...new Set(list.map(x=>x.organization).filter(Boolean))];
+ if(!list.length){
+  setState(filter==="ALL"?"No active championships are currently synchronized.":"No active "+filter+" championships are currently synchronized.");
+  return;
+ }
+ document.getElementById("grid").innerHTML=groups.map(g=>{
+  const titles=list.filter(x=>x.organization===g);
+  return '<div class="org"><div class="titlebar"><div><div class="org-tag">'+esc(g)+'</div><h2>'+(g==="UFC"?"MMA":"WRESTLING")+'</h2></div><div class="muted">'+titles.length+' TITLES</div></div><div class="champ-grid">'+
+   titles.map(x=>{
+    const meta=[x.division||"",x.won_at?"Reign began "+new Date(x.won_at+"T00:00:00").toLocaleDateString():"",x.is_interim?"INTERIM":""].filter(Boolean).join(" • ");
+    return '<a class="champ" style="display:block;color:inherit;text-decoration:none" href="championship.html?id='+encodeURIComponent(x.id)+'">'+
+     '<div class="org-tag">'+esc(x.title_type||"TITLE")+'</div>'+
+     '<h3>'+esc(x.title_name||"Championship")+'</h3>'+
+     '<div class="holder">'+esc(x.champion_name||"VACANT")+'</div>'+
+     '<div class="meta">'+esc(meta||"Current title record")+'</div>'+
+     '<div class="actions"><span class="button small">OPEN TITLE</span></div>'+
+    '</a>';
+   }).join("")+
+  '</div></div>';
+ }).join("");
+}
+
+async function load(){
+ if(loading)return;
+ loading=true;
+ const sync=document.getElementById("syncStatus");
+ sync.textContent="Refreshing live championship titles…";
+ try{
+  const r=await sb.from("cr_sports_championships")
+   .select("id,organization,title_name,title_type,champion_name,division,won_at,is_interim,status,source_url,image_url,updated_at")
+   .eq("status","active")
+   .order("organization")
+   .order("title_name");
+
+  if(r.error){
+   document.getElementById("count").textContent="—";
+   setState("Championship records unavailable","error");
+   document.getElementById("syncStatus").textContent="Database query returned an error.";
+   document.getElementById("recordStatus").textContent=r.error.message;
+   return;
+  }
+
+  rows=r.data||[];
+  render();
+  sync.textContent=rows.length+" active championship"+(rows.length===1?"":"s")+" synchronized.";
+
+  // Optional enrichment is deliberately non-blocking.
+  const [reigns,history,defenses]=await Promise.all([
+   sb.from("cr_sports_championship_reigns").select("id",{count:"exact",head:true}),
+   sb.from("cr_sports_championship_history").select("id",{count:"exact",head:true}),
+   sb.from("cr_sports_championship_defenses").select("id",{count:"exact",head:true})
+  ]);
+
+  const parts=[];
+  if(!reigns.error)parts.push((reigns.count||0)+" reign records");
+  if(!history.error)parts.push((history.count||0)+" lineage records");
+  if(!defenses.error)parts.push((defenses.count||0)+" defense records");
+  document.getElementById("recordStatus").textContent=parts.length?parts.join(" • ")+" available for title detail pages.":"Optional historical records are not currently available; live titles remain active.";
+ }catch(err){
+  document.getElementById("count").textContent="—";
+  setState("Championship board could not be loaded","error");
+  document.getElementById("syncStatus").textContent="Unexpected loading error.";
+  document.getElementById("recordStatus").textContent=err?.message||String(err);
+ }finally{
+  loading=false;
+ }
+}
+
+document.querySelectorAll("[data-filter]").forEach(b=>b.onclick=()=>{
+ filter=b.dataset.filter;
+ document.querySelectorAll("[data-filter]").forEach(x=>x.classList.toggle("active",x===b));
+ render();
+});
+
+document.getElementById("refreshBtn").onclick=load;
+
+loadSession();
+load();
+
+sb.channel("sports-championship-universe")
+ .on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_championships"},load)
+ .subscribe();
+</script>
+<script>footer()</script>
+</body>
+</html>
