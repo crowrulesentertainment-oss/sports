@@ -7,7 +7,7 @@
 <title>Audio & Video | CrowRules Sports</title>
 <link rel="stylesheet" href="css/sports.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/sports.js?v=20.0"></script>
+<script src="js/sports.js?v=22.0"></script>
 <style>
 .media-hero{padding-bottom:30px}
 .media-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
@@ -144,6 +144,21 @@ try{
  statusEl.textContent="Audio connection failed";
  emptyEl.hidden=false;
 }
+const sportsMediaHost=document.createElement("section");
+sportsMediaHost.className="section";
+sportsMediaHost.innerHTML='<div class="section-head"><div><div class="eyebrow">UNIVERSAL DATA LAYER</div><h2>SPORTS MEDIA</h2></div><div class="muted" id="sportsMediaStatus">Loading…</div></div><div id="sportsMediaGrid" class="media-grid"></div>';
+document.body.insertBefore(sportsMediaHost,document.querySelector("footer"));
+async function renderUniversalSportsMedia(){
+ const grid=document.getElementById("sportsMediaGrid"),status=document.getElementById("sportsMediaStatus");
+ if(!grid)return;
+ try{
+  const rows=await window.CrowRulesSports.getSportsData("media",{select:"id,title,description,media_type,media_url,thumbnail_url,league_id,published_at,is_published",eq:{is_published:true},order:{column:"published_at",ascending:false},limit:24});
+  status.textContent=(window.CROW_SPORTS_LEAGUE||"all")==="all"?"ALL LEAGUES":String(window.CROW_SPORTS_LEAGUE);
+  grid.innerHTML=rows.length?rows.map(m=>'<article class="media-card"><div class="media-thumb">'+(m.thumbnail_url?'<img src="'+esc(m.thumbnail_url)+'" alt="" onerror="this.style.display=\'none\'">':'')+'</div><div class="media-body"><div class="eyebrow">'+esc(m.media_type||"MEDIA")+'</div><h3>'+esc(m.title||"Sports Media")+'</h3><p class="muted">'+esc(m.description||"")+'</p>'+(m.media_url?'<a class="btn small" href="'+esc(m.media_url)+'" target="_blank" rel="noopener">OPEN MEDIA</a>':"")+'</div></article>').join(""):'<div class="empty-state">No sports media is published for the active league.</div>';
+ }catch(e){status.textContent="SPORTS MEDIA UNAVAILABLE";grid.innerHTML='<div class="empty-state">'+esc(e.message||"Unable to load sports media.")+'</div>'}
+}
+document.addEventListener("crowrules:leaguechange",renderUniversalSportsMedia);
+renderUniversalSportsMedia();
 })();
 </script>
 <script>footer()</script>
