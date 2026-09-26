@@ -364,12 +364,18 @@ async function refreshCurrentSportsPage(){
    if(typeof window.loadEvents==="function")await window.loadEvents();
   }else if(page==="schedule.html"){
    if(typeof window.loadScheduleData==="function")await window.loadScheduleData();
-  }else if(page==="standings.html"){
+   }else if(page==="standings.html"){
+   const l=await resolveLeague(getActiveLeague());
+   const el=document.getElementById("league");
+   if(el)el.value=l?.id||"";
    if(typeof window.loadRows==="function")await window.loadRows();
    else if(typeof window.loadStandings==="function")await window.loadStandings();
   }else if(page==="rankings.html"){
    if(typeof window.loadRankings==="function")await window.loadRankings();
   }else if(page==="teams.html"){
+   const l=await resolveLeague(getActiveLeague());
+   const el=document.getElementById("league");
+   if(el)el.value=l?.id||"";
    if(typeof window.loadDirectory==="function")await window.loadDirectory();
    if(typeof window.loadDashboard==="function"){
     const id=urlParams().get("id");
