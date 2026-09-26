@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rankings & Champions | CrowRules Sports</title>
+<link rel="stylesheet" href="css/sports.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/sports.js"></script>
+<style>
+.rank-hero{padding:76px 24px 48px;border-bottom:1px solid #26100f;background:radial-gradient(circle at 75% 20%,rgba(225,6,0,.2),transparent 30%),linear-gradient(135deg,#080808,#0d0909)}
+.rank-hero h1{font:900 clamp(42px,7vw,84px)/.95 Orbitron;margin:12px 0;letter-spacing:-3px}.rank-hero h1 span{color:#e10600}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}.controls select{max-width:280px}
+.champ-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.champ{position:relative;overflow:hidden;background:linear-gradient(145deg,#17100f,#0a0a0a);border:1px solid #33201e;padding:22px}.champ:before{content:"CHAMPION";position:absolute;right:-18px;top:15px;transform:rotate(35deg);font:900 9px Orbitron;color:#5b2925;letter-spacing:2px}.division{font:800 10px Orbitron;color:#ff5c54;letter-spacing:2px}.champ h2{font:900 25px Orbitron;margin:10px 0}.champ small{color:#777}.rank-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.division-card{background:#0d0d0f;border:1px solid #27272b;padding:18px}.division-head{display:flex;justify-content:space-between;gap:12px;align-items:end;border-bottom:1px solid #222;padding-bottom:13px}.division-head h3{font:800 18px Orbitron;margin:0}.rank-row{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid #1e1e20}.rank-no{font:900 13px Orbitron;color:#666}.rank-name{font-weight:800;font-size:12px}.rank-meta{color:#777;font-size:9px;margin-top:3px}.rank-change{font:800 9px Orbitron;color:#888}.rank-change.up{color:#6fe39a}.rank-change.down{color:#ff817c}.loading{color:#777;padding:20px 0}.note{color:#777;font-size:10px;line-height:1.7;margin-top:14px}
+@media(max-width:900px){.champ-grid,.rank-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<script>shell("rankings")</script>
+
+<section class="rank-hero">
+ <div class="hero">
+  <div class="eyebrow">CROWRULES SPORTS • UFC INTELLIGENCE</div>
+  <h1>RANKINGS <span>&</span> CHAMPIONS</h1>
+  <p class="muted">A dedicated combat rankings center. CrowRules stores official Meta UFC rankings and champions separately from the fight-card engine, with automatic server-side synchronization through Cito.</p>
+  <div class="controls">
+   <select id="source" class="input"><option value="meta">META UFC RANKINGS</option></select>
+   <select id="division" class="input"><option value="all">ALL DIVISIONS</option></select>
+  </div>
+ </div>
+</section>
+
+<section class="section">
+ <div class="section-head"><div><div class="eyebrow">TITLEHOLDERS</div><h2>CHAMPIONS</h2></div><div id="updated" class="muted"></div></div>
+ <div id="champions" class="champ-grid"><div class="loading">Loading champions…</div></div>
+</section>
+
+<section class="section">
+ <div class="section-head"><div><div class="eyebrow">DIVISION BOARDS</div><h2>RANKINGS</h2></div></div>
+ <div id="boards" class="rank-grid"><div class="loading">Loading rankings…</div></div>
+ <div class="note">Meta and media-panel rankings are different datasets. This page currently displays the Meta UFC rankings feed. CrowRules will keep the source label visible rather than merging the two systems.</div>
+</section>
+
+<script>
+let allRows=[];
+const escv=esc;
+function divisionSlug(v){return String(v||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");}
+function render(){
+ const selected=document.getElementById("division").value;
+ const rows=selected==="all"?allRows:allRows.filter(x=>x.division===selected);
+ document.getElementById("champions").innerHTML=rows.map(x=>`
+  <article class="champ">
+   <div class="division">${escv(x.division)}</div>
+   <h2>${escv(x.champion_name||"TITLE VACANT")}</h2>
+   <small>${x.champion_name?"Current champion":"No champion listed"}</small>
+  </article>`).join("")||'<div class="loading">No ranking data is available yet.</div>';
+ document.getElementById("boards").innerHTML=rows.map(x=>{
+   const list=Array.isArray(x.rankings)?x.rankings:[];
+   return `<article class="division-card">
+    <div class="division-head"><h3>${escv(x.division)}</h3><span class="tag">META</span></div>
+    ${list.map(r=>`<div class="rank-row">
+      <div class="rank-no">#${escv(r.rank)}</div>
+      <div><div class="rank-name">${escv(r.name||r.fighterName||r.slug)}</div><div class="rank-meta">${escv(r.slug||"")}</div></div>
+      <div class="rank-change ${r.rankChange>0?"up":r.rankChange<0?"down":""}">${r.rankChange>0?"▲ "+r.rankChange:r.rankChange<0?"▼ "+Math.abs(r.rankChange):"—"}</div>
+    </div>`).join("")||'<div class="loading">No ranked fighters.</div>'}
+   </article>`;
+ }).join("")||'<div class="loading">No ranking data is available yet.</div>';
+}
+async function loadRankings(){
+ const r=await sb.from("cr_sports_ufc_rankings").select("source,division,champion_name,rankings,provider_updated_at").eq("source","meta").order("division");
+ if(r.error){document.getElementById("boards").innerHTML='<div class="loading">'+escv(r.error.message)+'</div>';return;}
+ allRows=r.data||[];
+ const d=document.getElementById("division");
+ d.innerHTML='<option value="all">ALL DIVISIONS</option>'+allRows.map(x=>'<option value="'+escv(x.division)+'">'+escv(x.division)+'</option>').join("");
+ const latest=allRows.map(x=>x.provider_updated_at).filter(Boolean).sort().pop();
+ document.getElementById("updated").textContent=latest?"UPDATED "+new Date(latest).toLocaleString():"AWAITING FIRST SYNC";
+ render();
+}
+document.getElementById("division").addEventListener("change",render);
+loadSession();loadRankings();
+const ch=sb.channel("sports-ufc-rankings-page").on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_ufc_rankings"},loadRankings).subscribe();
+</script>
+<script>footer()</script>
+</body>
+</html>
