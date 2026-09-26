@@ -99,7 +99,7 @@ async function load(){
  sync.textContent="Refreshing live championship titles…";
  try{
   const r=await sb.from("cr_sports_championships")
-   .select("id,organization,title_name,title_type,champion_name,division,won_at,is_interim,status,source_url,champion_image_url,updated_at")
+   .select("*")
    .eq("status","active")
    .order("organization")
    .order("title_name");
