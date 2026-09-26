@@ -1,1 +1,151 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Audio & Video | CrowRules Sports</title><link rel="stylesheet" href="css/sports.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="js/sports.js"></script></head><body><script>shell("media")</script><section class="hero"><div class="eyebrow">CROWRULES SPORTS MEDIA</div><h1>AUDIO <span>& VIDEO</span></h1><p>Original sports stories, interviews, commentary, highlights and community programming.</p></section><section class="section"><div class="grid3" id="media"></div></section><script>loadSession();(async()=>{const{data,error}=await sb.from("cr_sports_media").select("*").order("published_at",{ascending:false});$("#media").innerHTML=error?'<div class="card">'+esc(error.message)+'</div>':data?.length?data.map(x=>'<article class="card media-card"><div class="thumb">'+(x.media_type==="video"?"▶ VIDEO":"◉ AUDIO")+'</div><div class="media-body"><span class="tag">'+esc(x.media_type.toUpperCase())+'</span><h3>'+esc(x.title)+'</h3><p class="muted">'+esc(x.description)+'</p><a class="btn" href="'+esc(x.media_url)+'" target="_blank">OPEN MEDIA</a></div></article>').join(""):'<div class="card"><h3>Media center ready.</h3><p class="muted">Add published audio/video records in Supabase and they appear here automatically.</p></div>'})()</script><script>footer()</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#050505">
+<title>Audio & Video | CrowRules Sports</title>
+<link rel="stylesheet" href="css/sports.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/sports.js"></script>
+<style>
+.media-hero{padding-bottom:30px}
+.media-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.media-search{flex:1;min-width:240px;padding:13px 15px;background:#0b0b0b;border:1px solid #333;color:#fff;font:500 13px Montserrat}
+.media-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 24px}
+.media-tab{padding:9px 13px;background:#0d0d0d;border:1px solid #333;color:#aaa;font:800 9px Orbitron;letter-spacing:1px;cursor:pointer}
+.media-tab.active{background:#e10600;border-color:#e10600;color:#fff}
+.media-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.audio-card{padding:0;overflow:hidden}
+.art{width:100%;aspect-ratio:1;object-fit:cover;background:#150b0b;display:block}
+.audio-body{padding:18px}
+.audio-body h3{font:800 17px Orbitron;line-height:1.25;margin:9px 0}
+.audio-body p{font-size:11px}
+.audio-meta{display:flex;gap:7px;flex-wrap:wrap;margin:11px 0}
+.audio-meta span{padding:5px 7px;border:1px solid #302020;color:#999;font-size:8px}
+.audio-player{width:100%;margin-top:12px}
+.audio-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.audio-actions .btn{padding:9px 11px}
+.featured-audio{display:grid;grid-template-columns:180px 1fr;gap:20px;align-items:center;padding:20px;margin-bottom:28px}
+.featured-audio .art{border:1px solid #2b1716}
+.status-line{color:#777;font-size:10px;margin-top:14px}
+.section-spacer{margin-top:46px}
+.empty-media{text-align:center;padding:55px 20px}
+@media(max-width:1100px){.media-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:800px){.media-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.featured-audio{grid-template-columns:1fr}}
+@media(max-width:520px){.media-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<script>shell("media")</script>
+
+<section class="hero media-hero">
+  <div class="eyebrow">CROWRULES SPORTS MEDIA</div>
+  <h1>AUDIO <span>& VIDEO</span></h1>
+  <p>Sports stories, interviews, commentary, highlights and community programming — now connected directly to the CrowRules Podcasting universe.</p>
+  <div class="media-toolbar">
+    <input id="mediaSearch" class="media-search" type="search" placeholder="Search podcasts, episodes, creators or categories…">
+    <a class="btn primary" href="https://crowrulesentertainment-oss.github.io/podcasting/podcasts.html" target="_blank" rel="noopener">OPEN PODCASTING</a>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-head">
+    <div><div class="eyebrow">PODCASTING CROSSOVER</div><h2>Sports Audio</h2></div>
+    <div id="mediaStatus" class="status-line">Connecting…</div>
+  </div>
+
+  <div class="media-tabs" id="mediaTabs">
+    <button class="media-tab active" data-filter="all">ALL AUDIO</button>
+    <button class="media-tab" data-filter="shows">PODCASTS</button>
+    <button class="media-tab" data-filter="episodes">EPISODES</button>
+  </div>
+
+  <div id="featured"></div>
+  <div id="media" class="media-grid"></div>
+  <div id="empty" class="card empty-media" hidden>
+    <div class="eyebrow">NO AUDIO FOUND</div>
+    <h3>No published podcast audio is available yet.</h3>
+    <p class="muted">Published podcasts and episodes from CrowRules Podcasting will appear here automatically.</p>
+  </div>
+</section>
+
+<script>
+(async()=>{
+"use strict";
+const mediaEl=document.getElementById("media");
+const featuredEl=document.getElementById("featured");
+const emptyEl=document.getElementById("empty");
+const statusEl=document.getElementById("mediaStatus");
+const searchEl=document.getElementById("mediaSearch");
+const tabs=[...document.querySelectorAll(".media-tab")];
+let payload={shows:[],episodes:[]},filter="all";
+
+const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const duration=s=>{s=Number(s||0);if(!s)return "";const m=Math.floor(s/60),sec=String(Math.floor(s%60)).padStart(2,"0");return m+":"+sec};
+const podcastUrl=id=>"https://crowrulesentertainment-oss.github.io/podcasting/podcast.html?id="+encodeURIComponent(id);
+const episodeUrl=id=>"https://crowrulesentertainment-oss.github.io/podcasting/episode.html?id="+encodeURIComponent(id);
+
+function showCard(p){
+ const art=p.artwork_url||"";
+ return '<article class="card audio-card"><a href="'+podcastUrl(p.id)+'" target="_blank" rel="noopener">'+
+   (art?'<img class="art" src="'+esc(art)+'" alt="'+esc(p.title)+' artwork" loading="lazy" onerror="this.style.display=\'none\'">':'<div class="art"></div>')+
+   '</a><div class="audio-body"><div class="tag">PODCAST</div><h3>'+esc(p.title)+'</h3><p class="muted">'+esc(p.description||"CrowRules Podcasting audio.")+'</p>'+
+   '<div class="audio-meta">'+(p.author_name?'<span>'+esc(p.author_name)+'</span>':'')+(p.category?'<span>'+esc(p.category)+'</span>':'')+'</div>'+
+   '<div class="audio-actions"><a class="btn" href="'+podcastUrl(p.id)+'" target="_blank" rel="noopener">VIEW PODCAST</a></div></div></article>';
+}
+
+function episodeCard(e){
+ const p=e.podcasts||{};
+ const art=e.thumbnail_url||p.artwork_url||"";
+ return '<article class="card audio-card"><a href="'+episodeUrl(e.id)+'" target="_blank" rel="noopener">'+
+   (art?'<img class="art" src="'+esc(art)+'" alt="'+esc(e.title)+' artwork" loading="lazy" onerror="this.style.display=\'none\'">':'<div class="art"></div>')+
+   '</a><div class="audio-body"><div class="tag">EPISODE</div><h3>'+esc(e.title)+'</h3>'+
+   '<p class="muted">'+esc(p.title||"CrowRules Podcasting")+(e.description?" • "+esc(e.description):"")+'</p>'+
+   '<div class="audio-meta">'+(e.episode_number?'<span>EP '+esc(e.episode_number)+'</span>':'')+(e.duration_seconds?'<span>'+duration(e.duration_seconds)+'</span>':'')+(e.play_count?'<span>'+Number(e.play_count).toLocaleString()+' PLAYS</span>':'')+'</div>'+
+   (e.audio_url?'<audio class="audio-player" controls preload="none" src="'+esc(e.audio_url)+'"></audio>':'')+
+   '<div class="audio-actions"><a class="btn" href="'+episodeUrl(e.id)+'" target="_blank" rel="noopener">OPEN EPISODE</a></div></div></article>';
+}
+
+function render(){
+ const q=searchEl.value.trim().toLowerCase();
+ const shows=payload.shows.filter(p=>!q||[p.title,p.author_name,p.category,p.description].join(" ").toLowerCase().includes(q));
+ const episodes=payload.episodes.filter(e=>!q||[e.title,e.description,e.podcasts?.title,e.podcasts?.author_name,e.podcasts?.category].join(" ").toLowerCase().includes(q));
+ let html="";
+ if(filter==="all")html=episodes.map(episodeCard).join("")||shows.map(showCard).join("");
+ if(filter==="shows")html=shows.map(showCard).join("");
+ if(filter==="episodes")html=episodes.map(episodeCard).join("");
+ mediaEl.innerHTML=html;
+ emptyEl.hidden=!!html;
+ const count=filter==="shows"?shows.length:filter==="episodes"?episodes.length:shows.length+episodes.length;
+ statusEl.textContent=count+" "+(count===1?"item":"items")+" • CrowRules Podcasting";
+ renderFeatured(episodes[0]||null);
+}
+function renderFeatured(e){
+ if(!e){featuredEl.innerHTML="";return}
+ const p=e.podcasts||{},art=e.thumbnail_url||p.artwork_url||"";
+ featuredEl.innerHTML='<article class="card featured-audio">'+
+   (art?'<img class="art" src="'+esc(art)+'" alt="'+esc(e.title)+' artwork" onerror="this.style.display=\'none\'">':'<div class="art"></div>')+
+   '<div><div class="eyebrow">LATEST SPORTS AUDIO</div><h2>'+esc(e.title)+'</h2><p class="muted">'+esc(p.title||"CrowRules Podcasting")+(e.description?" • "+esc(e.description):"")+'</p>'+
+   (e.audio_url?'<audio class="audio-player" controls preload="metadata" src="'+esc(e.audio_url)+'"></audio>':'')+
+   '<div class="audio-actions"><a class="btn primary" href="'+episodeUrl(e.id)+'" target="_blank" rel="noopener">OPEN EPISODE</a><a class="btn" href="'+podcastUrl(e.podcast_id)+'" target="_blank" rel="noopener">VIEW SHOW</a></div></div></article>';
+}
+tabs.forEach(tab=>tab.addEventListener("click",()=>{filter=tab.dataset.filter;tabs.forEach(x=>x.classList.toggle("active",x===tab));render()}));
+searchEl.addEventListener("input",render);
+
+try{
+ statusEl.textContent="Loading audio from CrowRules Podcasting…";
+ payload=await window.CrowRulesSports.loadPodcastAudio({limit:40});
+ if(payload.error)statusEl.textContent="Podcasting connection unavailable";
+ else statusEl.textContent="Connected to CrowRules Podcasting";
+ render();
+}catch(error){
+ console.error(error);
+ statusEl.textContent="Audio connection failed";
+ emptyEl.hidden=false;
+}
+})();
+</script>
+<script>footer()</script>
+</body>
+</html>
