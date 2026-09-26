@@ -254,10 +254,43 @@ function summary(d){
 }
 function badges(x){let a=[];if(x.clinched_division)a.push('<span class="badge hot">DIV CLINCHED</span>');if(x.clinched_wild_card)a.push('<span class="badge">WILD CARD</span>');if(x.clinched_bye)a.push('<span class="badge">BYE</span>');if(x.eliminated_from_playoff_contention)a.push('<span class="badge">ELIMINATED</span>');return a.length?'<div class="badges">'+a.join("")+"</div>":"";}
 function row(x){
-  const t=teamOf(x),id=x.team_id||t.id||"",saved=favorites.has(id),d=diff(x),st=num(x.streak);
-  const logo=t.logo_url?'<img class="logo" src="'+esc(t.logo_url)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">':'<span class="logo"></span>';
-  return '<tr><td><span class="rank '+(num(x.rank)<=3?"top":"")+'">'+esc(x.rank??"—")+"</span></td><td><div class="team">"+logo+'<a href="teams.html?id='+encodeURIComponent(id)+'"><div class="team-name">'+esc(name(x))+(saved?" ★":"")+'</div><div class="team-sub">'+esc([t.city,t.state].filter(Boolean).join(", "))+"</div>"+badges(x)+"</div></a></div></td><td class="record">"+record(x)+"</td><td>"+pct(x.win_pct)+"</td><td>"+num(x.points_for)+"</td><td>"+num(x.points_against)+"</td><td class=""+(d>0?"positive":d<0?"negative":"muted")+'">'+(d>0?"+":"")+d+"</td><td class=""+(st>0?"positive":st<0?"negative":"muted")+'">'+(st>0?"+":"")+st+'</td><td><button class="mini '+(saved?"saved":"")+'" data-fav="'+esc(id)+'">'+(saved?"★ SAVED":"☆ SAVE")+"</button></td></tr>"+
-  '<tr class="detail" '+(details?"":"style="display:none"")+'><td colspan="9"><div class="detail-box"><span>CONF '+num(x.conference_wins)+"-"+num(x.conference_losses)+"</span><span>DIV "+num(x.division_wins)+"-"+num(x.division_losses)+"</span><span>HOME "+num(x.home_wins)+"-"+num(x.home_losses)+"</span><span>AWAY "+num(x.away_wins)+"-"+num(x.away_losses)+"</span><span>UPDATED "+esc(x.updated_at?new Date(x.updated_at).toLocaleDateString():"—")+"</span></div></td></tr>";
+  const t=teamOf(x), id=x.team_id||t.id||"", saved=favorites.has(id), d=diff(x), st=num(x.streak);
+  const logo=t.logo_url
+    ? '<img class="logo" src="'+esc(t.logo_url)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">'
+    : '<span class="logo"></span>';
+  const teamUrl='teams.html?id='+encodeURIComponent(id);
+  return `
+    <tr>
+      <td><span class="rank ${num(x.rank)<=3?'top':''}">${esc(x.rank??'—')}</span></td>
+      <td>
+        <div class="team">
+          ${logo}
+          <a href="${teamUrl}">
+            <div class="team-name">${esc(name(x))}${saved?' ★':''}</div>
+            <div class="team-sub">${esc([t.city,t.state].filter(Boolean).join(', '))}</div>
+            ${badges(x)}
+          </a>
+        </div>
+      </td>
+      <td class="record">${record(x)}</td>
+      <td>${pct(x.win_pct)}</td>
+      <td>${num(x.points_for)}</td>
+      <td>${num(x.points_against)}</td>
+      <td class="${d>0?'positive':d<0?'negative':'muted'}">${d>0?'+':''}${d}</td>
+      <td class="${st>0?'positive':st<0?'negative':'muted'}">${st>0?'+':''}${st}</td>
+      <td><button class="mini ${saved?'saved':''}" data-fav="${esc(id)}">${saved?'★ SAVED':'☆ SAVE'}</button></td>
+    </tr>
+    <tr class="detail" ${details?'':'style="display:none"'}>
+      <td colspan="9">
+        <div class="detail-box">
+          <span>CONF ${num(x.conference_wins)}-${num(x.conference_losses)}</span>
+          <span>DIV ${num(x.division_wins)}-${num(x.division_losses)}</span>
+          <span>HOME ${num(x.home_wins)}-${num(x.home_losses)}</span>
+          <span>AWAY ${num(x.away_wins)}-${num(x.away_losses)}</span>
+          <span>UPDATED ${esc(x.updated_at?new Date(x.updated_at).toLocaleDateString():'—')}</span>
+        </div>
+      </td>
+    </tr>`;
 }
 function render(){
   const d=data();summary(d);
@@ -289,7 +322,7 @@ async function boot(){
   if(!S){errorView(new Error("Supabase client unavailable. The shared Sports engine did not initialize. Refresh the page and try again."));return;}
   try{
     setStatus("Connecting to CrowRules Sports…");
-    if(typeof loadSession==="function"){try{await timeout(loadSession(),7000);}catch(e){console.warn(e);}}
+    if(typeof window.CrowRulesSports?.loadSession==="function"){try{await timeout(window.CrowRulesSports.loadSession(),7000);}catch(e){console.warn("Session load skipped:",e);}}
     await getSeasons();
     await getLeagues();
     await getRows();\n    setStatus("Supabase connected • standings live",true);
