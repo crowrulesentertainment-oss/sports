@@ -69,7 +69,7 @@ const wait=(p,ms=15000)=>Promise.race([p,new Promise((_,reject)=>setTimeout(()=>
 
 const EXCLUDED_LEAGUES=new Set(["AEW","WWE","UFC"]);
 let all=[],seasons=[],leagues=[],activeSport="all",activeLeague="",showDetails=true;
-let favs=new Set(),standingsChannel=null,loadToken=0;
+let favs=new Set(),standingsChannel=null,loadToken=0,refreshTimer=null,refreshBusy=false;
 try{favs=new Set(JSON.parse(localStorage.getItem("crowrules-standing-favorites")||"[]"))}catch(_){}
 
 const initialView=(()=>{
@@ -377,7 +377,7 @@ function render(){
  });
 }
 
-function startRealtime(){
+async function refreshLive(){\n if(refreshBusy||document.hidden)return;\n refreshBusy=true;\n try{await loadRows(true);}catch(e){console.warn("Standings live refresh",e);}finally{refreshBusy=false;}\n}\n\nfunction startAutoRefresh(){\n if(refreshTimer)clearInterval(refreshTimer);\n refreshTimer=setInterval(refreshLive,30000);\n}\n\nfunction startRealtime(){
  if(standingsChannel||!db?.channel)return;
  standingsChannel=db.channel("crowrules-standings-live")
   .on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_standings"},payload=>{
@@ -449,7 +449,7 @@ $("share").onclick=async()=>{
  catch(_){prompt("Copy standings URL",url);}
 };
 
-window.addEventListener("beforeunload",stopRealtime);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)refreshLive();});\nwindow.addEventListener("beforeunload",()=>{stopRealtime();if(refreshTimer)clearInterval(refreshTimer);});
 window.addEventListener("keydown",e=>{
  const tag=document.activeElement?.tagName?.toLowerCase();
  if(e.key==="/"&&!["input","select","textarea"].includes(tag)){e.preventDefault();$("search").focus();}
