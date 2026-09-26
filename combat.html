@@ -121,7 +121,7 @@ body{background:var(--combat-bg)}
  <div class="wrap">
   <div class="section-head"><div><div class="eyebrow">CHAMPIONSHIP COMMAND CENTER</div><h2>THE CHAMPIONS</h2><p class="muted">Live title board, reign clocks, defenses, lineage and upcoming title fights.</p></div><div class="muted" id="championStatus">Loading championship intelligence…</div></div>
   <div class="champion-filter" style="margin:18px 0"><button class="active" data-champ-org="ALL">ALL</button><button data-champ-org="UFC">UFC</button><button data-champ-org="WWE">WWE</button><button data-champ-org="AEW">AEW</button><a class="button small secondary" href="championships.html">FULL CHAMPIONSHIP UNIVERSE</a></div>
-  <div id="championGrid" class="champion-grid"><div class="empty">Loading championship records…</div></div>
+  <div id="championGrid" class="champion-grid"><div class="empty">Loading live championship board…</div></div>
   <div class="section-head" style="margin-top:42px"><div><div class="eyebrow">TITLE FIGHT RADAR</div><h2>UPCOMING TITLE FIGHTS</h2></div><div class="muted" id="titleFightStatus">Scanning synchronized wrestling cards…</div></div>
   <div id="titleFightBoard" class="title-fight-board"><div class="empty">No upcoming verified title fights yet.</div></div>
  </div>
@@ -211,16 +211,72 @@ body{background:var(--combat-bg)}
 loadSession();
 
 
-let championRows=[],reignRows=[],titleFightRows=[];
+let championRows=[],reignRows=[],titleFightRows=[],championshipLoadToken=0,championshipHistoryLoading=false;
 async function loadChampions(){
+ const token=++championshipLoadToken;
  const root=document.getElementById("championGrid");
- const [cr,rr]=await Promise.all([
-  sb.from("cr_sports_championships").select("id,organization,league_code,title_name,division,title_type,champion_name,champion_slug,champion_image_url,won_at,is_interim,is_womens,defense_count,status,provider_updated_at").in("organization",["UFC","WWE","AEW"]).eq("status","active").order("organization").order("title_name"),
-  sb.from("cr_sports_championship_reigns").select("id,championship_id,organization,title_name,reign_number,champion_name,started_at,ended_at,won_event_id,lost_event_id,source_url,provider,updated_at").in("organization",["UFC","WWE","AEW"]).order("started_at",{ascending:false}).limit(500)
- ]);
- if(cr.error){root.innerHTML='<div class="empty error">'+escLocal(cr.error.message)+'</div>';return}
- championRows=cr.data||[];reignRows=rr.error?[]:(rr.data||[]);
- renderChampions("ALL"); loadTitleFights();
+ const status=document.getElementById("championStatus");
+ status.textContent="Loading live championship board…";
+ root.innerHTML='<div class="empty">Loading live championship board…</div>';
+
+ // Critical path: load the active championship board by itself.
+ // Reign/lineage data is optional enrichment and must never block the title cards.
+ const cr=await sb.from("cr_sports_championships")
+  .select("id,organization,league_code,title_name,division,title_type,champion_name,champion_slug,champion_image_url,won_at,is_interim,is_womens,defense_count,status,provider_updated_at")
+  .in("organization",["UFC","WWE","AEW"])
+  .eq("status","active")
+  .order("organization")
+  .order("title_name");
+
+ if(token!==championshipLoadToken)return;
+ if(cr.error){
+  championRows=[];
+  reignRows=[];
+  document.getElementById("titleCount").textContent="—";
+  root.innerHTML='<div class="empty error">Championship board unavailable: '+escLocal(cr.error.message)+'</div>';
+  status.textContent="Championship board unavailable";
+  loadTitleFights();
+  return;
+ }
+
+ championRows=cr.data||[];
+ // Render immediately from the live title table, even when historical tables are empty.
+ reignRows=[];
+ renderChampions("ALL");
+ status.textContent=championRows.length+" active title"+(championRows.length===1?"":"s")+" • live championship data";
+ loadTitleFights();
+
+ // Optional enrichment: lineage/reign history loads independently.
+ // An empty or unavailable history table cannot replace the live championship board.
+ loadChampionshipHistory(token);
+}
+
+async function loadChampionshipHistory(token){
+ if(championshipHistoryLoading)return;
+ championshipHistoryLoading=true;
+ try{
+  const ids=championRows.map(x=>x.id).filter(Boolean);
+  if(!ids.length){reignRows=[];return;}
+  const rr=await sb.from("cr_sports_championship_reigns")
+   .select("id,championship_id,organization,title_name,reign_number,champion_name,started_at,ended_at,won_event_id,lost_event_id,source_url,provider,updated_at")
+   .in("organization",["UFC","WWE","AEW"])
+   .in("championship_id",ids)
+   .order("started_at",{ascending:false})
+   .limit(500);
+  if(token!==championshipLoadToken)return;
+  reignRows=rr.error?[]:(rr.data||[]);
+  renderChampions("ALL");
+  const status=document.getElementById("championStatus");
+  status.textContent=championRows.length+" active title"+(championRows.length===1?"":"s")+" • "+reignRows.length+" historical reign record"+(reignRows.length===1?"":"s");
+ }catch(e){
+  if(token===championshipLoadToken){
+   reignRows=[];
+   renderChampions("ALL");
+   document.getElementById("championStatus").textContent=championRows.length+" active title"+(championRows.length===1?"":"s")+" • historical enrichment unavailable";
+  }
+ }finally{
+  championshipHistoryLoading=false;
+ }
 }
 function reignDays(x){
  const start=x.won_at||x.started_at;if(!start)return "—";
