@@ -318,27 +318,58 @@ async function loadTitleFights(){
 document.querySelectorAll("[data-champ-org]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-champ-org]").forEach(x=>x.classList.remove("active"));b.classList.add("active");renderChampions(b.dataset.champOrg)}));
 
 let fighterRows=[],rankedRows=[],wrestlerRows=[],wrestlingMatches=[],intelOrg="ALL";
+let fighterDataState="loading",wrestlerDataState="loading";
+
 async function loadFighterIntelligence(){
- const [fr,rr]=await Promise.all([
-  sb.from("cr_sports_ufc_fighters").select("id,slug,name,nickname,image_url,record_wins,record_losses,record_draws,weight_class,ranking,country,provider_updated_at").order("name").limit(500),
-  sb.from("cr_sports_ufc_rankings").select("id,division,champion_name,rankings,provider_updated_at").order("provider_updated_at",{ascending:false}).limit(50)
- ]);
- if(fr.error){document.getElementById("fighterStatus").textContent="Fighter data unavailable";document.getElementById("recordList").innerHTML='<div class="empty error">'+escLocal(fr.error.message)+'</div>';return}
- fighterRows=fr.data||[];
- rankedRows=fighterRows.filter(x=>/^\\d+$/.test(String(x.ranking||""))).sort((a,b)=>Number(a.ranking)-Number(b.ranking));
- const divisions=[...new Set(fighterRows.map(x=>x.weight_class).filter(Boolean))].sort();
- const sel=document.getElementById("rankingDivision"),old=sel.value;
- sel.innerHTML='<option value="ALL">ALL WEIGHT CLASSES</option>'+divisions.map(d=>'<option value="'+escLocal(d)+'">'+escLocal(d)+'</option>').join("");
- sel.value=divisions.includes(old)?old:"ALL";
- renderFighterIntelligence();
- document.getElementById("fighterStatus").textContent=fighterRows.length+" UFC fighters synchronized • "+rankedRows.length+" ranked records";
+ const status=document.getElementById("fighterStatus");
+ const rankingRoot=document.getElementById("rankingList");
+ const recordRoot=document.getElementById("recordList");
+ status.textContent="Loading UFC fighter data…";
+ fighterDataState="loading";
+ try{
+  // UFC profiles are the critical source. Rankings are optional enrichment.
+  const fr=await sb.from("cr_sports_ufc_fighters")
+   .select("id,slug,name,nickname,image_url,record_wins,record_losses,record_draws,weight_class,ranking,country,provider_updated_at")
+   .order("name").limit(500);
+  if(fr.error){
+   fighterRows=[];rankedRows=[];fighterDataState="error";
+   rankingRoot.innerHTML='<div class="empty error">UFC fighter data unavailable: '+escLocal(fr.error.message)+'</div>';
+   recordRoot.innerHTML='<div class="empty error">UFC fighter records unavailable.</div>';
+   document.getElementById("unifiedUfc").innerHTML='<div class="empty error">UFC intelligence unavailable: '+escLocal(fr.error.message)+'</div>';
+   status.textContent="UFC fighter data unavailable";
+   renderUnifiedIntelligence();
+   return;
+  }
+  fighterRows=fr.data||[];
+  rankedRows=fighterRows.filter(x=>/^\\d+$/.test(String(x.ranking||""))).sort((a,b)=>Number(a.ranking)-Number(b.ranking));
+  fighterDataState="ready";
+
+  const divisions=[...new Set(fighterRows.map(x=>x.weight_class).filter(Boolean))].sort();
+  const sel=document.getElementById("rankingDivision"),old=sel.value;
+  sel.innerHTML='<option value="ALL">ALL WEIGHT CLASSES</option>'+divisions.map(d=>'<option value="'+escLocal(d)+'">'+escLocal(d)+'</option>').join("");
+  sel.value=divisions.includes(old)?old:"ALL";
+  renderFighterIntelligence();
+  status.textContent=fighterRows.length+" UFC fighters synchronized • "+rankedRows.length+" ranked records";
+  renderUnifiedIntelligence();
+ }catch(e){
+  fighterRows=[];rankedRows=[];fighterDataState="error";
+  rankingRoot.innerHTML='<div class="empty error">UFC intelligence failed to load: '+escLocal(e.message||String(e))+'</div>';
+  recordRoot.innerHTML='<div class="empty error">UFC fighter records unavailable.</div>';
+  document.getElementById("unifiedUfc").innerHTML='<div class="empty error">UFC intelligence failed to load.</div>';
+  status.textContent="UFC intelligence unavailable";
+  renderUnifiedIntelligence();
+ }
 }
+
 function renderFighterIntelligence(){
  const div=document.getElementById("rankingDivision").value;
  const ranked=rankedRows.filter(x=>div==="ALL"||x.weight_class===div).slice(0,10);
  const rroot=document.getElementById("rankingList");
- if(!ranked.length){rroot.innerHTML='<div class="empty">No numeric UFC ranking is currently synchronized for this selection.</div>';}
- else rroot.innerHTML=ranked.map(x=>{
+ if(fighterDataState==="error"){
+  rroot.innerHTML='<div class="empty error">UFC ranking data cannot be displayed because the fighter dataset is unavailable.</div>';
+ }else if(!ranked.length){
+  rroot.innerHTML='<div class="empty">No numeric UFC ranking is currently synchronized for this selection.</div>';
+ }else rroot.innerHTML=ranked.map(x=>{
   const initial=escLocal((x.name||"?").slice(0,1).toUpperCase());
   const img=x.image_url?'<img class="fighter-thumb" src="'+escLocal(x.image_url)+'" alt="'+escLocal(x.name||"Fighter")+'" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';"><span class="fighter-fallback" style="display:none">'+initial+'</span>':'<span class="fighter-fallback">'+initial+'</span>';
   const rec=(x.record_wins??0)+"-"+(x.record_losses??0)+"-"+(x.record_draws??0);
@@ -351,21 +382,34 @@ function renderFighterIntelligence(){
   const initial=escLocal((x.name||"?").slice(0,1).toUpperCase());
   const img=x.image_url?'<img class="fighter-thumb" src="'+escLocal(x.image_url)+'" alt="'+escLocal(x.name||"Fighter")+'" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';"><span class="fighter-fallback" style="display:none">'+initial+'</span>':'<span class="fighter-fallback">'+initial+'</span>';
   const rec=(x.record_wins??0)+"-"+(x.record_losses??0)+"-"+(x.record_draws??0);
-  return '<div class="record-row"><div class="rank-number">'+(i+1)+'</div>'+img.replace("fighter-thumb","fighter-thumb")+'<div><div class="fighter-name">'+escLocal(x.name||"Unknown")+'</div><div class="fighter-meta">'+escLocal(x.weight_class||"UFC")+'</div></div><div class="record-badge record-win">'+escLocal(rec)+'<small>W-L-D</small></div></div>';
+  return '<div class="record-row"><div class="rank-number">'+(i+1)+'</div>'+img+'<div><div class="fighter-name">'+escLocal(x.name||"Unknown")+'</div><div class="fighter-meta">'+escLocal(x.weight_class||"UFC")+'</div></div><div class="record-badge record-win">'+escLocal(rec)+'<small>W-L-D</small></div></div>';
  }).join(""):'<div class="empty">No fighter records synchronized.</div>';
 }
 
 async function loadWrestlerIntelligence(){
- const [wr,mr]=await Promise.all([
-  sb.from("cr_sports_wrestlers").select("id,organization,slug,name,nickname,image_url,country,hometown,gender,weight_class,status,provider,provider_id,provider_updated_at").in("organization",["WWE","AEW"]).order("organization").order("name").limit(500),
-  sb.from("cr_sports_wrestling_matches").select("id,event_id,organization,red_name,blue_name,winner_name,result,title_fight,match_order,provider_updated_at").in("organization",["WWE","AEW"]).limit(1000)
- ]);
- wrestlerRows=wr.error?[]:(wr.data||[]);
- wrestlingMatches=mr.error?[]:(mr.data||[]);
- renderUnifiedIntelligence();
+ const status=document.getElementById("unifiedStatus");
+ wrestlerDataState="loading";
+ try{
+  const [wr,mr]=await Promise.all([
+   sb.from("cr_sports_wrestlers").select("id,organization,slug,name,nickname,image_url,country,hometown,gender,weight_class,status,provider,provider_id,provider_updated_at").in("organization",["WWE","AEW"]).order("organization").order("name").limit(500),
+   sb.from("cr_sports_wrestling_matches").select("id,event_id,organization,red_name,blue_name,winner_name,result,title_fight,match_order,provider_updated_at").in("organization",["WWE","AEW"]).limit(1000)
+  ]);
+  wrestlerRows=wr.error?[]:(wr.data||[]);
+  wrestlingMatches=mr.error?[]:(mr.data||[]);
+  wrestlerDataState=wr.error&&mr.error?"error":"ready";
+  renderUnifiedIntelligence();
+  if(wr.error) status.textContent="WWE / AEW roster unavailable • match data "+(mr.error?"unavailable":"connected");
+ }catch(e){
+  wrestlerRows=[];wrestlingMatches=[];wrestlerDataState="error";
+  renderUnifiedIntelligence();
+ }
 }
+
 function wrestlerRecord(name,org){
- const rows=wrestlingMatches.filter(m=>m.organization===org&&String(m.red_name||"").toLowerCase()===String(name||"").toLowerCase()||m.organization===org&&String(m.blue_name||"").toLowerCase()===String(name||"").toLowerCase());
+ const rows=wrestlingMatches.filter(m=>(m.organization===org)&&(
+  String(m.red_name||"").toLowerCase()===String(name||"").toLowerCase()||
+  String(m.blue_name||"").toLowerCase()===String(name||"").toLowerCase()
+ ));
  let w=0,l=0;
  rows.forEach(m=>{
   const winner=String(m.winner_name||"").toLowerCase(), n=String(name||"").toLowerCase();
@@ -374,10 +418,10 @@ function wrestlerRecord(name,org){
  });
  return {w,l,total:rows.length};
 }
+
 function renderUnifiedIntelligence(){
  const org=intelOrg;
  const wf=wrestlerRows.filter(x=>org==="ALL"||x.organization===org);
- const uf= fighterRows.filter(x=>org==="ALL"||org==="UFC");
  const titles=championRows.filter(x=>org==="ALL"||x.organization===org);
  const matches=wrestlingMatches.filter(x=>org==="ALL"||x.organization===org);
  document.getElementById("intelUfcFighters").textContent=org==="ALL"||org==="UFC"?fighterRows.length:0;
@@ -385,18 +429,40 @@ function renderUnifiedIntelligence(){
  document.getElementById("intelTitles").textContent=titles.length;
  document.getElementById("intelMatches").textContent=matches.length;
  document.getElementById("intelEvents").textContent=(org==="ALL"?combatEvents.length:combatEvents.filter(e=>leagueCode(e)===org).length);
- document.getElementById("unifiedStatus").textContent=(org==="ALL"?"All organizations":org)+" • live data view";
+
+ const readiness=[];
+ if(fighterDataState==="ready")readiness.push("UFC connected");
+ if(fighterDataState==="error")readiness.push("UFC unavailable");
+ if(wrestlerDataState==="ready")readiness.push("WWE/AEW connected");
+ if(wrestlerDataState==="error")readiness.push("WWE/AEW unavailable");
+ document.getElementById("unifiedStatus").textContent=(org==="ALL"?"All organizations":org)+" • "+(readiness.join(" • ")||"Loading intelligence…");
+
  const ur=document.getElementById("unifiedUfc");
- if(org==="WWE"||org==="AEW"){ur.innerHTML='<div class="empty">UFC intelligence is hidden by the current organization filter.</div>';}
- else{
+ if(org==="WWE"||org==="AEW"){
+  ur.innerHTML='<div class="empty">UFC intelligence is hidden by the current organization filter.</div>';
+ }else if(fighterDataState==="error"){
+  ur.innerHTML='<div class="empty error">UFC intelligence is temporarily unavailable. The rest of Combat Intelligence remains active.</div>';
+ }else{
   const top=rankedRows.slice(0,10);
+  const records=fighterRows.slice().sort((a,b)=>Number(b.record_wins||0)-Number(a.record_wins||0)).slice(0,8);
   ur.innerHTML=(top.length?'<div class="subnote">TOP 10 • synchronized numeric rankings</div>'+top.map(x=>'<div class="record-row"><div class="rank-number">#'+escLocal(x.ranking)+'</div><div><div class="fighter-name">'+escLocal(x.name)+'</div><div class="fighter-meta">'+escLocal(x.weight_class||"UFC")+'</div></div><div class="record-badge">'+escLocal((x.record_wins??0)+"-"+(x.record_losses??0)+"-"+(x.record_draws??0))+'<small>W-L-D</small></div></div>').join(""):'<div class="empty">No synchronized numeric UFC rankings.</div>')+
-  '<div class="subnote" style="margin-top:12px">FIGHTER RECORDS • '+fighterRows.length+' profiles</div>'+
-  fighterRows.slice().sort((a,b)=>Number(b.record_wins||0)-Number(a.record_wins||0)).slice(0,8).map(x=>'<div class="record-row"><div class="rank-number">•</div><div><div class="fighter-name">'+escLocal(x.name)+'</div><div class="fighter-meta">'+escLocal(x.weight_class||"UFC")+'</div></div><div class="record-badge">'+escLocal((x.record_wins??0)+"-"+(x.record_losses??0)+"-"+(x.record_draws??0))+'<small>W-L-D</small></div></div>').join("");
+   '<div class="subnote" style="margin-top:12px">FIGHTER RECORDS • '+fighterRows.length+' profiles</div>'+
+   (records.length?records.map(x=>'<div class="record-row"><div class="rank-number">•</div><div><div class="fighter-name">'+escLocal(x.name)+'</div><div class="fighter-meta">'+escLocal(x.weight_class||"UFC")+'</div></div><div class="record-badge">'+escLocal((x.record_wins??0)+"-"+(x.record_losses??0)+"-"+(x.record_draws??0))+'<small>W-L-D</small></div></div>').join(""):'<div class="empty">No UFC fighter records synchronized.</div>');
  }
+
  const wrroot=document.getElementById("unifiedWrestling");
- if(org==="UFC"){wrroot.innerHTML='<div class="empty">WWE / AEW intelligence is hidden by the current organization filter.</div>';return;}
- if(!wf.length){wrroot.innerHTML='<div class="empty">No WWE / AEW wrestler profiles are synchronized yet. The roster engine is connected and ready for wrestler data.</div>';return;}
+ if(org==="UFC"){
+  wrroot.innerHTML='<div class="empty">WWE / AEW intelligence is hidden by the current organization filter.</div>';
+  return;
+ }
+ if(wrestlerDataState==="error"){
+  wrroot.innerHTML='<div class="empty error">WWE / AEW intelligence is temporarily unavailable. Combat event data remains active.</div>';
+  return;
+ }
+ if(!wf.length){
+  wrroot.innerHTML='<div class="empty">No WWE / AEW wrestler profiles are synchronized yet. The roster engine is connected and ready for wrestler data.</div>';
+  return;
+ }
  const groups=wf.slice(0,20).map(x=>{const r=wrestlerRecord(x.name,x.organization);return '<div class="record-row"><div class="rank-number">'+escLocal(x.organization)+'</div><div><div class="fighter-name">'+escLocal(x.name)+'</div><div class="fighter-meta">'+escLocal(x.weight_class||x.gender||"Wrestler")+(x.nickname?" • "+escLocal(x.nickname):"")+'</div></div><div class="record-badge">'+r.w+'-'+r.l+'<small>'+r.total+' MATCHES</small></div></div>';}).join("");
  wrroot.innerHTML=groups;
 }
