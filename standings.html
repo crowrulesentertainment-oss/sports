@@ -91,8 +91,8 @@ tr:hover td{background:#ffffff03}
 </head>
 <body>
 <script>
-if(typeof shell==="function"){
-  shell("standings");
+if(typeof window.CrowRulesSports?.shell==="function"){
+  window.CrowRulesSports.shell("standings");
 }else{
   document.write('<header class="site-header cr-header"><nav class="nav cr-nav"><a class="brand" href="index.html">CROW<span>RULES</span> SPORTS</a><div class="navlinks"><a href="index.html">HOME</a><a href="scores.html">SCORES</a><a class="active" href="standings.html">STANDINGS</a><a href="leaders.html">LEADERS</a><a href="combat.html">COMBAT / WRESTLING</a><a href="rankings.html">RANKINGS</a><a href="championships.html">CHAMPIONS</a><a href="teams.html">TEAMS</a><a href="media.html">AUDIO / VIDEO</a><a href="pickem.html">PICK EM</a><a href="notifications.html">NOTIFICATIONS</a><a href="sync-health.html">SYNC HEALTH</a><a href="partners.html">PARTNERS</a></div><span class="account">ACCOUNT</span></nav></header>');
 }
@@ -290,7 +290,9 @@ async function boot(){
   try{
     setStatus("Connecting to CrowRules Sports…");
     if(typeof loadSession==="function"){try{await timeout(loadSession(),7000);}catch(e){console.warn(e);}}
-    await getSeasons();\n    await getLeagues();\n    await getRows();\n    setStatus("Supabase connected • standings live",true);
+    await getSeasons();
+    await getLeagues();
+    await getRows();\n    setStatus("Supabase connected • standings live",true);
   }catch(e){errorView(e);}
 }
 $("league").onchange=()=>{leagueId=$("league").value;getRows().catch(errorView);};
@@ -304,6 +306,6 @@ window.addEventListener("keydown",e=>{const tag=(document.activeElement?.tagName
 boot();
 })();
 </script>
-<script>footer()</script>
+<script>if(typeof window.CrowRulesSports?.footer==="function") window.CrowRulesSports.footer();</script>
 </body>
 </html>
