@@ -272,15 +272,36 @@ function renderStructureOverview(rows){
  const byLeague=new Map();
  rows.forEach(x=>{
   const l=league(x),name=l.code||l.name||"LEAGUE";
-  if(!byLeague.has(x.league_id))byLeague.set(x.league_id,{name,sport:l.sport||"Sport",conferences:new Set(),divisions:new Set(),teams:0});
+  if(!byLeague.has(x.league_id))byLeague.set(x.league_id,{id:x.league_id,name,sport:l.sport||"Sport",conferences:new Set(),divisions:new Set(),teams:0});
   const g=byLeague.get(x.league_id); g.teams++;
   if(x.conference)g.conferences.add(x.conference);
   const d=x.division||team(x).division;
   if(d)g.divisions.add(d);
  });
+ const catalog={
+  "COLLEGE-FOOTBALL":{a:"CONFERENCES",av:["ACC","Big 12","Big Ten","Conference USA","Independent","MAC","SEC","Sun Belt"],b:"DIVISIONS",bv:["None / conference-wide"]},
+  "MENS-COLLEGE-BASKETBALL":{a:"CONFERENCES",av:["ACC","Big East","Big South","Conference USA"],b:"DIVISIONS",bv:["None / conference-wide"]},
+  "MILB-AA":{a:"MINOR LEAGUES",av:["Eastern League","Southern League","Texas League"],b:"DIVISIONS",bv:["League-specific"]},
+  "MILB-AAA":{a:"MINOR LEAGUES",av:["International League","Pacific Coast League"],b:"DIVISIONS",bv:["East • West"]},
+  "MILB-HIGHA":{a:"MINOR LEAGUES",av:["Midwest League","Northwest League","South Atlantic League"],b:"DIVISIONS",bv:["League-specific"]},
+  "MILB-SINGLEA":{a:"MINOR LEAGUES",av:["California League","Carolina League","Florida State League"],b:"DIVISIONS",bv:["League-specific"]},
+  "MLB":{a:"LEAGUES",av:["AL","NL"],b:"DIVISIONS",bv:["Central","East","West"]},
+  "MLS":{a:"CONFERENCES",av:["Eastern","Western"],b:"DIVISIONS",bv:["None"]},
+  "NBA":{a:"CONFERENCES",av:["Eastern","Western"],b:"DIVISIONS",bv:["Atlantic","Central","Southeast","Northwest","Pacific","Southwest"]},
+  "NFL":{a:"CONFERENCES",av:["AFC","NFC"],b:"DIVISIONS",bv:["East","North","South","West"]},
+  "NHL":{a:"CONFERENCES",av:["Eastern","Western"],b:"DIVISIONS",bv:["Atlantic","Metropolitan","Central","Pacific"]},
+  "NWSL":{a:"CONFERENCES",av:["None — single-table league"],b:"DIVISIONS",bv:["None"]},
+  "PWHL":{a:"CONFERENCES",av:["None — single-table league"],b:"DIVISIONS",bv:["None"]},
+  "UFL":{a:"CONFERENCES",av:["None — single-table league"],b:"DIVISIONS",bv:["None"]},
+  "WNBA":{a:"CONFERENCES",av:["Eastern","Western"],b:"DIVISIONS",bv:["None"]}
+ };
  return [...byLeague.values()].sort((a,b)=>a.name.localeCompare(b.name)).map(g=>{
+  const c=catalog[g.name]||{};
   const conf=[...g.conferences].sort(),div=[...g.divisions].sort();
-  return '<div class="structure-card"><div class="structure-card-head"><b>'+esc(g.name)+'</b><span>'+esc(String(g.sport).toUpperCase())+' • '+g.teams+' TEAMS</span></div><div class="structure-line"><span>CONFERENCES</span><strong>'+esc(conf.length?conf.join(" • "):"Not populated")+'</strong></div><div class="structure-line"><span>DIVISIONS</span><strong>'+esc(div.length?div.join(" • "):"Not populated")+'</strong></div></div>';
+  const av=c.av||conf;
+  const bv=c.bv||div;
+  const aLabel=c.a||"CONFERENCES",bLabel=c.b||"DIVISIONS";
+  return '<div class="structure-card"><div class="structure-card-head"><b>'+esc(g.name)+'</b><span>'+esc(String(g.sport).toUpperCase())+' • '+g.teams+' TEAMS</span></div><div class="structure-line"><span>'+esc(aLabel)+'</span><strong>'+esc(av.length?av.join(" • "):"Not populated")+'</strong></div><div class="structure-line"><span>'+esc(bLabel)+'</span><strong>'+esc(bv.length?bv.join(" • "):"Not populated")+'</strong></div></div>';
  }).join("");
 }
 
