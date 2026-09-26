@@ -176,7 +176,7 @@ function renderWrestlers(){
  const root=document.getElementById("rosterGrid");
  document.getElementById("rosterStatus").textContent=rows.length+" profile"+(rows.length===1?"":"s")+" shown • "+wrestlers.length+" synchronized";
  if(!rows.length){root.innerHTML='<div class="empty">No wrestler profiles match the current filters.</div>';return}
- root.innerHTML=rows.slice(0,300).map(x=>'<article class="fighter">'+imageMarkup(x)+'<div><div class="fighter-name">'+escC(x.name)+'</div><div class="fighter-meta">'+escC([x.organization,x.nickname,x.hometown,x.country,x.gender,x.status].filter(Boolean).join(" • "))+'</div><div class="fighter-source"><a href="'+escC(sourceUrl(x))+'" target="_blank" rel="noopener">SOURCE: '+escC(x.provider||"ROSTER")+'</a></div></div></article>').join("");
+ root.innerHTML=rows.slice(0,300).map(x=>'<article class="fighter" style="cursor:pointer" onclick="location.href=\'wrestler.html?slug='+encodeURIComponent(x.slug||"")+'\'">'+imageMarkup(x)+'<div><div class="fighter-name">'+escC(x.name)+'</div><div class="fighter-meta">'+escC([x.organization,x.nickname,x.hometown,x.country,x.gender,x.status].filter(Boolean).join(" • "))+'</div><div class="fighter-source">VIEW FULL PROFILE</div></div></article>').join("");
 }
 
 async function loadFighters(){
