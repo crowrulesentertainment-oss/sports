@@ -44,17 +44,14 @@ function storageRemove(key,type="local"){try{storage(type)?.removeItem(key);}cat
 
 const NAV=[
  ["home","HOME","index.html"],
- ["live","LIVE","live.html"],
  ["scores","SCORES","scores.html"],
  ["schedule","SCHEDULE","schedule.html"],
  ["standings","STANDINGS","standings.html"],
  ["leaders","LEADERS","leaders.html"],
  ["combat","COMBAT / WRESTLING","combat.html"],
- ["event","EVENT CENTER","event.html"],
  ["media","AUDIO / VIDEO","media.html"],
  ["pickem","PICK EM","pickem.html"],
  ["notifications","NOTIFICATIONS","notifications.html"],
- ["sync-health","SYNC HEALTH","sync-health.html"],
  ["partners","PARTNERS","partners.html"],
  ["account","ACCOUNT","account.html"]
 ];
