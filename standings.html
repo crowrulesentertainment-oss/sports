@@ -377,7 +377,18 @@ function render(){
  });
 }
 
-async function refreshLive(){\n if(refreshBusy||document.hidden)return;\n refreshBusy=true;\n try{await loadRows(true);}catch(e){console.warn("Standings live refresh",e);}finally{refreshBusy=false;}\n}\n\nfunction startAutoRefresh(){\n if(refreshTimer)clearInterval(refreshTimer);\n refreshTimer=setInterval(refreshLive,30000);\n}\n\nfunction startRealtime(){
+async function refreshLive(){
+ if(refreshBusy||document.hidden)return;
+ refreshBusy=true;
+ try{await loadRows(true);}catch(e){console.warn("Standings live refresh",e);}finally{refreshBusy=false;}
+}
+
+function startAutoRefresh(){
+ if(refreshTimer)clearInterval(refreshTimer);
+ refreshTimer=setInterval(refreshLive,30000);
+}
+
+function startRealtime(){
  if(standingsChannel||!db?.channel)return;
  standingsChannel=db.channel("crowrules-standings-live")
   .on("postgres_changes",{event:"*",schema:"public",table:"cr_sports_standings"},payload=>{
@@ -437,7 +448,8 @@ $("export").onclick=()=>{
  const lines=[head,...rows.map(x=>[x.rank,team(x).name||"",league(x).name||league(x).code||"",x.season,x.conference||"",x.division||"",x.wins,x.losses,x.ties,x.win_pct,x.points_for,x.points_against,n(x.points_for)-n(x.points_against),x.streak])]
   .map(r=>r.map(v=>'"'+String(v??"").replaceAll('"','""')+'"').join(","));
  const a=document.createElement("a");
- a.href=URL.createObjectURL(new Blob(["\\ufeff"+lines.join("\\r\\n")],{type:"text/csv"}));
+ a.href=URL.createObjectURL(new Blob(["\\ufeff"+lines.join("\\r\
+")],{type:"text/csv"}));
  a.download="crowrules-standings-"+($("season").value||"season")+".csv";
  a.click();
  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
@@ -449,7 +461,8 @@ $("share").onclick=async()=>{
  catch(_){prompt("Copy standings URL",url);}
 };
 
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)refreshLive();});\nwindow.addEventListener("beforeunload",()=>{stopRealtime();if(refreshTimer)clearInterval(refreshTimer);});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)refreshLive();});
+window.addEventListener("beforeunload",()=>{stopRealtime();if(refreshTimer)clearInterval(refreshTimer);});
 window.addEventListener("keydown",e=>{
  const tag=document.activeElement?.tagName?.toLowerCase();
  if(e.key==="/"&&!["input","select","textarea"].includes(tag)){e.preventDefault();$("search").focus();}
