@@ -146,19 +146,31 @@ function imageMarkup(x,cls="fighter-img"){
 
 async function loadChampions(){
  const status=document.getElementById("championStatus");
- const r=await SB.from("cr_sports_championships").select("*").in("organization",["UFC","WWE","AEW"]).order("organization").order("title_name");
+ const r=await SB.from("cr_sports_championships").select("*").in("organization",["UFC","WWE","AEW"]).eq("status","active").order("organization").order("title_name");
  if(r.error){status.textContent="Championship data unavailable";document.getElementById("championGrid").innerHTML='<div class="empty error">'+escC(r.error.message)+'</div>';return}
  champions=r.data||[];
- document.getElementById("titleCount").textContent=champions.filter(x=>String(x.status||"").toLowerCase()==="active").length;
- status.textContent=champions.length+" championship records • "+champions.filter(x=>String(x.status||"").toLowerCase()==="active").length+" active";
+ document.getElementById("titleCount").textContent=champions.length;
+ status.textContent=champions.length+" active championship records";
  renderChampions();renderRosterMetrics();
 }
+function championPortrait(x){
+  if(x.champion_image_url) return x.champion_image_url;
+  const target=String(x.champion_name||"").toLowerCase();
+  if(!target) return "";
+  const parts=target.replace(/["“”]/g,"").split(/[,/&]|\s+\d+\s*&\s*/).map(s=>s.trim()).filter(Boolean);
+  const exact=wrestlers.find(w=>String(w.name||"").toLowerCase()===target);
+  if(exact?.image_url) return exact.image_url;
+  const names=parts.flatMap(p=>p.split(/\s+&\s+/)).map(s=>s.trim()).filter(s=>s.length>3);
+  const hit=wrestlers.find(w=>names.some(n=>String(w.name||"").toLowerCase()===n.toLowerCase()));
+  return hit?.image_url||"";
+}
 function renderChampions(){
- const rows=champions.filter(x=>champFilter==="ALL"||x.organization===champFilter);
+ const rows=champions.filter(x=>String(x.status||"").toLowerCase()==="active"&&(champFilter==="ALL"||x.organization===champFilter));
  const root=document.getElementById("championGrid");
  if(!rows.length){root.innerHTML='<div class="empty">No championship records match this filter.</div>';return}
  root.innerHTML=rows.map(x=>{
-  const img=x.champion_image_url?'<img src="'+escC(x.champion_image_url)+'" alt="'+escC(x.title_name||"Championship")+'" loading="lazy" onerror="this.style.display="none"">':'<div class="champion-fallback">'+escC(x.organization||"TITLE")+'</div>';
+  const portrait=championPortrait(x);
+  const img=portrait?'<img src="'+escC(portrait)+'" alt="'+escC(x.champion_name||"Champion")+'" loading="lazy" onerror="this.style.display="none"">':'<div class="champion-fallback">'+escC(x.organization||"TITLE")+'</div>';
   return '<article class="champion"><div class="champion-art">'+img+'</div><div class="champion-body"><div class="org">'+escC(x.organization||"COMBAT")+'</div><div class="champion-title">'+escC(x.title_name||x.title_type||"Championship")+'</div><div class="champion-name">'+escC(x.champion_name||"Vacant / Not Listed")+'</div><div class="champion-meta">'+escC([x.division,x.status,x.provider].filter(Boolean).join(" • "))+'</div><div class="stats"><div class="stat"><b>'+escC(x.defense_count??"—")+'</b><span>DEFENSES</span></div><div class="stat"><b>'+escC(x.won_at||"—")+'</b><span>WON</span></div><div class="stat"><b>'+escC(x.is_interim?"INTERIM":"CURRENT")+'</b><span>STATUS</span></div></div></div></article>'
  }).join("");
 }
@@ -246,7 +258,7 @@ document.getElementById("shareBtn").addEventListener("click",async()=>{try{if(na
 
 async function bootCombat(){
  if(!SB){document.body.insertAdjacentHTML("afterbegin",'<div class="empty error">Supabase client unavailable. Shared Sports engine did not initialize.</div>');return}
- await Promise.allSettled([loadChampions(),loadWrestlers(),loadFighters(),loadEvents(),loadMatches()]);
+ await Promise.all([loadWrestlers(),loadChampions(),loadFighters(),loadEvents(),loadMatches()]);
 }
 bootCombat();
 setInterval(()=>{loadEvents();loadChampions()},120000);
