@@ -110,7 +110,7 @@ body{background:#050508}
 (() => {
   "use strict";
 
-  const S = window.sb || window.supabaseClient || window.sbClient;
+  const S = (typeof sb !== "undefined" ? sb : null) || window.sb || window.supabaseClient || window.sbClient;
   const q = id => document.getElementById(id);
   const escLocal = v => String(v ?? "").replace(/[&<>"']/g,ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
   const num = v => Number(v ?? 0) || 0;
@@ -118,13 +118,14 @@ body{background:#050508}
   const record = x => num(x.wins)+"-"+num(x.losses)+(num(x.ties)?"-"+num(x.ties):"");
   const diff = x => num(x.points_for)-num(x.points_against);
 
+  const params=new URLSearchParams(location.search);
+  const requestedTeam=params.get("team");
+  const requestedSport=params.get("sport")||"";
+
   let rawRows=[], rows=[], leagues=[], seasons=[], activeSport="all", requestedLeague=params.get("league")||"", viewMode="table", showDetails=true;
   let favorites=new Set();
   try { favorites=new Set(JSON.parse(localStorage.getItem("cr_standings_favorites")||"[]")); } catch(_){}
 
-  const params=new URLSearchParams(location.search);
-  const requestedTeam=params.get("team");
-  const requestedSport=params.get("sport")||"";
   if(requestedSport) activeSport=requestedSport;
 
   function teamOf(x){ return Array.isArray(x.cr_sports_teams)?(x.cr_sports_teams[0]||{}):(x.cr_sports_teams||{}); }
