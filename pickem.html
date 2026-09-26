@@ -461,6 +461,11 @@ $id("leaderboardSeasonBtn").onclick=()=>{leaderboardMode="season";$id("leaderboa
 $id("leaderboardHistoryBtn").onclick=()=>{leaderboardMode="history";$id("leaderboardWeekBtn").className="button secondary";$id("leaderboardSeasonBtn").className="button secondary";$id("leaderboardHistoryBtn").className="button";loadLeaderboard()};
 $id("leaderboardRefreshBtn").onclick=loadLeaderboard;
 
+async function awaitPickemBoot(){
+  await loadPickemLeagues();
+  await loadWeeks();
+}
+
 (async () => {
   const {data} = await sb.auth.getSession();
   session = data?.session || null;
@@ -474,9 +479,3 @@ $id("leaderboardRefreshBtn").onclick=loadLeaderboard;
 <script>footer()</script>
 </body>
 </html>
-<script>
-async function awaitPickemBoot(){
-  await loadPickemLeagues();
-  await loadWeeks();
-}
-</script>
