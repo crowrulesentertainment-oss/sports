@@ -35,6 +35,20 @@ function favoriteButton(type,id,label){
 
 
 
+
+// SPORTS 28.0 — UNIVERSAL SPORTS MEMBER DASHBOARD
+function renderMemberDashboard(){
+  const box=$("#sportsMemberDashboard");if(!box||!SportsState.ready)return;
+  const f=Favorites.get(), n=SportsNotifications.get(), games=SportsState.data.games;
+  const followed=games.filter(g=>(f.teams||[]).includes(g.homeTeamId)||(f.teams||[]).includes(g.awayTeamId));
+  const live=followed.filter(g=>["LIVE","IN PROGRESS","HALFTIME"].includes(String(g.status||"").toUpperCase()));
+  const players=(f.players||[]).map(id=>SportsState.data.players.find(p=>p.id===id)).filter(Boolean);
+  const media=selected(SportsState.data.videos).slice(0,4);
+  box.innerHTML='<div class="memberHero"><div><small>SPORTS 28.0 • MEMBER COMMAND CENTER</small><h2>YOUR SPORTS UNIVERSE</h2><p>Favorites, activity, notifications, stats and media in one connected dashboard.</p></div><a class="memberAccount" href="https://crowrulesentertainment-oss.github.io/crowspace/login.html">ACCOUNT • GUEST</a></div>'+
+  '<div class="memberMetrics"><div><b>'+f.teams.length+'</b><span>FOLLOWED TEAMS</span></div><div><b>'+f.players.length+'</b><span>FOLLOWED PLAYERS</span></div><div><b>'+f.leagues.length+'</b><span>FOLLOWED LEAGUES</span></div><div><b>'+live.length+'</b><span>LIVE NOW</span></div></div>'+
+  '<div class="memberGrid"><a href="#sportsActivityCenter"><b>ACTIVITY</b><span>'+followed.length+' followed games</span></a><a href="scores.html"><b>LIVE SCORES</b><span>'+live.length+' live games</span></a><a href="#sportsNotificationsCenter"><b>NOTIFICATIONS</b><span>'+(n.enabled?"ENABLED":"DISABLED")+'</span></a><a href="stats.html"><b>STATISTICS</b><span>'+players.length+' followed players</span></a><a href="videos.html"><b>MEDIA</b><span>'+media.length+' selected-league videos</span></a><a href="pickem.html"><b>PICK ’EM</b><span>Enter the challenge</span></a></div>';
+}
+
 // SPORTS 27.0 — UNIVERSAL SPORTS ACTIVITY CENTER
 function renderActivityCenter(){
   const box=$("#sportsActivityCenter");if(!box||!SportsState.ready)return;
@@ -161,7 +175,7 @@ async function loadData(){
     loadJSON("data/standings.json"),loadJSON("data/schedule.json"),loadJSON("data/videos.json"),loadJSON("data/pickem.json")
   ]);
   SportsState.data={leagues:leagues.leagues||[],teams:teams.teams||[],players:players.players||[],games:games.games||[],standings:standings.standings||[],schedule:schedule.schedule||[],videos:videos.videos||[],pickem};
-  SportsState.ready=true; buildShell(); render(); renderFavorites(); renderNotificationCenter(); renderActivityCenter(); renderActivityCenter(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
+  SportsState.ready=true; buildShell(); render(); renderFavorites(); renderNotificationCenter(); renderActivityCenter(); renderMemberDashboard(); renderActivityCenter(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
 }
 function league(){return SportsState.data.leagues.find(x=>x.id===SportsState.selectedLeague)||null}
 function selected(arr){return SportsState.selectedLeague==="all"?arr:arr.filter(x=>x.leagueId===SportsState.selectedLeague)}
