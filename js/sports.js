@@ -1,4 +1,17 @@
 
+// SPORTS 66.0 — UNIVERSAL SPORTS LEADERBOARD & STAT LEADERS ENGINE
+function renderLeadersCenter66(){
+ const box=$("#leadersCenter66");if(!box||!SportsState.ready)return;
+ const d=SportsState.data, rows=d.leaders||d.stat_leaders||d.player_leaders||[];
+ const q=(new URLSearchParams(location.search).get("q")||"").trim().toLowerCase();
+ const filtered=rows.filter(x=>!q||JSON.stringify(x).toLowerCase().includes(q)).slice(0,100);
+ const card=(x,i)=>'<article><div class="ld66Rank">#'+(i+1)+'</div><small>'+esc(x.leagueId||x.league||x.category||"SPORTS")+'</small><h2>'+esc(x.metric||x.stat||x.title||"STAT LEADER")+'</h2><b>'+esc(x.value??x.total??"—")+'</b><strong>'+esc(x.playerName||x.player||x.teamName||x.holder||"LEADER")+'</strong><span>'+esc(x.teamName||x.team||x.season||x.year||"CURRENT")+'</span></article>';
+ box.innerHTML='<div class="ld66Hero"><small>SPORTS 66.0 • UNIVERSAL LEADERBOARD & STAT LEADERS ENGINE</small><h1>STAT LEADERS</h1><p>PLAYER • TEAM • LEAGUE • SPORT • CATEGORY • METRIC</p></div><div class="ld66Search"><input id="leaderSearch66" value="'+esc(q)+'" placeholder="SEARCH LEADERS OR STATISTICS"><button id="leaderSearchBtn66">SEARCH</button></div><div class="ld66Metrics"><div><b>'+rows.length+'</b><span>LEADERS</span></div><div><b>'+new Set(rows.map(x=>x.leagueId||x.league)).size+'</b><span>LEAGUES</span></div><div><b>'+new Set(rows.map(x=>x.metric||x.stat)).size+'</b><span>METRICS</span></div><div><b>'+filtered.length+'</b><span>VISIBLE</span></div></div><section class="ld66Panel"><h2>LEADERBOARD</h2><div class="ld66Grid">'+(filtered.length?filtered.map(card).join(""):'<div class="ld66Empty"><h3>LEADER FEED READY</h3><p>No statistical leader dataset is connected yet. Current or historical leaders can be supplied by the Sports data layer.</p></div>')+'</div></section><div class="ld66Links"><a href="records.html">RECORDS</a><a href="stats.html">STATISTICS</a><a href="players.html">PLAYERS</a><a href="history.html">HISTORY</a></div>';
+ const input=$("#leaderSearch66"),btn=$("#leaderSearchBtn66"),go=()=>{const v=input?.value.trim();location.href=v?"leaders.html?q="+encodeURIComponent(v):"leaders.html"};
+ btn?.addEventListener("click",go);input?.addEventListener("keydown",e=>{if(e.key==="Enter")go()});
+}
+
+
 // SPORTS 65.0 — UNIVERSAL SPORTS RECORDS & STATISTICS HISTORY
 function renderRecordsCenter65(){
  const box=$("#recordsCenter65");if(!box||!SportsState.ready)return;
