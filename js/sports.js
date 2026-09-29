@@ -33,6 +33,34 @@ function favoriteButton(type,id,label){
   return '<button type="button" class="favoriteButton '+(isFav(type,id)?"isFavorite":"")+'" onclick="Favorites.toggle(\''+type+'\',\''+esc(id)+'\')">'+(isFav(type,id)?"★ FOLLOWING":"☆ FOLLOW "+esc(label).toUpperCase())+'</button>';
 }
 
+
+// SPORTS 26.0 — UNIVERSAL SPORTS NOTIFICATIONS CENTER
+const SportsNotifications={
+  key:"crowrulesSportsNotifications",
+  get(){try{return JSON.parse(localStorage.getItem(this.key))||{enabled:true,scoreChanges:true,upcoming:true,live:true}}catch(e){return{enabled:true,scoreChanges:true,upcoming:true,live:true}}},
+  save(v){localStorage.setItem(this.key,JSON.stringify(v));},
+  relevantGames(){
+    const f=Favorites.get(),ids=new Set([...(f.teams||[])]);
+    return SportsState.data.games.filter(g=>SportsState.selectedLeague==="all"||g.leagueId===SportsState.selectedLeague).filter(g=>ids.has(g.homeTeamId)||ids.has(g.awayTeamId));
+  },
+  toggle(k){const v=this.get();v[k]=!v[k];this.save(v);renderNotificationCenter();}
+};
+function renderNotificationCenter(){
+  const box=$("#sportsNotificationsCenter");if(!box||!SportsState.ready)return;
+  const n=SportsNotifications.get(), games=SportsNotifications.relevantGames();
+  const live=games.filter(g=>["LIVE","IN PROGRESS","HALFTIME"].includes(String(g.status||"").toUpperCase()));
+  const upcoming=games.filter(g=>!["FINAL","LIVE","IN PROGRESS","HALFTIME"].includes(String(g.status||"").toUpperCase())).slice(0,8);
+  box.innerHTML='<div class="notificationSettings"><b>NOTIFICATION PREFERENCES</b><button type="button" onclick="SportsNotifications.toggle(\'enabled\')">'+(n.enabled?"● ENABLED":"○ DISABLED")+'</button><button type="button" onclick="SportsNotifications.toggle(\'live\')">'+(n.live?"● LIVE":"○ LIVE")+'</button><button type="button" onclick="SportsNotifications.toggle(\'upcoming\')">'+(n.upcoming?"● UPCOMING":"○ UPCOMING")+'</button></div>'+
+    '<div class="notificationSummary"><span>FOLLOWED GAMES</span><b>'+games.length+'</b><span>LIVE</span><b>'+live.length+'</b></div>'+
+    (n.enabled&&n.live&&live.length?'<div class="notificationList"><h3>LIVE NOW</h3>'+live.map(g=>notificationGame(g)).join("")+'</div>':'')+
+    (n.enabled&&n.upcoming&&upcoming.length?'<div class="notificationList"><h3>UP NEXT</h3>'+upcoming.map(g=>notificationGame(g)).join("")+'</div>':'')+
+    (!games.length?'<div class="notificationEmpty">Follow teams to receive personalized Sports notifications.</div>':'');
+}
+function notificationGame(g){
+  const a=getTeam(g.awayTeamId),h=getTeam(g.homeTeamId);
+  return '<a class="notificationGame" href="game.html?id='+encodeURIComponent(g.id)+'"><span>'+esc(g.status||"UP NEXT")+'</span><b>'+esc(a?.short||"AWY")+' @ '+esc(h?.short||"HME")+'</b><em>'+esc(g.time||"TBD")+'</em></a>';
+}
+
 // SPORTS 24.0 — UNIVERSAL SPORTS API GATEWAY
 const SportsAPI={
   mode:"STATIC",
@@ -113,7 +141,7 @@ async function loadData(){
     loadJSON("data/standings.json"),loadJSON("data/schedule.json"),loadJSON("data/videos.json"),loadJSON("data/pickem.json")
   ]);
   SportsState.data={leagues:leagues.leagues||[],teams:teams.teams||[],players:players.players||[],games:games.games||[],standings:standings.standings||[],schedule:schedule.schedule||[],videos:videos.videos||[],pickem};
-  SportsState.ready=true; buildShell(); render(); renderFavorites(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
+  SportsState.ready=true; buildShell(); render(); renderFavorites(); renderNotificationCenter(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
 }
 function league(){return SportsState.data.leagues.find(x=>x.id===SportsState.selectedLeague)||null}
 function selected(arr){return SportsState.selectedLeague==="all"?arr:arr.filter(x=>x.leagueId===SportsState.selectedLeague)}
@@ -220,7 +248,7 @@ function buildShell(){
     notification.classList.toggle("hasAlert",live>0);
     notification.onclick=()=>{window.location.href="scores.html";};
   }
-  renderFavorites();
+  renderFavorites(); renderNotificationCenter();
   if(!document.querySelector("#sportsDataState")){
     const state=document.createElement("div"); state.id="sportsDataState"; state.className="sportsDataState";
     state.innerHTML='<span>SPORTS 24.0 API GATEWAY</span><b id="sportsApiStatus" class="apiStatus">API GATEWAY STATIC</b><i></i><span id="sportsApiSource">STATIC JSON</span><i></i><b id="liveEngineStatus">○ LIVE FEED READY</b><span id="liveEngineSync">WAITING FOR LIVE PROVIDER</span>';
