@@ -1,0 +1,83 @@
+{
+  "version": "3.0",
+  "status": "static-sample",
+  "leagues": [
+    {
+      "id": "nfl",
+      "name": "NFL",
+      "level": "PRO",
+      "sport": "Football",
+      "status": "active"
+    },
+    {
+      "id": "mlb",
+      "name": "MLB",
+      "level": "PRO",
+      "sport": "Baseball",
+      "status": "active"
+    },
+    {
+      "id": "nhl",
+      "name": "NHL",
+      "level": "PRO",
+      "sport": "Hockey",
+      "status": "active"
+    },
+    {
+      "id": "nba",
+      "name": "NBA",
+      "level": "PRO",
+      "sport": "Basketball",
+      "status": "active"
+    },
+    {
+      "id": "wnba",
+      "name": "WNBA",
+      "level": "PRO",
+      "sport": "Basketball",
+      "status": "active"
+    },
+    {
+      "id": "mls",
+      "name": "MLS",
+      "level": "PRO",
+      "sport": "Soccer",
+      "status": "active"
+    },
+    {
+      "id": "ufl",
+      "name": "UFL",
+      "level": "PRO",
+      "sport": "Football",
+      "status": "active"
+    },
+    {
+      "id": "ncaa",
+      "name": "NCAA",
+      "level": "COLLEGE",
+      "sport": "Multi-sport",
+      "status": "active"
+    },
+    {
+      "id": "triple-a",
+      "name": "TRIPLE-A",
+      "level": "MINOR LEAGUE",
+      "sport": "Baseball",
+      "status": "active"
+    },
+    {
+      "id": "high-school",
+      "name": "HIGH SCHOOL",
+      "level": "SCHOOL",
+      "sport": "Multi-sport",
+      "status": "active"
+    },
+    {
+      "id": "future",
+      "name": "FUTURE",
+      "level": "EXPANSION",
+      "sport": "Multi-sport",
+      "status": "planned"
+    }
+  ]
+}
