@@ -1,4 +1,17 @@
 
+// SPORTS 50.0 — UNIVERSAL SPORTS NEWS COMMAND CENTER
+function renderNewsCommandCenter50(){
+  const box=$("#sportsNewsCommand50");if(!box||!SportsState.ready)return;
+  const f=Favorites.get(), saved=NewsWatchlist.get(), history=NewsHistory.get(), all=SportsState.data.news||[], engagement=NewsEngagement.get();
+  const selected=all.filter(n=>SportsState.selectedLeague==="all"||n.leagueId===SportsState.selectedLeague);
+  const trending=selected.map(n=>({n,s:((engagement[n.id]?.opens||0)*2)+((engagement[n.id]?.reads||0)*3)+(saved.includes(n.id)?2:0)})).sort((a,b)=>b.s-a.s).slice(0,5).map(x=>x.n);
+  const recent=history.map(x=>all.find(n=>n.id===x.id)).filter(Boolean).slice(0,5);
+  const personal=selected.filter(n=>(f.leagues||[]).includes(n.leagueId)||(f.teams||[]).includes(n.teamId)||(f.players||[]).includes(n.playerId)).slice(0,5);
+  const card=n=>'<a href="news-story.html?id='+encodeURIComponent(n.id)+'"><span>'+esc(n.category||"SPORTS")+'</span><b>'+esc(n.title||"Sports Story")+'</b><em>'+esc(n.date||"LATEST")+'</em></a>';
+  box.innerHTML='<div class="cmd50Hero"><div><small>SPORTS 50.0 • NEWS COMMAND CENTER</small><h1>THE SPORTS NEWS DESK</h1><p>One command center connecting discovery, personalization, topics, trending stories, history and saved coverage.</p></div><a href="home.html">SPORTS HOME</a></div><div class="cmd50Actions"><a href="news.html">DISCOVER</a><a href="your-topics.html">YOUR TOPICS</a><a href="topic-feed.html">TOPIC FEED</a><a href="trending-news.html">TRENDING</a><a href="news-history.html">HISTORY</a><a href="news-watchlist.html">WATCHLIST • '+saved.length+'</a></div><div class="cmd50Metrics"><div><b>'+selected.length+'</b><span>SELECTED STORIES</span></div><div><b>'+personal.length+'</b><span>PERSONAL</span></div><div><b>'+trending.length+'</b><span>TRENDING</span></div><div><b>'+history.length+'</b><span>READ</span></div></div><div class="cmd50Grid"><section><h2>PERSONALIZED</h2>'+(personal.length?personal.map(card).join(""):'<p>Follow teams, players or leagues to personalize coverage.</p>')+'</section><section><h2>TRENDING</h2>'+(trending.length?trending.map(card).join(""):'<p>Trending stories will appear as engagement grows.</p>')+'</section><section><h2>RECENTLY READ</h2>'+(recent.length?recent.map(card).join(""):'<p>Your reading history will appear here.</p>')+'</section></div>';
+}
+
+
 // SPORTS 49.0 — UNIVERSAL SPORTS NEWS TOPIC FEEDS
 function renderTopicFeed49(){
   const box=$("#sportsTopicFeed49");if(!box||!SportsState.ready)return;
