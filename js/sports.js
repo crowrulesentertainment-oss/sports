@@ -1,4 +1,18 @@
 
+// SPORTS 67.0 — UNIVERSAL SPORTS STATISTICS EXPLORER
+function renderStatsExplorer67(){
+ const box=$("#statsExplorer67");if(!box||!SportsState.ready)return;
+ const d=SportsState.data, stats=d.statistics||d.stats||d.player_stats||[];
+ const leagues=d.leagues||[], teams=d.teams||[], players=d.players||[];
+ const q=new URLSearchParams(location.search), league=q.get("league")||"", team=q.get("team")||"", player=q.get("player")||"", metric=q.get("metric")||"";
+ const filtered=stats.filter(x=>(!league||String(x.leagueId||x.league)===league)&&(!team||String(x.teamId||x.team)===team)&&(!player||String(x.playerId||x.player)===player)&&(!metric||String(x.metric||x.stat)===metric)).slice(0,100);
+ const opts=(arr,val,label)=>'<option value="">ALL '+label+'</option>'+arr.map(x=>'<option value="'+esc(x.id)+'" '+(String(x.id)===String(val)?"selected":"")+'>'+esc(x.name||x.fullName||x.title||x.id)+'</option>').join("");
+ const row=x=>'<tr><td>'+esc(x.playerName||x.player||x.teamName||x.team||"—")+'</td><td>'+esc(x.teamName||x.team||"—")+'</td><td>'+esc(x.metric||x.stat||"—")+'</td><td>'+esc(x.value??x.total??x.average??"—")+'</td><td>'+esc(x.season||x.year||"—")+'</td></tr>';
+ const metrics=[...new Set(stats.map(x=>x.metric||x.stat).filter(Boolean))];
+ box.innerHTML='<div class="sx67Hero"><small>SPORTS 67.0 • UNIVERSAL STATISTICS EXPLORER</small><h1>STATISTICS EXPLORER</h1><p>LEAGUE • TEAM • PLAYER • SEASON • METRIC</p></div><form class="sx67Filters" id="statsFilters67"><select name="league">'+opts(leagues,league,"LEAGUES")+'</select><select name="team">'+opts(teams,team,"TEAMS")+'</select><select name="player">'+opts(players,player,"PLAYERS")+'</select><select name="metric"><option value="">ALL METRICS</option>'+metrics.map(x=>'<option '+(x===metric?"selected":"")+'>'+esc(x)+'</option>').join("")+'</select><button>EXPLORE</button></form><div class="sx67Metrics"><div><b>'+stats.length+'</b><span>STAT ROWS</span></div><div><b>'+filtered.length+'</b><span>RESULTS</span></div><div><b>'+metrics.length+'</b><span>METRICS</span></div><div><b>'+leagues.length+'</b><span>LEAGUES</span></div></div><section class="sx67Panel"><h2>STATISTICS</h2><div class="sx67TableWrap">'+(filtered.length?'<table><thead><tr><th>ATHLETE</th><th>TEAM</th><th>METRIC</th><th>VALUE</th><th>SEASON</th></tr></thead><tbody>'+filtered.map(row).join("")+'</tbody></table>':'<div class="sx67Empty"><h3>STATISTICS FEED READY</h3><p>No statistics match the selected filters, or a statistics feed has not been connected yet.</p></div>')+'</div></section><div class="sx67Links"><a href="leaders.html">LEADERS</a><a href="records.html">RECORDS</a><a href="players.html">PLAYERS</a><a href="history.html">HISTORY</a></div>';
+}
+
+
 // SPORTS 66.0 — UNIVERSAL SPORTS LEADERBOARD & STAT LEADERS ENGINE
 function renderLeadersCenter66(){
  const box=$("#leadersCenter66");if(!box||!SportsState.ready)return;
