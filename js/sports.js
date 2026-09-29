@@ -1,4 +1,22 @@
 
+// SPORTS 43.0 — UNIVERSAL SPORTS NEWS READING HISTORY
+const NewsHistory={
+  key:"crowrulesSportsNewsHistory",
+  get(){try{return JSON.parse(localStorage.getItem(this.key))||[]}catch(e){return[]}},
+  save(v){localStorage.setItem(this.key,JSON.stringify(v))},
+  record(id){if(!id)return;const v=this.get().filter(x=>x.id!==id);v.unshift({id,time:new Date().toISOString()});this.save(v.slice(0,50));refreshUniversalLayer();renderNewsHistory43()},
+  stories(){return this.get().map(x=>(SportsState.data.news||[]).find(n=>n.id===x.id)).filter(Boolean)}
+};
+function renderNewsHistory43(){
+  const box=$("#sportsNewsHistory");if(!box||!SportsState.ready)return;
+  const stories=NewsHistory.stories().slice(0,12);
+  box.innerHTML='<div class="history43Hero"><div><small>SPORTS 43.0 • READING HISTORY</small><h2>RECENTLY READ</h2><p>Your recent Sports stories, stored locally in this browser.</p></div><a href="news.html">DISCOVER NEWS</a></div><div class="history43Grid">'+(stories.length?stories.map(n=>'<a href="news-story.html?id='+encodeURIComponent(n.id)+'"><span>'+esc(n.category||"SPORTS")+'</span><b>'+esc(n.title||"Sports Story")+'</b><em>'+esc(n.date||"LATEST")+'</em></a>').join(""):'<p class="history43Empty">NO READING HISTORY YET.</p>')+'</div>';
+}
+function recordNewsStory43(){
+  const id=new URLSearchParams(location.search).get("id");if(id)NewsHistory.record(id);
+}
+
+
 // SPORTS 42.0 — UNIVERSAL SPORTS NEWS RECOMMENDATIONS
 function renderNewsRecommendations42(){
   const box=$("#sportsNewsRecommendations");if(!box||!SportsState.ready)return;
