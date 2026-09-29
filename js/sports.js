@@ -1,4 +1,17 @@
 
+// SPORTS 61.0 — UNIVERSAL SPORTS BRACKET ENGINE
+function renderBracketEngine61(){
+ const box=$("#bracketEngine61");if(!box||!SportsState.ready)return;
+ const data=SportsState.data.tournaments||SportsState.data.championships||[], q=new URLSearchParams(location.search), id=q.get("id");
+ const t=data.find(x=>String(x.id)===String(id))||data[0];
+ if(!t){box.innerHTML='<div class="br61Empty"><h1>BRACKET ENGINE</h1><p>No tournament bracket is connected yet. Add tournament rounds/matchups to activate the interactive championship path.</p><a href="tournaments.html">TOURNAMENT CENTER</a></div>';return}
+ const rounds=t.rounds||t.bracket||[], games=SportsState.data.games||[];
+ const getName=id=>{const x=getTeam(id);return x?.short||x?.name||id||"TBD"};
+ const match=(m,i)=>{const g=games.find(x=>String(x.id)===String(m.gameId||m.id));const a=m.awayTeamId?getName(m.awayTeamId):(m.away||"TBD"),h=m.homeTeamId?getName(m.homeTeamId):(m.home||"TBD");return '<div class="br61Match"><a href="'+(g?'game-intelligence.html?id='+encodeURIComponent(g.id):'#')+'"><b>'+esc(a)+'</b><span>'+esc(g?.score||m.awayScore??"—")+'</span></a><a href="'+(g?'game-intelligence.html?id='+encodeURIComponent(g.id):'#')+'"><b>'+esc(h)+'</b><span>'+esc(g?.scoreHome||m.homeScore??"—")+'</span></a><small>'+esc(m.status||g?.status||"MATCHUP")+'</small></div>'};
+ box.innerHTML='<div class="br61Hero"><small>SPORTS 61.0 • UNIVERSAL BRACKET ENGINE</small><h1>'+esc(t.name||t.title||"CHAMPIONSHIP")+'</h1><p>'+esc(t.status||"TOURNAMENT PATH")+'</p></div><div class="br61Path">'+(rounds.length?rounds.map((r,i)=>'<section><h2>'+esc(r.name||r.round||"ROUND "+(i+1))+'</h2>'+(r.matches||r.matchups||[]).map(match).join("")+'</section>').join(""):'<section class="br61Empty"><h2>BRACKET DATA</h2><p>Rounds and matchups will appear when supplied by the tournament feed.</p></section>')+'</div><div class="br61Actions"><a href="tournaments.html?id='+encodeURIComponent(t.id)+'">TOURNAMENT CENTER</a><a href="event-center.html">EVENT CENTER</a><a href="game-day.html">GAME DAY</a></div>';
+}
+
+
 // SPORTS 60.0 — UNIVERSAL SPORTS TOURNAMENT & CHAMPIONSHIP CENTER
 function renderTournamentCenter60(){
   const box=$("#tournamentCenter60");if(!box||!SportsState.ready)return;
