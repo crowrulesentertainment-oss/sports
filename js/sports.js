@@ -1,4 +1,26 @@
 
+// SPORTS 69.0 — UNIVERSAL SPORTS HEAD-TO-HEAD ENGINE
+function renderHeadToHeadEngine69(){
+ const box=$("#headToHeadEngine69");if(!box||!SportsState.ready)return;
+ const d=SportsState.data,teams=d.teams||[],players=d.players||[],games=d.games||[],stats=d.statistics||d.stats||[];
+ const q=new URLSearchParams(location.search),a=q.get("a")||"",b=q.get("b")||"";
+ const entities=[...players.map(x=>({id:x.id,name:x.name||x.fullName||x.id,type:"PLAYER",teamId:x.teamId||x.team_id})),...teams.map(x=>({id:x.id,name:x.name||x.fullName||x.id,type:"TEAM"}))];
+ const A=entities.find(x=>String(x.id)===String(a)),B=entities.find(x=>String(x.id)===String(b));
+ const teamIds=e=>e?.type==="TEAM"?e.id:e?.teamId;
+ const relevant=games.filter(g=>{
+   const ids=[g.homeTeamId,g.awayTeamId,g.home_team_id,g.away_team_id,g.home,g.away].filter(Boolean).map(String);
+   const x=String(teamIds(A)||""),y=String(teamIds(B)||"");
+   return x&&y&&ids.includes(x)&&ids.includes(y);
+ });
+ const playerGames=(e)=>e?.type==="PLAYER"?games.filter(g=>JSON.stringify(g).includes(String(e.id))):[];
+ const meetings=A&&B&&A.type==="PLAYER"&&B.type==="PLAYER"?games.filter(g=>JSON.stringify(g).includes(String(A.id))&&JSON.stringify(g).includes(String(B.id))):relevant;
+ const options=sel=>'<option value="">SELECT '+sel+'</option>'+entities.map(x=>'<option value="'+esc(x.id)+'" '+(String(x.id)===String(sel==="A"?a:b)?"selected":"")+'>'+esc(x.name)+' • '+x.type+'</option>').join("");
+ const gameCard=g=>'<article class="h269Game"><b>'+esc(g.date||g.startTime||"DATE TBD")+'</b><strong>'+esc(g.awayTeam||g.away||g.awayTeamId||"AWAY")+' <span>'+esc(g.score??g.awayScore??"—")+'</span></strong><strong>'+esc(g.homeTeam||g.home||g.homeTeamId||"HOME")+' <span>'+esc(g.scoreHome??g.homeScore??"—")+'</span></strong><small>'+esc(g.status||"GAME")+'</small><a href="game-intelligence.html?id='+encodeURIComponent(g.id||"")+'">GAME INTELLIGENCE</a></article>';
+ const statRows=[...new Set(stats.filter(x=>[A?.id,B?.id].includes(x.playerId||x.teamId||x.entityId)).map(x=>x.metric||x.stat).filter(Boolean))].slice(0,20).map(m=>{const v=e=>stats.find(x=>String(x.playerId||x.teamId||x.entityId)===String(e?.id)&&(x.metric||x.stat)===m);return '<tr><th>'+esc(m)+'</th><td>'+esc(v(A)?.value??v(A)?.total??"—")+'</td><td>'+esc(v(B)?.value??v(B)?.total??"—")+'</td></tr>'}).join("");
+ box.innerHTML='<div class="h269Hero"><small>SPORTS 69.0 • UNIVERSAL HEAD-TO-HEAD ENGINE</small><h1>HEAD TO HEAD</h1><p>MEETINGS • MATCHUPS • RESULTS • SHARED STATISTICS</p></div><form class="h269Pick" id="h2hForm69"><select name="a">'+options("A")+'</select><select name="b">'+options("B")+'</select><button>LOAD MATCHUP</button></form><div class="h269Summary"><article><small>SUBJECT A</small><h2>'+esc(A?.name||"NOT SELECTED")+'</h2><span>'+esc(A?.type||"—")+'</span></article><article><small>SUBJECT B</small><h2>'+esc(B?.name||"NOT SELECTED")+'</h2><span>'+esc(B?.type||"—")+'</span></article><article><small>CONNECTED MEETINGS</small><h2>'+meetings.length+'</h2><span>SUPPLIED GAMES</span></article></div><section class="h269Panel"><h2>MATCHUP HISTORY</h2><div class="h269Games">'+(meetings.length?meetings.slice(0,30).map(gameCard).join(""):'<div class="h269Empty">No connected head-to-head games were found for the selected entities.</div>')+'</div></section><section class="h269Panel"><h2>SHARED STATISTICS</h2><div class="h269Table">'+(statRows?'<table><thead><tr><th>METRIC</th><th>'+esc(A?.name||"A")+'</th><th>'+esc(B?.name||"B")+'</th></tr></thead><tbody>'+statRows+'</tbody></table>':'<div class="h269Empty">No shared statistics are connected for this matchup.</div>')+'</div></section><div class="h269Links"><a href="compare.html?a='+encodeURIComponent(a)+'&b='+encodeURIComponent(b)+'">COMPARISON</a><a href="game-day.html">GAME DAY</a><a href="event-center.html">EVENT CENTER</a><a href="stats-explorer.html">STATISTICS</a></div>';
+}
+
+
 // SPORTS 68.0 — UNIVERSAL SPORTS COMPARISON ENGINE
 function renderComparisonEngine68(){
  const box=$("#comparisonEngine68");if(!box||!SportsState.ready)return;
