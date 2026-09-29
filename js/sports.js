@@ -1,4 +1,18 @@
 
+// SPORTS 37.0 — UNIVERSAL SPORTS STORY PAGES
+function renderNewsStory37(){
+  const box=$("#sportsNewsStory");if(!box||!SportsState.ready)return;
+  const id=new URLSearchParams(location.search).get("id");
+  const story=(SportsState.data.news||[]).find(n=>n.id===id);
+  if(!story){box.innerHTML='<div class="story37Empty">STORY NOT FOUND</div>';return;}
+  const league=SportsState.data.leagues.find(l=>l.id===story.leagueId);
+  const team=story.teamId?getTeam(story.teamId):null;
+  const player=story.playerId?getPlayer(story.playerId):null;
+  const related=(SportsState.data.news||[]).filter(n=>n.id!==story.id&&(n.leagueId===story.leagueId||n.teamId===story.teamId)).slice(0,5);
+  box.innerHTML='<article class="story37"><header><small>SPORTS 37.0 • '+esc(story.category||"SPORTS STORY")+'</small><h1>'+esc(story.title||"Untitled Story")+'</h1><p class="story37Summary">'+esc(story.summary||"Sports story")+'</p><div class="story37Meta">'+esc(league?.name||"Sports")+' • '+esc(story.date||"LATEST")+'</div></header><div class="story37Grid"><section><div class="story37Body">'+esc(story.body||story.summary||"This story is ready for expanded editorial content.")+'</div><div class="story37Links">'+(team?'<a href="team.html?id='+encodeURIComponent(team.id)+'">TEAM • '+esc(team.name)+'</a>':"")+(player?'<a href="player.html?id='+encodeURIComponent(player.id)+'">PLAYER • '+esc(player.name)+'</a>':"")+(league?'<a href="league.html?league='+encodeURIComponent(league.id)+'">LEAGUE • '+esc(league.name)+'</a>':"")+'</div></section><aside><h3>RELATED STORIES</h3>'+(related.length?related.map(n=>'<a href="news-story.html?id='+encodeURIComponent(n.id)+'"><b>'+esc(n.title)+'</b><span>'+esc(n.category||"SPORTS")+'</span></a>').join(""):'<p>No related stories yet.</p>')+'</aside></div></article>';
+}
+
+
 // SPORTS 36.0 — UNIVERSAL SPORTS SEARCH 2.0
 function renderUniversalSearch36(){
   const input=$("#globalSearch");if(!input||!SportsState.ready)return;
