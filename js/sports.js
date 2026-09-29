@@ -1,4 +1,16 @@
 
+// SPORTS 64.0 — UNIVERSAL SPORTS SEASON ARCHIVE & HISTORY
+function renderSeasonArchive64(){
+ const box=$("#seasonArchive64");if(!box||!SportsState.ready)return;
+ const d=SportsState.data, seasons=d.seasons||d.season_history||d.history||[];
+ const current=(d.seasons||[])[0];
+ const rows=seasons.length?seasons:current?[current]:[];
+ const games=d.games||[], standings=d.standings||[], tournaments=d.tournaments||d.championships||[];
+ const card=s=>{const id=s.id||s.seasonId||s.year, champ=s.champion||s.winner||"—";return '<article><div><small>'+esc(s.year||s.season||s.name||"SEASON")+'</small><h2>'+esc(s.name||s.title||("SEASON "+(s.year||id||"")))+'</h2></div><span>'+esc(s.status||"ARCHIVED")+'</span><b>CHAMPION: '+esc(champ)+'</b><p>'+esc(s.summary||s.description||"Historical season data is available when supplied by the connected archive feed.")+'</p>'+(id?'<a href="season.html?id='+encodeURIComponent(id)+'">OPEN SEASON</a>':"")+'</article>'};
+ box.innerHTML='<div class="sa64Hero"><small>SPORTS 64.0 • UNIVERSAL SEASON ARCHIVE & HISTORY</small><h1>SPORTS HISTORY</h1><p>SEASONS • CHAMPIONS • RECORDS • PLAYOFFS • HISTORICAL DATA</p></div><div class="sa64Metrics"><div><b>'+rows.length+'</b><span>SEASONS</span></div><div><b>'+tournaments.length+'</b><span>CHAMPIONSHIPS</span></div><div><b>'+standings.length+'</b><span>STANDING RECORDS</span></div><div><b>'+games.length+'</b><span>GAME RECORDS</span></div></div><section class="sa64Panel"><h2>SEASON ARCHIVE</h2><div class="sa64Grid">'+(rows.length?rows.map(card).join(""):'<div class="sa64Empty"><h3>ARCHIVE READY</h3><p>No historical season dataset is connected yet. Completed seasons can be preserved here without replacing current data.</p></div>')+'</div></section><div class="sa64Links"><a href="season.html">CURRENT SEASON</a><a href="playoffs.html">PLAYOFFS</a><a href="tournaments.html">CHAMPIONSHIPS</a><a href="event-center.html">EVENT CENTER</a></div>';
+}
+
+
 // SPORTS 63.0 — UNIVERSAL SPORTS SEASON ENGINE
 function renderSeasonEngine63(){
  const box=$("#seasonEngine63");if(!box||!SportsState.ready)return;
