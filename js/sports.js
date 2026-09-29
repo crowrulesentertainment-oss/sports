@@ -38,6 +38,28 @@ function favoriteButton(type,id,label){
 
 
 
+
+// SPORTS 31.0 — UNIVERSAL SPORTS PERSONALIZATION ENGINE
+const Personalization={
+  apply(){
+    const f=Favorites.get(), league=SportsState.selectedLeague;
+    document.body.dataset.personalized="true";
+    const favLeague=f.leagues?.[0];
+    const target=league==="all"&&favLeague?favLeague:league;
+    if(target&&target!=="all"){
+      const sel=$("#leagueSelector"); if(sel&&sel.value!==target){sel.value=target;SportsState.selectedLeague=target;}
+    }
+    renderPersonalizationBar();
+  }
+};
+function renderPersonalizationBar(){
+  const box=$("#sportsPersonalization");if(!box||!SportsState.ready)return;
+  const f=Favorites.get(), favTeams=(f.teams||[]).map(id=>getTeam(id)).filter(Boolean);
+  const favPlayers=(f.players||[]).map(id=>getPlayer(id)).filter(Boolean);
+  const favLeague=(f.leagues||[]).map(id=>SportsState.data.leagues.find(x=>x.id===id)).filter(Boolean)[0];
+  box.innerHTML='<span>SPORTS 31.0 • PERSONALIZED</span><b>'+esc(favLeague?.name||"ALL SPORTS")+'</b><i></i><em>'+favTeams.length+' TEAMS</em><em>'+favPlayers.length+' PLAYERS</em><a href="sports-profile.html">PROFILE</a>';
+}
+
 // SPORTS 30.0 — UNIVERSAL SPORTS PROFILE
 function renderSportsProfile(){
   const box=$("#sportsProfile"); if(!box||!SportsState.ready)return;
@@ -216,7 +238,7 @@ async function loadData(){
     loadJSON("data/standings.json"),loadJSON("data/schedule.json"),loadJSON("data/videos.json"),loadJSON("data/pickem.json")
   ]);
   SportsState.data={leagues:leagues.leagues||[],teams:teams.teams||[],players:players.players||[],games:games.games||[],standings:standings.standings||[],schedule:schedule.schedule||[],videos:videos.videos||[],pickem};
-  SportsState.ready=true; SportsIdentity.init(); buildShell(); render(); renderFavorites(); renderNotificationCenter(); renderActivityCenter(); renderMemberDashboard(); renderIdentity(); renderSportsProfile(); renderActivityCenter(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
+  SportsState.ready=true; SportsIdentity.init(); buildShell(); Personalization.apply(); render(); renderFavorites(); renderNotificationCenter(); renderActivityCenter(); renderMemberDashboard(); renderIdentity(); renderSportsProfile(); renderPersonalizationBar(); renderActivityCenter(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
 }
 function league(){return SportsState.data.leagues.find(x=>x.id===SportsState.selectedLeague)||null}
 function selected(arr){return SportsState.selectedLeague==="all"?arr:arr.filter(x=>x.leagueId===SportsState.selectedLeague)}
