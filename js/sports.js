@@ -1,5 +1,5 @@
-/* CrowRules Sports 3.0 — Universal Data Layer
-   Static JSON now; designed so the same API can later be backed by Supabase/live feeds.
+/* CrowRules Sports 8.0 — Universal Event Center + Data Layer
+   Static JSON now; structured for future Supabase/live feeds.
 */
 const SportsState={
   data:{leagues:[],teams:[],players:[],games:[],standings:[],schedule:[],videos:[],pickem:{games:[],leaderboard:[]}},
@@ -9,7 +9,7 @@ const SportsState={
 };
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
-const loadJSON=async path=>{const r=await fetch(path+"?v=3.0",{cache:"no-store"});if(!r.ok)throw new Error(path+" "+r.status);return r.json();};
+const loadJSON=async path=>{const r=await fetch(path+"?v=8.0",{cache:"no-store"});if(!r.ok)throw new Error(path+" "+r.status);return r.json();};
 
 async function loadData(){
   const [leagues,teams,players,games,standings,schedule,videos,pickem]=await Promise.all([
@@ -17,7 +17,7 @@ async function loadData(){
     loadJSON("data/standings.json"),loadJSON("data/schedule.json"),loadJSON("data/videos.json"),loadJSON("data/pickem.json")
   ]);
   SportsState.data={leagues:leagues.leagues||[],teams:teams.teams||[],players:players.players||[],games:games.games||[],standings:standings.standings||[],schedule:schedule.schedule||[],videos:videos.videos||[],pickem};
-  SportsState.ready=true; buildShell(); render(); renderDetail(); renderPickDetail();
+  SportsState.ready=true; buildShell(); render(); renderDetail(); renderDetail(); renderPickDetail();
 }
 function league(){return SportsState.data.leagues.find(x=>x.id===SportsState.selectedLeague)||null}
 function selected(arr){return SportsState.selectedLeague==="all"?arr:arr.filter(x=>x.leagueId===SportsState.selectedLeague)}
@@ -75,6 +75,53 @@ function renderPickDetail(){
   box.innerHTML='<div class="detailCard"><small>PICK ’EM CHALLENGE • '+esc(leagueName(x.leagueId))+'</small><h2>'+esc(x.question)+'</h2><div class="pickOptions">'+x.options.map((o,i)=>'<button class="btn pickOption" data-pick="'+i+'">'+esc(o)+'</button>').join("")+'</div><p>VALUE: '+esc(x.points)+' POINTS</p></div>';
   box.querySelectorAll(".pickOption").forEach(b=>b.onclick=()=>{box.querySelectorAll(".pickOption").forEach(q=>q.classList.remove("primary"));b.classList.add("primary")});
 }
+
+function getGame(id){return SportsState.data.games.find(x=>x.id===id)||null}
+function getTeam(id){return SportsState.data.teams.find(x=>x.id===id)||null}
+function getPlayer(id){return SportsState.data.players.find(x=>x.id===id)||null}
+function getVideo(id){return SportsState.data.videos.find(x=>x.id===id)||null}
+function gamesForTeam(id){return SportsState.data.games.filter(x=>x.homeTeamId===id||x.awayTeamId===id)}
+function videosForLeague(id){return SportsState.data.videos.filter(x=>x.leagueId===id)}
+function standingsForTeam(id){return SportsState.data.standings.find(x=>x.teamId===id)||null}
+function pickemForGame(id){return (SportsState.data.pickem?.games||[]).filter(x=>x.gameId===id)}
+
+function recordLabel(s){return s?esc(s.wins)+"-"+esc(s.losses):"RECORD PENDING"}
+function teamForm(id){
+  const gs=gamesForTeam(id).slice(-5);
+  if(!gs.length)return '<span class="contextPending">RECENT FORM PENDING</span>';
+  return gs.map(g=>'<a class="miniGame" href="game.html?id='+encodeURIComponent(g.id)+'"><span>'+esc(g.status||"GAME")+'</span><b>'+esc((getTeam(g.awayTeamId)?.short||"AWY"))+' @ '+esc((getTeam(g.homeTeamId)?.short||"HME"))+'</b></a>').join("");
+}
+function renderEventCenter(game){
+  const box=$("#gameDetail"); if(!box)return;
+  if(!game){box.innerHTML='<article class="detailCard"><small>GAME CENTER</small><h2>GAME NOT FOUND</h2><p>The requested event is not available in the current data layer.</p></article>';$("#detailIntro").textContent="EVENT UNAVAILABLE";return}
+  const a=getTeam(game.awayTeamId),h=getTeam(game.homeTeamId),as=standingsForTeam(game.awayTeamId),hs=standingsForTeam(game.homeTeamId);
+  const sch=SportsState.data.schedule.find(x=>x.gameId===game.id);
+  const picks=pickemForGame(game.id);
+  const vids=videosForLeague(game.leagueId).slice(0,4);
+  const ap=SportsState.data.players.filter(x=>x.teamId===game.awayTeamId).slice(0,5);
+  const hp=SportsState.data.players.filter(x=>x.teamId===game.homeTeamId).slice(0,5);
+  $("#detailIntro").textContent=leagueName(game.leagueId)+" • "+(game.status||"SCHEDULED");
+  box.innerHTML=
+    '<div class="eventHero">'+
+      '<div class="eventMeta"><span>'+esc(leagueName(game.leagueId))+'</span><b>'+esc(game.status||"SCHEDULED")+'</b></div>'+
+      '<div class="eventTeams">'+
+        '<a class="eventTeam" href="team.html?id='+encodeURIComponent(game.awayTeamId)+'"><small>AWAY</small><strong>'+esc(a?.short||"AWY")+'</strong><b>'+esc(a?.name||"Away Team")+'</b><span>'+recordLabel(as)+'</span></a>'+
+        '<div class="eventScore"><small>'+esc(sch?.date||"DATE TBD")+'</small><strong>'+esc(game.time||"TBD")+'</strong><b>VS</b><small>'+esc(sch?.venue||"VENUE TBD")+'</small></div>'+
+        '<a class="eventTeam" href="team.html?id='+encodeURIComponent(game.homeTeamId)+'"><small>HOME</small><strong>'+esc(h?.short||"HME")+'</strong><b>'+esc(h?.name||"Home Team")+'</b><span>'+recordLabel(hs)+'</span></a>'+
+      '</div>'+
+      '<div class="detailActions"><a class="btn" href="schedule.html?league='+encodeURIComponent(game.leagueId)+'">SCHEDULE</a><a class="btn" href="standings.html?league='+encodeURIComponent(game.leagueId)+'">STANDINGS</a><a class="btn" href="league.html?league='+encodeURIComponent(game.leagueId)+'">LEAGUE HUB</a></div>'+
+    '</div>'+
+    '<div class="eventGrid">'+
+      '<article class="contextCard"><small>STANDINGS CONTEXT</small><h3>'+esc(a?.name||"Away Team")+'</h3><div class="contextStat"><b>'+recordLabel(as)+'</b><span>'+(as?'RANK #'+esc(as.rank):'STANDING PENDING')+'</span></div><h3>'+esc(h?.name||"Home Team")+'</h3><div class="contextStat"><b>'+recordLabel(hs)+'</b><span>'+(hs?'RANK #'+esc(hs.rank):'STANDING PENDING')+'</span></div></article>'+
+      '<article class="contextCard"><small>RECENT GAME HISTORY</small><h3>'+esc(a?.name||"Away Team")+'</h3>'+teamForm(game.awayTeamId)+'<h3>'+esc(h?.name||"Home Team")+'</h3>'+teamForm(game.homeTeamId)+'</article>'+
+      '<article class="contextCard"><small>PLAYER CONTEXT</small><div class="rosterSplit"><div><h3>'+esc(a?.short||"AWY")+'</h3>'+ (ap.map(p=>link("player.html",p.id,p.name+" • "+(p.position||"PLAYER"))).join("<br>")||'<span class="contextPending">ROSTER DATA PENDING</span>')+'</div><div><h3>'+esc(h?.short||"HME")+'</h3>'+ (hp.map(p=>link("player.html",p.id,p.name+" • "+(p.position||"PLAYER"))).join("<br>")||'<span class="contextPending">ROSTER DATA PENDING</span>')+'</div></div></article>'+
+      '<article class="contextCard"><small>PICK ’EM</small>'+ (picks.map(x=>'<div class="pickEvent"><h3>'+esc(x.question)+'</h3><div class="pickOptions">'+x.options.map(o=>'<button class="btn pickOption" type="button">'+esc(o)+'</button>').join("")+'</div><span>'+esc(x.points)+' POINTS</span></div>').join("")||'<span class="contextPending">NO PICK ’EM CHALLENGE FOR THIS EVENT</span>')+'</article>'+
+      '<article class="contextCard eventMedia"><small>RELATED MEDIA</small>'+ (vids.map(v=>'<a class="miniVideo" href="video.html?id='+encodeURIComponent(v.id)+'"><b>'+esc(v.title)+'</b><span>'+esc(v.type||"VIDEO")+'</span></a>').join("")||'<span class="contextPending">RELATED VIDEO DATA PENDING</span>')+'</article>'+
+      '<article class="contextCard"><small>EVENT HISTORY</small><p>This Event Center is powered by the CrowRules Sports Universal Data Layer. Live score, venue, player, media and historical fields can be added without changing the event architecture.</p><div class="detailLinks"><a class="btn" href="teams.html?league='+encodeURIComponent(game.leagueId)+'">TEAMS</a><a class="btn" href="players.html?league='+encodeURIComponent(game.leagueId)+'">PLAYERS</a><a class="btn" href="videos.html?league='+encodeURIComponent(game.leagueId)+'">MEDIA</a></div></article>'+
+    '</div>';
+  box.querySelectorAll(".pickOption").forEach(b=>b.onclick=()=>{b.parentElement.querySelectorAll(".pickOption").forEach(q=>q.classList.remove("primary"));b.classList.add("primary")});
+}
+
 function renderDetail(){
   const id=byId("id"), page=location.pathname.split("/").pop();
   const d=SportsState.data;
