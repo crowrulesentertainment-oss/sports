@@ -1,0 +1,86 @@
+{
+  "version": "3.0",
+  "status": "static-sample",
+  "games": [
+    {
+      "id": "g1",
+      "leagueId": "nfl",
+      "status": "UP NEXT",
+      "awayTeamId": "nfl-alpha",
+      "homeTeamId": "nfl-tacoma",
+      "time": "TBD"
+    },
+    {
+      "id": "g2",
+      "leagueId": "mlb",
+      "status": "UP NEXT",
+      "awayTeamId": "mlb-alpha",
+      "homeTeamId": "mlb-tacoma",
+      "time": "TBD"
+    },
+    {
+      "id": "g3",
+      "leagueId": "nhl",
+      "status": "UP NEXT",
+      "awayTeamId": "nhl-alpha",
+      "homeTeamId": "nhl-tacoma",
+      "time": "TBD"
+    },
+    {
+      "id": "g4",
+      "leagueId": "nba",
+      "status": "UP NEXT",
+      "awayTeamId": "nba-alpha",
+      "homeTeamId": "nba-tacoma",
+      "time": "TBD"
+    },
+    {
+      "id": "g5",
+      "leagueId": "wnba",
+      "status": "UP NEXT",
+      "awayTeamId": "wnba-alpha",
+      "homeTeamId": "wnba-tacoma",
+      "time": "TBD"
+    },
+    {
+      "id": "g6",
+      "leagueId": "mls",
+      "status": "UP NEXT",
+      "awayTeamId": "mls-alpha",
+      "homeTeamId": "mls-tacoma",
+      "time": "TBD"
+    },
+    {
+      "id": "g7",
+      "leagueId": "ufl",
+      "status": "UP NEXT",
+      "awayTeamId": "ufl-alpha",
+      "homeTeamId": "ufl-tacoma",
+      "time": "TBD"
+    },
+    {
+      "id": "g8",
+      "leagueId": "ncaa",
+      "status": "UP NEXT",
+      "awayTeamId": "ncaa-north",
+      "homeTeamId": "ncaa-south",
+      "time": "TBD"
+    },
+    {
+      "id": "g9",
+      "leagueId": "triple-a",
+      "status": "UP NEXT",
+      "awayTeamId": "aaa-alpha",
+      "homeTeamId": "aaa-tacoma",
+      "time": "TBD"
+    },
+    {
+      "id": "g10",
+      "leagueId": "high-school",
+      "status": "UP NEXT",
+      "awayTeamId": "hs-north",
+      "homeTeamId": "hs-south",
+      "time": "TBD"
+    }
+  ]
+}
