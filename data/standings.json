@@ -1,0 +1,54 @@
+{
+  "version": "3.0",
+  "status": "static-sample",
+  "standings": [
+    {
+      "id": "s1",
+      "leagueId": "nfl",
+      "teamId": "nfl-alpha",
+      "rank": 1,
+      "wins": 0,
+      "losses": 0
+    },
+    {
+      "id": "s2",
+      "leagueId": "nfl",
+      "teamId": "nfl-tacoma",
+      "rank": 2,
+      "wins": 0,
+      "losses": 0
+    },
+    {
+      "id": "s3",
+      "leagueId": "mlb",
+      "teamId": "mlb-alpha",
+      "rank": 1,
+      "wins": 0,
+      "losses": 0
+    },
+    {
+      "id": "s4",
+      "leagueId": "mlb",
+      "teamId": "mlb-tacoma",
+      "rank": 2,
+      "wins": 0,
+      "losses": 0
+    },
+    {
+      "id": "s5",
+      "leagueId": "nba",
+      "teamId": "nba-alpha",
+      "rank": 1,
+      "wins": 0,
+      "losses": 0
+    },
+    {
+      "id": "s6",
+      "leagueId": "nba",
+      "teamId": "nba-tacoma",
+      "rank": 2,
+      "wins": 0,
+      "losses": 0
+    }
+  ]
+}
