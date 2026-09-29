@@ -1,4 +1,23 @@
 
+// SPORTS 53.0 — UNIVERSAL SPORTS HOME SECTIONS ENGINE
+function renderSportsHomeSections53(){
+  const box=$("#sportsHomeSections53");if(!box||!SportsState.ready)return;
+  const f=Favorites.get(), all=SportsState.data.news||[], games=SportsState.data.games||[], videos=SportsState.data.videos||[];
+  const followedLeagues=new Set(f.leagues||[]), followedTeams=new Set(f.teams||[]), followedPlayers=new Set(f.players||[]);
+  const leagueOk=x=>SportsState.selectedLeague==="all"||x.leagueId===SportsState.selectedLeague;
+  const live=games.filter(g=>leagueOk(g)&&["LIVE","IN PROGRESS","HALFTIME"].includes(String(g.status||"").toUpperCase())).slice(0,4);
+  const upcoming=games.filter(g=>leagueOk(g)&&!["FINAL","COMPLETED"].includes(String(g.status||"").toUpperCase())).slice(0,4);
+  const mine=all.filter(n=>followedLeagues.has(n.leagueId)||followedTeams.has(n.teamId)||followedPlayers.has(n.playerId)).slice(0,4);
+  const trend=all.filter(leagueOk).slice(0,4);
+  const media=videos.filter(v=>leagueOk(v)).slice(0,4);
+  const storyCard=n=>'<a href="news-story.html?id='+encodeURIComponent(n.id)+'"><span>'+esc(n.category||"SPORTS")+'</span><b>'+esc(n.title||"Sports Story")+'</b><em>'+esc(n.date||"LATEST")+'</em></a>';
+  const gameCard=g=>'<a href="game.html?id='+encodeURIComponent(g.id)+'"><span>'+esc(g.status||"UP NEXT")+'</span><b>'+esc(getTeam(g.awayTeamId)?.short||"AWY")+' @ '+esc(getTeam(g.homeTeamId)?.short||"HME")+'</b><em>'+esc(g.time||g.date||"SCHEDULED")+'</em></a>';
+  const videoCard=v=>'<a href="video.html?id='+encodeURIComponent(v.id)+'"><span>VIDEO</span><b>'+esc(v.title||v.name||"Sports Video")+'</b><em>'+esc(v.date||"MEDIA")+'</em></a>';
+  const section=(title,items,empty)=>'<section><h2>'+title+'</h2>'+(items.length?items.join(""):'<p>'+empty+'</p>')+'</section>';
+  box.innerHTML='<div class="home53Header"><small>SPORTS 53.0 • UNIVERSAL HOME SECTIONS</small><h1>YOUR SPORTS UNIVERSE</h1><p>One connected home, organized around the Sports content that matters to you.</p></div><div class="home53Grid">'+section("FOR YOU",mine.map(storyCard),"Follow teams, players or leagues to personalize this section.")+section("LIVE NOW",live.map(gameCard),"No live games in the current data feed.")+section("UP NEXT",upcoming.map(gameCard),"No upcoming games in the current data feed.")+section("TRENDING",trend.map(storyCard),"No current stories in the selected league.")+section("MEDIA",media.map(videoCard),"No videos in the current data feed.")+'</div>';
+}
+
+
 // SPORTS 52.0 — UNIVERSAL SPORTS HOME PERSONALIZATION 2.0
 function renderHomePersonalization52(){
   const box=$("#sportsHomePersonalization52");if(!box||!SportsState.ready)return;
