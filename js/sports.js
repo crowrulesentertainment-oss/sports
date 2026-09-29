@@ -1,4 +1,14 @@
 
+// SPORTS 46.0 — UNIVERSAL SPORTS NEWS TRENDING ENGINE
+function renderNewsTrending46(){
+  const box=$("#sportsNewsTrending46");if(!box||!SportsState.ready)return;
+  const engagement=NewsEngagement.get(), news=SportsState.data.news||[];
+  const score=n=>{const e=engagement[n.id]||{};return (e.opens||0)*2+(e.reads||0)*3+(NewsWatchlist.has(n.id)?2:0)};
+  const ranked=news.map(n=>({n,s:score(n)})).sort((a,b)=>b.s-a.s||String(b.n.date||"").localeCompare(String(a.n.date||""))).slice(0,8).map(x=>x.n);
+  box.innerHTML='<div class="trend46Hero"><div><small>SPORTS 46.0 • TRENDING ENGINE</small><h2>WHAT’S TRENDING</h2><p>Stories rise through local engagement signals such as opens, reads and saves.</p></div><a href="news.html">ALL NEWS</a></div><div class="trend46Grid">'+(ranked.length?ranked.map((n,i)=>'<a href="news-story.html?id='+encodeURIComponent(n.id)+'"><span>#'+(i+1)+' • '+esc(n.category||"SPORTS")+'</span><b>'+esc(n.title||"Sports Story")+'</b><em>'+((engagement[n.id]?.opens||0)+(engagement[n.id]?.reads||0))+' activity events</em></a>').join(""):'<p class="trend46Empty">TRENDING DATA WILL APPEAR AS STORIES RECEIVE ACTIVITY.</p>')+'</div>';
+}
+
+
 // SPORTS 45.0 — UNIVERSAL SPORTS NEWS ENGAGEMENT
 const NewsEngagement={
   key:"crowrulesSportsNewsEngagement",
