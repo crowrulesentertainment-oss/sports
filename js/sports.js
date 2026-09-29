@@ -1,4 +1,21 @@
 
+// SPORTS 63.0 — UNIVERSAL SPORTS SEASON ENGINE
+function renderSeasonEngine63(){
+ const box=$("#seasonEngine63");if(!box||!SportsState.ready)return;
+ const d=SportsState.data, seasons=d.seasons||d.season||[], s=seasons[0]||{};
+ const games=d.games||[], standings=d.standings||[], tournaments=d.tournaments||d.championships||[], schedule=d.schedule||[];
+ const phase=(s.phases||s.stages||[
+  {name:"REGULAR SEASON",status:games.length?"ACTIVE":"READY",count:games.length},
+  {name:"STANDINGS",status:standings.length?"CONNECTED":"READY",count:standings.length},
+  {name:"PLAYOFF QUALIFICATION",status:tournaments.length?"CONNECTED":"READY",count:tournaments.length},
+  {name:"CHAMPIONSHIP",status:tournaments.length?"CONNECTED":"READY",count:tournaments.length}
+ ]);
+ const selected=s.name||s.title||s.season||"CURRENT SPORTS SEASON";
+ const links=[["REGULAR SEASON","scores.html"],["STANDINGS","standings.html"],["PLAYOFFS","playoffs.html"],["CHAMPIONSHIP","tournaments.html"]];
+ box.innerHTML='<div class="se63Hero"><small>SPORTS 63.0 • UNIVERSAL SPORTS SEASON ENGINE</small><h1>'+esc(selected)+'</h1><p>'+esc(s.status||"SEASON LIFECYCLE")+'</p></div><div class="se63Timeline">'+phase.map((x,i)=>'<article class="'+(i===0?"active":"")+'"><div class="se63Node">'+(i+1)+'</div><h2>'+esc(x.name||x.stage||"PHASE")+'</h2><b>'+esc(x.status||"READY")+'</b><span>'+esc(x.count??"—")+'</span></article>').join("")+'</div><section class="se63Panel"><h2>SEASON SNAPSHOT</h2><div class="se63Stats"><div><b>'+games.length+'</b><span>GAMES</span></div><div><b>'+standings.length+'</b><span>STANDING ROWS</span></div><div><b>'+schedule.length+'</b><span>SCHEDULE ITEMS</span></div><div><b>'+tournaments.length+'</b><span>CHAMPIONSHIPS</span></div></div></section><section class="se63Panel"><h2>SEASON CONTROL</h2><div class="se63Links">'+links.map(x=>'<a href="'+x[1]+'"><b>'+x[0]+'</b><span>OPEN CENTER →</span></a>').join("")+'</div></section><p class="se63Note">The season lifecycle is driven by connected Sports data. No standings, playoff qualification, or championship results are invented when the corresponding feed is absent.</p>';
+}
+
+
 // SPORTS 62.0 — UNIVERSAL PLAYOFF & CHAMPIONSHIP ENGINE
 function renderPlayoffEngine62(){
  const box=$("#playoffEngine62");if(!box||!SportsState.ready)return;
