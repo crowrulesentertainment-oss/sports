@@ -1,4 +1,18 @@
 
+// SPORTS 44.0 — UNIVERSAL SPORTS NEWS PERSONALIZATION 2.0
+function renderNewsPersonalization44(){
+  const box=$("#sportsNewsPersonalization44");if(!box||!SportsState.ready)return;
+  const f=Favorites.get(), history=NewsHistory.get(), saved=new Set(NewsWatchlist.get());
+  const leagueIds=new Set(f.leagues||[]), teamIds=new Set(f.teams||[]), playerIds=new Set(f.players||[]);
+  const all=SportsState.data.news||[];
+  const readIds=new Set(history.map(x=>x.id));
+  const score=n=>(leagueIds.has(n.leagueId)?6:0)+(teamIds.has(n.teamId)?6:0)+(playerIds.has(n.playerId)?6:0)+(saved.has(n.id)?3:0)+(readIds.has(n.id)?1:0);
+  const ranked=all.map(n=>({n,s:score(n)})).sort((a,b)=>b.s-a.s||String(b.n.date||"").localeCompare(String(a.n.date||""))).slice(0,12).map(x=>x.n);
+  const top=ranked.length?ranked:all.slice(0,12);
+  box.innerHTML='<div class="personal44Hero"><div><small>SPORTS 44.0 • PERSONALIZATION 2.0</small><h2>YOUR NEWS SIGNAL</h2><p>Follows, saved stories, reading history and league selection now shape your Sports News priority.</p></div><a href="news-hub.html">NEWS HUB</a></div><div class="personal44Metrics"><div><b>'+top.length+'</b><span>RECOMMENDED</span></div><div><b>'+saved.size+'</b><span>SAVED</span></div><div><b>'+history.length+'</b><span>READ</span></div><div><b>'+(leagueIds.size+teamIds.size+playerIds.size)+'</b><span>FOLLOWS</span></div></div><div class="personal44Grid">'+(top.length?top.map(n=>'<a href="news-story.html?id='+encodeURIComponent(n.id||"")+'"><span>'+esc(n.category||"SPORTS")+'</span><b>'+esc(n.title||"Sports Story")+'</b><em>'+esc(n.date||"LATEST")+'</em></a>').join(""):'<p class="personal44Empty">Follow Sports content to build your personalized signal.</p>')+'</div>';
+}
+
+
 // SPORTS 43.0 — UNIVERSAL SPORTS NEWS READING HISTORY
 const NewsHistory={
   key:"crowrulesSportsNewsHistory",
