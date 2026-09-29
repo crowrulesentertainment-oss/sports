@@ -1,4 +1,19 @@
 
+/* SPORTS 78.0 — UNIVERSAL SPORTS MEDIA & VIDEO ARCHIVE */
+function renderMediaArchive78(){
+ const box=$("#mediaArchive78");if(!box||!SportsState.ready)return;
+ const d=SportsState.data,videos=d.videos||d.media||d.video_archive||[],games=d.games||[],players=d.players||[],teams=d.teams||[],mom=d.iconic_moments||d.iconicMoments||d.moments||[],news=d.news||[],leagues=d.leagues||[];
+ const q=new URLSearchParams(location.search),search=(q.get("q")||"").trim().toLowerCase(),league=q.get("league")||"",type=q.get("type")||"";
+ const source=[...videos.map(x=>({...x,mediaType:x.type||x.category||"VIDEO"})),...mom.filter(x=>x.videoId||x.videoUrl).map(x=>({...x,mediaType:"ICONIC MOMENT"}))];
+ const rows=source.filter((x,i,a)=>i===a.findIndex(y=>String(y.id||y.title)===String(x.id||x.title))).filter(x=>(!search||JSON.stringify(x).toLowerCase().includes(search))&&(!league||String(x.leagueId||x.league)===String(league))&&(!type||String(x.mediaType)===String(type)));
+ const pname=id=>(players.find(x=>String(x.id)===String(id))||{}).name||"";
+ const tname=id=>(teams.find(x=>String(x.id)===String(id))||{}).name||"";
+ const game=id=>games.find(x=>String(x.id)===String(id));
+ const cards=rows.slice(0,120).map(x=>{const g=game(x.gameId||x.eventId),href=x.url||x.videoUrl||x.youtubeUrl||x.youtube||"";return '<article class="ma78Card"><div class="ma78Top"><span>'+esc(x.mediaType)+'</span><small>'+esc(x.date||x.year||x.season||"CONNECTED")+'</small></div><h2>'+esc(x.title||x.name||"Sports Media")+'</h2><small>'+esc(x.leagueName||x.league||"SPORTS")+'</small><p>'+esc(x.description||x.summary||x.story||"Connected sports media from the CrowRules Sports data layer.")+'</p><div>'+esc(pname(x.playerId||x.athleteId))+' '+esc(tname(x.teamId))+'</div><footer>'+(href?'<a href="'+esc(href)+'" target="_blank" rel="noopener">WATCH / OPEN</a>':"")+(g?'<a href="game-intelligence.html?id='+encodeURIComponent(g.id)+'">GAME</a>':"")+'</footer></article>'}).join("");
+ box.innerHTML='<section class="ma78Hero"><small>SPORTS 78.0 • UNIVERSAL MEDIA & VIDEO ARCHIVE</small><h1>SPORTS MEDIA VAULT</h1><p>HIGHLIGHTS • DOCUMENTARIES • INTERVIEWS • GAMES • CHAMPIONSHIPS • ICONIC MOMENTS</p></section><form class="ma78Search"><input name="q" value="'+esc(q.get("q")||"")+'" placeholder="SEARCH SPORTS MEDIA"><select name="league"><option value="">ALL LEAGUES</option>'+leagues.map(l=>'<option value="'+esc(l.id)+'" '+(String(l.id)===String(league)?"selected":"")+'>'+esc(l.name||l.id)+'</option>').join("")+'</select><select name="type"><option value="">ALL MEDIA TYPES</option>'+[...new Set(source.map(x=>x.mediaType).filter(Boolean))].slice(0,30).map(t=>'<option value="'+esc(t)+'" '+(String(t)===String(type)?"selected":"")+'>'+esc(t)+'</option>').join("")+'</select><button>SEARCH VAULT</button></form><div class="ma78Metrics"><article><b>'+rows.length+'</b><small>MEDIA ITEMS</small></article><article><b>'+rows.filter(x=>x.mediaType==="VIDEO").length+'</b><small>VIDEOS</small></article><article><b>'+new Set(rows.map(x=>x.leagueId||x.league).filter(Boolean)).size+'</b><small>LEAGUES</small></article><article><b>'+rows.filter(x=>x.gameId).length+'</b><small>GAME LINKS</small></article></div><section class="ma78Grid">'+(cards||'<div class="ma78Empty"><h2>MEDIA VAULT READY</h2><p>No connected media matches this selection yet.</p></div>')+'</section><nav class="ma78Links"><a href="media.html">MEDIA CENTER</a><a href="iconic-moments.html">ICONIC MOMENTS</a><a href="stories.html">STORIES</a><a href="timeline.html">TIMELINE</a><a href="legacy.html">LEGACY</a></nav>';
+}
+
+
 /* SPORTS 77.0 — UNIVERSAL SPORTS DOCUMENTARY & TIMELINE ENGINE */
 function renderDocumentaryTimeline77(){
  const box=$("#documentaryTimeline77");if(!box||!SportsState.ready)return;
