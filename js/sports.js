@@ -1,4 +1,27 @@
 
+// SPORTS 36.0 — UNIVERSAL SPORTS SEARCH 2.0
+function renderUniversalSearch36(){
+  const input=$("#globalSearch");if(!input||!SportsState.ready)return;
+  let panel=$("#sportsSearch36");
+  if(!panel){panel=document.createElement("div");panel.id="sportsSearch36";panel.className="sportsSearch36";document.body.appendChild(panel);}
+  const q=SportsState.search.trim().toLowerCase();
+  if(!q){panel.classList.remove("open");panel.innerHTML="";return;}
+  const match=(x,fields)=>fields.some(k=>String(x?.[k]??"").toLowerCase().includes(q));
+  const groups=[
+    ["LEAGUES",SportsState.data.leagues.filter(x=>match(x,["name","sport","level"])),x=>"league.html?league="+encodeURIComponent(x.id),x=>x.name],
+    ["TEAMS",SportsState.data.teams.filter(x=>match(x,["name","short","id"])),x=>"team.html?id="+encodeURIComponent(x.id),x=>x.name],
+    ["PLAYERS",SportsState.data.players.filter(x=>match(x,["name","position","statLabel"])),x=>"player.html?id="+encodeURIComponent(x.id),x=>x.name],
+    ["GAMES",SportsState.data.games.filter(x=>match(x,["id","status","time"])),x=>"game.html?id="+encodeURIComponent(x.id),x=>((getTeam(x.awayTeamId)?.short||"AWY")+" @ "+(getTeam(x.homeTeamId)?.short||"HME"))],
+    ["NEWS", (SportsState.data.news||[]).filter(x=>match(x,["title","summary","category"])),x=>x.url||"news.html?id="+encodeURIComponent(x.id||""),x=>x.title],
+    ["MEDIA",SportsState.data.videos.filter(x=>match(x,["title","type"])),x=>"video.html?id="+encodeURIComponent(x.id),x=>x.title]
+  ];
+  const found=groups.reduce((a,g)=>a+g[1].length,0);
+  panel.innerHTML='<div class="search36Panel"><div class="search36Head"><b>SPORTS 36.0 • UNIVERSAL SEARCH</b><button type="button" id="search36Close">×</button></div>'+
+  (found?groups.filter(g=>g[1].length).map(g=>'<section><h3>'+g[0]+'</h3>'+g[1].slice(0,6).map(x=>'<a href="'+esc(g[2](x))+'"><span>'+esc(g[0])+'</span><b>'+esc(g[3](x))+'</b></a>').join("")+'</section>').join(""):'<div class="search36Empty">NO SPORTS RESULTS FOR “'+esc(SportsState.search)+'”</div>')+'</div>';
+  panel.classList.add("open");$("#search36Close").onclick=()=>{SportsState.search="";input.value="";panel.classList.remove("open");};
+}
+
+
 // SPORTS 35.0 — UNIVERSAL NEWS INTEGRATION
 function renderIntegratedSportsFeed(){
   const box=$("#sportsIntegratedFeed");if(!box||!SportsState.ready)return;
@@ -306,7 +329,7 @@ async function loadData(){
     loadJSON("data/standings.json"),loadJSON("data/schedule.json"),loadJSON("data/videos.json"),loadJSON("data/pickem.json"),loadJSON("data/news.json").catch(()=>({news:[]}))
   ]);
   SportsState.data={leagues:leagues.leagues||[],teams:teams.teams||[],players:players.players||[],games:games.games||[],standings:standings.standings||[],schedule:schedule.schedule||[],videos:videos.videos||[],pickem,news:news.news||[]};
-  SportsState.ready=true; SportsIdentity.init(); buildShell(); Personalization.apply(); render(); renderFavorites(); renderNotificationCenter(); renderActivityCenter(); renderMemberDashboard(); renderIdentity(); renderSportsProfile(); renderPersonalizationBar(); renderHomeIntelligence(); renderUniversalSportsFeed(); renderSportsNewsCenter(); renderActivityCenter(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
+  SportsState.ready=true; SportsIdentity.init(); buildShell(); Personalization.apply(); render(); renderFavorites(); renderNotificationCenter(); renderActivityCenter(); renderMemberDashboard(); renderIdentity(); renderSportsProfile(); renderPersonalizationBar(); renderHomeIntelligence(); renderUniversalSportsFeed(); renderSportsNewsCenter(); renderActivityCenter(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch(); renderUniversalSearch36();
 }
 function league(){return SportsState.data.leagues.find(x=>x.id===SportsState.selectedLeague)||null}
 function selected(arr){return SportsState.selectedLeague==="all"?arr:arr.filter(x=>x.leagueId===SportsState.selectedLeague)}
