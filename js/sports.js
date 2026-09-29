@@ -1,4 +1,17 @@
 
+// SPORTS 52.0 — UNIVERSAL SPORTS HOME PERSONALIZATION 2.0
+function renderHomePersonalization52(){
+  const box=$("#sportsHomePersonalization52");if(!box||!SportsState.ready)return;
+  const f=Favorites.get(), history=NewsHistory.get(), saved=NewsWatchlist.get(), engagement=NewsEngagement.get();
+  const leagues=new Set(f.leagues||[]), teams=new Set(f.teams||[]), players=new Set(f.players||[]);
+  const all=SportsState.data.news||[];
+  const score=n=>(leagues.has(n.leagueId)?7:0)+(teams.has(n.teamId)?7:0)+(players.has(n.playerId)?7:0)+(saved.includes(n.id)?3:0)+(history.some(x=>x.id===n.id)?2:0)+((engagement[n.id]?.reads||0)*2);
+  const feed=all.map(n=>({n,s:score(n)})).sort((a,b)=>b.s-a.s).slice(0,8).map(x=>x.n);
+  const focus=feed.slice(0,4);
+  box.innerHTML='<div class="home52Hero"><div><small>SPORTS 52.0 • HOME PERSONALIZATION 2.0</small><h2>YOUR SPORTS FOCUS</h2><p>Your front page now prioritizes the strongest signals from follows, saved stories, reading history and engagement.</p></div><a href="sports-profile.html">PROFILE</a></div><div class="home52Metrics"><div><b>'+leagues.size+'</b><span>LEAGUES</span></div><div><b>'+teams.size+'</b><span>TEAMS</span></div><div><b>'+players.size+'</b><span>PLAYERS</span></div><div><b>'+history.length+'</b><span>READ</span></div></div><div class="home52Grid">'+(focus.length?focus.map(n=>'<a href="news-story.html?id='+encodeURIComponent(n.id)+'"><span>'+esc(n.category||"SPORTS")+'</span><b>'+esc(n.title||"Sports Story")+'</b><em>'+esc(n.date||"LATEST")+'</em></a>').join(""):'<p class="home52Empty">Follow Sports content to build your personalized focus.</p>')+'</div>';
+}
+
+
 // SPORTS 51.0 — UNIVERSAL SPORTS NEWS HOME
 function renderSportsNewsHome51(){
   const box=$("#sportsNewsHome51");if(!box||!SportsState.ready)return;
