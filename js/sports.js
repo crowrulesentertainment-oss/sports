@@ -1,4 +1,4 @@
-/* CrowRules Sports 8.0 — Universal Event Center + Data Layer
+/* CrowRules Sports 9.0 — Live Game Intelligence + Universal Event Center
    Static JSON now; structured for future Supabase/live feeds.
 */
 const SportsState={
@@ -117,21 +117,30 @@ function renderEventCenter(game){
       '<article class="contextCard"><small>PLAYER CONTEXT</small><div class="rosterSplit"><div><h3>'+esc(a?.short||"AWY")+'</h3>'+ (ap.map(p=>link("player.html",p.id,p.name+" • "+(p.position||"PLAYER"))).join("<br>")||'<span class="contextPending">ROSTER DATA PENDING</span>')+'</div><div><h3>'+esc(h?.short||"HME")+'</h3>'+ (hp.map(p=>link("player.html",p.id,p.name+" • "+(p.position||"PLAYER"))).join("<br>")||'<span class="contextPending">ROSTER DATA PENDING</span>')+'</div></div></article>'+
       '<article class="contextCard"><small>PICK ’EM</small>'+ (picks.map(x=>'<div class="pickEvent"><h3>'+esc(x.question)+'</h3><div class="pickOptions">'+x.options.map(o=>'<button class="btn pickOption" type="button">'+esc(o)+'</button>').join("")+'</div><span>'+esc(x.points)+' POINTS</span></div>').join("")||'<span class="contextPending">NO PICK ’EM CHALLENGE FOR THIS EVENT</span>')+'</article>'+
       '<article class="contextCard eventMedia"><small>RELATED MEDIA</small>'+ (vids.map(v=>'<a class="miniVideo" href="video.html?id='+encodeURIComponent(v.id)+'"><b>'+esc(v.title)+'</b><span>'+esc(v.type||"VIDEO")+'</span></a>').join("")||'<span class="contextPending">RELATED VIDEO DATA PENDING</span>')+'</article>'+
+      '<article class="contextCard timelineCard"><small>LIVE GAME TIMELINE</small>'+renderLiveTimeline(game)+'</article>'+
       '<article class="contextCard"><small>EVENT HISTORY</small><p>This Event Center is powered by the CrowRules Sports Universal Data Layer. Live score, venue, player, media and historical fields can be added without changing the event architecture.</p><div class="detailLinks"><a class="btn" href="teams.html?league='+encodeURIComponent(game.leagueId)+'">TEAMS</a><a class="btn" href="players.html?league='+encodeURIComponent(game.leagueId)+'">PLAYERS</a><a class="btn" href="videos.html?league='+encodeURIComponent(game.leagueId)+'">MEDIA</a></div></article>'+
     '</div>';
   box.querySelectorAll(".pickOption").forEach(b=>b.onclick=()=>{b.parentElement.querySelectorAll(".pickOption").forEach(q=>q.classList.remove("primary"));b.classList.add("primary")});
 }
 
+function renderLiveTimeline(game){
+  const items=Array.isArray(game?.timeline)?game.timeline:[];
+  if(!items.length)return '<div class="timelinePending">LIVE TIMELINE WILL APPEAR WHEN EVENT DATA IS AVAILABLE.</div>';
+  return items.slice().reverse().map((x,i)=>'<div class="timelineItem"><span>'+esc(x.time||"")+"</span><b>"+esc(x.team||"GAME")+"</b><p>"+esc(x.text||x.description||"EVENT")+"</p></div>").join("");
+}
+function renderLiveScore(game){
+  const s=game?.score;
+  if(!s||typeof s!=="object")return '<div class="scorePending">SCORE DATA PENDING</div>';
+  return '<div class="liveScore"><div><span>AWAY</span><strong>'+esc(s.away??"—")+"</strong></div><b>"+esc(game.period||"LIVE")+"</b><div><span>HOME</span><strong>"+esc(s.home??"—")+"</strong></div></div>";
+}
 function renderDetail(){
   const id=byId("id"), page=location.pathname.split("/").pop();
   const d=SportsState.data;
   const game=d.games.find(x=>x.id===id), t=d.teams.find(x=>x.id===id), p=d.players.find(x=>x.id===id), v=d.videos.find(x=>x.id===id), l=d.leagues.find(x=>x.id===(new URLSearchParams(location.search).get("league")||id));
   const card=(title,body)=>'<article class="detailCard"><small>'+esc(title)+'</small>'+body+'</article>';
   if(page==="game.html"){
-    if(!game){$("#gameDetail").innerHTML=card("GAME","<h2>GAME NOT FOUND</h2>");return}
-    const a=team(game.awayTeamId),h=team(game.homeTeamId);
-    $("#detailIntro").textContent=leagueName(game.leagueId)+" • "+(game.status||"SCHEDULED");
-    $("#gameDetail").innerHTML=card("MATCHUP",'<h2>'+link("team.html",game.awayTeamId,a?.name||"Away Team")+' <span class="versus">@</span> '+link("team.html",game.homeTeamId,h?.name||"Home Team")+'</h2><p>'+esc(game.time||"TBD")+' • '+esc(game.status||"")+'</p><div class="detailActions"><a class="btn primary" href="pickem.html?league='+encodeURIComponent(game.leagueId)+'">PICK ’EM</a><a class="btn" href="schedule.html?league='+encodeURIComponent(game.leagueId)+'">LEAGUE SCHEDULE</a></div>');
+    renderEventCenter(game);
+    return;
   } else if(page==="team.html"){
     if(!t){$("#teamDetail").innerHTML=card("TEAM","<h2>TEAM NOT FOUND</h2>");return}
     const roster=d.players.filter(x=>x.teamId===t.id), games=d.games.filter(x=>x.homeTeamId===t.id||x.awayTeamId===t.id), s=d.standings.find(x=>x.teamId===t.id);
