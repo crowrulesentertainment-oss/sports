@@ -1,0 +1,30 @@
+{
+  "version": "3.0",
+  "status": "static-sample",
+  "videos": [
+    {
+      "id": "v1",
+      "leagueId": "nfl",
+      "title": "NFL • Sports Network Preview",
+      "type": "preview"
+    },
+    {
+      "id": "v2",
+      "leagueId": "mlb",
+      "title": "MLB • Sports Network Preview",
+      "type": "preview"
+    },
+    {
+      "id": "v3",
+      "leagueId": "nba",
+      "title": "NBA • Sports Network Preview",
+      "type": "preview"
+    },
+    {
+      "id": "v4",
+      "leagueId": "ncaa",
+      "title": "NCAA • Sports Network Preview",
+      "type": "preview"
+    }
+  ]
+}
