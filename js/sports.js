@@ -1,4 +1,20 @@
 
+// SPORTS 71.0 — UNIVERSAL SPORTS MILESTONES & ACHIEVEMENTS ENGINE
+function renderMilestonesEngine71(){
+ const box=$("#milestonesEngine71");if(!box||!SportsState.ready)return;
+ const d=SportsState.data, players=d.players||[], teams=d.teams||[], records=d.records||[], stats=d.statistics||d.stats||[], awards=d.awards||d.achievements||d.milestones||[];
+ const q=new URLSearchParams(location.search),id=q.get("id")||"",type=q.get("type")||"PLAYER";
+ const pool=type==="TEAM"?teams:players,e=pool.find(x=>String(x.id)===String(id))||pool[0];
+ if(!e){box.innerHTML='<div class="ms71Empty"><h1>MILESTONES ENGINE</h1><p>No connected player or team data is available yet.</p></div>';return}
+ const eid=String(e.id),name=e.name||e.fullName||e.short||eid;
+ const owned=x=>String(x.playerId||x.teamId||x.entityId)===eid;
+ const items=[...awards.filter(owned).map(x=>({kind:"ACHIEVEMENT",title:x.title||x.name||"Achievement",detail:x.description||x.season||x.year||"CONNECTED"})),...records.filter(owned).map(x=>({kind:"RECORD",title:x.title||x.name||x.record||"Record",detail:x.description||x.value||x.season||"CONNECTED"})),...stats.filter(owned).filter(x=>x.milestone||x.achievement).map(x=>({kind:"MILESTONE",title:x.milestone||x.achievement,detail:x.value??x.season??"CONNECTED"}))];
+ const years=[...new Set(items.map(x=>x.detail).filter(x=>/^(19|20)\d{2}/.test(String(x))))].sort();
+ const opts=pool.map(x=>'<option value="'+esc(x.id)+'" '+(String(x.id)===eid?"selected":"")+'>'+esc(x.name||x.fullName||x.short||x.id)+'</option>').join("");
+ box.innerHTML='<div class="ms71Hero"><small>SPORTS 71.0 • UNIVERSAL MILESTONES & ACHIEVEMENTS ENGINE</small><h1>'+esc(name)+'</h1><p>'+esc(type)+' • MILESTONES • AWARDS • RECORDS • CHAMPIONSHIPS</p></div><form class="ms71Pick"><select name="type"><option value="PLAYER" '+(type!=="TEAM"?"selected":"")+'>PLAYERS</option><option value="TEAM" '+(type==="TEAM"?"selected":"")+'>TEAMS</option></select><select name="id">'+opts+'</select><button>LOAD ACHIEVEMENTS</button></form><div class="ms71Metrics"><article><b>'+items.length+'</b><span>CONNECTED ACHIEVEMENTS</span></article><article><b>'+records.filter(owned).length+'</b><span>RECORDS</span></article><article><b>'+awards.filter(owned).length+'</b><span>AWARDS</span></article><article><b>'+years.length+'</b><span>ACTIVE YEARS</span></article></div><section class="ms71Panel"><h2>ACHIEVEMENT TIMELINE</h2><div class="ms71Timeline">'+(items.length?items.slice(0,50).map((x,i)=>'<article><i>'+String(i+1).padStart(2,"0")+'</i><div><small>'+esc(x.kind)+'</small><h3>'+esc(x.title)+'</h3><p>'+esc(String(x.detail))+'</p></div></article>').join(""):'<div class="ms71Empty">No connected milestones, awards, or records are available for this entity.</div>')+'</div></section><div class="ms71Links"><a href="career.html?type='+encodeURIComponent(type)+'&id='+encodeURIComponent(eid)+'">CAREER</a><a href="records.html">RECORDS</a><a href="history.html">HISTORY</a><a href="stats-explorer.html?'+(type==="TEAM"?"team":"player")+'='+encodeURIComponent(eid)+'">STATISTICS</a><a href="compare.html">COMPARE</a></div>';
+}
+
+
 // SPORTS 70.0 — UNIVERSAL SPORTS CAREER & SEASON ENGINE
 function renderCareerSeasonEngine70(){
  const box=$("#careerSeasonEngine70");if(!box||!SportsState.ready)return;
