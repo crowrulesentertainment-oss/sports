@@ -1,4 +1,19 @@
 
+// SPORTS 42.0 — UNIVERSAL SPORTS NEWS RECOMMENDATIONS
+function renderNewsRecommendations42(){
+  const box=$("#sportsNewsRecommendations");if(!box||!SportsState.ready)return;
+  const id=new URLSearchParams(location.search).get("id");
+  const story=(SportsState.data.news||[]).find(n=>n.id===id);
+  const f=Favorites.get(), teamIds=new Set(f.teams||[]), leagueIds=new Set(f.leagues||[]), playerIds=new Set(f.players||[]);
+  const all=(SportsState.data.news||[]).filter(n=>n.id!==id);
+  const score=n=>(n.leagueId===story?.leagueId?4:0)+(n.teamId&&teamIds.has(n.teamId)?4:0)+(n.playerId&&playerIds.has(n.playerId)?4:0)+(leagueIds.has(n.leagueId)?3:0);
+  const recs=all.map(n=>({n,s:score(n)})).filter(x=>x.s>0).sort((a,b)=>b.s-a.s).slice(0,6).map(x=>x.n);
+  const fallback=all.filter(n=>n.leagueId===story?.leagueId).slice(0,6);
+  const feed=(recs.length?recs:fallback);
+  box.innerHTML='<div class="rec42Head"><small>SPORTS 42.0 • RECOMMENDATIONS</small><h2>MORE LIKE THIS</h2><p>Related coverage based on this story and your Sports follows.</p></div><div class="rec42Grid">'+(feed.length?feed.map(n=>'<a href="news-story.html?id='+encodeURIComponent(n.id||"")+'"><span>'+esc(n.category||"SPORTS")+'</span><b>'+esc(n.title||"Sports Story")+'</b><em>'+esc(n.date||"LATEST")+'</em></a>').join(""):'<p class="rec42Empty">More related coverage will appear as the News library grows.</p>')+'</div>';
+}
+
+
 // SPORTS 41.0 — UNIVERSAL SPORTS NEWS HUB
 function renderNewsHub41(){
   const box=$("#sportsNewsHub");if(!box||!SportsState.ready)return;
