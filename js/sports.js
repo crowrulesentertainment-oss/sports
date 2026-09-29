@@ -1,4 +1,18 @@
 
+// SPORTS 62.0 — UNIVERSAL PLAYOFF & CHAMPIONSHIP ENGINE
+function renderPlayoffEngine62(){
+ const box=$("#playoffEngine62");if(!box||!SportsState.ready)return;
+ const t=(SportsState.data.tournaments||SportsState.data.championships||[])[0];
+ const standings=SportsState.data.standings||[], teams=SportsState.data.teams||[], games=SportsState.data.games||[];
+ if(!t){box.innerHTML='<div class="po62Empty"><h1>PLAYOFF ENGINE</h1><p>Connect tournament, standings, seeding and playoff data to activate championship qualification.</p><a href="bracket.html">BRACKET ENGINE</a></div>';return}
+ const seed=x=>x.seed??x.rank??x.position??"—";
+ const eligible=(standings.length?standings.slice(0,12):teams.slice(0,12));
+ const rounds=t.rounds||t.bracket||[];
+ const status=x=>x.eliminated?"ELIMINATED":x.qualified?"QUALIFIED":x.status||"IN CONTENTION";
+ box.innerHTML='<div class="po62Hero"><small>SPORTS 62.0 • UNIVERSAL PLAYOFF & CHAMPIONSHIP ENGINE</small><h1>'+esc(t.name||t.title||"CHAMPIONSHIP PLAYOFFS")+'</h1><p>'+esc(t.status||"QUALIFICATION • SEEDING • ELIMINATION • CHAMPIONSHIP")+'</p></div><div class="po62Metrics"><div><b>'+eligible.length+'</b><span>SEEDING POOL</span></div><div><b>'+rounds.length+'</b><span>ROUNDS</span></div><div><b>'+games.length+'</b><span>GAMES</span></div><div><b>'+esc(t.champion||"TBD")+'</b><span>CHAMPION</span></div></div><section class="po62Panel"><h2>QUALIFICATION & SEEDING</h2><div class="po62Seeds">'+eligible.map((x,i)=>{const team=teams.find(z=>String(z.id)===String(x.teamId||x.id));return '<a href="team.html?id='+encodeURIComponent(team?.id||x.teamId||x.id)+'"><b>#'+esc(seed(x)===undefined?i+1:seed(x))+'</b><strong>'+esc(team?.name||x.teamName||x.name||"TEAM")+'</strong><span>'+esc(status(x))+'</span></a>'}).join("")+'</div></section><section class="po62Panel"><h2>CHAMPIONSHIP PATH</h2><div class="po62Rounds">'+(rounds.length?rounds.map((x,i)=>'<article><b>'+esc(x.name||x.round||"ROUND "+(i+1))+'</b><span>'+esc(x.status||"READY")+'</span><p>'+esc(x.description||"Matchups and advancement will be determined by connected playoff data.")+'</p></article>').join(""):'<p>No playoff rounds connected yet.</p>')+'</div></section><div class="po62Actions"><a href="bracket.html">BRACKET</a><a href="tournaments.html">TOURNAMENTS</a><a href="standings.html">STANDINGS</a><a href="event-center.html">EVENT CENTER</a></div>';
+}
+
+
 // SPORTS 61.0 — UNIVERSAL SPORTS BRACKET ENGINE
 function renderBracketEngine61(){
  const box=$("#bracketEngine61");if(!box||!SportsState.ready)return;
