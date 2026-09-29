@@ -9,7 +9,7 @@ const SportsState={
 };
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
-const loadJSON=async path=>{const r=await fetch(path+"?v=21.0",{cache:"no-store"});if(!r.ok)throw new Error(path+" "+r.status);return r.json();};
+const loadJSON=async path=>{const r=await fetch(path+"?v=22.0",{cache:"no-store"});if(!r.ok)throw new Error(path+" "+r.status);return r.json();};
 
 async function loadData(){
   const [leagues,teams,players,games,standings,schedule,videos,pickem]=await Promise.all([
@@ -88,6 +88,16 @@ function renderStatsCenter(){
   box.innerHTML='<div class="statsOverview"><div><strong>'+ts.length+'</strong><span>TEAMS</span></div><div><strong>'+ps.length+'</strong><span>PLAYERS</span></div><div><strong>'+numeric.length+'</strong><span>STAT LEADERS</span></div></div>'+
     '<div class="statsSplit"><div class="statsBlock"><small>PLAYER PERFORMANCE</small>'+(numeric.length?numeric.map((p,i)=>'<a class="statRow" href="player.html?id='+encodeURIComponent(p.id)+'"><strong>#'+String(i+1).padStart(2,"0")+'</strong><b>'+esc(p.name)+'</b><span>'+esc(p.position||"PLAYER")+' • '+esc(leagueName(p.leagueId))+'</span><em>'+esc(p.statValue)+' '+esc(p.statLabel||"")+'</em></a>').join(""):'<div class="emptyState">PLAYER STATISTICS PENDING</div>')+'</div><div class="statsBlock"><small>TEAM PERFORMANCE</small>'+ts.map(t=>{const s=d.standings.find(x=>x.teamId===t.id);return '<a class="statRow" href="team.html?id='+encodeURIComponent(t.id)+'"><strong>#'+esc(s?.rank||"—")+'</strong><b>'+esc(t.name)+'</b><span>'+esc(leagueName(t.leagueId))+'</span><em>'+esc(s?recordLabel(s):"RECORD PENDING")+'</em></a>'}).join("")||'<div class="emptyState">TEAM DATA PENDING</div>'+'</div></div>';
 }
+function refreshUniversalLayer(){
+  if(!SportsState.ready)return;
+  render(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch(); buildShell();
+  const state=document.querySelector("#sportsDataState");
+  if(state){
+    const leagueText=SportsState.selectedLeague==="all"?"ALL LEAGUES":(league()?.name||"SELECTED LEAGUE");
+    state.querySelector("[data-layer-league]").textContent=leagueText;
+    state.querySelector("[data-layer-query]").textContent=SportsState.search?'"'+esc(SportsState.search)+'"':"NO ACTIVE SEARCH";
+  }
+}
 function buildShell(){
   const top=document.querySelector(".topbar"); if(!top)return;
   if(!document.querySelector("#sportsControls")){
@@ -99,7 +109,7 @@ function buildShell(){
     select.innerHTML='<option value="all">ALL LEAGUES</option>'+SportsState.data.leagues.map(l=>'<option value="'+esc(l.id)+'">'+esc(l.name)+' • '+esc(l.level)+'</option>').join("");
     select.value=SportsState.selectedLeague; select.onchange=e=>setLeague(e.target.value);
   }
-  const search=$("#sportsSearch"); if(search){search.value=SportsState.search; search.oninput=e=>{SportsState.search=e.target.value;render();renderDiscoverySearch()};}
+  const search=$("#sportsSearch"); if(search){search.value=SportsState.search; search.oninput=e=>{SportsState.search=e.target.value;refreshUniversalLayer()};}
   const command=$("#sportsCommand"), menu=$("#commandMenu");
   if(command&&menu){command.onclick=e=>{e.stopPropagation();menu.classList.toggle("open");command.setAttribute("aria-expanded",menu.classList.contains("open"))}}
   const notification=$("#sportsNotifications");
@@ -108,6 +118,11 @@ function buildShell(){
     notification.querySelector("b").textContent=String(live);
     notification.classList.toggle("hasAlert",live>0);
     notification.onclick=()=>{window.location.href="scores.html";};
+  }
+  if(!document.querySelector("#sportsDataState")){
+    const state=document.createElement("div"); state.id="sportsDataState"; state.className="sportsDataState";
+    state.innerHTML='<span>SPORTS 22.0 DATA LAYER</span><b data-layer-league>ALL LEAGUES</b><i></i><span>SEARCH</span><b data-layer-query>NO ACTIVE SEARCH</b><i></i><span>STATUS</span><b>CONNECTED</b>';
+    top.insertAdjacentElement("afterend",state);
   }
   const current=(location.pathname.split("/").pop()||"home.html").toLowerCase();
   document.querySelectorAll(".topbar nav a,.mobileNav a").forEach(a=>{const href=(a.getAttribute("href")||"").split("?")[0].toLowerCase();a.classList.toggle("active",href===current);});
