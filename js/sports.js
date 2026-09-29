@@ -1,4 +1,18 @@
 
+// SPORTS 38.0 — UNIVERSAL NEWS DISCOVERY CENTER
+function renderNewsDiscovery38(){
+  const box=$("#sportsNewsDiscovery");if(!box||!SportsState.ready)return;
+  const q=(new URLSearchParams(location.search).get("q")||"").trim().toLowerCase();
+  const cat=(new URLSearchParams(location.search).get("category")||"ALL").toUpperCase();
+  const news=(SportsState.data.news||[]).filter(n=>SportsState.selectedLeague==="all"||n.leagueId===SportsState.selectedLeague)
+    .filter(n=>cat==="ALL"||String(n.category||"SPORTS").toUpperCase()===cat)
+    .filter(n=>!q||[n.title,n.summary,n.category].some(v=>String(v||"").toLowerCase().includes(q)));
+  const cats=["ALL",...new Set((SportsState.data.news||[]).map(n=>String(n.category||"SPORTS").toUpperCase()))];
+  box.innerHTML='<div class="news38Hero"><div><small>SPORTS 38.0 • NEWS DISCOVERY</small><h1>DISCOVER SPORTS STORIES</h1><p>Browse stories by league, category and search — connected to the universal Sports data layer.</p></div><a href="home.html">SPORTS HOME</a></div><div class="news38Tools"><input id="news38Search" value="'+esc(q)+'" placeholder="SEARCH SPORTS STORIES…">'+cats.map(c=>'<a class="'+(c===cat?"active":"")+'" href="news.html?category='+encodeURIComponent(c)+'">'+esc(c)+'</a>').join("")+'</div><div class="news38Grid">'+(news.length?news.map(n=>'<a class="news38Card" href="news-story.html?id='+encodeURIComponent(n.id||"")+'"><span>'+esc(n.category||"SPORTS")+'</span><h2>'+esc(n.title||"Untitled Story")+'</h2><p>'+esc(n.summary||"Sports story")+'</p><em>'+esc(n.date||"LATEST")+'</em></a>').join(""):'<div class="news38Empty">NO STORIES FOUND FOR THIS SELECTION.</div>')+'</div>';
+  const input=$("#news38Search");if(input)input.oninput=()=>{const u=new URL(location.href);u.searchParams.set("q",input.value);if(!input.value)u.searchParams.delete("q");history.replaceState({}, "",u);renderNewsDiscovery38();};
+}
+
+
 // SPORTS 37.0 — UNIVERSAL SPORTS STORY PAGES
 function renderNewsStory37(){
   const box=$("#sportsNewsStory");if(!box||!SportsState.ready)return;
