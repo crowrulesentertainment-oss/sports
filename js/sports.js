@@ -37,6 +37,23 @@ function favoriteButton(type,id,label){
 
 
 
+
+// SPORTS 30.0 — UNIVERSAL SPORTS PROFILE
+function renderSportsProfile(){
+  const box=$("#sportsProfile"); if(!box||!SportsState.ready)return;
+  const f=Favorites.get(), n=SportsNotifications.get();
+  const user=SportsIdentity.state.user, member=SportsIdentity.state.status==="MEMBER";
+  const leagues=f.leagues.map(id=>SportsState.data.leagues.find(x=>x.id===id)).filter(Boolean);
+  const teams=f.teams.map(id=>getTeam(id)).filter(Boolean);
+  const players=f.players.map(id=>getPlayer(id)).filter(Boolean);
+  box.innerHTML='<div class="profile30Hero"><div class="profile30Avatar">'+esc(member?(user.email||"C").charAt(0).toUpperCase():"G")+'</div><div><small>SPORTS 30.0 • UNIVERSAL PROFILE</small><h1>'+esc(member?(user.email||"CROW MEMBER"):"CROW GUEST")+'</h1><p>'+esc(member?"Connected to the Universal CrowRules identity.":"Sign in to connect your Sports experience to your CrowRules account.")+'</p></div><a class="profile30Button" href="https://crowrulesentertainment-oss.github.io/crowspace/'+(member?"profile.html":"login.html")+'">'+(member?"OPEN CROWSPACE PROFILE":"SIGN IN")+'</a></div>'+
+  '<div class="profile30Metrics"><div><b>'+f.leagues.length+'</b><span>LEAGUES</span></div><div><b>'+f.teams.length+'</b><span>TEAMS</span></div><div><b>'+f.players.length+'</b><span>PLAYERS</span></div><div><b>'+ (n.enabled?"ON":"OFF")+'</b><span>NOTIFICATIONS</span></div></div>'+
+  '<div class="profile30Grid"><section><h2>FOLLOWED LEAGUES</h2>'+(leagues.length?leagues.map(x=>'<a href="league.html?league='+encodeURIComponent(x.id)+'">'+esc(x.name)+'</a>').join(""):'<em>No followed leagues yet.</em>')+'</section>'+
+  '<section><h2>FOLLOWED TEAMS</h2>'+(teams.length?teams.map(x=>'<a href="team.html?id='+encodeURIComponent(x.id)+'">'+esc(x.name)+'</a>').join(""):'<em>No followed teams yet.</em>')+'</section>'+
+  '<section><h2>FOLLOWED PLAYERS</h2>'+(players.length?players.map(x=>'<a href="player.html?id='+encodeURIComponent(x.id)+'">'+esc(x.name)+'</a>').join(""):'<em>No followed players yet.</em>')+'</section>'+
+  '<section><h2>SPORTS COMMAND</h2><div class="profile30Actions"><a href="home.html">DASHBOARD</a><a href="scores.html">LIVE SCORES</a><a href="stats.html">STATISTICS</a><a href="videos.html">MEDIA</a><a href="pickem.html">PICK ’EM</a></div></section></div>';
+}
+
 // SPORTS 29.0 — UNIVERSAL SPORTS IDENTITY & PROFILE
 const SportsIdentity={
   key:"crowrulesSportsIdentity",
@@ -199,7 +216,7 @@ async function loadData(){
     loadJSON("data/standings.json"),loadJSON("data/schedule.json"),loadJSON("data/videos.json"),loadJSON("data/pickem.json")
   ]);
   SportsState.data={leagues:leagues.leagues||[],teams:teams.teams||[],players:players.players||[],games:games.games||[],standings:standings.standings||[],schedule:schedule.schedule||[],videos:videos.videos||[],pickem};
-  SportsState.ready=true; SportsIdentity.init(); buildShell(); render(); renderFavorites(); renderNotificationCenter(); renderActivityCenter(); renderMemberDashboard(); renderIdentity(); renderActivityCenter(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
+  SportsState.ready=true; SportsIdentity.init(); buildShell(); render(); renderFavorites(); renderNotificationCenter(); renderActivityCenter(); renderMemberDashboard(); renderIdentity(); renderSportsProfile(); renderActivityCenter(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
 }
 function league(){return SportsState.data.leagues.find(x=>x.id===SportsState.selectedLeague)||null}
 function selected(arr){return SportsState.selectedLeague==="all"?arr:arr.filter(x=>x.leagueId===SportsState.selectedLeague)}
