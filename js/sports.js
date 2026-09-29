@@ -1,4 +1,22 @@
 
+// SPORTS 45.0 — UNIVERSAL SPORTS NEWS ENGAGEMENT
+const NewsEngagement={
+  key:"crowrulesSportsNewsEngagement",
+  get(){try{return JSON.parse(localStorage.getItem(this.key))||{}}catch(e){return{}}},
+  save(v){localStorage.setItem(this.key,JSON.stringify(v))},
+  record(id,type){if(!id)return;const v=this.get();v[id]=v[id]||{opens:0,saves:0,reads:0};v[id][type]=(v[id][type]||0)+1;v[id].last=new Date().toISOString();this.save(v)},
+  data(id){return this.get()[id]||{opens:0,saves:0,reads:0}}
+};
+function recordNewsOpen45(){
+  const id=new URLSearchParams(location.search).get("id");if(id){NewsEngagement.record(id,"opens");NewsEngagement.record(id,"reads")}
+}
+function renderNewsEngagement45(){
+  const box=$("#sportsNewsEngagement");if(!box||!SportsState.ready)return;
+  const id=new URLSearchParams(location.search).get("id");const e=NewsEngagement.data(id);
+  box.innerHTML='<div class="eng45Head"><small>SPORTS 45.0 • ENGAGEMENT</small><b>YOUR STORY ACTIVITY</b></div><div class="eng45Metrics"><div><strong>'+e.opens+'</strong><span>OPENS</span></div><div><strong>'+e.reads+'</strong><span>READS</span></div><div><strong>'+NewsWatchlist.get().filter(x=>x===id).length+'</strong><span>SAVED</span></div></div>';
+}
+
+
 // SPORTS 44.0 — UNIVERSAL SPORTS NEWS PERSONALIZATION 2.0
 function renderNewsPersonalization44(){
   const box=$("#sportsNewsPersonalization44");if(!box||!SportsState.ready)return;
