@@ -1,4 +1,17 @@
 
+// SPORTS 58.0 — UNIVERSAL SPORTS GAME INTELLIGENCE CENTER
+function renderGameIntelligence58(){
+  const box=$("#gameIntelligence58");if(!box||!SportsState.ready)return;
+  const p=new URLSearchParams(location.search), id=p.get("id"), games=SportsState.data.games||[], g=games.find(x=>String(x.id)===String(id))||games[0];
+  if(!g){box.innerHTML='<div class="intel58Empty"><h1>GAME NOT FOUND</h1><a href="scores.html">BACK TO SCORES</a></div>';return}
+  const away=getTeam(g.awayTeamId),home=getTeam(g.homeTeamId), players=(SportsState.data.players||[]).filter(x=>x.teamId===g.homeTeamId||x.teamId===g.awayTeamId);
+  const standings=(SportsState.data.standings||[]).filter(x=>x.leagueId===g.leagueId).slice(0,6), news=(SportsState.data.news||[]).filter(x=>x.leagueId===g.leagueId).slice(0,5), media=(SportsState.data.videos||[]).filter(x=>x.leagueId===g.leagueId).slice(0,4);
+  const row=a=>'<a href="player.html?id='+encodeURIComponent(a.id)+'"><b>'+esc(a.name||"Player")+'</b><span>'+esc(a.position||"")+'</span></a>';
+  const teamRows=t=>'<a href="team.html?id='+encodeURIComponent(t?.id||"")+'"><b>'+esc(t?.name||"TEAM")+'</b><span>'+esc(t?.short||"")+'</span></a>';
+  box.innerHTML='<div class="intel58Hero"><small>SPORTS 58.0 • UNIVERSAL GAME INTELLIGENCE</small><h1>'+esc(away?.name||"AWAY")+' <strong>'+esc(g.score||"VS")+'</strong> '+esc(home?.name||"HOME")+'</h1><p>'+esc(g.status||"SCHEDULED")+' • '+esc(g.time||g.date||"")+' • '+esc(g.leagueId||"SPORTS").toUpperCase()+'</p></div><div class="intel58Grid"><section><h2>GAME SNAPSHOT</h2><div class="intel58Facts"><b>'+esc(g.status||"SCHEDULED")+'</b><span>'+esc(g.score||"Score pending")+'</span><span>'+esc(g.venue||"Venue pending")+'</span></div></section><section><h2>TEAMS</h2>'+teamRows(away)+teamRows(home)+'</section><section><h2>KEY PLAYERS</h2>'+((players.slice(0,8).map(row).join(""))||'<p>No player data available.</p>')+'</section><section><h2>STANDINGS CONTEXT</h2>'+(standings.length?standings.map(x=>'<div class="intel58Stand"><b>'+esc(x.teamName||getTeam(x.teamId)?.name||"TEAM")+'</b><span>'+esc(x.wins!=null?x.wins+"-"+(x.losses??0):x.record||"Record pending")+'</span></div>').join(""):'<p>No standings context in the current data feed.</p>')+'</section><section><h2>GAME TIMELINE</h2>'+((g.events||g.timeline||[]).map(e=>'<div class="intel58Event"><b>'+esc(e.time||e.clock||"")+'</b><span>'+esc(e.text||e.description||e.event||"Game event")+'</span></div>').join("")||'<p>Timeline events will appear from the connected live feed.</p>')+'</section><section><h2>RELATED NEWS</h2>'+(news.length?news.map(n=>'<a href="news-story.html?id='+encodeURIComponent(n.id)+'"><b>'+esc(n.title||"Sports Story")+'</b><span>'+esc(n.date||"LATEST")+'</span></a>').join(""):'<p>No related news available.</p>')+'</section><section><h2>RELATED MEDIA</h2>'+(media.length?media.map(v=>'<a href="video.html?id='+encodeURIComponent(v.id)+'"><b>'+esc(v.title||v.name||"Sports Video")+'</b><span>VIDEO</span></a>').join(""):'<p>No related media available.</p>')+'</section></div><div class="intel58Actions"><a href="live-game.html?id='+encodeURIComponent(g.id)+'">LIVE GAME</a><a href="team-game.html?id='+encodeURIComponent(g.id)+'">TEAM GAME HUB</a><a href="game.html?id='+encodeURIComponent(g.id)+'">GAME DETAILS</a></div>';
+}
+
+
 // SPORTS 57.0 — UNIVERSAL PLAYER GAME CENTER
 function renderPlayerGameCenter57(){
   const box=$("#playerGameCenter57");if(!box||!SportsState.ready)return;
