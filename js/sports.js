@@ -1,4 +1,25 @@
 
+// SPORTS 40.0 — UNIVERSAL NEWS WATCHLIST & ALERTS
+const NewsWatchlist={
+  key:"crowrulesSportsNewsWatchlist",
+  get(){try{return JSON.parse(localStorage.getItem(this.key))||[]}catch(e){return[]}},
+  save(v){localStorage.setItem(this.key,JSON.stringify(v))},
+  has(id){return this.get().includes(id)},
+  toggle(id){const v=this.get(),i=v.indexOf(id);i>=0?v.splice(i,1):v.push(id);this.save(v);refreshUniversalLayer();renderNewsWatchlist40();renderNewsStory40Button()},
+  stories(){return this.get().map(id=>(SportsState.data.news||[]).find(n=>n.id===id)).filter(Boolean)}
+};
+function newsWatchButton(id){return '<button type="button" class="newsWatch40 '+(NewsWatchlist.has(id)?"saved":"")+'" onclick="NewsWatchlist.toggle(\''+esc(id)+'\')">'+(NewsWatchlist.has(id)?"★ SAVED":"☆ SAVE STORY")+'</button>'}
+function renderNewsStory40Button(){
+  const box=$("#newsStoryWatchButton");if(!box||!SportsState.ready)return;
+  const id=new URLSearchParams(location.search).get("id"); if(id)box.innerHTML=newsWatchButton(id);
+}
+function renderNewsWatchlist40(){
+  const box=$("#sportsNewsWatchlist");if(!box||!SportsState.ready)return;
+  const stories=NewsWatchlist.stories();
+  box.innerHTML='<div class="watch40Hero"><div><small>SPORTS 40.0 • NEWS WATCHLIST</small><h2>YOUR SAVED STORIES</h2><p>Save stories and keep them in one personal Sports watchlist.</p></div><a href="news.html">DISCOVER NEWS</a></div><div class="watch40Grid">'+(stories.length?stories.map(n=>'<article class="watch40Card"><a href="news-story.html?id='+encodeURIComponent(n.id)+'"><span>'+esc(n.category||"SPORTS")+'</span><h3>'+esc(n.title||"Sports Story")+'</h3><p>'+esc(n.summary||"Sports story")+'</p></a><div>'+newsWatchButton(n.id)+'</div></article>').join(""):'<div class="watch40Empty">NO SAVED STORIES YET — SAVE STORIES FROM THEIR STORY PAGES.</div>')+'</div>';
+}
+
+
 // SPORTS 39.0 — UNIVERSAL SPORTS NEWS PERSONALIZATION
 function renderNewsPersonalization39(){
   const box=$("#sportsNewsPersonalization");if(!box||!SportsState.ready)return;
