@@ -9,7 +9,38 @@ const SportsState={
 };
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
-const loadJSON=async path=>{const r=await fetch(path+"?v=22.0",{cache:"no-store"});if(!r.ok)throw new Error(path+" "+r.status);return r.json();};
+
+// SPORTS 23.0 — UNIVERSAL LIVE SPORTS ENGINE
+const LiveEngine={
+  enabled:false,connected:false,lastSync:null,timer:null,interval:30000,
+  start(){
+    this.enabled=true; this.refresh();
+    clearInterval(this.timer); this.timer=setInterval(()=>this.refresh(),this.interval);
+  },
+  async refresh(){
+    try{
+      const provider=window.CROWRULES_SPORTS_LIVE_FEED;
+      if(typeof provider!=="function"){this.connected=false;updateLiveStatus();return}
+      const payload=await provider({league:SportsState.selectedLeague});
+      if(payload&&Array.isArray(payload.games)){
+        const byId=new Map(SportsState.data.games.map(g=>[g.id,g]));
+        payload.games.forEach(g=>{if(!g?.id)return;byId.set(g.id,{...byId.get(g.id),...g});});
+        SportsState.data.games=[...byId.values()];
+        this.connected=true;this.lastSync=new Date();
+        refreshUniversalLayer();
+      }
+    }catch(e){this.connected=false;updateLiveStatus()}
+    updateLiveStatus();
+  }
+};
+function updateLiveStatus(){
+  const el=$("#liveEngineStatus"); if(!el)return;
+  el.textContent=LiveEngine.connected?"● LIVE FEED CONNECTED":"○ LIVE FEED READY";
+  el.classList.toggle("liveConnected",LiveEngine.connected);
+  const sync=$("#liveEngineSync"); if(sync)sync.textContent=LiveEngine.lastSync?"SYNC "+LiveEngine.lastSync.toLocaleTimeString():"WAITING FOR LIVE PROVIDER";
+}
+
+const loadJSON=async path=>{const r=await fetch(path+"?v=23.0",{cache:"no-store"});if(!r.ok)throw new Error(path+" "+r.status);return r.json();};
 
 async function loadData(){
   const [leagues,teams,players,games,standings,schedule,videos,pickem]=await Promise.all([
@@ -113,6 +144,7 @@ function buildShell(){
   const command=$("#sportsCommand"), menu=$("#commandMenu");
   if(command&&menu){command.onclick=e=>{e.stopPropagation();menu.classList.toggle("open");command.setAttribute("aria-expanded",menu.classList.contains("open"))}}
   const notification=$("#sportsNotifications");
+  LiveEngine.start();
   if(notification){
     const live=SportsState.data.games.filter(g=>["LIVE","IN PROGRESS","HALFTIME"].includes(String(g.status||"").toUpperCase())).filter(g=>SportsState.selectedLeague==="all"||g.leagueId===SportsState.selectedLeague).length;
     notification.querySelector("b").textContent=String(live);
@@ -120,6 +152,11 @@ function buildShell(){
     notification.onclick=()=>{window.location.href="scores.html";};
   }
   if(!document.querySelector("#sportsDataState")){
+    const state=document.createElement("div"); state.id="sportsDataState"; state.className="sportsDataState";
+    state.innerHTML='<span>SPORTS 23.0 LIVE ENGINE</span><b id="liveEngineStatus">○ LIVE FEED READY</b><i></i><span id="liveEngineSync">WAITING FOR LIVE PROVIDER</span>';
+    top.insertAdjacentElement("afterend",state);
+  }
+  if(false){
     const state=document.createElement("div"); state.id="sportsDataState"; state.className="sportsDataState";
     state.innerHTML='<span>SPORTS 22.0 DATA LAYER</span><b data-layer-league>ALL LEAGUES</b><i></i><span>SEARCH</span><b data-layer-query>NO ACTIVE SEARCH</b><i></i><span>STATUS</span><b>CONNECTED</b>';
     top.insertAdjacentElement("afterend",state);
