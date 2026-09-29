@@ -1,4 +1,20 @@
 
+// SPORTS 60.0 — UNIVERSAL SPORTS TOURNAMENT & CHAMPIONSHIP CENTER
+function renderTournamentCenter60(){
+  const box=$("#tournamentCenter60");if(!box||!SportsState.ready)return;
+  const p=new URLSearchParams(location.search), tid=p.get("id");
+  const source=SportsState.data.tournaments||SportsState.data.championships||[];
+  const tournament=source.find(x=>String(x.id)===String(tid))||source[0];
+  const games=SportsState.data.games||[];
+  const selectedGames=tournament?games.filter(g=>!tournament.leagueId||g.leagueId===tournament.leagueId).slice(0,12):games.slice(0,12);
+  if(!tournament){box.innerHTML='<div class="tour60Empty"><h1>TOURNAMENT CENTER</h1><p>No tournament dataset is connected yet. The center is ready for tournament and championship feeds.</p><a href="event-center.html">EVENT CENTER</a></div>';return}
+  const teams=(SportsState.data.teams||[]).filter(t=>(tournament.teamIds||[]).includes(t.id)).slice(0,16);
+  const rounds=tournament.rounds||tournament.bracket||[];
+  const game=g=>'<a href="game-intelligence.html?id='+encodeURIComponent(g.id)+'"><span>'+esc(g.status||"MATCHUP")+'</span><b>'+esc(getTeam(g.awayTeamId)?.short||"AWY")+' @ '+esc(getTeam(g.homeTeamId)?.short||"HME")+'</b><em>'+esc(g.score||g.time||g.date||"SCHEDULED")+'</em></a>';
+  box.innerHTML='<div class="tour60Hero"><small>SPORTS 60.0 • TOURNAMENT & CHAMPIONSHIP CENTER</small><h1>'+esc(tournament.name||tournament.title||"TOURNAMENT")+'</h1><p>'+esc(tournament.leagueId||"SPORTS").toUpperCase()+' • '+esc(tournament.status||"CHAMPIONSHIP EVENT")+'</p></div><div class="tour60Stats"><div><b>'+teams.length+'</b><span>TEAMS</span></div><div><b>'+rounds.length+'</b><span>ROUNDS</span></div><div><b>'+selectedGames.length+'</b><span>MATCHUPS</span></div><div><b>'+esc(tournament.venue||"—")+'</b><span>VENUE</span></div></div><div class="tour60Grid"><section><h2>BRACKET / ROUNDS</h2>'+(rounds.length?rounds.map((x,i)=>'<div class="tour60Round"><b>'+esc(x.name||x.round||("ROUND "+(i+1)))+'</b><span>'+esc(x.status||x.date||"ROUND")+'</span></div>').join(""):'<p>Bracket data will appear when supplied by the tournament feed.</p>')+'</section><section><h2>CHAMPIONSHIP MATCHUPS</h2>'+(selectedGames.length?selectedGames.map(game).join(""):'<p>No matchups are connected yet.</p>')+'</section><section><h2>PARTICIPATING TEAMS</h2>'+(teams.length?teams.map(t=>'<a href="team.html?id='+encodeURIComponent(t.id)+'"><b>'+esc(t.name||"TEAM")+'</b><span>'+esc(t.short||"")+'</span></a>').join(""):'<p>Team entries will appear from the tournament dataset.</p>')+'</section><section><h2>CHAMPIONSHIP INFO</h2><p>'+esc(tournament.description||"Tournament details, championship rounds and event information will appear from the connected data feed.")+'</p></section></div>';
+}
+
+
 // SPORTS 59.0 — UNIVERSAL SPORTS EVENT CENTER 2.0
 function renderEventCenter59(){
   const box=$("#eventCenter59");if(!box||!SportsState.ready)return;
