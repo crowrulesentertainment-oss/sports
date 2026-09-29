@@ -9,7 +9,7 @@ const SportsState={
 };
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
-const loadJSON=async path=>{const r=await fetch(path+"?v=20.0",{cache:"no-store"});if(!r.ok)throw new Error(path+" "+r.status);return r.json();};
+const loadJSON=async path=>{const r=await fetch(path+"?v=21.0",{cache:"no-store"});if(!r.ok)throw new Error(path+" "+r.status);return r.json();};
 
 async function loadData(){
   const [leagues,teams,players,games,standings,schedule,videos,pickem]=await Promise.all([
@@ -92,7 +92,7 @@ function buildShell(){
   const top=document.querySelector(".topbar"); if(!top)return;
   if(!document.querySelector("#sportsControls")){
     const controls=document.createElement("div"); controls.id="sportsControls"; controls.className="sportsControls";
-    controls.innerHTML='<button class="commandButton" id="sportsCommand" type="button" aria-expanded="false">COMMAND <span>⌄</span></button><label class="srOnly" for="leagueSelect">League</label><select id="leagueSelect" aria-label="Global league selector"></select><label class="srOnly" for="sportsSearch">Search sports</label><input id="sportsSearch" type="search" placeholder="SEARCH SPORTS" autocomplete="off"><button class="notificationButton" id="sportsNotifications" type="button" aria-label="Sports notifications">◉<b>0</b></button><span class="accountStatus"><i></i> DATA LAYER</span><div class="commandMenu" id="commandMenu"><a href="scores.html">LIVE SCORES</a><a href="schedule.html">SCHEDULE</a><a href="standings.html">STANDINGS</a><a href="rankings.html">RANKINGS</a><a href="stats.html">STATISTICS</a><a href="teams.html">TEAMS</a><a href="players.html">PLAYERS</a><a href="videos.html">MEDIA</a><a href="pickem.html">PICK ’EM</a></div>';
+    controls.innerHTML='<button class="commandButton" id="sportsCommand" type="button" aria-expanded="false">COMMAND <span>⌄</span></button><label class="srOnly" for="leagueSelect">League</label><select id="leagueSelect" aria-label="Global league selector"></select><label class="srOnly" for="sportsSearch">Search sports</label><input id="sportsSearch" type="search" placeholder="SEARCH SPORTS" autocomplete="off"><button class="notificationButton" id="sportsNotifications" type="button" aria-label="Sports notifications"><span>◉</span><b>0</b></button><a class="accountChip" href="https://crowrulesentertainment-oss.github.io/crowspace/login.html" aria-label="Universal CrowRules account"><i></i><span>ACCOUNT</span><b>GUEST</b></a><div class="commandMenu" id="commandMenu"><div class="commandTitle">SPORTS COMMAND</div><a href="home.html">SPORTS HOME</a><a href="scores.html">LIVE SCORES</a><a href="schedule.html">SCHEDULE</a><a href="standings.html">STANDINGS</a><a href="rankings.html">RANKINGS</a><a href="stats.html">STATISTICS</a><a href="teams.html">TEAMS</a><a href="players.html">PLAYERS</a><a href="videos.html">MEDIA</a><a href="pickem.html">PICK ’EM</a></div>';
     top.appendChild(controls);
   }
   const select=$("#leagueSelect"); if(select){
@@ -102,8 +102,15 @@ function buildShell(){
   const search=$("#sportsSearch"); if(search){search.value=SportsState.search; search.oninput=e=>{SportsState.search=e.target.value;render();renderDiscoverySearch()};}
   const command=$("#sportsCommand"), menu=$("#commandMenu");
   if(command&&menu){command.onclick=e=>{e.stopPropagation();menu.classList.toggle("open");command.setAttribute("aria-expanded",menu.classList.contains("open"))}}
-  $("#sportsNotifications")?.addEventListener("click",()=>{const n=$("#sportsNotifications");n.classList.toggle("active");n.querySelector("b").textContent=n.classList.contains("active")?"✓":"0"});
-
+  const notification=$("#sportsNotifications");
+  if(notification){
+    const live=SportsState.data.games.filter(g=>["LIVE","IN PROGRESS","HALFTIME"].includes(String(g.status||"").toUpperCase())).filter(g=>SportsState.selectedLeague==="all"||g.leagueId===SportsState.selectedLeague).length;
+    notification.querySelector("b").textContent=String(live);
+    notification.classList.toggle("hasAlert",live>0);
+    notification.onclick=()=>{window.location.href="scores.html";};
+  }
+  const current=(location.pathname.split("/").pop()||"home.html").toLowerCase();
+  document.querySelectorAll(".topbar nav a,.mobileNav a").forEach(a=>{const href=(a.getAttribute("href")||"").split("?")[0].toLowerCase();a.classList.toggle("active",href===current);});
 }
 function renderGameDayDashboard(){
   const box=$("#gameDayDashboard"); if(!box||!SportsState.ready)return;
