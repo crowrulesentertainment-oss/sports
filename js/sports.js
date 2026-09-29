@@ -1,4 +1,18 @@
 
+// SPORTS 51.0 — UNIVERSAL SPORTS NEWS HOME
+function renderSportsNewsHome51(){
+  const box=$("#sportsNewsHome51");if(!box||!SportsState.ready)return;
+  const f=Favorites.get(), saved=NewsWatchlist.get(), history=NewsHistory.get(), engagement=NewsEngagement.get(), all=SportsState.data.news||[];
+  const selected=all.filter(n=>SportsState.selectedLeague==="all"||n.leagueId===SportsState.selectedLeague);
+  const personal=selected.filter(n=>(f.leagues||[]).includes(n.leagueId)||(f.teams||[]).includes(n.teamId)||(f.players||[]).includes(n.playerId));
+  const top=(personal.length?personal:selected).slice(0,6);
+  const live=SportsState.data.games.filter(g=>["LIVE","IN PROGRESS","HALFTIME"].includes(String(g.status||"").toUpperCase())).filter(g=>SportsState.selectedLeague==="all"||g.leagueId===SportsState.selectedLeague).slice(0,4);
+  const trend=selected.map(n=>({n,s:(engagement[n.id]?.opens||0)*2+(engagement[n.id]?.reads||0)*3+(saved.includes(n.id)?2:0)})).sort((a,b)=>b.s-a.s).slice(0,4).map(x=>x.n);
+  const card=n=>'<a href="news-story.html?id='+encodeURIComponent(n.id)+'"><span>'+esc(n.category||"SPORTS")+'</span><b>'+esc(n.title||"Sports Story")+'</b><em>'+esc(n.date||"LATEST")+'</em></a>';
+  box.innerHTML='<div class="newsHome51Hero"><div><small>SPORTS 51.0 • UNIVERSAL SPORTS HOME</small><h1>YOUR SPORTS FRONT PAGE</h1><p>News, live games, trending coverage and your personalized Sports universe in one connected home.</p></div><a href="news-command.html">NEWS DESK</a></div><div class="newsHome51Actions"><a href="scores.html">LIVE SCORES</a><a href="news.html">NEWS</a><a href="your-topics.html">YOUR TOPICS</a><a href="sports-profile.html">PROFILE</a></div><div class="newsHome51Grid"><section><h2>YOUR NEWS</h2>'+(top.length?top.map(card).join(""):'<p>Follow teams, players or leagues to personalize your front page.</p>')+'</section><section><h2>LIVE SPORTS</h2>'+(live.length?live.map(g=>'<a href="game.html?id='+encodeURIComponent(g.id)+'"><span>'+esc(g.status||"LIVE")+'</span><b>'+esc(getTeam(g.awayTeamId)?.short||"AWY")+' @ '+esc(getTeam(g.homeTeamId)?.short||"HME")+'</b><em>'+esc(g.time||"NOW")+'</em></a>').join(""):'<p>No live games in the current data feed.</p>')+'</section><section><h2>TRENDING NEWS</h2>'+(trend.length?trend.map(card).join(""):'<p>Trending coverage will grow with story activity.</p>')+'</section></div>';
+}
+
+
 // SPORTS 50.0 — UNIVERSAL SPORTS NEWS COMMAND CENTER
 function renderNewsCommandCenter50(){
   const box=$("#sportsNewsCommand50");if(!box||!SportsState.ready)return;
