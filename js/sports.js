@@ -1,4 +1,20 @@
 
+/* SPORTS 80.0 — UNIVERSAL SPORTS VISUAL STORY ENGINE */
+function renderVisualStories80(){
+ const box=$("#visualStories80");if(!box||!SportsState.ready)return;
+ const d=SportsState.data,stories=d.visual_stories||d.visualStories||[],mom=d.iconic_moments||d.iconicMoments||d.moments||[],news=d.news||[],photos=d.photos||d.images||d.photo_archive||[],videos=d.videos||d.media||[],games=d.games||[],players=d.players||[],teams=d.teams||[];
+ const q=new URLSearchParams(location.search),search=(q.get("q")||"").trim().toLowerCase(),league=q.get("league")||"";
+ const source=[...stories.map(x=>({...x,storyType:"VISUAL STORY"})),...mom.map(x=>({...x,storyType:"ICONIC MOMENT"})),...news.map(x=>({...x,storyType:"STORY"}))];
+ const rows=source.filter((x,i,a)=>i===a.findIndex(y=>String(y.id||y.title)===String(x.id||x.title))).filter(x=>(!search||JSON.stringify(x).toLowerCase().includes(search))&&(!league||String(x.leagueId||x.league)===String(league)));
+ const pname=id=>(players.find(x=>String(x.id)===String(id))||{}).name||"";
+ const tname=id=>(teams.find(x=>String(x.id)===String(id))||{}).name||"";
+ const relatedPhotos=x=>photos.filter(p=>String(p.storyId||p.momentId||p.gameId)===String(x.id||x.gameId)).slice(0,3);
+ const relatedVideos=x=>videos.find(v=>String(v.storyId||v.momentId||v.gameId)===String(x.id||x.gameId));
+ const cards=rows.slice(0,80).map(x=>{const ps=relatedPhotos(x),v=relatedVideos(x),g=games.find(y=>String(y.id)===String(x.gameId||x.eventId));return '<article class="vs80Card"><div class="vs80Visual">'+(ps[0]?.image||ps[0]?.imageUrl||x.image||x.imageUrl?'<img src="'+esc(ps[0]?.image||ps[0]?.imageUrl||x.image||x.imageUrl)+'" alt="'+esc(x.title||"Visual story")+'" loading="lazy">':'<div class="vs80Placeholder">VISUAL STORY</div>')+'<span>'+esc(x.storyType)+'</span></div><div class="vs80Body"><small>'+esc(x.date||x.year||x.season||"CONNECTED")+' • '+esc(x.leagueName||x.league||"SPORTS")+'</small><h2>'+esc(x.title||x.name||"Visual Sports Story")+'</h2><p>'+esc(x.description||x.story||x.summary||"A connected visual story assembled from the CrowRules Sports data layer.")+'</p><div>'+esc(pname(x.playerId||x.athleteId))+' '+esc(tname(x.teamId))+'</div><footer>'+ps.map((p,i)=>'<a href="'+esc(p.image||p.imageUrl||"#")+'" target="_blank" rel="noopener">PHOTO '+(i+1)+'</a>').join("")+(v?'<a href="video.html?id='+encodeURIComponent(v.id||"")+'">VIDEO</a>':"")+(g?'<a href="game-intelligence.html?id='+encodeURIComponent(g.id)+'">GAME</a>':"")+'</footer></div></article>'}).join("");
+ box.innerHTML='<section class="vs80Hero"><small>SPORTS 80.0 • UNIVERSAL SPORTS VISUAL STORY ENGINE</small><h1>SPORTS VISUAL STORIES</h1><p>PHOTOS • VIDEO • STORIES • TIMELINES • GAMES • ATHLETES • CHAMPIONSHIPS</p></section><form class="vs80Search"><input name="q" value="'+esc(q.get("q")||"")+'" placeholder="SEARCH VISUAL STORIES"><select name="league"><option value="">ALL LEAGUES</option>'+((d.leagues||[]).map(l=>'<option value="'+esc(l.id)+'" '+(String(l.id)===String(league)?"selected":"")+'>'+esc(l.name||l.id)+'</option>').join(""))+'</select><button>EXPLORE STORIES</button></form><div class="vs80Metrics"><article><b>'+rows.length+'</b><small>VISUAL STORIES</small></article><article><b>'+rows.filter(x=>x.storyType==="ICONIC MOMENT").length+'</b><small>ICONIC MOMENTS</small></article><article><b>'+rows.filter(x=>relatedPhotos(x).length).length+'</b><small>PHOTO CONNECTED</small></article><article><b>'+rows.filter(x=>relatedVideos(x)).length+'</b><small>VIDEO CONNECTED</small></article></div><section class="vs80Grid">'+(cards||'<div class="vs80Empty"><h2>VISUAL STORY ENGINE READY</h2><p>No connected visual stories match this selection yet.</p></div>')+'</section><nav class="vs80Links"><a href="photos.html">PHOTO VAULT</a><a href="media-vault.html">MEDIA VAULT</a><a href="stories.html">STORIES</a><a href="timeline.html">TIMELINE</a><a href="iconic-moments.html">ICONIC MOMENTS</a><a href="legacy.html">LEGACY</a></nav>';
+}
+
+
 /* SPORTS 79.0 — UNIVERSAL SPORTS PHOTO & IMAGE ARCHIVE */
 function renderPhotoArchive79(){
  const box=$("#photoArchive79");if(!box||!SportsState.ready)return;
