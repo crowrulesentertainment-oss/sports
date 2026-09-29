@@ -9,7 +9,7 @@ const SportsState={
 };
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
-const loadJSON=async path=>{const r=await fetch(path+"?v=16.0",{cache:"no-store"});if(!r.ok)throw new Error(path+" "+r.status);return r.json();};
+const loadJSON=async path=>{const r=await fetch(path+"?v=17.0",{cache:"no-store"});if(!r.ok)throw new Error(path+" "+r.status);return r.json();};
 
 async function loadData(){
   const [leagues,teams,players,games,standings,schedule,videos,pickem]=await Promise.all([
@@ -17,7 +17,7 @@ async function loadData(){
     loadJSON("data/standings.json"),loadJSON("data/schedule.json"),loadJSON("data/videos.json"),loadJSON("data/pickem.json")
   ]);
   SportsState.data={leagues:leagues.leagues||[],teams:teams.teams||[],players:players.players||[],games:games.games||[],standings:standings.standings||[],schedule:schedule.schedule||[],videos:videos.videos||[],pickem};
-  SportsState.ready=true; buildShell(); render(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
+  SportsState.ready=true; buildShell(); render(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
 }
 function league(){return SportsState.data.leagues.find(x=>x.id===SportsState.selectedLeague)||null}
 function selected(arr){return SportsState.selectedLeague==="all"?arr:arr.filter(x=>x.leagueId===SportsState.selectedLeague)}
@@ -26,7 +26,7 @@ function leagueName(id){return SportsState.data.leagues.find(x=>x.id===id)?.name
 function setLeague(id){
   SportsState.selectedLeague=id||"all"; localStorage.setItem("crowrulesSportsLeague",SportsState.selectedLeague);
   const u=new URL(location.href); if(id&&id!=="all")u.searchParams.set("league",id);else u.searchParams.delete("league");
-  history.replaceState({}, "", u); buildShell(); render(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
+  history.replaceState({}, "", u); buildShell(); render(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
 }
 function renderDiscoverySearch(){
   const q=SportsState.search.trim().toLowerCase();
@@ -79,6 +79,14 @@ function renderScoreboardCenter(){
   const live=rows.filter(g=>["LIVE","IN PROGRESS","HALFTIME","FINAL"].includes(status(g)));
   if(box) box.innerHTML=rows.map(g=>{const a=getTeam(g.awayTeamId),h=getTeam(g.homeTeamId),sc=g.score||{};return '<a class="scoreboardGame" href="game.html?id='+encodeURIComponent(g.id)+'"><div class="scoreLeague"><b>'+esc(leagueName(g.leagueId))+'</b><span>'+esc(status(g))+'</span></div><div class="scoreTeams"><strong>'+esc(a?.short||"AWY")+'</strong><span>'+esc(sc.away??"—")+'</span><em>@</em><strong>'+esc(h?.short||"HME")+'</strong><span>'+esc(sc.home??"—")+'</span></div><div class="scoreTime"><b>'+esc(g.period||g.time||"TBD")+'</b><span>EVENT CENTER ›</span></div></a>').join("")||'<div class="emptyState">NO GAMES IN SELECTION</div>';
   if(sum) sum.innerHTML='<div class="scoreSummary"><strong>'+live.length+'</strong><span>ACTIVE / RECENT EVENTS</span></div><div class="scoreSummary"><strong>'+rows.length+'</strong><span>TOTAL GAMES</span></div><p class="scoreFeedNote">Scores appear only when supplied by the current data layer. No live results are fabricated.</p>';
+}
+function renderStatsCenter(){
+  const box=$("#statsData"); if(!box)return;
+  const d=SportsState.data, ps=selected(d.players), ts=selected(d.teams);
+  const numeric=ps.filter(p=>p.statValue!==undefined&&p.statValue!==null&&p.statValue!==""&&!Number.isNaN(Number(p.statValue)))
+    .sort((a,b)=>Number(b.statValue)-Number(a.statValue)).slice(0,25);
+  box.innerHTML='<div class="statsOverview"><div><strong>'+ts.length+'</strong><span>TEAMS</span></div><div><strong>'+ps.length+'</strong><span>PLAYERS</span></div><div><strong>'+numeric.length+'</strong><span>STAT LEADERS</span></div></div>'+
+    '<div class="statsSplit"><div class="statsBlock"><small>PLAYER PERFORMANCE</small>'+(numeric.length?numeric.map((p,i)=>'<a class="statRow" href="player.html?id='+encodeURIComponent(p.id)+'"><strong>#'+String(i+1).padStart(2,"0")+'</strong><b>'+esc(p.name)+'</b><span>'+esc(p.position||"PLAYER")+' • '+esc(leagueName(p.leagueId))+'</span><em>'+esc(p.statValue)+' '+esc(p.statLabel||"")+'</em></a>').join(""):'<div class="emptyState">PLAYER STATISTICS PENDING</div>')+'</div><div class="statsBlock"><small>TEAM PERFORMANCE</small>'+ts.map(t=>{const s=d.standings.find(x=>x.teamId===t.id);return '<a class="statRow" href="team.html?id='+encodeURIComponent(t.id)+'"><strong>#'+esc(s?.rank||"—")+'</strong><b>'+esc(t.name)+'</b><span>'+esc(leagueName(t.leagueId))+'</span><em>'+esc(s?recordLabel(s):"RECORD PENDING")+'</em></a>'}).join("")||'<div class="emptyState">TEAM DATA PENDING</div>'+'</div></div>';
 }
 function buildShell(){
   const top=document.querySelector(".topbar"); if(!top)return;
