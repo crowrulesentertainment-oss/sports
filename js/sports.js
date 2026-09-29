@@ -1,4 +1,17 @@
 
+// SPORTS 75.0 — UNIVERSAL SPORTS ICONIC MOMENTS CENTER
+function renderIconicMoments75(){
+ const box=$("#iconicMoments75");if(!box||!SportsState.ready)return;
+ const d=SportsState.data,games=d.games||[],players=d.players||[],teams=d.teams||[],moments=d.iconic_moments||d.iconicMoments||d.moments||[],news=d.news||[],videos=d.videos||[];
+ const q=new URLSearchParams(location.search),search=(q.get("q")||"").trim().toLowerCase(),league=q.get("league")||"";
+ const source=moments.length?moments:games.filter(x=>x.iconic||x.historic||x.moment).map(x=>({...x,title:x.moment||x.title||"Historic Game",type:"GAME"}));
+ const rows=source.filter(x=>(!search||JSON.stringify(x).toLowerCase().includes(search))&&(!league||String(x.leagueId||x.league)===league));
+ const name=id=>(players.find(p=>String(p.id)===String(id))||teams.find(t=>String(t.id)===String(id)))?.name||id||"";
+ const cards=rows.slice(0,100).map(x=>'<article class="im75Card"><div class="im75Tag">'+esc(x.type||x.category||"ICONIC MOMENT")+'</div><h2>'+esc(x.title||x.name||"Iconic Moment")+'</h2><small>'+esc(x.date||x.season||x.year||"DATE TBD")+' • '+esc(x.leagueName||x.league||"SPORTS")+'</small><p>'+esc(x.description||x.story||x.summary||"Historic moment connected to the CrowRules Sports data layer.")+'</p><div class="im75People">'+esc(name(x.playerId||x.athleteId))+' '+esc(x.playerId||x.athleteId?"":"")+' '+esc(name(x.teamId))+'</div><div class="im75Media">'+(x.videoId||x.videoUrl||videos.some(v=>String(v.gameId)===String(x.gameId||x.id))?"MEDIA CONNECTED":"MEDIA READY")+'</div></article>').join("");
+ box.innerHTML='<div class="im75Hero"><small>SPORTS 75.0 • UNIVERSAL ICONIC MOMENTS CENTER</small><h1>ICONIC MOMENTS</h1><p>LEGENDARY GAMES • CHAMPIONSHIP MOMENTS • RECORDS • STORIES • MEDIA</p></div><form class="im75Search"><input name="q" value="'+esc(q.get("q")||"")+'" placeholder="SEARCH ICONIC MOMENTS"><select name="league"><option value="">ALL LEAGUES</option>'+((d.leagues||[]).map(l=>'<option value="'+esc(l.id)+'" '+(String(l.id)===String(league)?"selected":"")+'>'+esc(l.name||l.id)+'</option>').join(""))+'</select><button>EXPLORE</button></form><div class="im75Metrics"><article><b>'+rows.length+'</b><span>CONNECTED MOMENTS</span></article><article><b>'+new Set(rows.map(x=>x.leagueId||x.league).filter(Boolean)).size+'</b><span>SPORTS / LEAGUES</span></article><article><b>'+rows.filter(x=>x.videoId||x.videoUrl).length+'</b><span>MEDIA LINKS</span></article><article><b>'+rows.filter(x=>x.gameId).length+'</b><span>GAME LINKS</span></article></div><section class="im75Grid">'+(cards||'<div class="im75Empty">No iconic moments match the current search.</div>')+'</section><div class="im75Links"><a href="legacy.html">LEGACY</a><a href="hall-of-fame.html">HALL OF FAME</a><a href="history.html">HISTORY</a><a href="game-intelligence.html">GAME INTELLIGENCE</a><a href="media.html">MEDIA</a></div>';
+}
+
+
 // SPORTS 74.0 — UNIVERSAL SPORTS LEGACY CENTER
 function renderLegacyCenter74(){
  const box=$("#legacyCenter74");if(!box||!SportsState.ready)return;
