@@ -1,4 +1,21 @@
 
+// SPORTS 48.0 — UNIVERSAL SPORTS NEWS TOPIC PERSONALIZATION
+function renderTopicPersonalization48(){
+  const box=$("#sportsTopicPersonalization48");if(!box||!SportsState.ready)return;
+  const f=Favorites.get(), history=NewsHistory.get(), saved=new Set(NewsWatchlist.get()), engagement=NewsEngagement.get();
+  const leagues=new Set(f.leagues||[]), teams=new Set(f.teams||[]), players=new Set(f.players||[]), read=new Set(history.map(x=>x.id));
+  const all=SportsState.data.news||[], scores={};
+  all.forEach(n=>{
+    const c=String(n.category||"SPORTS").toUpperCase();
+    const e=engagement[n.id]||{};
+    scores[c]=(scores[c]||0)+(leagues.has(n.leagueId)?6:0)+(teams.has(n.teamId)?6:0)+(players.has(n.playerId)?6:0)+(saved.has(n.id)?2:0)+(read.has(n.id)?1:0)+(e.reads||0);
+  });
+  const topics=Object.entries(scores).sort((a,b)=>b[1]-a[1]);
+  const top=topics.slice(0,8);
+  box.innerHTML='<div class="topic48Hero"><div><small>SPORTS 48.0 • TOPIC PERSONALIZATION</small><h2>YOUR TOPICS</h2><p>Topic priority is shaped by your follows, saved stories, reading history and local engagement.</p></div><a href="topics.html">TOPIC CENTER</a></div><div class="topic48Grid">'+(top.length?top.map((x,i)=>'<a href="topics.html?topic='+encodeURIComponent(x[0])+'"><span>#'+(i+1)+'</span><b>'+esc(x[0])+'</b><em>'+x[1]+' relevance</em></a>').join(""):'<p class="topic48Empty">READ OR FOLLOW Sports stories to build topic personalization.</p>')+'</div>';
+}
+
+
 // SPORTS 47.0 — UNIVERSAL SPORTS NEWS TOPICS & CATEGORIES
 function renderNewsTopics47(){
   const box=$("#sportsNewsTopics47");if(!box||!SportsState.ready)return;
