@@ -32,3 +32,15 @@
 .eventMedia{grid-column:1/-1}
 @media(max-width:850px){.eventTeams{grid-template-columns:1fr;}.eventScore{order:2}.eventTeam{min-height:170px}.eventGrid{grid-template-columns:1fr}}
 @media(max-width:600px){.eventHero,.contextCard{padding:18px}.eventTeams{padding:25px 0}.eventTeam strong{font-size:48px}.rosterSplit{grid-template-columns:1fr}.eventMedia{grid-column:auto}}
+
+/* SPORTS 9.0 — LIVE GAME INTELLIGENCE */
+.liveScorePanel{border:1px solid var(--cyan);background:rgba(0,234,255,.035);padding:18px;margin-top:14px;box-shadow:0 0 30px rgba(0,234,255,.07)}
+.liveScore{display:grid;grid-template-columns:1fr 100px 1fr;align-items:center;text-align:center;gap:15px}
+.liveScore div{display:flex;align-items:center;justify-content:center;gap:18px}
+.liveScore span{font:800 8px Orbitron;color:#68738a;letter-spacing:1px}.liveScore strong{font:900 42px Orbitron;color:#fff}
+.liveScore>b{font:900 10px Orbitron;color:var(--red);letter-spacing:1.5px}
+.scorePending{padding:12px;text-align:center;color:#68738a;font:800 9px Orbitron;letter-spacing:1.5px}
+.timelineCard{grid-column:1/-1}.timelineItem{display:grid;grid-template-columns:80px 100px 1fr;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid rgba(148,163,184,.1)}
+.timelineItem span{font:800 8px Orbitron;color:var(--cyan)}.timelineItem b{font:800 9px Orbitron}.timelineItem p{margin:0;color:#8993aa;font-size:10px;line-height:1.5}
+.timelinePending{padding:20px 0;color:#68738a;font:800 8px Orbitron;letter-spacing:1px}
+@media(max-width:650px){.liveScore{grid-template-columns:1fr}.liveScore div{justify-content:space-between}.timelineItem{grid-template-columns:65px 1fr}.timelineItem p{grid-column:1/-1}}
