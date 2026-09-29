@@ -1,4 +1,24 @@
 
+/* SPORTS 83.0 — UNIVERSAL SPORTS MUSEUM COLLECTIONS ENGINE */
+function renderMuseumCollections83(){
+ const box=$("#museumCollections83");if(!box||!SportsState.ready)return;
+ const d=SportsState.data,players=d.players||[],teams=d.teams||[],games=d.games||[],records=d.records||[],awards=d.awards||d.honors||[],mom=d.iconic_moments||d.iconicMoments||d.moments||[],hof=d.hall_of_fame||d.hallOfFame||d.legends||[],collections=d.collections||d.museum_collections||[];
+ const q=new URLSearchParams(location.search),search=(q.get("q")||"").trim().toLowerCase(),collection=q.get("collection")||"";
+ const fallback=[
+  {id:"athletes",name:"GREATEST ATHLETES",description:"Connected athlete exhibits.",items:players,type:"PLAYER"},
+  {id:"teams",name:"TEAM LEGENDS",description:"Connected team history and legacy.",items:teams,type:"TEAM"},
+  {id:"championships",name:"CHAMPIONSHIP HISTORY",description:"Awards, titles and championship records.",items:[...awards,...games.filter(x=>x.championship||x.titleType==="CHAMPIONSHIP")],type:"CHAMPIONSHIP"},
+  {id:"moments",name:"ICONIC GAMES & MOMENTS",description:"Historic games and iconic moments.",items:[...mom,...games.filter(x=>x.iconic||x.historic||x.moment)],type:"MOMENT"},
+  {id:"records",name:"RECORD BREAKERS",description:"Connected statistical and historical records.",items:records,type:"RECORD"},
+  {id:"legends",name:"HALL OF FAME & LEGENDS",description:"Hall of Fame and legendary figures.",items:hof.length?hof:players.filter(x=>x.hallOfFame||x.hof||x.legend),type:"HALL_OF_FAME"}
+ ];
+ const cols=collections.length?collections.map(x=>({...x,items:x.items||x.exhibits||[]})):fallback;
+ const filtered=cols.filter(x=>(!collection||String(x.id)===String(collection))&&(!search||JSON.stringify(x).toLowerCase().includes(search)));
+ const cards=filtered.map(col=>{const items=col.items||[];return '<article class="mc83Card"><div class="mc83Header"><span>'+esc(col.type||"COLLECTION")+'</span><b>'+items.length+'</b></div><h2>'+esc(col.name||col.title||"Collection")+'</h2><p>'+esc(col.description||"A curated CrowRules Sports museum collection.")+'</p><div class="mc83Items">'+items.slice(0,6).map(x=>'<a href="exhibit.html?type='+encodeURIComponent(x.exhibitType||col.type||"PLAYER")+'&id='+encodeURIComponent(x.id||"")+'">'+esc(x.name||x.fullName||x.title||x.record||"Exhibit")+'</a>').join("")+'</div><a class="mc83Open" href="?collection='+encodeURIComponent(col.id||"")+'">OPEN COLLECTION</a></article>'}).join("");
+ box.innerHTML='<section class="mc83Hero"><small>SPORTS 83.0 • UNIVERSAL MUSEUM COLLECTIONS ENGINE</small><h1>SPORTS MUSEUM COLLECTIONS</h1><p>CURATED EXHIBITS • ATHLETES • TEAMS • CHAMPIONSHIPS • MOMENTS • RECORDS • LEGENDS</p></section><form class="mc83Search"><input name="q" value="'+esc(q.get("q")||"")+'" placeholder="SEARCH COLLECTIONS"><select name="collection"><option value="">ALL COLLECTIONS</option>'+cols.map(x=>'<option value="'+esc(x.id||"")+'" '+(String(x.id)===String(collection)?"selected":"")+'>'+esc(x.name||x.title||x.id||"COLLECTION")+'</option>').join("")+'</select><button>EXPLORE COLLECTIONS</button></form><div class="mc83Metrics"><article><b>'+filtered.length+'</b><small>COLLECTIONS</small></article><article><b>'+filtered.reduce((n,x)=>n+(x.items||[]).length,0)+'</b><small>CONNECTED EXHIBITS</small></article><article><b>'+players.length+'</b><small>ATHLETES</small></article><article><b>'+teams.length+'</b><small>TEAMS</small></article></div><section class="mc83Grid">'+(cards||'<div class="mc83Empty"><h2>COLLECTIONS READY</h2><p>No museum collections match this selection yet.</p></div>')+'</section><nav class="mc83Links"><a href="museum.html">MUSEUM</a><a href="exhibit.html">EXHIBIT ENGINE</a><a href="legacy.html">LEGACY</a><a href="hall-of-fame.html">HALL OF FAME</a><a href="iconic-moments.html">ICONIC MOMENTS</a></nav>';
+}
+
+
 /* SPORTS 82.0 — UNIVERSAL SPORTS MUSEUM EXHIBIT ENGINE */
 function renderMuseumExhibit82(){
  const box=$("#museumExhibit82");if(!box||!SportsState.ready)return;
