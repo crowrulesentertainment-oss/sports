@@ -1,4 +1,28 @@
 
+/* SPORTS 81.0 — UNIVERSAL SPORTS DIGITAL MUSEUM */
+function renderDigitalMuseum81(){
+ const box=$("#digitalMuseum81");if(!box||!SportsState.ready)return;
+ const d=SportsState.data,players=d.players||[],teams=d.teams||[],leagues=d.leagues||[],games=d.games||[],records=d.records||[],awards=d.awards||d.honors||[],hof=d.hall_of_fame||d.hallOfFame||d.legends||[],mom=d.iconic_moments||d.iconicMoments||d.moments||[],photos=d.photos||d.images||d.photo_archive||[],videos=d.videos||d.media||[],news=d.news||[];
+ const q=new URLSearchParams(location.search),search=(q.get("q")||"").trim().toLowerCase(),league=q.get("league")||"",room=q.get("room")||"";
+ const rooms={
+  "LEGENDS":hof.length?hof:players.filter(x=>x.hallOfFame||x.hof||x.legend),
+  "CHAMPIONSHIPS":[...awards.filter(x=>x.championship||x.type==="CHAMPIONSHIP"),...mom.filter(x=>x.championship||x.category==="CHAMPIONSHIP")],
+  "ICONIC MOMENTS":mom,
+  "RECORDS":records,
+  "GAMES":games,
+  "MEDIA":[...photos,...videos]
+ };
+ const source=room&&rooms[room]?rooms[room]:[...players,...teams,...leagues,...mom,...records,...awards,...hof,...games,...photos,...videos,...news];
+ const rows=source.filter((x,i,a)=>i===a.findIndex(y=>String(y.id||y.title||y.name)===String(x.id||x.title||x.name))).filter(x=>(!search||JSON.stringify(x).toLowerCase().includes(search))&&(!league||String(x.leagueId||x.league)===String(league))).slice(0,120);
+ const label=x=>x.title||x.name||x.fullName||x.short||"Museum Exhibit";
+ const type=x=>x.type||x.category||x.position||"EXHIBIT";
+ const image=x=>x.image||x.imageUrl||x.photo||x.photoUrl||x.logo||"";
+ const link=x=>x.gameId?'game-intelligence.html?id='+encodeURIComponent(x.gameId):x.playerId?'player.html?id='+encodeURIComponent(x.playerId):x.teamId?'team.html?id='+encodeURIComponent(x.teamId):"";
+ const cards=rows.map(x=>'<article class="dm81Card">'+(image(x)?'<div class="dm81Img"><img src="'+esc(image(x))+'" alt="'+esc(label(x))+'" loading="lazy"></div>':'<div class="dm81Img dm81NoImg">EXHIBIT</div>')+'<div class="dm81Body"><span>'+esc(type(x))+'</span><h2>'+esc(label(x))+'</h2><small>'+esc(x.year||x.season||x.date||x.leagueName||x.league||"ARCHIVE")+'</small><p>'+esc(x.description||x.story||x.summary||"A connected exhibit from the CrowRules Sports digital museum.")+'</p>'+(link(x)?'<a href="'+link(x)+'">EXPLORE CONNECTION</a>':"")+'</div></article>').join("");
+ box.innerHTML='<section class="dm81Hero"><small>SPORTS 81.0 • UNIVERSAL DIGITAL MUSEUM</small><h1>THE SPORTS MUSEUM</h1><p>LEGENDS • CHAMPIONSHIPS • GAMES • RECORDS • MOMENTS • MEDIA</p></section><form class="dm81Search"><input name="q" value="'+esc(q.get("q")||"")+'" placeholder="SEARCH THE MUSEUM"><select name="room"><option value="">ALL EXHIBITS</option>'+Object.keys(rooms).map(r=>'<option value="'+esc(r)+'" '+(r===room?"selected":"")+'>'+esc(r)+'</option>').join("")+'</select><select name="league"><option value="">ALL LEAGUES</option>'+leagues.map(l=>'<option value="'+esc(l.id)+'" '+(String(l.id)===String(league)?"selected":"")+'>'+esc(l.name||l.id)+'</option>').join("")+'</select><button>ENTER MUSEUM</button></form><div class="dm81Rooms">'+Object.keys(rooms).map(r=>'<a href="?room='+encodeURIComponent(r)+'">'+esc(r)+'<b>'+rooms[r].length+'</b></a>').join("")+'</div><div class="dm81Metrics"><article><b>'+rows.length+'</b><small>EXHIBITS</small></article><article><b>'+players.length+'</b><small>ATHLETES</small></article><article><b>'+teams.length+'</b><small>TEAMS</small></article><article><b>'+games.length+'</b><small>GAMES</small></article></div><section class="dm81Grid">'+(cards||'<div class="dm81Empty"><h2>MUSEUM READY</h2><p>No connected exhibits match this selection yet.</p></div>')+'</section><nav class="dm81Links"><a href="visual-stories.html">VISUAL STORIES</a><a href="photos.html">PHOTO VAULT</a><a href="media-vault.html">MEDIA VAULT</a><a href="hall-of-fame.html">HALL OF FAME</a><a href="legacy.html">LEGACY</a><a href="timeline.html">TIMELINE</a></nav>';
+}
+
+
 /* SPORTS 80.0 — UNIVERSAL SPORTS VISUAL STORY ENGINE */
 function renderVisualStories80(){
  const box=$("#visualStories80");if(!box||!SportsState.ready)return;
