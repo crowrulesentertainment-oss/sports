@@ -9,7 +9,7 @@ const SportsState={
 };
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
-const loadJSON=async path=>{const r=await fetch(path+"?v=13.0",{cache:"no-store"});if(!r.ok)throw new Error(path+" "+r.status);return r.json();};
+const loadJSON=async path=>{const r=await fetch(path+"?v=14.0",{cache:"no-store"});if(!r.ok)throw new Error(path+" "+r.status);return r.json();};
 
 async function loadData(){
   const [leagues,teams,players,games,standings,schedule,videos,pickem]=await Promise.all([
@@ -17,7 +17,7 @@ async function loadData(){
     loadJSON("data/standings.json"),loadJSON("data/schedule.json"),loadJSON("data/videos.json"),loadJSON("data/pickem.json")
   ]);
   SportsState.data={leagues:leagues.leagues||[],teams:teams.teams||[],players:players.players||[],games:games.games||[],standings:standings.standings||[],schedule:schedule.schedule||[],videos:videos.videos||[],pickem};
-  SportsState.ready=true; buildShell(); render(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
+  SportsState.ready=true; buildShell(); render(); renderRankings(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
 }
 function league(){return SportsState.data.leagues.find(x=>x.id===SportsState.selectedLeague)||null}
 function selected(arr){return SportsState.selectedLeague==="all"?arr:arr.filter(x=>x.leagueId===SportsState.selectedLeague)}
@@ -26,7 +26,7 @@ function leagueName(id){return SportsState.data.leagues.find(x=>x.id===id)?.name
 function setLeague(id){
   SportsState.selectedLeague=id||"all"; localStorage.setItem("crowrulesSportsLeague",SportsState.selectedLeague);
   const u=new URL(location.href); if(id&&id!=="all")u.searchParams.set("league",id);else u.searchParams.delete("league");
-  history.replaceState({}, "", u); buildShell(); render(); renderDetail(); renderPickDetail();
+  history.replaceState({}, "", u); buildShell(); render(); renderRankings(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
 }
 function renderDiscoverySearch(){
   const q=SportsState.search.trim().toLowerCase();
@@ -55,6 +55,14 @@ function renderDiscoverySearch(){
   box.classList.add("open");
   $("#closeDiscovery")?.addEventListener("click",()=>{box.classList.remove("open");const s=$("#sportsSearch");if(s){s.value="";SportsState.search="";render()}});
   box.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>box.classList.remove("open")));
+}
+function renderRankings(){
+  const teamBox=$("#teamRankings"),playerBox=$("#playerRankings"); if(!teamBox&&!playerBox)return;
+  const d=SportsState.data, ts=selected(d.teams), ps=selected(d.players);
+  const standings=selected(d.standings).sort((a,b)=>a.rank-b.rank);
+  if(teamBox) teamBox.innerHTML=standings.map(s=>{const t=getTeam(s.teamId);return '<a class="rankingRow" href="team.html?id='+encodeURIComponent(s.teamId)+'"><strong>#'+esc(s.rank)+'</strong><b>'+esc(t?.name||"TEAM")+'</b><span>'+esc(leagueName(s.leagueId))+'</span><em>'+recordLabel(s)+'</em></a>'}).join("")||'<div class="emptyState">NO TEAM RANKINGS IN SELECTION</div>';
+  const rankedPlayers=ps.filter(p=>p.statValue&&p.statValue!=="—").slice(0,20);
+  if(playerBox) playerBox.innerHTML=(rankedPlayers.length?rankedPlayers.map((p,i)=>'<a class="rankingRow playerRank" href="player.html?id='+encodeURIComponent(p.id)+'"><strong>#'+String(i+1).padStart(2,"0")+'</strong><b>'+esc(p.name)+'</b><span>'+esc(p.position||"PLAYER")+' • '+esc(leagueName(p.leagueId))+'</span><em>'+esc(p.statValue)+' '+esc(p.statLabel||"")+'</em></a>').join(""):'<div class="emptyState">PLAYER RANKING DATA PENDING</div>');
 }
 function buildShell(){
   const top=document.querySelector(".topbar"); if(!top)return;
