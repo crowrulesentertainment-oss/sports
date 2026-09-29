@@ -1,0 +1,38 @@
+{
+  "version": "3.0",
+  "status": "static-sample",
+  "schedule": [
+    {
+      "id": "sch1",
+      "leagueId": "nfl",
+      "gameId": "g1",
+      "date": "TBD",
+      "time": "TBD",
+      "venue": "TBD"
+    },
+    {
+      "id": "sch2",
+      "leagueId": "mlb",
+      "gameId": "g2",
+      "date": "TBD",
+      "time": "TBD",
+      "venue": "TBD"
+    },
+    {
+      "id": "sch3",
+      "leagueId": "nhl",
+      "gameId": "g3",
+      "date": "TBD",
+      "time": "TBD",
+      "venue": "TBD"
+    },
+    {
+      "id": "sch4",
+      "leagueId": "nba",
+      "gameId": "g4",
+      "date": "TBD",
+      "time": "TBD",
+      "venue": "TBD"
+    }
+  ]
+}
