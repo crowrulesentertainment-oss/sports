@@ -1,0 +1,126 @@
+{
+  "version": "3.0",
+  "status": "static-sample",
+  "teams": [
+    {
+      "id": "nfl-alpha",
+      "leagueId": "nfl",
+      "name": "Alpha City",
+      "short": "ALP"
+    },
+    {
+      "id": "nfl-tacoma",
+      "leagueId": "nfl",
+      "name": "Tacoma",
+      "short": "TAC"
+    },
+    {
+      "id": "mlb-alpha",
+      "leagueId": "mlb",
+      "name": "Alpha City",
+      "short": "ALP"
+    },
+    {
+      "id": "mlb-tacoma",
+      "leagueId": "mlb",
+      "name": "Tacoma",
+      "short": "TAC"
+    },
+    {
+      "id": "nhl-alpha",
+      "leagueId": "nhl",
+      "name": "Alpha City",
+      "short": "ALP"
+    },
+    {
+      "id": "nhl-tacoma",
+      "leagueId": "nhl",
+      "name": "Tacoma",
+      "short": "TAC"
+    },
+    {
+      "id": "nba-alpha",
+      "leagueId": "nba",
+      "name": "Alpha City",
+      "short": "ALP"
+    },
+    {
+      "id": "nba-tacoma",
+      "leagueId": "nba",
+      "name": "Tacoma",
+      "short": "TAC"
+    },
+    {
+      "id": "wnba-alpha",
+      "leagueId": "wnba",
+      "name": "Alpha City",
+      "short": "ALP"
+    },
+    {
+      "id": "wnba-tacoma",
+      "leagueId": "wnba",
+      "name": "Tacoma",
+      "short": "TAC"
+    },
+    {
+      "id": "mls-alpha",
+      "leagueId": "mls",
+      "name": "Alpha City",
+      "short": "ALP"
+    },
+    {
+      "id": "mls-tacoma",
+      "leagueId": "mls",
+      "name": "Tacoma",
+      "short": "TAC"
+    },
+    {
+      "id": "ufl-alpha",
+      "leagueId": "ufl",
+      "name": "Alpha City",
+      "short": "ALP"
+    },
+    {
+      "id": "ufl-tacoma",
+      "leagueId": "ufl",
+      "name": "Tacoma",
+      "short": "TAC"
+    },
+    {
+      "id": "ncaa-north",
+      "leagueId": "ncaa",
+      "name": "North University",
+      "short": "NOR"
+    },
+    {
+      "id": "ncaa-south",
+      "leagueId": "ncaa",
+      "name": "South University",
+      "short": "SOU"
+    },
+    {
+      "id": "aaa-alpha",
+      "leagueId": "triple-a",
+      "name": "Alpha Club",
+      "short": "ALP"
+    },
+    {
+      "id": "aaa-tacoma",
+      "leagueId": "triple-a",
+      "name": "Tacoma Club",
+      "short": "TAC"
+    },
+    {
+      "id": "hs-north",
+      "leagueId": "high-school",
+      "name": "North High",
+      "short": "NOR"
+    },
+    {
+      "id": "hs-south",
+      "leagueId": "high-school",
+      "name": "South High",
+      "short": "SOU"
+    }
+  ]
+}
