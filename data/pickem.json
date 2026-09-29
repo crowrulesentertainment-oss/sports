@@ -1,0 +1,53 @@
+{
+  "version": "3.0",
+  "status": "static-sample",
+  "games": [
+    {
+      "id": "pe1",
+      "leagueId": "nfl",
+      "gameId": "g1",
+      "question": "Who wins?",
+      "options": [
+        "Alpha City",
+        "Tacoma"
+      ],
+      "points": 10
+    },
+    {
+      "id": "pe2",
+      "leagueId": "mlb",
+      "gameId": "g2",
+      "question": "Who wins?",
+      "options": [
+        "Alpha City",
+        "Tacoma"
+      ],
+      "points": 10
+    },
+    {
+      "id": "pe3",
+      "leagueId": "nba",
+      "gameId": "g4",
+      "question": "Who wins?",
+      "options": [
+        "Alpha City",
+        "Tacoma"
+      ],
+      "points": 10
+    }
+  ],
+  "leaderboard": [
+    {
+      "name": "PLAYER ONE",
+      "points": 0
+    },
+    {
+      "name": "PLAYER TWO",
+      "points": 0
+    },
+    {
+      "name": "PLAYER THREE",
+      "points": 0
+    }
+  ]
+}
