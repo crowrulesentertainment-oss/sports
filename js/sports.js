@@ -1,4 +1,20 @@
 
+// SPORTS 73.0 — UNIVERSAL SPORTS HALL OF FAME & LEGENDS CENTER
+function renderHallOfFame73(){
+ const box=$("#hallOfFame73");if(!box||!SportsState.ready)return;
+ const d=SportsState.data, players=d.players||[],teams=d.teams||[],hof=d.hall_of_fame||d.hallOfFame||d.legends||d.hall_of_fame_members||[];
+ const awards=d.awards||d.honors||[], records=d.records||[];
+ const all=hof.length?hof:players.filter(x=>x.hallOfFame||x.hof||x.legend).map(x=>({...x,type:"PLAYER",name:x.name||x.fullName}));
+ const q=new URLSearchParams(location.search),search=(q.get("q")||"").trim().toLowerCase(),league=q.get("league")||"";
+ const rows=all.filter(x=>(!search||JSON.stringify(x).toLowerCase().includes(search))&&(!league||String(x.leagueId||x.league)===league));
+ const personName=x=>x.name||x.fullName||x.title||x.id||"LEGEND";
+ const honors=x=>awards.filter(a=>String(a.playerId||a.teamId||a.entityId)===String(x.id)).slice(0,5);
+ const recs=x=>records.filter(a=>String(a.playerId||a.teamId||a.entityId)===String(x.id)).length;
+ const cards=rows.slice(0,100).map(x=>{const hs=honors(x);return '<article class="hof73Card"><div class="hof73Badge">HALL OF FAME</div><h2>'+esc(personName(x))+'</h2><small>'+esc(x.type||"PLAYER")+' • '+esc(x.inductionYear||x.inducted||x.year||"YEAR TBD")+'</small><span>'+esc(x.leagueName||x.league||x.sport||"SPORTS")+'</span><p>'+esc(x.biography||x.bio||x.description||"Historical profile connected to the CrowRules Sports data layer.")+'</p><div class="hof73Stats"><b>'+recs(x)+'</b><em>RECORDS</em><b>'+hs.length+'</b><em>HONORS</em></div></article>'}).join("");
+ box.innerHTML='<div class="hof73Hero"><small>SPORTS 73.0 • UNIVERSAL HALL OF FAME & LEGENDS CENTER</small><h1>HALL OF FAME</h1><p>LEGENDS • INDUCTEES • CAREERS • CHAMPIONSHIPS • HISTORY</p></div><form class="hof73Search"><input name="q" value="'+esc(q.get("q")||"")+'" placeholder="SEARCH LEGENDS"><select name="league"><option value="">ALL LEAGUES</option>'+((d.leagues||[]).map(l=>'<option value="'+esc(l.id)+'" '+(String(l.id)===String(league)?"selected":"")+'>'+esc(l.name||l.id)+'</option>').join(""))+'</select><button>SEARCH</button></form><div class="hof73Metrics"><article><b>'+rows.length+'</b><span>CONNECTED LEGENDS</span></article><article><b>'+new Set(rows.map(x=>x.inductionYear||x.inducted||x.year).filter(Boolean)).size+'</b><span>INDUCTION YEARS</span></article><article><b>'+new Set(rows.map(x=>x.leagueId||x.league||x.sport).filter(Boolean)).size+'</b><span>SPORTS / LEAGUES</span></article><article><b>'+rows.filter(x=>x.type==="TEAM"||x.team).length+'</b><span>TEAM HONORS</span></article></div><section class="hof73Grid">'+(cards||'<div class="hof73Empty">No Hall of Fame records match the current search.</div>')+'</section><div class="hof73Links"><a href="awards.html">AWARDS</a><a href="milestones.html">MILESTONES</a><a href="records.html">RECORDS</a><a href="history.html">HISTORY</a><a href="career.html">CAREERS</a></div>';
+}
+
+
 // SPORTS 72.0 — UNIVERSAL SPORTS AWARDS & HONORS CENTER
 function renderAwardsCenter72(){
  const box=$("#awardsCenter72");if(!box||!SportsState.ready)return;
