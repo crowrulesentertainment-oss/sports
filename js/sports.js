@@ -1,4 +1,16 @@
 
+// SPORTS 47.0 — UNIVERSAL SPORTS NEWS TOPICS & CATEGORIES
+function renderNewsTopics47(){
+  const box=$("#sportsNewsTopics47");if(!box||!SportsState.ready)return;
+  const all=SportsState.data.news||[], counts={};
+  all.forEach(n=>{const c=String(n.category||"SPORTS").toUpperCase();counts[c]=(counts[c]||0)+1});
+  const cats=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const q=(new URLSearchParams(location.search).get("topic")||"ALL").toUpperCase();
+  const feed=all.filter(n=>q==="ALL"||String(n.category||"SPORTS").toUpperCase()===q).slice(0,12);
+  box.innerHTML='<div class="topic47Hero"><div><small>SPORTS 47.0 • TOPICS & CATEGORIES</small><h2>SPORTS TOPICS</h2><p>Explore Sports coverage through connected story categories and topic views.</p></div><a href="news.html">DISCOVER</a></div><div class="topic47Cats"><a class="'+(q==="ALL"?"active":"")+'" href="topics.html?topic=ALL">ALL</a>'+cats.map(c=>'<a class="'+(q===c[0]?"active":"")+'" href="topics.html?topic='+encodeURIComponent(c[0])+'">'+esc(c[0])+' <b>'+c[1]+'</b></a>').join("")+'</div><div class="topic47Grid">'+(feed.length?feed.map(n=>'<a href="news-story.html?id='+encodeURIComponent(n.id||"")+'"><span>'+esc(n.category||"SPORTS")+'</span><b>'+esc(n.title||"Sports Story")+'</b><em>'+esc(n.date||"LATEST")+'</em></a>').join(""):'<p class="topic47Empty">NO STORIES IN THIS TOPIC.</p>')+'</div>';
+}
+
+
 // SPORTS 46.0 — UNIVERSAL SPORTS NEWS TRENDING ENGINE
 function renderNewsTrending46(){
   const box=$("#sportsNewsTrending46");if(!box||!SportsState.ready)return;
