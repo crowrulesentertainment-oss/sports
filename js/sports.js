@@ -1,4 +1,20 @@
 
+// SPORTS 54.0 — UNIVERSAL SPORTS GAME DAY COMMAND CENTER
+function renderGameDayCommandCenter54(){
+  const box=$("#gameDayCommand54");if(!box||!SportsState.ready)return;
+  const f=Favorites.get(), games=SportsState.data.games||[], news=SportsState.data.news||[], videos=SportsState.data.videos||[];
+  const teams=new Set(f.teams||[]), leagueOk=x=>SportsState.selectedLeague==="all"||x.leagueId===SportsState.selectedLeague;
+  const relevant=g=>leagueOk(g)&&(!teams.size||teams.has(g.homeTeamId)||teams.has(g.awayTeamId));
+  const live=games.filter(g=>relevant(g)&&["LIVE","IN PROGRESS","HALFTIME"].includes(String(g.status||"").toUpperCase())).slice(0,6);
+  const upcoming=games.filter(g=>relevant(g)&&!["FINAL","COMPLETED"].includes(String(g.status||"").toUpperCase())&&!["LIVE","IN PROGRESS","HALFTIME"].includes(String(g.status||"").toUpperCase())).slice(0,6);
+  const stories=news.filter(leagueOk).slice(0,4), media=videos.filter(leagueOk).slice(0,4);
+  const game=g=>'<a href="game.html?id='+encodeURIComponent(g.id)+'"><span>'+esc(g.status||"GAME")+'</span><b>'+esc(getTeam(g.awayTeamId)?.short||"AWY")+' @ '+esc(getTeam(g.homeTeamId)?.short||"HME")+'</b><em>'+esc(g.score||g.time||g.date||"SCHEDULED")+'</em></a>';
+  const story=n=>'<a href="news-story.html?id='+encodeURIComponent(n.id)+'"><span>'+esc(n.category||"NEWS")+'</span><b>'+esc(n.title||"Sports Story")+'</b><em>'+esc(n.date||"LATEST")+'</em></a>';
+  const vid=v=>'<a href="video.html?id='+encodeURIComponent(v.id)+'"><span>VIDEO</span><b>'+esc(v.title||v.name||"Sports Video")+'</b><em>'+esc(v.date||"MEDIA")+'</em></a>';
+  box.innerHTML='<div class="gameday54Hero"><div><small>SPORTS 54.0 • GAME DAY COMMAND CENTER</small><h1>GAME DAY CONTROL</h1><p>One command center for live action, upcoming games, news and media connected to your Sports universe.</p></div><a href="scores.html">SCORES</a></div><div class="gameday54Stats"><div><b>'+live.length+'</b><span>LIVE</span></div><div><b>'+upcoming.length+'</b><span>UP NEXT</span></div><div><b>'+teams.size+'</b><span>FOLLOWED TEAMS</span></div><div><b>'+stories.length+'</b><span>STORIES</span></div></div><div class="gameday54Grid"><section><h2>LIVE NOW</h2>'+(live.length?live.map(game).join(""):'<p>No live games in the current data feed.</p>')+'</section><section><h2>UP NEXT</h2>'+(upcoming.length?upcoming.map(game).join(""):'<p>No upcoming games in the current data feed.</p>')+'</section><section><h2>GAME DAY NEWS</h2>'+(stories.length?stories.map(story).join(""):'<p>No current stories in the selected league.</p>')+'</section><section><h2>GAME DAY MEDIA</h2>'+(media.length?media.map(vid).join(""):'<p>No videos in the current data feed.</p>')+'</section></div>';
+}
+
+
 // SPORTS 53.0 — UNIVERSAL SPORTS HOME SECTIONS ENGINE
 function renderSportsHomeSections53(){
   const box=$("#sportsHomeSections53");if(!box||!SportsState.ready)return;
