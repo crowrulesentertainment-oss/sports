@@ -9,7 +9,7 @@ const SportsState={
 };
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
-const loadJSON=async path=>{const r=await fetch(path+"?v=12.0",{cache:"no-store"});if(!r.ok)throw new Error(path+" "+r.status);return r.json();};
+const loadJSON=async path=>{const r=await fetch(path+"?v=13.0",{cache:"no-store"});if(!r.ok)throw new Error(path+" "+r.status);return r.json();};
 
 async function loadData(){
   const [leagues,teams,players,games,standings,schedule,videos,pickem]=await Promise.all([
@@ -17,7 +17,7 @@ async function loadData(){
     loadJSON("data/standings.json"),loadJSON("data/schedule.json"),loadJSON("data/videos.json"),loadJSON("data/pickem.json")
   ]);
   SportsState.data={leagues:leagues.leagues||[],teams:teams.teams||[],players:players.players||[],games:games.games||[],standings:standings.standings||[],schedule:schedule.schedule||[],videos:videos.videos||[],pickem};
-  SportsState.ready=true; buildShell(); render(); renderDetail(); renderPickDetail();
+  SportsState.ready=true; buildShell(); render(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
 }
 function league(){return SportsState.data.leagues.find(x=>x.id===SportsState.selectedLeague)||null}
 function selected(arr){return SportsState.selectedLeague==="all"?arr:arr.filter(x=>x.leagueId===SportsState.selectedLeague)}
@@ -27,6 +27,34 @@ function setLeague(id){
   SportsState.selectedLeague=id||"all"; localStorage.setItem("crowrulesSportsLeague",SportsState.selectedLeague);
   const u=new URL(location.href); if(id&&id!=="all")u.searchParams.set("league",id);else u.searchParams.delete("league");
   history.replaceState({}, "", u); buildShell(); render(); renderDetail(); renderPickDetail();
+}
+function renderDiscoverySearch(){
+  const q=SportsState.search.trim().toLowerCase();
+  let box=$("#sportsDiscovery");
+  if(!box){
+    box=document.createElement("div"); box.id="sportsDiscovery"; box.className="sportsDiscovery";
+    document.body.appendChild(box);
+  }
+  if(!q){box.classList.remove("open");box.innerHTML="";return}
+  const d=SportsState.data;
+  const match=(x,fields)=>fields.some(k=>String(x?.[k]??"").toLowerCase().includes(q));
+  const leagues=d.leagues.filter(x=>match(x,["name","sport","level"])).slice(0,6);
+  const teams=d.teams.filter(x=>match(x,["name","short","id"])).slice(0,6);
+  const players=d.players.filter(x=>match(x,["name","position","statLabel"])).slice(0,6);
+  const games=d.games.filter(x=>match(x,["id","status","time"])).slice(0,6);
+  const videos=d.videos.filter(x=>match(x,["title","type"])).slice(0,6);
+  const section=(title,items,render)=>items.length?'<div class="discoverySection"><small>'+esc(title)+'</small>'+items.map(render).join("")+'</div>':"";
+  box.innerHTML='<div class="discoveryPanel"><div class="discoveryHead"><span>UNIVERSAL SPORTS SEARCH</span><button type="button" id="closeDiscovery">×</button></div>'+
+    section("LEAGUES",leagues,x=>'<a href="league.html?league='+encodeURIComponent(x.id)+'"><b>'+esc(x.name)+'</b><span>'+esc(x.sport||"SPORT")+' • '+esc(x.level||"LEVEL")+'</span></a>')+
+    section("TEAMS",teams,x=>'<a href="team.html?id='+encodeURIComponent(x.id)+'"><b>'+esc(x.name)+'</b><span>'+esc(leagueName(x.leagueId))+'</span></a>')+
+    section("PLAYERS",players,x=>'<a href="player.html?id='+encodeURIComponent(x.id)+'"><b>'+esc(x.name)+'</b><span>'+esc(x.position||"PLAYER")+' • '+esc(leagueName(x.leagueId))+'</span></a>')+
+    section("GAMES",games,x=>'<a href="game.html?id='+encodeURIComponent(x.id)+'"><b>'+esc(getTeam(x.awayTeamId)?.short||"AWY")+' @ '+esc(getTeam(x.homeTeamId)?.short||"HME")+'</b><span>'+esc(leagueName(x.leagueId))+' • '+esc(x.status||"GAME")+'</span></a>')+
+    section("MEDIA",videos,x=>'<a href="video.html?id='+encodeURIComponent(x.id)+'"><b>'+esc(x.title)+'</b><span>'+esc(leagueName(x.leagueId))+' • '+esc(x.type||"VIDEO")+'</span></a>')+
+    ((leagues.length+teams.length+players.length+games.length+videos.length)===0?'<div class="discoveryEmpty">NO SPORTS RESULTS FOUND</div>':"")+
+    '</div>';
+  box.classList.add("open");
+  $("#closeDiscovery")?.addEventListener("click",()=>{box.classList.remove("open");const s=$("#sportsSearch");if(s){s.value="";SportsState.search="";render()}});
+  box.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>box.classList.remove("open")));
 }
 function buildShell(){
   const top=document.querySelector(".topbar"); if(!top)return;
@@ -39,7 +67,7 @@ function buildShell(){
     select.innerHTML='<option value="all">ALL LEAGUES</option>'+SportsState.data.leagues.map(l=>'<option value="'+esc(l.id)+'">'+esc(l.name)+' • '+esc(l.level)+'</option>').join("");
     select.value=SportsState.selectedLeague; select.onchange=e=>setLeague(e.target.value);
   }
-  const search=$("#sportsSearch"); if(search){search.value=SportsState.search; search.oninput=e=>{SportsState.search=e.target.value;render()};}
+  const search=$("#sportsSearch"); if(search){search.value=SportsState.search; search.oninput=e=>{SportsState.search=e.target.value;render();renderDiscoverySearch()};}
 }
 function render(){
   if(!SportsState.ready)return;
