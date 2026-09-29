@@ -36,6 +36,30 @@ function favoriteButton(type,id,label){
 
 
 
+
+// SPORTS 29.0 — UNIVERSAL SPORTS IDENTITY & PROFILE
+const SportsIdentity={
+  key:"crowrulesSportsIdentity",
+  state:{status:"GUEST",user:null},
+  async init(){
+    try{
+      const supabase=window.supabase;
+      const client=window.supabaseClient||window.CROW_SUPABASE_CLIENT||null;
+      if(client?.auth?.getUser){
+        const {data}=await client.auth.getUser();
+        if(data?.user)this.state={status:"MEMBER",user:data.user};
+      }
+    }catch(e){}
+    renderIdentity();
+  }
+};
+function renderIdentity(){
+  const chip=$("#sportsIdentity");if(!chip)return;
+  chip.innerHTML=SportsIdentity.state.status==="MEMBER"
+    ? '<i></i><span>MEMBER</span><b>'+esc(SportsIdentity.state.user?.email||"CROW MEMBER")+'</b>'
+    : '<i></i><span>ACCOUNT</span><b>GUEST</b>';
+}
+
 // SPORTS 28.0 — UNIVERSAL SPORTS MEMBER DASHBOARD
 function renderMemberDashboard(){
   const box=$("#sportsMemberDashboard");if(!box||!SportsState.ready)return;
@@ -175,7 +199,7 @@ async function loadData(){
     loadJSON("data/standings.json"),loadJSON("data/schedule.json"),loadJSON("data/videos.json"),loadJSON("data/pickem.json")
   ]);
   SportsState.data={leagues:leagues.leagues||[],teams:teams.teams||[],players:players.players||[],games:games.games||[],standings:standings.standings||[],schedule:schedule.schedule||[],videos:videos.videos||[],pickem};
-  SportsState.ready=true; buildShell(); render(); renderFavorites(); renderNotificationCenter(); renderActivityCenter(); renderMemberDashboard(); renderActivityCenter(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
+  SportsState.ready=true; SportsIdentity.init(); buildShell(); render(); renderFavorites(); renderNotificationCenter(); renderActivityCenter(); renderMemberDashboard(); renderIdentity(); renderActivityCenter(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
 }
 function league(){return SportsState.data.leagues.find(x=>x.id===SportsState.selectedLeague)||null}
 function selected(arr){return SportsState.selectedLeague==="all"?arr:arr.filter(x=>x.leagueId===SportsState.selectedLeague)}
@@ -264,7 +288,7 @@ function buildShell(){
   }
   if(!document.querySelector("#sportsControls")){
     const controls=document.createElement("div"); controls.id="sportsControls"; controls.className="sportsControls";
-    controls.innerHTML='<button class="commandButton" id="sportsCommand" type="button" aria-expanded="false">COMMAND <span>⌄</span></button><label class="srOnly" for="leagueSelect">League</label><select id="leagueSelect" aria-label="Global league selector"></select><label class="srOnly" for="sportsSearch">Search sports</label><input id="sportsSearch" type="search" placeholder="SEARCH SPORTS" autocomplete="off"><button class="notificationButton" id="sportsNotifications" type="button" aria-label="Sports notifications"><span>◉</span><b>0</b></button><a class="accountChip" href="https://crowrulesentertainment-oss.github.io/crowspace/login.html" aria-label="Universal CrowRules account"><i></i><span>ACCOUNT</span><b>GUEST</b></a><div class="commandMenu" id="commandMenu"><div class="commandTitle">SPORTS COMMAND</div><a href="home.html">SPORTS HOME</a><a href="scores.html">LIVE SCORES</a><a href="schedule.html">SCHEDULE</a><a href="standings.html">STANDINGS</a><a href="rankings.html">RANKINGS</a><a href="stats.html">STATISTICS</a><a href="teams.html">TEAMS</a><a href="players.html">PLAYERS</a><a href="videos.html">MEDIA</a><a href="pickem.html">PICK ’EM</a></div>';
+    controls.innerHTML='<button class="commandButton" id="sportsCommand" type="button" aria-expanded="false">COMMAND <span>⌄</span></button><label class="srOnly" for="leagueSelect">League</label><select id="leagueSelect" aria-label="Global league selector"></select><label class="srOnly" for="sportsSearch">Search sports</label><input id="sportsSearch" type="search" placeholder="SEARCH SPORTS" autocomplete="off"><button class="notificationButton" id="sportsNotifications" type="button" aria-label="Sports notifications"><span>◉</span><b>0</b></button><a class="accountChip" id="sportsIdentity" href="https://crowrulesentertainment-oss.github.io/crowspace/login.html" aria-label="Universal CrowRules account"><i></i><span>ACCOUNT</span><b>GUEST</b></a><div class="commandMenu" id="commandMenu"><div class="commandTitle">SPORTS COMMAND</div><a href="home.html">SPORTS HOME</a><a href="scores.html">LIVE SCORES</a><a href="schedule.html">SCHEDULE</a><a href="standings.html">STANDINGS</a><a href="rankings.html">RANKINGS</a><a href="stats.html">STATISTICS</a><a href="teams.html">TEAMS</a><a href="players.html">PLAYERS</a><a href="videos.html">MEDIA</a><a href="pickem.html">PICK ’EM</a></div>';
     top.appendChild(controls);
   }
   const select=$("#leagueSelect"); if(select){
