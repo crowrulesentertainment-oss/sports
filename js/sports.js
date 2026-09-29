@@ -17,7 +17,7 @@ async function loadData(){
     loadJSON("data/standings.json"),loadJSON("data/schedule.json"),loadJSON("data/videos.json"),loadJSON("data/pickem.json")
   ]);
   SportsState.data={leagues:leagues.leagues||[],teams:teams.teams||[],players:players.players||[],games:games.games||[],standings:standings.standings||[],schedule:schedule.schedule||[],videos:videos.videos||[],pickem};
-  SportsState.ready=true; buildShell(); render(); renderDetail(); renderDetail(); renderPickDetail();
+  SportsState.ready=true; buildShell(); render(); renderDetail(); renderPickDetail();
 }
 function league(){return SportsState.data.leagues.find(x=>x.id===SportsState.selectedLeague)||null}
 function selected(arr){return SportsState.selectedLeague==="all"?arr:arr.filter(x=>x.leagueId===SportsState.selectedLeague)}
@@ -26,7 +26,7 @@ function leagueName(id){return SportsState.data.leagues.find(x=>x.id===id)?.name
 function setLeague(id){
   SportsState.selectedLeague=id||"all"; localStorage.setItem("crowrulesSportsLeague",SportsState.selectedLeague);
   const u=new URL(location.href); if(id&&id!=="all")u.searchParams.set("league",id);else u.searchParams.delete("league");
-  history.replaceState({}, "", u); buildShell(); render();
+  history.replaceState({}, "", u); buildShell(); render(); renderDetail(); renderPickDetail();
 }
 function buildShell(){
   const top=document.querySelector(".topbar"); if(!top)return;
