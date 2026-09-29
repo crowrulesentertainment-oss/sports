@@ -1,4 +1,19 @@
 
+// SPORTS 35.0 — UNIVERSAL NEWS INTEGRATION
+function renderIntegratedSportsFeed(){
+  const box=$("#sportsIntegratedFeed");if(!box||!SportsState.ready)return;
+  const f=Favorites.get(), teamIds=new Set(f.teams||[]), leagueIds=new Set(f.leagues||[]), playerIds=new Set(f.players||[]);
+  const games=SportsState.data.games.filter(g=>SportsState.selectedLeague==="all"||g.leagueId===SportsState.selectedLeague).filter(g=>leagueIds.has(g.leagueId)||teamIds.has(g.homeTeamId)||teamIds.has(g.awayTeamId));
+  const news=(SportsState.data.news||[]).filter(n=>SportsState.selectedLeague==="all"||n.leagueId===SportsState.selectedLeague).filter(n=>leagueIds.has(n.leagueId)||teamIds.has(n.teamId)||playerIds.has(n.playerId));
+  const videos=selected(SportsState.data.videos).slice(0,4);
+  const items=[];
+  games.slice(0,5).forEach(g=>items.push({type:"GAME",title:(getTeam(g.awayTeamId)?.short||"AWY")+" @ "+(getTeam(g.homeTeamId)?.short||"HME"),meta:g.status||"UP NEXT",href:"game.html?id="+encodeURIComponent(g.id)}));
+  news.slice(0,5).forEach(n=>items.push({type:"STORY",title:n.title||"Sports Story",meta:n.category||"NEWS",href:n.url||"news.html?id="+encodeURIComponent(n.id||"")}));
+  videos.forEach(v=>items.push({type:"MEDIA",title:v.title||"Sports Video",meta:v.type||"VIDEO",href:"video.html?id="+encodeURIComponent(v.id)}));
+  box.innerHTML='<div class="integrated35Hero"><div><small>SPORTS 35.0 • UNIVERSAL STREAM</small><h2>EVERYTHING SPORTS. ONE FEED.</h2><p>Games, stories and media connected to your Sports personalization.</p></div><a href="sports-profile.html">PROFILE</a></div><div class="integrated35List">'+(items.length?items.map(x=>'<a href="'+esc(x.href)+'" class="integrated35Item"><span>'+esc(x.type)+'</span><b>'+esc(x.title)+'</b><em>'+esc(x.meta)+'</em></a>').join(""):'<p class="integrated35Empty">Follow teams or leagues to build your universal Sports stream.</p>')+'</div>';
+}
+
+
 // SPORTS 34.0 — UNIVERSAL SPORTS NEWS & STORY CENTER
 function renderSportsNewsCenter(){
   const box=$("#sportsNewsCenter");if(!box||!SportsState.ready)return;
