@@ -10,6 +10,48 @@ const SportsState={
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 
+
+// SPORTS 24.0 — UNIVERSAL SPORTS API GATEWAY
+const SportsAPI={
+  mode:"STATIC",
+  endpoint:null,
+  provider:"NONE",
+  async configure(){
+    const cfg=window.CROW_CONFIG?.sportsLive||window.CROWRULES_SPORTS_API||null;
+    if(typeof cfg==="string") this.endpoint=cfg;
+    else if(cfg&&typeof cfg==="object"){this.endpoint=cfg.endpoint||null;this.provider=cfg.provider||"CUSTOM";}
+    this.mode=this.endpoint?"READY":"STATIC";
+    updateApiStatus();
+  },
+  async fetchGames(){
+    if(!this.endpoint)return null;
+    const res=await fetch(this.endpoint,{cache:"no-store",headers:{"Accept":"application/json"}});
+    if(!res.ok)throw new Error("Sports API "+res.status);
+    const data=await res.json();
+    return Array.isArray(data)?data:(Array.isArray(data.games)?data.games:null);
+  },
+  async sync(){
+    try{
+      const games=await this.fetchGames();
+      if(!games)return;
+      const map=new Map(SportsState.data.games.map(g=>[g.id,g]));
+      games.forEach(g=>{if(g?.id)map.set(g.id,{...map.get(g.id),...g});});
+      SportsState.data.games=[...map.values()];
+      this.mode="LIVE"; this.lastSync=new Date();
+      LiveEngine.connected=true;
+      refreshUniversalLayer();
+    }catch(e){this.mode=this.endpoint?"ERROR":"STATIC";LiveEngine.connected=false}
+    updateApiStatus(); updateLiveStatus();
+  },
+  lastSync:null
+};
+function updateApiStatus(){
+  const el=$("#sportsApiStatus");if(!el)return;
+  el.textContent="API GATEWAY "+SportsAPI.mode;
+  el.className="apiStatus api-"+SportsAPI.mode.toLowerCase();
+  const src=$("#sportsApiSource");if(src)src.textContent=SportsAPI.provider||"STATIC JSON";
+}
+
 // SPORTS 23.0 — UNIVERSAL LIVE SPORTS ENGINE
 const LiveEngine={
   enabled:false,connected:false,lastSync:null,timer:null,interval:30000,
@@ -43,6 +85,7 @@ function updateLiveStatus(){
 const loadJSON=async path=>{const r=await fetch(path+"?v=23.0",{cache:"no-store"});if(!r.ok)throw new Error(path+" "+r.status);return r.json();};
 
 async function loadData(){
+  await SportsAPI.configure();
   const [leagues,teams,players,games,standings,schedule,videos,pickem]=await Promise.all([
     loadJSON("data/leagues.json"),loadJSON("data/teams.json"),loadJSON("data/players.json"),loadJSON("data/games.json"),
     loadJSON("data/standings.json"),loadJSON("data/schedule.json"),loadJSON("data/videos.json"),loadJSON("data/pickem.json")
@@ -144,7 +187,7 @@ function buildShell(){
   const command=$("#sportsCommand"), menu=$("#commandMenu");
   if(command&&menu){command.onclick=e=>{e.stopPropagation();menu.classList.toggle("open");command.setAttribute("aria-expanded",menu.classList.contains("open"))}}
   const notification=$("#sportsNotifications");
-  LiveEngine.start();
+  SportsAPI.sync(); LiveEngine.start();
   if(notification){
     const live=SportsState.data.games.filter(g=>["LIVE","IN PROGRESS","HALFTIME"].includes(String(g.status||"").toUpperCase())).filter(g=>SportsState.selectedLeague==="all"||g.leagueId===SportsState.selectedLeague).length;
     notification.querySelector("b").textContent=String(live);
@@ -153,7 +196,7 @@ function buildShell(){
   }
   if(!document.querySelector("#sportsDataState")){
     const state=document.createElement("div"); state.id="sportsDataState"; state.className="sportsDataState";
-    state.innerHTML='<span>SPORTS 23.0 LIVE ENGINE</span><b id="liveEngineStatus">○ LIVE FEED READY</b><i></i><span id="liveEngineSync">WAITING FOR LIVE PROVIDER</span>';
+    state.innerHTML='<span>SPORTS 24.0 API GATEWAY</span><b id="sportsApiStatus" class="apiStatus">API GATEWAY STATIC</b><i></i><span id="sportsApiSource">STATIC JSON</span><i></i><b id="liveEngineStatus">○ LIVE FEED READY</b><span id="liveEngineSync">WAITING FOR LIVE PROVIDER</span>';
     top.insertAdjacentElement("afterend",state);
   }
   if(false){
