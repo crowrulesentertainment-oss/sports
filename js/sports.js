@@ -1,4 +1,20 @@
 
+/* SPORTS 76.0 — UNIVERSAL SPORTS STORYTELLING ENGINE */
+function renderSportsStorytelling76(){
+ const box=$("#sportsStorytelling76");if(!box||!SportsState.ready)return;
+ const d=SportsState.data,mom=d.iconic_moments||d.iconicMoments||d.moments||[],games=d.games||[],players=d.players||[],teams=d.teams||[],news=d.news||[],records=d.records||[],videos=d.videos||[];
+ const q=new URLSearchParams(location.search),search=(q.get("q")||"").trim().toLowerCase(),league=q.get("league")||"";
+ const source=[...mom.map(x=>({...x,storyType:"ICONIC MOMENT"})),...news.map(x=>({...x,storyType:"NEWS STORY"})),...records.filter(x=>x.story||x.description).map(x=>({...x,storyType:"RECORD"}))];
+ const unique=source.filter((x,i,a)=>i===a.findIndex(y=>String(y.id||y.title)===String(x.id||x.title)));
+ const rows=unique.filter(x=>(!search||JSON.stringify(x).toLowerCase().includes(search))&&(!league||String(x.leagueId||x.league)===league));
+ const pname=id=>(players.find(x=>String(x.id)===String(id))||{}).name||"";
+ const tname=id=>(teams.find(x=>String(x.id)===String(id))||{}).name||"";
+ const linked=x=>games.find(g=>String(g.id)===String(x.gameId||x.eventId));
+ const cards=rows.slice(0,100).map(x=>{const g=linked(x),video=x.videoId||x.videoUrl||videos.find(v=>String(v.gameId)===String(x.gameId));return '<article class="st76Card"><span>'+esc(x.storyType)+'</span><h2>'+esc(x.title||x.name||"Sports Story")+'</h2><small>'+esc(x.date||x.year||x.season||"CONNECTED")+' • '+esc(x.leagueName||x.league||"SPORTS")+'</small><p>'+esc(x.story||x.description||x.summary||"A connected sports story assembled from the CrowRules Sports data layer.")+'</p><div>'+esc(pname(x.playerId||x.athleteId))+' '+esc(tname(x.teamId||x.teamIdHome))+'</div><footer>'+(g?'<a href="game-intelligence.html?id='+encodeURIComponent(g.id)+'">GAME INTELLIGENCE</a>':"")+(video?'<a href="video.html?id='+encodeURIComponent(video.id||"")+'">MEDIA</a>':"")+'</footer></article>'}).join("");
+ box.innerHTML='<section class="st76Hero"><small>SPORTS 76.0 • UNIVERSAL SPORTS STORYTELLING ENGINE</small><h1>THE SPORTS STORY ARCHIVE</h1><p>GAMES • PEOPLE • CHAMPIONSHIPS • RECORDS • MOMENTS • STORIES</p></section><form class="st76Search"><input name="q" value="'+esc(q.get("q")||"")+'" placeholder="SEARCH SPORTS STORIES"><select name="league"><option value="">ALL LEAGUES</option>'+((d.leagues||[]).map(l=>'<option value="'+esc(l.id)+'" '+(String(l.id)===String(league)?"selected":"")+'>'+esc(l.name||l.id)+'</option>').join(""))+'</select><button>EXPLORE STORIES</button></form><div class="st76Metrics"><article><b>'+rows.length+'</b><small>CONNECTED STORIES</small></article><article><b>'+rows.filter(x=>x.storyType==="ICONIC MOMENT").length+'</b><small>ICONIC MOMENTS</small></article><article><b>'+rows.filter(x=>x.storyType==="NEWS STORY").length+'</b><small>NEWS STORIES</small></article><article><b>'+new Set(rows.map(x=>x.leagueId||x.league).filter(Boolean)).size+'</b><small>LEAGUES</small></article></div><section class="st76Grid">'+(cards||'<div class="st76Empty"><h2>STORY ARCHIVE READY</h2><p>No connected sports stories are available for this selection yet.</p></div>')+'</section><nav class="st76Links"><a href="iconic-moments.html">ICONIC MOMENTS</a><a href="news.html">NEWS</a><a href="history.html">HISTORY</a><a href="legacy.html">LEGACY</a><a href="media.html">MEDIA</a></nav>';
+}
+
+
 // SPORTS 75.0 — UNIVERSAL SPORTS ICONIC MOMENTS CENTER
 function renderIconicMoments75(){
  const box=$("#iconicMoments75");if(!box||!SportsState.ready)return;
