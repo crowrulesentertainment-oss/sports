@@ -96,3 +96,7 @@
 /* SPORTS 24.0 — API GATEWAY */
 .apiStatus{color:var(--cyan)!important}.api-live{color:#38d39f!important}.api-error{color:#ff6b7a!important}.api-ready{color:#ffd166!important}
 #sportsApiSource{color:#7b879d}
+
+/* SPORTS 25.0 — FAVORITES */
+.sportsFavorites{position:relative;z-index:440;display:flex;align-items:center;gap:8px;min-height:38px;padding:6px 14px;overflow:auto;white-space:nowrap;background:rgba(5,8,18,.94);border-bottom:1px solid rgba(148,163,184,.1);font:800 8px Orbitron;letter-spacing:1px}.sportsFavorites span{color:var(--purple)}.sportsFavorites em{color:#68738a;font-style:normal}.sportsFavorites button,.favoriteButton{border:1px solid rgba(34,211,238,.25);background:rgba(34,211,238,.06);color:var(--cyan);border-radius:999px;padding:7px 11px;font:800 7px Orbitron;letter-spacing:1px;cursor:pointer}.favoriteButton{margin-top:10px}.favoriteButton.isFavorite{color:#ffd166;border-color:rgba(255,209,102,.4);background:rgba(255,209,102,.08)}.sportsFavorites button:hover,.favoriteButton:hover{transform:translateY(-1px)}
+@media(max-width:650px){.sportsFavorites{min-height:34px;padding:5px 10px}.sportsFavorites button{font-size:6px}.favoriteButton{font-size:6px}}
