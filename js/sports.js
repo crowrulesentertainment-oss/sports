@@ -1,4 +1,20 @@
 
+// SPORTS 72.0 — UNIVERSAL SPORTS AWARDS & HONORS CENTER
+function renderAwardsCenter72(){
+ const box=$("#awardsCenter72");if(!box||!SportsState.ready)return;
+ const d=SportsState.data, players=d.players||[],teams=d.teams||[],awards=d.awards||d.honors||d.achievements||[],records=d.records||[];
+ const q=new URLSearchParams(location.search),league=q.get("league")||"",entity=q.get("id")||"";
+ const all=[...awards,...records.filter(x=>x.award||x.honor||x.honors).map(x=>({...x,title:x.award||x.honor||x.honors}))];
+ const filtered=all.filter(x=>(!league||String(x.leagueId||x.league)===league)&&(!entity||String(x.playerId||x.teamId||x.entityId)===entity));
+ const leagueName=id=>{const x=(d.leagues||[]).find(l=>String(l.id)===String(id));return x?.name||id||"UNSPECIFIED"};
+ const recipient=x=>{const id=x.playerId||x.teamId||x.entityId;return (players.find(p=>String(p.id)===String(id))||teams.find(t=>String(t.id)===String(id)))?.name||x.recipient||id||"UNSPECIFIED"};
+ const grouped={};filtered.forEach(x=>{const k=x.year||x.season||x.date||"HISTORY";(grouped[k]??=[]).push(x)});
+ const cards=Object.entries(grouped).slice(0,40).map(([year,items])=>'<section class="aw72Year"><h2>'+esc(year)+'</h2>'+items.map(x=>'<article><small>'+esc(x.category||x.type||"HONOR")+'</small><h3>'+esc(x.title||x.name||"AWARD")+'</h3><b>'+esc(recipient(x))+'</b><span>'+esc(leagueName(x.leagueId||x.league))+'</span><p>'+esc(x.description||x.value||x.result||"CONNECTED HONOR")+'</p></article>').join("")+'</section>').join("");
+ box.innerHTML='<div class="aw72Hero"><small>SPORTS 72.0 • UNIVERSAL AWARDS & HONORS CENTER</small><h1>AWARDS & HONORS</h1><p>CHAMPIONSHIPS • MVP • ALL-STAR • LEAGUE AWARDS • HALL OF FAME</p></div><div class="aw72Metrics"><article><b>'+filtered.length+'</b><span>CONNECTED HONORS</span></article><article><b>'+new Set(filtered.map(x=>x.year||x.season||x.date)).size+'</b><span>YEARS / SEASONS</span></article><article><b>'+new Set(filtered.map(x=>x.playerId||x.teamId||x.entityId).filter(Boolean)).size+'</b><span>RECIPIENTS</span></article><article><b>'+new Set(filtered.map(x=>x.category||x.type).filter(Boolean)).size+'</b><span>CATEGORIES</span></article></div><div class="aw72Filters"><select id="aw72League"><option value="">ALL LEAGUES</option>'+((d.leagues||[]).map(l=>'<option value="'+esc(l.id)+'" '+(String(l.id)===String(league)?"selected":"")+'>'+esc(l.name||l.id)+'</option>').join(""))+'</select></div><main class="aw72Timeline">'+(cards||'<div class="aw72Empty">No connected awards or honors match the current filters.</div>')+'</main><div class="aw72Links"><a href="milestones.html">MILESTONES</a><a href="records.html">RECORDS</a><a href="history.html">HISTORY</a><a href="leaders.html">LEADERS</a><a href="career.html">CAREER</a></div>';
+ const sel=$("#aw72League");if(sel)sel.onchange=()=>{const u=new URL(location.href);u.searchParams.set("league",sel.value);if(!sel.value)u.searchParams.delete("league");location.href=u.href};
+}
+
+
 // SPORTS 71.0 — UNIVERSAL SPORTS MILESTONES & ACHIEVEMENTS ENGINE
 function renderMilestonesEngine71(){
  const box=$("#milestonesEngine71");if(!box||!SportsState.ready)return;
