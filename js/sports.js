@@ -1,4 +1,17 @@
 
+// SPORTS 49.0 — UNIVERSAL SPORTS NEWS TOPIC FEEDS
+function renderTopicFeed49(){
+  const box=$("#sportsTopicFeed49");if(!box||!SportsState.ready)return;
+  const params=new URLSearchParams(location.search), topic=(params.get("topic")||"ALL").toUpperCase();
+  const f=Favorites.get(), leagues=new Set(f.leagues||[]), teams=new Set(f.teams||[]), players=new Set(f.players||[]), read=new Set(NewsHistory.get().map(x=>x.id)), saved=new Set(NewsWatchlist.get());
+  const all=SportsState.data.news||[];
+  const base=all.filter(n=>topic==="ALL"||String(n.category||"SPORTS").toUpperCase()===topic);
+  const feed=base.map(n=>({n,s:(leagues.has(n.leagueId)?5:0)+(teams.has(n.teamId)?5:0)+(players.has(n.playerId)?5:0)+(saved.has(n.id)?2:0)+(read.has(n.id)?1:0)})).sort((a,b)=>b.s-a.s).map(x=>x.n);
+  const topics=[...new Set(all.map(n=>String(n.category||"SPORTS").toUpperCase()))];
+  box.innerHTML='<div class="feed49Hero"><div><small>SPORTS 49.0 • TOPIC FEED</small><h2>'+esc(topic==="ALL"?"SPORTS TOPIC FEED":topic+" FEED")+'</h2><p>A connected story stream prioritized by your Sports personalization.</p></div><a href="your-topics.html">YOUR TOPICS</a></div><div class="feed49Topics"><a class="'+(topic==="ALL"?"active":"")+'" href="topic-feed.html?topic=ALL">ALL</a>'+topics.map(t=>'<a class="'+(t===topic?"active":"")+'" href="topic-feed.html?topic='+encodeURIComponent(t)+'">'+esc(t)+'</a>').join("")+'</div><div class="feed49Grid">'+(feed.length?feed.slice(0,15).map((n,i)=>'<a href="news-story.html?id='+encodeURIComponent(n.id||"")+'"><span>'+esc(n.category||"SPORTS")+' • '+(i+1)+'</span><b>'+esc(n.title||"Sports Story")+'</b><p>'+esc(n.summary||"Sports story")+'</p><em>'+esc(n.date||"LATEST")+'</em></a>').join(""):'<p class="feed49Empty">NO STORIES IN THIS TOPIC.</p>')+'</div>';
+}
+
+
 // SPORTS 48.0 — UNIVERSAL SPORTS NEWS TOPIC PERSONALIZATION
 function renderTopicPersonalization48(){
   const box=$("#sportsTopicPersonalization48");if(!box||!SportsState.ready)return;
