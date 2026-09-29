@@ -9,7 +9,7 @@ const SportsState={
 };
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
-const loadJSON=async path=>{const r=await fetch(path+"?v=11.0",{cache:"no-store"});if(!r.ok)throw new Error(path+" "+r.status);return r.json();};
+const loadJSON=async path=>{const r=await fetch(path+"?v=12.0",{cache:"no-store"});if(!r.ok)throw new Error(path+" "+r.status);return r.json();};
 
 async function loadData(){
   const [leagues,teams,players,games,standings,schedule,videos,pickem]=await Promise.all([
@@ -124,6 +124,23 @@ function renderEventCenter(game){
 }
 
 function teamGames(id){return SportsState.data.games.filter(g=>g.homeTeamId===id||g.awayTeamId===id)}
+function renderLeagueCenter(l){
+  const box=$("#leagueDetail"); if(!box)return;
+  if(!l){box.innerHTML='<article class="detailCard"><small>LEAGUE CENTER</small><h2>LEAGUE NOT FOUND</h2><p>The requested league is not available in the current data layer.</p></article>';$("#detailIntro").textContent="LEAGUE UNAVAILABLE";return}
+  const d=SportsState.data,gs=d.games.filter(x=>x.leagueId===l.id),ts=d.teams.filter(x=>x.leagueId===l.id),ps=d.players.filter(x=>x.leagueId===l.id),ss=d.standings.filter(x=>x.leagueId===l.id).sort((a,b)=>a.rank-b.rank),vs=d.videos.filter(x=>x.leagueId===l.id),sch=d.schedule.filter(x=>x.leagueId===l.id),picks=(d.pickem?.games||[]).filter(x=>x.leagueId===l.id);
+  const teamCard=t=>{const s=ss.find(x=>x.teamId===t.id);return '<a class="leagueTeam" href="team.html?id='+encodeURIComponent(t.id)+'"><b>'+esc(t.name)+'</b><span>'+esc(t.short)+'</span><em>'+(s?'#'+esc(s.rank)+' • '+recordLabel(s):'STANDING PENDING')+'</em></a>'};
+  const gameCard=g=>'<a class="leagueGame" href="game.html?id='+encodeURIComponent(g.id)+'"><span>'+esc(g.status||"GAME")+'</span><b>'+esc(getTeam(g.awayTeamId)?.short||"AWY")+' @ '+esc(getTeam(g.homeTeamId)?.short||"HME")+'</b><em>'+esc(g.time||"TBD")+'</em></a>';
+  $("#detailIntro").textContent=esc(l.name)+" • "+esc(l.sport||"SPORT")+" • "+esc(l.level);
+  box.innerHTML='<div class="leagueHero"><div><small>LEAGUE INTELLIGENCE CENTER</small><h2>'+esc(l.name)+'</h2><p>'+esc(l.sport||"SPORT")+' • '+esc(l.level)+' • '+esc(l.status||"ACTIVE")+'</p></div><div class="leagueCounts"><b>'+gs.length+'</b><span>GAMES</span><b>'+ts.length+'</b><span>TEAMS</span><b>'+ps.length+'</b><span>PLAYERS</span></div></div>'+
+  '<div class="leagueCenterGrid"><article class="contextCard"><small>LEAGUE SNAPSHOT</small><div class="leagueMetrics"><div><b>'+gs.length+'</b><span>GAMES</span></div><div><b>'+ts.length+'</b><span>TEAMS</span></div><div><b>'+ps.length+'</b><span>PLAYERS</span></div><div><b>'+ss.length+'</b><span>STANDINGS</span></div></div></article>'+
+  '<article class="contextCard"><small>TOP STANDINGS</small>'+(ss.slice(0,6).map(s=>'<a class="leagueRank" href="team.html?id='+encodeURIComponent(s.teamId)+'"><b>#'+esc(s.rank)+' '+esc(getTeam(s.teamId)?.name||"TEAM")+'</b><span>'+recordLabel(s)+'</span></a>').join("")||'<span class="contextPending">STANDINGS DATA PENDING</span>')+'</article>'+
+  '<article class="contextCard"><small>TEAMS</small><div class="leagueTeams">'+(ts.map(teamCard).join("")||'<span class="contextPending">TEAM DATA PENDING</span>')+'</div></article>'+
+  '<article class="contextCard"><small>SCORES & SCHEDULE</small>'+(gs.slice(0,8).map(gameCard).join("")||'<span class="contextPending">GAME DATA PENDING</span>')+(sch.length?'<div class="detailLinks"><a class="btn" href="schedule.html?league='+encodeURIComponent(l.id)+'">FULL SCHEDULE</a></div>':"")+'</article>'+
+  '<article class="contextCard"><small>PLAYERS</small><div class="leaguePlayers">'+(ps.slice(0,8).map(p=>'<a href="player.html?id='+encodeURIComponent(p.id)+'"><b>'+esc(p.name)+'</b><span>'+esc(p.position||"PLAYER")+' • '+esc(getTeam(p.teamId)?.short||"TEAM")+'</span></a>').join("")||'<span class="contextPending">PLAYER DATA PENDING</span>')+'</div></article>'+
+  '<article class="contextCard"><small>PICK ’EM</small>'+(picks.map(x=>'<a class="leaguePick" href="pickem.html?game='+encodeURIComponent(x.id)+'"><b>'+esc(x.question)+'</b><span>'+esc(x.points)+' POINTS • '+esc(x.options.join(" / "))+'</span></a>').join("")||'<span class="contextPending">PICK ’EM DATA PENDING</span>')+'</article>'+
+  '<article class="contextCard leagueMedia"><small>MEDIA</small>'+(vs.map(v=>'<a class="miniVideo" href="video.html?id='+encodeURIComponent(v.id)+'"><b>'+esc(v.title)+'</b><span>'+esc(v.type||"VIDEO")+'</span></a>').join("")||'<span class="contextPending">LEAGUE MEDIA PENDING</span>')+'</article>'+
+  '<article class="contextCard"><small>LEAGUE COMMAND LINKS</small><div class="detailLinks"><a class="btn primary" href="scores.html?league='+encodeURIComponent(l.id)+'">SCORES</a><a class="btn" href="schedule.html?league='+encodeURIComponent(l.id)+'">SCHEDULE</a><a class="btn" href="standings.html?league='+encodeURIComponent(l.id)+'">STANDINGS</a><a class="btn" href="teams.html?league='+encodeURIComponent(l.id)+'">TEAMS</a><a class="btn" href="players.html?league='+encodeURIComponent(l.id)+'">PLAYERS</a><a class="btn" href="videos.html?league='+encodeURIComponent(l.id)+'">MEDIA</a><a class="btn" href="pickem.html?league='+encodeURIComponent(l.id)+'">PICK ’EM</a></div></article></div>';
+}
 function renderPlayerCenter(p){
   const box=$("#playerDetail");
   if(!box)return;
@@ -188,11 +205,9 @@ function renderDetail(){
     $("#detailIntro").textContent=leagueName(v.leagueId)+" • "+(v.type||"VIDEO");
     $("#videoDetail").innerHTML=card("SPORTS MEDIA",'<h2>'+esc(v.title)+'</h2><p>'+esc(v.type||"VIDEO")+' • '+esc(leagueName(v.leagueId))+'</p><div class="videoStage">VIDEO PLAYER / MEDIA STREAM READY</div><a class="btn" href="leagues.html?league='+encodeURIComponent(v.leagueId)+'">MORE '+esc(leagueName(v.leagueId))+' MEDIA</a>');
   } else if(page==="league.html"){
-    if(!l){$("#leagueDetail").innerHTML=card("LEAGUE","<h2>LEAGUE NOT FOUND</h2>");return}
-    const gs=d.games.filter(x=>x.leagueId===l.id), ts=d.teams.filter(x=>x.leagueId===l.id), ps=d.players.filter(x=>x.leagueId===l.id), vs=d.videos.filter(x=>x.leagueId===l.id);
-    $("#detailIntro").textContent=l.name+" • "+l.level;
-    $("#leagueDetail").innerHTML=card("LEAGUE DASHBOARD",'<h2>'+esc(l.name)+'</h2><p>'+esc(l.level)+' • '+gs.length+' games • '+ts.length+' teams • '+ps.length+' players</p><div class="detailLinks"><a class="btn" href="scores.html?league='+encodeURIComponent(l.id)+'">SCORES</a><a class="btn" href="schedule.html?league='+encodeURIComponent(l.id)+'">SCHEDULE</a><a class="btn" href="standings.html?league='+encodeURIComponent(l.id)+'">STANDINGS</a><a class="btn" href="teams.html?league='+encodeURIComponent(l.id)+'">TEAMS</a><a class="btn" href="players.html?league='+encodeURIComponent(l.id)+'">PLAYERS</a><a class="btn" href="videos.html?league='+encodeURIComponent(l.id)+'">MEDIA</a></div>');
-  }
+    renderLeagueCenter(l);
+    return;
+
 }
 
 clock();setInterval(clock,1000);loadData().catch(err=>{console.error(err);document.querySelectorAll("[data-error]").forEach(x=>x.textContent="DATA LAYER ERROR — "+err.message)});
