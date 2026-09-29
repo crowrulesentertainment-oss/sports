@@ -1,4 +1,21 @@
 
+// SPORTS 74.0 — UNIVERSAL SPORTS LEGACY CENTER
+function renderLegacyCenter74(){
+ const box=$("#legacyCenter74");if(!box||!SportsState.ready)return;
+ const d=SportsState.data,players=d.players||[],teams=d.teams||[],stats=d.statistics||d.stats||[],records=d.records||[],awards=d.awards||d.honors||[],hof=d.hall_of_fame||d.hallOfFame||d.legends||[];
+ const q=new URLSearchParams(location.search),id=q.get("id")||"",type=q.get("type")||"PLAYER";
+ const pool=type==="TEAM"?teams:players,e=pool.find(x=>String(x.id)===String(id))||pool[0];
+ if(!e){box.innerHTML='<div class="lg74Empty"><h1>LEGACY CENTER</h1><p>No connected player or team data is available yet.</p></div>';return}
+ const eid=String(e.id),name=e.name||e.fullName||e.short||eid,owned=x=>String(x.playerId||x.teamId||x.entityId)===eid;
+ const s=stats.filter(owned),r=records.filter(owned),a=awards.filter(owned),h=hof.filter(owned);
+ const highlights=[...h.map(x=>({k:"HALL OF FAME",t:x.title||x.name||"Inducted",d:x.inductionYear||x.inducted||x.year||"CONNECTED"})),...a.map(x=>({k:"HONOR",t:x.title||x.name||"Award",d:x.season||x.year||x.date||"CONNECTED"})),...r.map(x=>({k:"RECORD",t:x.title||x.name||x.record||"Record",d:x.value??x.season??x.year??"CONNECTED"}))].slice(0,12);
+ const teamsLinked=teams.filter(t=>String(t.id)===String(e.teamId||e.team_id));
+ const metrics=[["STAT LINES",s.length],["RECORDS",r.length],["HONORS",a.length],["LEGACY MARKERS",highlights.length]];
+ const opts=pool.map(x=>'<option value="'+esc(x.id)+'" '+(String(x.id)===eid?"selected":"")+'>'+esc(x.name||x.fullName||x.short||x.id)+'</option>').join("");
+ box.innerHTML='<div class="lg74Hero"><small>SPORTS 74.0 • UNIVERSAL SPORTS LEGACY CENTER</small><h1>'+esc(name)+'</h1><p>'+esc(type)+' • CAREER • CHAMPIONSHIPS • RECORDS • HONORS • LEGACY</p></div><form class="lg74Pick"><select name="type"><option value="PLAYER" '+(type!=="TEAM"?"selected":"")+'>PLAYERS</option><option value="TEAM" '+(type==="TEAM"?"selected":"")+'>TEAMS</option></select><select name="id">'+opts+'</select><button>OPEN LEGACY</button></form><div class="lg74Metrics">'+metrics.map(x=>'<article><b>'+x[1]+'</b><span>'+x[0]+'</span></article>').join("")+'</div><section class="lg74Panel"><h2>LEGACY PROFILE</h2><div class="lg74Profile"><div><small>IDENTITY</small><h3>'+esc(name)+'</h3><p>'+esc(e.biography||e.bio||e.description||"Historical profile connected to the CrowRules Sports universal data layer.")+'</p></div><div><small>CONNECTED TEAM</small><strong>'+esc(teamsLinked[0]?.name||e.teamName||"—")+'</strong><small>SPORT / LEAGUE</small><strong>'+esc(e.leagueName||e.league||e.sport||"—")+'</strong></div></div></section><section class="lg74Panel"><h2>LEGACY HIGHLIGHTS</h2><div class="lg74Highlights">'+(highlights.length?highlights.map(x=>'<article><small>'+esc(x.k)+'</small><h3>'+esc(x.t)+'</h3><span>'+esc(String(x.d))+'</span></article>').join(""):'<div class="lg74Empty">No connected legacy highlights are available.</div>')+'</div></section><div class="lg74Links"><a href="career.html?type='+encodeURIComponent(type)+'&id='+encodeURIComponent(eid)+'">CAREER</a><a href="milestones.html?type='+encodeURIComponent(type)+'&id='+encodeURIComponent(eid)+'">MILESTONES</a><a href="awards.html">AWARDS</a><a href="hall-of-fame.html">HALL OF FAME</a><a href="records.html">RECORDS</a><a href="history.html">HISTORY</a></div>';
+}
+
+
 // SPORTS 73.0 — UNIVERSAL SPORTS HALL OF FAME & LEGENDS CENTER
 function renderHallOfFame73(){
  const box=$("#hallOfFame73");if(!box||!SportsState.ready)return;
