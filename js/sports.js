@@ -17,7 +17,7 @@ async function loadData(){
     loadJSON("data/standings.json"),loadJSON("data/schedule.json"),loadJSON("data/videos.json"),loadJSON("data/pickem.json")
   ]);
   SportsState.data={leagues:leagues.leagues||[],teams:teams.teams||[],players:players.players||[],games:games.games||[],standings:standings.standings||[],schedule:schedule.schedule||[],videos:videos.videos||[],pickem};
-  SportsState.ready=true; buildShell(); render(); renderDetail();
+  SportsState.ready=true; buildShell(); render(); renderDetail(); renderPickDetail();
 }
 function league(){return SportsState.data.leagues.find(x=>x.id===SportsState.selectedLeague)||null}
 function selected(arr){return SportsState.selectedLeague==="all"?arr:arr.filter(x=>x.leagueId===SportsState.selectedLeague)}
@@ -48,27 +48,33 @@ function render(){
   const games=selected(SportsState.data.games).filter(g=>!q||JSON.stringify(g).toLowerCase().includes(q));
   const players=selected(SportsState.data.players).filter(p=>!q||JSON.stringify(p).toLowerCase().includes(q));
   if($("#leagues"))$("#leagues").innerHTML=leagues.map(l=>'<a class="league" href="leagues.html?league='+encodeURIComponent(l.id)+'"><b>'+esc(l.name)+'</b><span>'+esc(l.level)+'</span></a>').join("")||'<div class="emptyState">NO MATCHES</div>';
-  if($("#games"))$("#games").innerHTML=games.map(g=>{const a=team(g.awayTeamId),h=team(g.homeTeamId);return '<div class="game"><div><small>'+esc(leagueName(g.leagueId))+'</small><br><span class="live">'+esc(g.status)+'</span></div><div><b>'+esc(a?.name||"AWAY TEAM")+'</b><br><small>@</small><br><b>'+esc(h?.name||"HOME TEAM")+'</b></div><div><small>'+esc(g.time||"TBD")+'</small></div></div>'}).join("")||'<div class="emptyState">NO GAMES IN SELECTION</div>';
+  if($("#games"))$("#games").innerHTML=games.map(g=>{const a=team(g.awayTeamId),h=team(g.homeTeamId);return '<a class="game" href="game.html?id='+encodeURIComponent(g.id)+'"><div><small>'+esc(leagueName(g.leagueId))+'</small><br><span class="live">'+esc(g.status)+'</span></div><div><b>'+esc(a?.name||"AWAY TEAM")+'</b><br><small>@</small><br><b>'+esc(h?.name||"HOME TEAM")+'</b></div><div><small>'+esc(g.time||"TBD")+'</small></div></div>'}).join("")||'<div class="emptyState">NO GAMES IN SELECTION</div>';
   if($("#players"))$("#players").innerHTML=players.map((p,i)=>'<div class="player"><div class="rank">'+String(i+1).padStart(2,"0")+'</div><div><b>'+esc(p.name)+'</b><br><small>'+esc(p.position||"PLAYER")+' • '+esc(leagueName(p.leagueId))+'</small></div><div class="stat">'+esc(p.statValue||"—")+'</div></div>').join("")||'<div class="emptyState">NO PLAYERS IN SELECTION</div>';
   document.querySelectorAll("[data-sports-selection]").forEach(el=>el.textContent=SportsState.selectedLeague==="all"?"ALL LEAGUES":(league()?.name||"ALL LEAGUES"));
   document.querySelectorAll("[data-sports-count]").forEach(el=>el.textContent=selected(SportsState.data.games).length);
   document.querySelectorAll("[data-sports-module]").forEach(el=>{el.classList.add("dataReady");});
   const schedule=selected(SportsState.data.schedule);
-  if($("#scheduleData"))$("#scheduleData").innerHTML=schedule.map(x=>'<div class="dataRow"><b>'+esc(leagueName(x.leagueId))+'</b><span>'+esc(x.date)+' • '+esc(x.time)+'</span><span>'+esc(x.venue)+'</span></div>').join("")||'<div class="emptyState">NO SCHEDULE ITEMS IN SELECTION</div>';
+  if($("#scheduleData"))$("#scheduleData").innerHTML=schedule.map(x=>'<div class="dataRow"><b>'+esc(leagueName(x.leagueId))+'</b><span>'+esc(x.date)+' • '+esc(x.time)+'</span><span>'+esc(x.venue)+'</span></a>').join("")||'<div class="emptyState">NO SCHEDULE ITEMS IN SELECTION</div>';
   const standings=selected(SportsState.data.standings).sort((a,b)=>a.rank-b.rank);
-  if($("#standingsData"))$("#standingsData").innerHTML=standings.map(x=>{const t=team(x.teamId);return '<div class="dataRow"><b>#'+esc(x.rank)+' '+esc(t?.name||"TEAM")+'</b><span>'+esc(leagueName(x.leagueId))+'</span><span>'+esc(x.wins)+'-'+esc(x.losses)+'</span></div>'}).join("")||'<div class="emptyState">NO STANDINGS IN SELECTION</div>';
+  if($("#standingsData"))$("#standingsData").innerHTML=standings.map(x=>{const t=team(x.teamId);return '<a class="dataRow" href="team.html?id='+encodeURIComponent(x.teamId)+'"><b>#'+esc(x.rank)+' '+esc(t?.name||"TEAM")+'</b><span>'+esc(leagueName(x.leagueId))+'</span><span>'+esc(x.wins)+'-'+esc(x.losses)+'</span></a>'}).join("")||'<div class="emptyState">NO STANDINGS IN SELECTION</div>';
   const teams=SportsState.data.teams.filter(t=>SportsState.selectedLeague==="all"||t.leagueId===SportsState.selectedLeague).filter(t=>!q||JSON.stringify(t).toLowerCase().includes(q));
-  if($("#teamsData"))$("#teamsData").innerHTML=teams.map(t=>'<div class="dataRow"><b>'+esc(t.name)+'</b><span>'+esc(t.short)+'</span><span>'+esc(leagueName(t.leagueId))+'</span></div>').join("")||'<div class="emptyState">NO TEAMS IN SELECTION</div>';
+  if($("#teamsData"))$("#teamsData").innerHTML=teams.map(t=>'<div class="dataRow"><b>'+esc(t.name)+'</b><span>'+esc(t.short)+'</span><span>'+esc(leagueName(t.leagueId))+'</span></a>').join("")||'<div class="emptyState">NO TEAMS IN SELECTION</div>';
   const videos=selected(SportsState.data.videos).filter(v=>!q||JSON.stringify(v).toLowerCase().includes(q));
-  if($("#videosData"))$("#videosData").innerHTML=videos.map(v=>'<div class="dataRow"><b>'+esc(v.title)+'</b><span>'+esc(leagueName(v.leagueId))+'</span><span>'+esc(v.type||"VIDEO")+'</span></div>').join("")||'<div class="emptyState">NO VIDEOS IN SELECTION</div>';
+  if($("#videosData"))$("#videosData").innerHTML=videos.map(v=>'<div class="dataRow"><b>'+esc(v.title)+'</b><span>'+esc(leagueName(v.leagueId))+'</span><span>'+esc(v.type||"VIDEO")+'</span></a>').join("")||'<div class="emptyState">NO VIDEOS IN SELECTION</div>';
   const picks=(SportsState.data.pickem?.games||[]).filter(x=>SportsState.selectedLeague==="all"||x.leagueId===SportsState.selectedLeague);
-  if($("#pickemData"))$("#pickemData").innerHTML=picks.map(x=>'<div class="dataRow pickRow"><b>'+esc(leagueName(x.leagueId))+'</b><span>'+esc(x.question)+'</span><span>'+esc(x.options.join(" / "))+' • '+esc(x.points)+' PTS</span></div>').join("")||'<div class="emptyState">NO PICK ’EM GAMES IN SELECTION</div>';
+  if($("#pickemData"))$("#pickemData").innerHTML=picks.map(x=>'<div class="dataRow pickRow"><b>'+esc(leagueName(x.leagueId))+'</b><span>'+esc(x.question)+'</span><span>'+esc(x.options.join(" / "))+' • '+esc(x.points)+' PTS</span></a>').join("")||'<div class="emptyState">NO PICK ’EM GAMES IN SELECTION</div>';
 }
 function clock(){if($("#clock"))$("#clock").textContent=new Date().toLocaleTimeString([], {hour12:false})+" LOCAL"}
 document.addEventListener("click",e=>{if(e.target.closest("#menu"))$("#mobileNav")?.classList.toggle("open")});
 
 function byId(id){return new URLSearchParams(location.search).get(id)}
 function link(path,id,label){return '<a class="detailLink" href="'+path+'?id='+encodeURIComponent(id)+'">'+esc(label)+'</a>'}
+function renderPickDetail(){
+  const gid=byId("game"), box=$("#pickemData"); if(!gid||!box)return;
+  const x=(SportsState.data.pickem?.games||[]).find(y=>y.id===gid); if(!x)return;
+  box.innerHTML='<div class="detailCard"><small>PICK ’EM CHALLENGE • '+esc(leagueName(x.leagueId))+'</small><h2>'+esc(x.question)+'</h2><div class="pickOptions">'+x.options.map((o,i)=>'<button class="btn pickOption" data-pick="'+i+'">'+esc(o)+'</button>').join("")+'</div><p>VALUE: '+esc(x.points)+' POINTS</p></div>';
+  box.querySelectorAll(".pickOption").forEach(b=>b.onclick=()=>{box.querySelectorAll(".pickOption").forEach(q=>q.classList.remove("primary"));b.classList.add("primary")});
+}
 function renderDetail(){
   const id=byId("id"), page=location.pathname.split("/").pop();
   const d=SportsState.data;
