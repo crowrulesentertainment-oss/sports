@@ -9,7 +9,7 @@ const SportsState={
 };
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
-const loadJSON=async path=>{const r=await fetch(path+"?v=9.0",{cache:"no-store"});if(!r.ok)throw new Error(path+" "+r.status);return r.json();};
+const loadJSON=async path=>{const r=await fetch(path+"?v=11.0",{cache:"no-store"});if(!r.ok)throw new Error(path+" "+r.status);return r.json();};
 
 async function loadData(){
   const [leagues,teams,players,games,standings,schedule,videos,pickem]=await Promise.all([
@@ -124,6 +124,21 @@ function renderEventCenter(game){
 }
 
 function teamGames(id){return SportsState.data.games.filter(g=>g.homeTeamId===id||g.awayTeamId===id)}
+function renderPlayerCenter(p){
+  const box=$("#playerDetail");
+  if(!box)return;
+  if(!p){box.innerHTML='<article class="detailCard"><small>PLAYER CENTER</small><h2>PLAYER NOT FOUND</h2><p>The requested player is not available in the current data layer.</p></article>';$("#detailIntro").textContent="PLAYER UNAVAILABLE";return}
+  const d=SportsState.data,pt=getTeam(p.teamId),s=standingsForTeam(p.teamId),games=teamGames(p.teamId).filter(g=>g.homeTeamId===p.teamId||g.awayTeamId===p.teamId),media=d.videos.filter(v=>v.leagueId===p.leagueId).slice(0,4);
+  const gameCard=g=>'<a class="playerGame" href="game.html?id='+encodeURIComponent(g.id)+'"><span>'+esc(g.status||"GAME")+'</span><b>'+esc(getTeam(g.awayTeamId)?.short||"AWY")+' @ '+esc(getTeam(g.homeTeamId)?.short||"HME")+'</b><em>'+esc(g.time||"TBD")+'</em></a>';
+  $("#detailIntro").textContent=leagueName(p.leagueId)+" • "+(p.position||"PLAYER")+" • PLAYER INTELLIGENCE";
+  box.innerHTML='<div class="playerHero"><div><small>PLAYER INTELLIGENCE CENTER</small><h2>'+esc(p.name)+'</h2><p>'+esc(p.position||"PLAYER")+' • '+(pt?link("team.html",pt.id,pt.name):"TEAM DATA PENDING")+'</p></div><div class="playerStat"><span>'+esc(p.statLabel||"PRIMARY STAT")+'</span><strong>'+esc(p.statValue||"—")+'</strong></div></div>'+
+  '<div class="playerCenterGrid"><article class="contextCard"><small>PLAYER PROFILE</small><div class="playerFacts"><b>'+esc(p.position||"—")+'</b><span>POSITION</span><b>'+esc(pt?.short||"—")+'</b><span>TEAM</span><b>'+esc(leagueName(p.leagueId))+'</b><span>LEAGUE</span></div></article>'+
+  '<article class="contextCard"><small>TEAM CONTEXT</small><h3>'+esc(pt?.name||"TEAM PENDING")+'</h3><div class="contextStat"><b>'+recordLabel(s)+'</b><span>'+(s?"RANK #"+esc(s.rank):"STANDING PENDING")+'</span></div><div class="detailLinks">'+(pt?'<a class="btn" href="team.html?id='+encodeURIComponent(pt.id)+'">TEAM CENTER</a>':"")+'<a class="btn" href="standings.html?league='+encodeURIComponent(p.leagueId)+'">STANDINGS</a></div></article>'+
+  '<article class="contextCard"><small>GAME APPEARANCES</small>'+(games.slice(-6).reverse().map(gameCard).join("")||'<span class="contextPending">GAME HISTORY PENDING</span>')+'</article>'+
+  '<article class="contextCard"><small>PERFORMANCE</small><div class="statBlock"><b>'+esc(p.statValue||"—")+'</b><span>'+esc(p.statLabel||"PRIMARY STAT")+'</span></div><p>Additional statistics can be supplied by the future live sports data layer without changing this player profile.</p></article>'+
+  '<article class="contextCard playerMedia"><small>RELATED MEDIA</small>'+(media.map(v=>'<a class="miniVideo" href="video.html?id='+encodeURIComponent(v.id)+'"><b>'+esc(v.title)+'</b><span>'+esc(v.type||"VIDEO")+'</span></a>').join("")||'<span class="contextPending">PLAYER MEDIA PENDING</span>')+'</article>'+
+  '<article class="contextCard"><small>PLAYER COMMAND LINKS</small><div class="detailLinks"><a class="btn primary" href="players.html?league='+encodeURIComponent(p.leagueId)+'">ALL PLAYERS</a><a class="btn" href="scores.html?league='+encodeURIComponent(p.leagueId)+'">SCORES</a><a class="btn" href="schedule.html?league='+encodeURIComponent(p.leagueId)+'">SCHEDULE</a><a class="btn" href="videos.html?league='+encodeURIComponent(p.leagueId)+'">MEDIA</a></div></article></div>';
+}
 function renderTeamCenter(t){
   const box=$("#teamDetail");
   if(!box)return;
@@ -166,10 +181,8 @@ function renderDetail(){
     renderTeamCenter(t);
     return;
   } else if(page==="player.html"){
-    if(!p){$("#playerDetail").innerHTML=card("PLAYER","<h2>PLAYER NOT FOUND</h2>");return}
-    const pt=team(p.teamId);
-    $("#detailIntro").textContent=leagueName(p.leagueId)+" • "+(p.position||"PLAYER");
-    $("#playerDetail").innerHTML=card("PLAYER PROFILE",'<h2>'+esc(p.name)+'</h2><p>'+esc(p.position||"PLAYER")+' • '+(pt?link("team.html",pt.id,pt.name):"Team pending")+'</p><div class="statBlock"><b>'+esc(p.statValue||"—")+'</b><span>LEADER STAT</span></div>');
+    renderPlayerCenter(p);
+    return;
   } else if(page==="video.html"){
     if(!v){$("#videoDetail").innerHTML=card("VIDEO","<h2>VIDEO NOT FOUND</h2>");return}
     $("#detailIntro").textContent=leagueName(v.leagueId)+" • "+(v.type||"VIDEO");
