@@ -11,6 +11,28 @@ const $=s=>document.querySelector(s);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 
 
+
+// SPORTS 25.0 — UNIVERSAL FAVORITES & FOLLOWING
+const Favorites={
+  key:"crowrulesSportsFavorites",
+  get(){try{return JSON.parse(localStorage.getItem(this.key))||{leagues:[],teams:[],players:[]}}catch(e){return{leagues:[],teams:[],players:[]}}},
+  save(v){localStorage.setItem(this.key,JSON.stringify(v));},
+  toggle(type,id){const v=this.get();v[type]=v[type]||[];const i=v[type].indexOf(id);i>=0?v[type].splice(i,1):v[type].push(id);this.save(v);refreshUniversalLayer();renderFavorites();}
+};
+function isFav(type,id){return Favorites.get()[type]?.includes(id)}
+function renderFavorites(){
+  const box=$("#sportsFavorites");if(!box||!SportsState.ready)return;
+  const f=Favorites.get(),items=[];
+  f.leagues.forEach(id=>{const x=SportsState.data.leagues.find(v=>v.id===id);if(x)items.push({type:"leagues",id,label:x.name})});
+  f.teams.forEach(id=>{const x=team(id);if(x)items.push({type:"teams",id,label:x.name})});
+  f.players.forEach(id=>{const x=SportsState.data.players.find(v=>v.id===id);if(x)items.push({type:"players",id,label:x.name})});
+  box.innerHTML=items.length?'<span>FOLLOWING</span>'+items.map(x=>'<button type="button" data-fav-type="'+esc(x.type)+'" data-fav-id="'+esc(x.id)+'">★ '+esc(x.label)+'</button>').join(""):'<span>FOLLOWING</span><em>No favorites yet — follow teams, players or leagues from their pages.</em>';
+  box.querySelectorAll("button").forEach(b=>b.onclick=()=>{const t=b.dataset.favType,id=b.dataset.favId;window.location.href=t==="teams"?"team.html?id="+encodeURIComponent(id):t==="players"?"player.html?id="+encodeURIComponent(id):"league.html?league="+encodeURIComponent(id)});
+}
+function favoriteButton(type,id,label){
+  return '<button type="button" class="favoriteButton '+(isFav(type,id)?"isFavorite":"")+'" onclick="Favorites.toggle(\''+type+'\',\''+esc(id)+'\')">'+(isFav(type,id)?"★ FOLLOWING":"☆ FOLLOW "+esc(label).toUpperCase())+'</button>';
+}
+
 // SPORTS 24.0 — UNIVERSAL SPORTS API GATEWAY
 const SportsAPI={
   mode:"STATIC",
@@ -91,7 +113,7 @@ async function loadData(){
     loadJSON("data/standings.json"),loadJSON("data/schedule.json"),loadJSON("data/videos.json"),loadJSON("data/pickem.json")
   ]);
   SportsState.data={leagues:leagues.leagues||[],teams:teams.teams||[],players:players.players||[],games:games.games||[],standings:standings.standings||[],schedule:schedule.schedule||[],videos:videos.videos||[],pickem};
-  SportsState.ready=true; buildShell(); render(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
+  SportsState.ready=true; buildShell(); render(); renderFavorites(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
 }
 function league(){return SportsState.data.leagues.find(x=>x.id===SportsState.selectedLeague)||null}
 function selected(arr){return SportsState.selectedLeague==="all"?arr:arr.filter(x=>x.leagueId===SportsState.selectedLeague)}
@@ -100,7 +122,7 @@ function leagueName(id){return SportsState.data.leagues.find(x=>x.id===id)?.name
 function setLeague(id){
   SportsState.selectedLeague=id||"all"; localStorage.setItem("crowrulesSportsLeague",SportsState.selectedLeague);
   const u=new URL(location.href); if(id&&id!=="all")u.searchParams.set("league",id);else u.searchParams.delete("league");
-  history.replaceState({}, "", u); buildShell(); render(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
+  history.replaceState({}, "", u); buildShell(); render(); renderFavorites(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
 }
 function renderDiscoverySearch(){
   const q=SportsState.search.trim().toLowerCase();
@@ -174,6 +196,10 @@ function refreshUniversalLayer(){
 }
 function buildShell(){
   const top=document.querySelector(".topbar"); if(!top)return;
+  if(!document.querySelector("#sportsFavorites")){
+    const fav=document.createElement("div"); fav.id="sportsFavorites"; fav.className="sportsFavorites";
+    top.insertAdjacentElement("afterend",fav);
+  }
   if(!document.querySelector("#sportsControls")){
     const controls=document.createElement("div"); controls.id="sportsControls"; controls.className="sportsControls";
     controls.innerHTML='<button class="commandButton" id="sportsCommand" type="button" aria-expanded="false">COMMAND <span>⌄</span></button><label class="srOnly" for="leagueSelect">League</label><select id="leagueSelect" aria-label="Global league selector"></select><label class="srOnly" for="sportsSearch">Search sports</label><input id="sportsSearch" type="search" placeholder="SEARCH SPORTS" autocomplete="off"><button class="notificationButton" id="sportsNotifications" type="button" aria-label="Sports notifications"><span>◉</span><b>0</b></button><a class="accountChip" href="https://crowrulesentertainment-oss.github.io/crowspace/login.html" aria-label="Universal CrowRules account"><i></i><span>ACCOUNT</span><b>GUEST</b></a><div class="commandMenu" id="commandMenu"><div class="commandTitle">SPORTS COMMAND</div><a href="home.html">SPORTS HOME</a><a href="scores.html">LIVE SCORES</a><a href="schedule.html">SCHEDULE</a><a href="standings.html">STANDINGS</a><a href="rankings.html">RANKINGS</a><a href="stats.html">STATISTICS</a><a href="teams.html">TEAMS</a><a href="players.html">PLAYERS</a><a href="videos.html">MEDIA</a><a href="pickem.html">PICK ’EM</a></div>';
@@ -194,6 +220,7 @@ function buildShell(){
     notification.classList.toggle("hasAlert",live>0);
     notification.onclick=()=>{window.location.href="scores.html";};
   }
+  renderFavorites();
   if(!document.querySelector("#sportsDataState")){
     const state=document.createElement("div"); state.id="sportsDataState"; state.className="sportsDataState";
     state.innerHTML='<span>SPORTS 24.0 API GATEWAY</span><b id="sportsApiStatus" class="apiStatus">API GATEWAY STATIC</b><i></i><span id="sportsApiSource">STATIC JSON</span><i></i><b id="liveEngineStatus">○ LIVE FEED READY</b><span id="liveEngineSync">WAITING FOR LIVE PROVIDER</span>';
