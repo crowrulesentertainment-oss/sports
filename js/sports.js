@@ -9,7 +9,7 @@ const SportsState={
 };
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
-const loadJSON=async path=>{const r=await fetch(path+"?v=8.0",{cache:"no-store"});if(!r.ok)throw new Error(path+" "+r.status);return r.json();};
+const loadJSON=async path=>{const r=await fetch(path+"?v=9.0",{cache:"no-store"});if(!r.ok)throw new Error(path+" "+r.status);return r.json();};
 
 async function loadData(){
   const [leagues,teams,players,games,standings,schedule,videos,pickem]=await Promise.all([
@@ -123,6 +123,27 @@ function renderEventCenter(game){
   box.querySelectorAll(".pickOption").forEach(b=>b.onclick=()=>{b.parentElement.querySelectorAll(".pickOption").forEach(q=>q.classList.remove("primary"));b.classList.add("primary")});
 }
 
+function teamGames(id){return SportsState.data.games.filter(g=>g.homeTeamId===id||g.awayTeamId===id)}
+function renderTeamCenter(t){
+  const box=$("#teamDetail");
+  if(!box)return;
+  if(!t){box.innerHTML='<article class="detailCard"><small>TEAM CENTER</small><h2>TEAM NOT FOUND</h2><p>The requested team is not available in the current data layer.</p></article>';$("#detailIntro").textContent="TEAM UNAVAILABLE";return}
+  const d=SportsState.data,s=d.standings.find(x=>x.teamId===t.id),roster=d.players.filter(x=>x.teamId===t.id),games=teamGames(t.id),upcoming=games.filter(g=>g.status!=="FINAL").slice(0,5),past=games.filter(g=>g.status==="FINAL").slice(-5).reverse(),media=d.videos.filter(v=>v.leagueId===t.leagueId).slice(0,4);
+  $("#detailIntro").textContent=leagueName(t.leagueId)+" • "+(t.short||"TEAM")+" • TEAM INTELLIGENCE";
+  const gameCard=g=>{const a=getTeam(g.awayTeamId),h=getTeam(g.homeTeamId);return '<a class="teamGame" href="game.html?id='+encodeURIComponent(g.id)+'"><span>'+esc(g.status||"GAME")+'</span><b>'+esc(a?.short||"AWY")+' @ '+esc(h?.short||"HME")+'</b><em>'+esc(g.time||"TBD")+'</em></a>'};
+  box.innerHTML='<div class="teamHero">'+
+    '<div><small>TEAM INTELLIGENCE CENTER</small><h2>'+esc(t.name)+'</h2><p>'+esc(leagueName(t.leagueId))+' • '+esc(t.short||"TEAM")+'</p></div>'+
+    '<div class="teamRecord"><span>RECORD</span><strong>'+recordLabel(s)+'</strong><em>'+(s?'RANK #'+esc(s.rank):'RANK PENDING')+'</em></div>'+
+    '</div>'+
+    '<div class="teamCenterGrid">'+
+      '<article class="contextCard"><small>UPCOMING GAMES</small>'+ (upcoming.map(gameCard).join("")||'<span class="contextPending">UPCOMING SCHEDULE PENDING</span>') +'</article>'+
+      '<article class="contextCard"><small>RECENT RESULTS</small>'+ (past.map(gameCard).join("")||'<span class="contextPending">RESULT HISTORY PENDING</span>') +'</article>'+
+      '<article class="contextCard"><small>ROSTER</small><div class="teamRoster">'+(roster.map(p=>'<a href="player.html?id='+encodeURIComponent(p.id)+'"><b>'+esc(p.name)+'</b><span>'+esc(p.position||"PLAYER")+'</span><em>'+esc(p.statValue||"—")+'</em></a>').join("")||'<span class="contextPending">ROSTER DATA PENDING</span>')+'</div></article>'+
+      '<article class="contextCard"><small>STANDINGS POSITION</small><div class="teamStandings"><strong>'+esc(s?.rank||"—")+'</strong><span>LEAGUE RANK</span><b>'+recordLabel(s)+'</b></div><div class="detailLinks"><a class="btn" href="standings.html?league='+encodeURIComponent(t.leagueId)+'">FULL STANDINGS</a><a class="btn" href="league.html?league='+encodeURIComponent(t.leagueId)+'">LEAGUE HUB</a></div></article>'+
+      '<article class="contextCard teamMedia"><small>TEAM MEDIA</small>'+ (media.map(v=>'<a class="miniVideo" href="video.html?id='+encodeURIComponent(v.id)+'"><b>'+esc(v.title)+'</b><span>'+esc(v.type||"VIDEO")+'</span></a>').join("")||'<span class="contextPending">TEAM MEDIA PENDING</span>') +'</article>'+
+      '<article class="contextCard"><small>TEAM COMMAND LINKS</small><p>Every team is connected to its league, games, players, standings, media and Event Center through the Universal Data Layer.</p><div class="detailLinks"><a class="btn primary" href="scores.html?league='+encodeURIComponent(t.leagueId)+'">LIVE SCORES</a><a class="btn" href="schedule.html?league='+encodeURIComponent(t.leagueId)+'">SCHEDULE</a><a class="btn" href="players.html?league='+encodeURIComponent(t.leagueId)+'">PLAYERS</a></div></article>'+
+    '</div>';
+}
 function renderLiveTimeline(game){
   const items=Array.isArray(game?.timeline)?game.timeline:[];
   if(!items.length)return '<div class="timelinePending">LIVE TIMELINE WILL APPEAR WHEN EVENT DATA IS AVAILABLE.</div>';
@@ -142,10 +163,8 @@ function renderDetail(){
     renderEventCenter(game);
     return;
   } else if(page==="team.html"){
-    if(!t){$("#teamDetail").innerHTML=card("TEAM","<h2>TEAM NOT FOUND</h2>");return}
-    const roster=d.players.filter(x=>x.teamId===t.id), games=d.games.filter(x=>x.homeTeamId===t.id||x.awayTeamId===t.id), s=d.standings.find(x=>x.teamId===t.id);
-    $("#detailIntro").textContent=leagueName(t.leagueId)+" • "+(t.short||"TEAM");
-    $("#teamDetail").innerHTML=card("TEAM PROFILE",'<h2>'+esc(t.name)+'</h2><p>'+esc(leagueName(t.leagueId))+(s?' • Record '+esc(s.wins)+'-'+esc(s.losses):"")+'</p><h3>ROSTER</h3>'+ (roster.map(x=>link("player.html",x.id,x.name)).join(" • ")||"Roster data pending.")+'<h3>GAMES</h3>'+games.map(x=>link("game.html",x.id,(x.status||"Game")+" • "+(x.time||"TBD"))).join("<br>"));
+    renderTeamCenter(t);
+    return;
   } else if(page==="player.html"){
     if(!p){$("#playerDetail").innerHTML=card("PLAYER","<h2>PLAYER NOT FOUND</h2>");return}
     const pt=team(p.teamId);
