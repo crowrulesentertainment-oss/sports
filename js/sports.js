@@ -1,4 +1,20 @@
 
+// SPORTS 65.0 — UNIVERSAL SPORTS RECORDS & STATISTICS HISTORY
+function renderRecordsCenter65(){
+ const box=$("#recordsCenter65");if(!box||!SportsState.ready)return;
+ const d=SportsState.data, records=d.records||d.statistics_history||d.stat_records||[];
+ const games=d.games||[], players=d.players||[], teams=d.teams||[], leagues=d.leagues||[];
+ const q=(new URLSearchParams(location.search).get("q")||"").trim().toLowerCase();
+ const filtered=records.filter(x=>!q||JSON.stringify(x).toLowerCase().includes(q));
+ const rows=filtered.slice(0,60);
+ const card=x=>'<article><small>'+esc(x.category||x.type||"RECORD")+'</small><h2>'+esc(x.title||x.name||"Sports Record")+'</h2><b>'+esc(x.value??x.stat??"—")+'</b><p>'+esc(x.holder||x.playerName||x.teamName||x.description||"Record holder and context supplied by connected data.")+'</p><span>'+esc(x.season||x.year||x.date||"HISTORICAL")+'</span></article>';
+ box.innerHTML='<div class="rc65Hero"><small>SPORTS 65.0 • UNIVERSAL RECORDS & STATISTICS HISTORY</small><h1>RECORDS CENTER</h1><p>PLAYER • TEAM • LEAGUE • SEASON • GAME • CHAMPIONSHIP RECORDS</p></div><div class="rc65Search"><input id="recordSearch65" value="'+esc(q)+'" placeholder="SEARCH RECORDS, PLAYERS, TEAMS OR SEASONS"><button id="recordSearchBtn65">SEARCH</button></div><div class="rc65Metrics"><div><b>'+records.length+'</b><span>RECORDS</span></div><div><b>'+players.length+'</b><span>PLAYERS</span></div><div><b>'+teams.length+'</b><span>TEAMS</span></div><div><b>'+leagues.length+'</b><span>LEAGUES</span></div></div><section class="rc65Panel"><h2>HISTORICAL RECORDS</h2><div class="rc65Grid">'+(rows.length?rows.map(card).join(""):'<div class="rc65Empty"><h3>RECORDS FEED READY</h3><p>No historical records are connected yet. Record data can be added without fabricating historical statistics.</p></div>')+'</div></section><div class="rc65Links"><a href="history.html">SPORTS HISTORY</a><a href="stats.html">STATISTICS</a><a href="standings.html">STANDINGS</a><a href="season.html">SEASONS</a></div>';
+ const input=$("#recordSearch65"),btn=$("#recordSearchBtn65");
+ const go=()=>{const v=input?.value.trim();location.href=v?"records.html?q="+encodeURIComponent(v):"records.html"};
+ btn?.addEventListener("click",go);input?.addEventListener("keydown",e=>{if(e.key==="Enter")go()});
+}
+
+
 // SPORTS 64.0 — UNIVERSAL SPORTS SEASON ARCHIVE & HISTORY
 function renderSeasonArchive64(){
  const box=$("#seasonArchive64");if(!box||!SportsState.ready)return;
