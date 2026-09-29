@@ -1,4 +1,15 @@
 
+// SPORTS 39.0 — UNIVERSAL SPORTS NEWS PERSONALIZATION
+function renderNewsPersonalization39(){
+  const box=$("#sportsNewsPersonalization");if(!box||!SportsState.ready)return;
+  const f=Favorites.get(), leagues=new Set(f.leagues||[]), teams=new Set(f.teams||[]), players=new Set(f.players||[]);
+  const all=(SportsState.data.news||[]).filter(n=>SportsState.selectedLeague==="all"||n.leagueId===SportsState.selectedLeague);
+  const personalized=all.filter(n=>leagues.has(n.leagueId)||teams.has(n.teamId)||players.has(n.playerId));
+  const feed=(personalized.length?personalized:all).slice(0,8);
+  box.innerHTML='<div class="news39Hero"><div><small>SPORTS 39.0 • PERSONALIZED NEWS</small><h2>NEWS FOR YOUR SPORTS UNIVERSE</h2><p>Stories connected to the leagues, teams and players you follow are surfaced first.</p></div><a href="sports-profile.html">PROFILE</a></div><div class="news39Metrics"><div><b>'+personalized.length+'</b><span>PERSONAL STORIES</span></div><div><b>'+leagues.size+'</b><span>LEAGUES</span></div><div><b>'+teams.size+'</b><span>TEAMS</span></div><div><b>'+players.size+'</b><span>PLAYERS</span></div></div><div class="news39Grid">'+(feed.length?feed.map(n=>'<a class="news39Card" href="news-story.html?id='+encodeURIComponent(n.id||"")+'"><span>'+esc(n.category||"SPORTS")+'</span><h3>'+esc(n.title||"Sports Story")+'</h3><p>'+esc(n.summary||"Sports story")+'</p><em>'+esc(n.date||"LATEST")+'</em></a>').join(""):'<p class="news39Empty">Follow teams, players or leagues to personalize Sports News.</p>')+'</div>';
+}
+
+
 // SPORTS 38.0 — UNIVERSAL NEWS DISCOVERY CENTER
 function renderNewsDiscovery38(){
   const box=$("#sportsNewsDiscovery");if(!box||!SportsState.ready)return;
