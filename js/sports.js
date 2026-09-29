@@ -1,4 +1,22 @@
 
+// SPORTS 33.0 — UNIVERSAL SPORTS FEED
+function renderUniversalSportsFeed(){
+  const box=$("#sportsUniversalFeed");if(!box||!SportsState.ready)return;
+  const f=Favorites.get(), followedTeams=new Set(f.teams||[]), followedLeagues=new Set(f.leagues||[]), followedPlayers=new Set(f.players||[]);
+  const games=SportsState.data.games.filter(g=>SportsState.selectedLeague==="all"||g.leagueId===SportsState.selectedLeague).filter(g=>followedLeagues.has(g.leagueId)||followedTeams.has(g.homeTeamId)||followedTeams.has(g.awayTeamId));
+  const live=games.filter(g=>["LIVE","IN PROGRESS","HALFTIME"].includes(String(g.status||"").toUpperCase()));
+  const upcoming=games.filter(g=>!["FINAL","LIVE","IN PROGRESS","HALFTIME"].includes(String(g.status||"").toUpperCase())).slice(0,5);
+  const players=SportsState.data.players.filter(p=>followedPlayers.has(p.id)).slice(0,5);
+  const videos=selected(SportsState.data.videos).slice(0,5);
+  const game=g=>'<a class="feed33Game" href="game.html?id='+encodeURIComponent(g.id)+'"><span>'+esc(g.status||"GAME")+'</span><b>'+esc(getTeam(g.awayTeamId)?.short||"AWY")+' @ '+esc(getTeam(g.homeTeamId)?.short||"HME")+'</b><em>'+esc(g.time||"TBD")+'</em></a>';
+  box.innerHTML='<div class="feed33Hero"><div><small>SPORTS 33.0 • UNIVERSAL FEED</small><h2>YOUR SPORTS FEED</h2><p>One stream for the games, players, teams, leagues and media you follow.</p></div><a href="sports-profile.html">PROFILE</a></div>'+
+  '<div class="feed33Stream"><section><h3>LIVE NOW</h3>'+(live.length?live.map(game).join(""):'<p>No followed games are live right now.</p>')+'</section>'+
+  '<section><h3>UP NEXT</h3>'+(upcoming.length?upcoming.map(game).join(""):'<p>Follow teams or leagues to build your feed.</p>')+'</section>'+
+  '<section><h3>FOLLOWED PLAYERS</h3>'+(players.length?players.map(p=>'<a class="feed33Player" href="player.html?id='+encodeURIComponent(p.id)+'"><b>'+esc(p.name)+'</b><span>'+esc(p.position||"PLAYER")+' • '+esc(leagueName(p.leagueId))+'</span></a>').join(""):'<p>No followed players yet.</p>')+'</section>'+
+  '<section><h3>MEDIA</h3>'+(videos.length?videos.map(v=>'<a class="feed33Video" href="video.html?id='+encodeURIComponent(v.id)+'"><b>'+esc(v.title)+'</b><span>'+esc(v.type||"VIDEO")+'</span></a>').join(""):'<p>No media available for this selection.</p>')+'</section></div>';
+}
+
+
 // SPORTS 32.0 — UNIVERSAL SPORTS HOME INTELLIGENCE
 function renderHomeIntelligence(){
   const box=$("#sportsHomeIntelligence");if(!box||!SportsState.ready)return;
@@ -260,7 +278,7 @@ async function loadData(){
     loadJSON("data/standings.json"),loadJSON("data/schedule.json"),loadJSON("data/videos.json"),loadJSON("data/pickem.json")
   ]);
   SportsState.data={leagues:leagues.leagues||[],teams:teams.teams||[],players:players.players||[],games:games.games||[],standings:standings.standings||[],schedule:schedule.schedule||[],videos:videos.videos||[],pickem};
-  SportsState.ready=true; SportsIdentity.init(); buildShell(); Personalization.apply(); render(); renderFavorites(); renderNotificationCenter(); renderActivityCenter(); renderMemberDashboard(); renderIdentity(); renderSportsProfile(); renderPersonalizationBar(); renderHomeIntelligence(); renderActivityCenter(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
+  SportsState.ready=true; SportsIdentity.init(); buildShell(); Personalization.apply(); render(); renderFavorites(); renderNotificationCenter(); renderActivityCenter(); renderMemberDashboard(); renderIdentity(); renderSportsProfile(); renderPersonalizationBar(); renderHomeIntelligence(); renderUniversalSportsFeed(); renderActivityCenter(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
 }
 function league(){return SportsState.data.leagues.find(x=>x.id===SportsState.selectedLeague)||null}
 function selected(arr){return SportsState.selectedLeague==="all"?arr:arr.filter(x=>x.leagueId===SportsState.selectedLeague)}
