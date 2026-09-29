@@ -1,4 +1,20 @@
 
+/* SPORTS 77.0 — UNIVERSAL SPORTS DOCUMENTARY & TIMELINE ENGINE */
+function renderDocumentaryTimeline77(){
+ const box=$("#documentaryTimeline77");if(!box||!SportsState.ready)return;
+ const d=SportsState.data,seasons=d.seasons||d.season_history||[],mom=d.iconic_moments||d.iconicMoments||d.moments||[],news=d.news||[],records=d.records||[],games=d.games||[],players=d.players||[],teams=d.teams||[];
+ const q=new URLSearchParams(location.search),search=(q.get("q")||"").trim().toLowerCase(),league=q.get("league")||"";
+ const all=[...seasons.map(x=>({...x,timelineType:"SEASON",title:x.name||x.title||"Season"})),...mom.map(x=>({...x,timelineType:"ICONIC MOMENT",title:x.title||x.name||"Iconic Moment"})),...news.map(x=>({...x,timelineType:"NEWS",title:x.title||"Sports Story"})),...records.map(x=>({...x,timelineType:"RECORD",title:x.title||x.name||x.record||"Record"})),...games.map(x=>({...x,timelineType:"GAME",title:x.title||x.name||((x.awayTeam||x.away||"Away")+" vs "+(x.homeTeam||x.home||"Home"))}))];
+ const unique=all.filter((x,i,a)=>i===a.findIndex(y=>String(y.id||y.title)===String(x.id||x.title)));
+ const rows=unique.filter(x=>(!search||JSON.stringify(x).toLowerCase().includes(search))&&(!league||String(x.leagueId||x.league)===String(league)));
+ const pname=id=>(players.find(x=>String(x.id)===String(id))||{}).name||"";
+ const tname=id=>(teams.find(x=>String(x.id)===String(id))||{}).name||"";
+ const dateKey=x=>String(x.date||x.datetime||x.startDate||x.year||x.season||"").replace(/[^0-9-]/g,"").slice(0,10)||"CONNECTED";
+ const cards=rows.slice(0,120).sort((a,b)=>dateKey(a).localeCompare(dateKey(b))).map(x=>'<article class="dt77Item"><div class="dt77Date">'+esc(dateKey(x))+'</div><div class="dt77Dot"></div><div class="dt77Body"><span>'+esc(x.timelineType)+'</span><h2>'+esc(x.title)+'</h2><small>'+esc(x.leagueName||x.league||"SPORTS")+'</small><p>'+esc(x.description||x.story||x.summary||"Connected historical sports event in the CrowRules Sports timeline.")+'</p><div>'+esc(pname(x.playerId||x.athleteId))+' '+esc(tname(x.teamId))+'</div>'+(x.gameId?'<a href="game-intelligence.html?id='+encodeURIComponent(x.gameId)+'">OPEN GAME INTELLIGENCE</a>':"")+'</div></article>').join("");
+ box.innerHTML='<section class="dt77Hero"><small>SPORTS 77.0 • UNIVERSAL DOCUMENTARY & TIMELINE ENGINE</small><h1>SPORTS THROUGH TIME</h1><p>SEASONS • GAMES • PEOPLE • RECORDS • CHAMPIONSHIPS • ICONIC MOMENTS</p></section><form class="dt77Search"><input name="q" value="'+esc(q.get("q")||"")+'" placeholder="SEARCH THE SPORTS TIMELINE"><select name="league"><option value="">ALL LEAGUES</option>'+((d.leagues||[]).map(l=>'<option value="'+esc(l.id)+'" '+(String(l.id)===String(league)?"selected":"")+'>'+esc(l.name||l.id)+'</option>').join(""))+'</select><button>EXPLORE TIMELINE</button></form><div class="dt77Metrics"><article><b>'+rows.length+'</b><small>TIMELINE EVENTS</small></article><article><b>'+new Set(rows.map(x=>x.timelineType)).size+'</b><small>EVENT TYPES</small></article><article><b>'+new Set(rows.map(x=>x.leagueId||x.league).filter(Boolean)).size+'</b><small>LEAGUES</small></article><article><b>'+new Set(rows.map(dateKey).filter(x=>x!=="CONNECTED")).size+'</b><small>DATED EVENTS</small></article></div><section class="dt77Timeline">'+(cards||'<div class="dt77Empty"><h2>TIMELINE READY</h2><p>No connected historical timeline data is available for this selection yet.</p></div>')+'</section><nav class="dt77Links"><a href="stories.html">STORIES</a><a href="iconic-moments.html">ICONIC MOMENTS</a><a href="history.html">HISTORY</a><a href="legacy.html">LEGACY</a><a href="tournaments.html">CHAMPIONSHIPS</a></nav>';
+}
+
+
 /* SPORTS 76.0 — UNIVERSAL SPORTS STORYTELLING ENGINE */
 function renderSportsStorytelling76(){
  const box=$("#sportsStorytelling76");if(!box||!SportsState.ready)return;
