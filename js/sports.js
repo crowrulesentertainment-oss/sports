@@ -1,4 +1,24 @@
 
+// SPORTS 70.0 — UNIVERSAL SPORTS CAREER & SEASON ENGINE
+function renderCareerSeasonEngine70(){
+ const box=$("#careerSeasonEngine70");if(!box||!SportsState.ready)return;
+ const d=SportsState.data, players=d.players||[], teams=d.teams||[], stats=d.statistics||d.stats||d.player_stats||[], seasons=d.seasons||d.season_history||d.history||[], records=d.records||[];
+ const q=new URLSearchParams(location.search),id=q.get("id")||"",type=q.get("type")||"PLAYER";
+ const pool=type==="TEAM"?teams:players, e=pool.find(x=>String(x.id)===String(id))||pool[0];
+ if(!e){box.innerHTML='<div class="cs70Empty"><h1>CAREER & SEASON ENGINE</h1><p>No connected player or team data is available yet.</p></div>';return}
+ const eid=String(e.id), name=e.name||e.fullName||e.short||eid;
+ const rows=stats.filter(x=>String(x.playerId||x.teamId||x.entityId)===eid);
+ const seasonKey=x=>x.season||x.seasonId||x.year||x.seasonYear||"UNKNOWN";
+ const bySeason={};rows.forEach(x=>{const k=seasonKey(x);(bySeason[k]??=[]).push(x)});
+ const seasonRows=Object.entries(bySeason).map(([season,rs])=>{const metrics=[...new Set(rs.map(x=>x.metric||x.stat).filter(Boolean))].slice(0,8);return '<tr><th>'+esc(season)+'</th>'+metrics.map(m=>{const z=rs.find(x=>(x.metric||x.stat)===m);return '<td>'+esc(z?.value??z?.total??z?.average??"—")+'</td>'}).join("")+'</tr>'});
+ const metricList=[...new Set(rows.map(x=>x.metric||x.stat).filter(Boolean))].slice(0,12);
+ const career=metricList.map(m=>{const vals=rows.map(x=>Number(x.value??x.total??x.average)).filter(Number.isFinite);if(!vals.length)return "";const total=vals.reduce((a,b)=>a+b,0);return '<article><small>'+esc(m)+'</small><b>'+esc(String(Math.round(total*100)/100))+'</b><span>CONNECTED TOTAL</span></article>'}).join("");
+ const milestones=records.filter(x=>String(x.playerId||x.teamId||x.entityId)===eid).slice(0,12);
+ const opts=pool.map(x=>'<option value="'+esc(x.id)+'" '+(String(x.id)===eid?"selected":"")+'>'+esc(x.name||x.fullName||x.short||x.id)+'</option>').join("");
+ box.innerHTML='<div class="cs70Hero"><small>SPORTS 70.0 • UNIVERSAL CAREER & SEASON ENGINE</small><h1>'+esc(name)+'</h1><p>'+esc(type)+' • CAREER • SEASONS • MILESTONES • RECORDS</p></div><form class="cs70Pick"><select name="type"><option value="PLAYER" '+(type!=="TEAM"?"selected":"")+'>PLAYERS</option><option value="TEAM" '+(type==="TEAM"?"selected":"")+'>TEAMS</option></select><select name="id">'+opts+'</select><button>LOAD CAREER</button></form><section class="cs70Panel"><h2>CAREER SNAPSHOT</h2><div class="cs70Metrics">'+(career||'<article><b>—</b><span>NO CONNECTED CAREER TOTALS</span></article>')+'</div></section><section class="cs70Panel"><h2>SEASON-BY-SEASON</h2><div class="cs70Table">'+(seasonRows.length?'<table><thead><tr><th>SEASON</th>'+metricList.map(m=>'<th>'+esc(m)+'</th>').join("")+'</tr></thead><tbody>'+seasonRows.join("")+'</tbody></table>':'<div class="cs70Empty">Season-level statistics will appear when supplied by the Sports data feed.</div>')+'</div></section><section class="cs70Panel"><h2>MILESTONES & RECORDS</h2><div class="cs70Milestones">'+(milestones.length?milestones.map(x=>'<article><b>'+esc(x.title||x.name||x.record||"RECORD")+'</b><span>'+esc(x.value??x.description??x.season??"CONNECTED RECORD")+'</span></article>').join(""):'<div class="cs70Empty">No connected milestones or records for this entity.</div>')+'</div></section><div class="cs70Links"><a href="player.html?id='+encodeURIComponent(eid)+'">PROFILE</a><a href="stats-explorer.html?'+(type==="TEAM"?"team":"player")+'='+encodeURIComponent(eid)+'">STATISTICS</a><a href="records.html">RECORDS</a><a href="history.html">HISTORY</a><a href="compare.html">COMPARE</a></div>';
+}
+
+
 // SPORTS 69.0 — UNIVERSAL SPORTS HEAD-TO-HEAD ENGINE
 function renderHeadToHeadEngine69(){
  const box=$("#headToHeadEngine69");if(!box||!SportsState.ready)return;
