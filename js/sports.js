@@ -1,4 +1,17 @@
 
+// SPORTS 34.0 — UNIVERSAL SPORTS NEWS & STORY CENTER
+function renderSportsNewsCenter(){
+  const box=$("#sportsNewsCenter");if(!box||!SportsState.ready)return;
+  const f=Favorites.get(), teamIds=new Set(f.teams||[]), playerIds=new Set(f.players||[]), leagueIds=new Set(f.leagues||[]);
+  const all=(SportsState.data.news||[]);
+  const selectedNews=all.filter(n=>SportsState.selectedLeague==="all"||n.leagueId===SportsState.selectedLeague);
+  const personalized=selectedNews.filter(n=>leagueIds.has(n.leagueId)||teamIds.has(n.teamId)||playerIds.has(n.playerId));
+  const feed=(personalized.length?personalized:selectedNews).slice(0,10);
+  box.innerHTML='<div class="news34Hero"><div><small>SPORTS 34.0 • NEWS & STORIES</small><h2>SPORTS NEWS CENTER</h2><p>Headlines and stories connected to your leagues, teams and players.</p></div><a href="home.html">SPORTS HOME</a></div>'+
+  '<div class="news34Grid">'+(feed.length?feed.map(n=>'<a class="news34Card" href="'+(n.url?esc(n.url):"news.html?id="+encodeURIComponent(n.id||""))+'"><span>'+esc(n.category||"SPORTS")+'</span><h3>'+esc(n.title||"Untitled Story")+'</h3><p>'+esc(n.summary||"Sports story")+'</p><em>'+esc(n.date||"LATEST")+'</em></a>').join(""):'<div class="news34Empty">NEWS FEED READY — Connect a live news source or add stories to data/news.json.</div>')+'</div>';
+}
+
+
 // SPORTS 33.0 — UNIVERSAL SPORTS FEED
 function renderUniversalSportsFeed(){
   const box=$("#sportsUniversalFeed");if(!box||!SportsState.ready)return;
@@ -273,12 +286,12 @@ const loadJSON=async path=>{const r=await fetch(path+"?v=23.0",{cache:"no-store"
 
 async function loadData(){
   await SportsAPI.configure();
-  const [leagues,teams,players,games,standings,schedule,videos,pickem]=await Promise.all([
+  const [leagues,teams,players,games,standings,schedule,videos,pickem,news]=await Promise.all([
     loadJSON("data/leagues.json"),loadJSON("data/teams.json"),loadJSON("data/players.json"),loadJSON("data/games.json"),
-    loadJSON("data/standings.json"),loadJSON("data/schedule.json"),loadJSON("data/videos.json"),loadJSON("data/pickem.json")
+    loadJSON("data/standings.json"),loadJSON("data/schedule.json"),loadJSON("data/videos.json"),loadJSON("data/pickem.json"),loadJSON("data/news.json").catch(()=>({news:[]}))
   ]);
-  SportsState.data={leagues:leagues.leagues||[],teams:teams.teams||[],players:players.players||[],games:games.games||[],standings:standings.standings||[],schedule:schedule.schedule||[],videos:videos.videos||[],pickem};
-  SportsState.ready=true; SportsIdentity.init(); buildShell(); Personalization.apply(); render(); renderFavorites(); renderNotificationCenter(); renderActivityCenter(); renderMemberDashboard(); renderIdentity(); renderSportsProfile(); renderPersonalizationBar(); renderHomeIntelligence(); renderUniversalSportsFeed(); renderActivityCenter(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
+  SportsState.data={leagues:leagues.leagues||[],teams:teams.teams||[],players:players.players||[],games:games.games||[],standings:standings.standings||[],schedule:schedule.schedule||[],videos:videos.videos||[],pickem,news:news.news||[]};
+  SportsState.ready=true; SportsIdentity.init(); buildShell(); Personalization.apply(); render(); renderFavorites(); renderNotificationCenter(); renderActivityCenter(); renderMemberDashboard(); renderIdentity(); renderSportsProfile(); renderPersonalizationBar(); renderHomeIntelligence(); renderUniversalSportsFeed(); renderSportsNewsCenter(); renderActivityCenter(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
 }
 function league(){return SportsState.data.leagues.find(x=>x.id===SportsState.selectedLeague)||null}
 function selected(arr){return SportsState.selectedLeague==="all"?arr:arr.filter(x=>x.leagueId===SportsState.selectedLeague)}
