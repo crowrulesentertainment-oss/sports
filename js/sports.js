@@ -34,6 +34,26 @@ function favoriteButton(type,id,label){
 }
 
 
+
+// SPORTS 27.0 — UNIVERSAL SPORTS ACTIVITY CENTER
+function renderActivityCenter(){
+  const box=$("#sportsActivityCenter");if(!box||!SportsState.ready)return;
+  const f=Favorites.get(), games=SportsState.data.games.filter(g=>
+    (SportsState.selectedLeague==="all"||g.leagueId===SportsState.selectedLeague) &&
+    ((f.teams||[]).includes(g.homeTeamId)||(f.teams||[]).includes(g.awayTeamId)));
+  const live=games.filter(g=>["LIVE","IN PROGRESS","HALFTIME"].includes(String(g.status||"").toUpperCase()));
+  const upcoming=games.filter(g=>!["FINAL","LIVE","IN PROGRESS","HALFTIME"].includes(String(g.status||"").toUpperCase())).slice(0,5);
+  const finished=games.filter(g=>String(g.status||"").toUpperCase()==="FINAL").slice(-5).reverse();
+  const favPlayers=(f.players||[]).map(id=>SportsState.data.players.find(p=>p.id===id)).filter(Boolean).slice(0,5);
+  const gameCard=g=>'<a class="activityGame" href="game.html?id='+encodeURIComponent(g.id)+'"><span>'+esc(g.status||"GAME")+'</span><b>'+esc(getTeam(g.awayTeamId)?.short||"AWY")+' @ '+esc(getTeam(g.homeTeamId)?.short||"HME")+'</b><em>'+esc(g.time||"TBD")+'</em></a>';
+  box.innerHTML='<div class="activityMetrics"><div><b>'+games.length+'</b><span>FOLLOWED GAMES</span></div><div><b>'+live.length+'</b><span>LIVE</span></div><div><b>'+favPlayers.length+'</b><span>FOLLOWED PLAYERS</span></div></div>'+
+    '<div class="activityGrid">'+
+    '<section class="activityPanel"><h3>LIVE & UPCOMING</h3>'+((live.concat(upcoming)).length?(live.concat(upcoming)).map(gameCard).join(""):'<p class="activityEmpty">No followed games currently available.</p>')+'</section>'+
+    '<section class="activityPanel"><h3>RECENT RESULTS</h3>'+(finished.length?finished.map(gameCard).join(""):'<p class="activityEmpty">No recent followed results.</p>')+'</section>'+
+    '<section class="activityPanel"><h3>FOLLOWED PLAYERS</h3>'+(favPlayers.length?favPlayers.map(p=>'<a class="activityPlayer" href="player.html?id='+encodeURIComponent(p.id)+'"><b>'+esc(p.name)+'</b><span>'+esc(p.position||"PLAYER")+' • '+esc(leagueName(p.leagueId))+'</span></a>').join(""):'<p class="activityEmpty">Follow players to build your personal Sports activity.</p>')+'</section>'+
+    '</div>';
+}
+
 // SPORTS 26.0 — UNIVERSAL SPORTS NOTIFICATIONS CENTER
 const SportsNotifications={
   key:"crowrulesSportsNotifications",
@@ -141,7 +161,7 @@ async function loadData(){
     loadJSON("data/standings.json"),loadJSON("data/schedule.json"),loadJSON("data/videos.json"),loadJSON("data/pickem.json")
   ]);
   SportsState.data={leagues:leagues.leagues||[],teams:teams.teams||[],players:players.players||[],games:games.games||[],standings:standings.standings||[],schedule:schedule.schedule||[],videos:videos.videos||[],pickem};
-  SportsState.ready=true; buildShell(); render(); renderFavorites(); renderNotificationCenter(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
+  SportsState.ready=true; buildShell(); render(); renderFavorites(); renderNotificationCenter(); renderActivityCenter(); renderActivityCenter(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
 }
 function league(){return SportsState.data.leagues.find(x=>x.id===SportsState.selectedLeague)||null}
 function selected(arr){return SportsState.selectedLeague==="all"?arr:arr.filter(x=>x.leagueId===SportsState.selectedLeague)}
