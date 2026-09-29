@@ -1,4 +1,16 @@
 
+// SPORTS 59.0 — UNIVERSAL SPORTS EVENT CENTER 2.0
+function renderEventCenter59(){
+  const box=$("#eventCenter59");if(!box||!SportsState.ready)return;
+  const games=SportsState.data.games||[], events=SportsState.data.live_events||SportsState.data.events||[], schedule=SportsState.data.schedule||[];
+  const selected=SportsState.selectedLeague;
+  const leagueOk=x=>selected==="all"||x.leagueId===selected;
+  const combined=[...games.filter(leagueOk).map(g=>({type:"GAME",id:g.id,title:(getTeam(g.awayTeamId)?.short||"AWY")+" @ "+(getTeam(g.homeTeamId)?.short||"HME"),status:g.status,time:g.time||g.date,href:"game-intelligence.html?id="+encodeURIComponent(g.id)})),...events.filter(leagueOk).map(e=>({type:"EVENT",id:e.id,title:e.title||e.name||"Live Event",status:e.status,time:e.time||e.date,href:"event-center.html?id="+encodeURIComponent(e.id)})),...schedule.filter(leagueOk).map(e=>({type:"SCHEDULE",id:e.id,title:e.title||e.name||"Scheduled Event",status:e.status,time:e.time||e.date,href:"event-center.html?id="+encodeURIComponent(e.id)}))].slice(0,18);
+  const card=e=>'<a href="'+e.href+'"><span>'+esc(e.type)+'</span><b>'+esc(e.title)+'</b><em>'+esc(e.status||"SCHEDULED")+' • '+esc(e.time||"TIME TBD")+'</em></a>';
+  box.innerHTML='<div class="event59Hero"><small>SPORTS 59.0 • UNIVERSAL EVENT CENTER 2.0</small><h1>THE EVENT CENTER</h1><p>Games, live events and scheduled activity connected through one Sports event system.</p><a href="game-day.html">GAME DAY</a></div><div class="event59Stats"><div><b>'+games.filter(leagueOk).length+'</b><span>GAMES</span></div><div><b>'+events.filter(leagueOk).length+'</b><span>LIVE EVENTS</span></div><div><b>'+schedule.filter(leagueOk).length+'</b><span>SCHEDULED</span></div><div><b>'+combined.length+'</b><span>DISCOVERABLE</span></div></div><section class="event59List"><h2>EVENT DISCOVERY</h2>'+(combined.length?combined.map(card).join(""):'<p>No events are available in the current data feed.</p>')+'</section>';
+}
+
+
 // SPORTS 58.0 — UNIVERSAL SPORTS GAME INTELLIGENCE CENTER
 function renderGameIntelligence58(){
   const box=$("#gameIntelligence58");if(!box||!SportsState.ready)return;
