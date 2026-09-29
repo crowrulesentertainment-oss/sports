@@ -1,4 +1,21 @@
 
+// SPORTS 56.0 — UNIVERSAL TEAM GAME HUB
+function renderTeamGameHub56(){
+  const box=$("#teamGameHub56");if(!box||!SportsState.ready)return;
+  const p=new URLSearchParams(location.search), id=p.get("id"), games=SportsState.data.games||[];
+  const g=games.find(x=>String(x.id)===String(id))||games[0];
+  if(!g){box.innerHTML='<div class="team56Empty"><h1>GAME NOT FOUND</h1><a href="scores.html">BACK TO SCORES</a></div>';return}
+  const away=getTeam(g.awayTeamId), home=getTeam(g.homeTeamId), teams=[away,home].filter(Boolean);
+  const teamGames=t=>games.filter(x=>x.homeTeamId===t?.id||x.awayTeamId===t?.id).slice(0,4);
+  const roster=(SportsState.data.players||[]).filter(p=>teams.some(t=>t.id===p.teamId)).slice(0,8);
+  const news=(SportsState.data.news||[]).filter(n=>teams.some(t=>t.id===n.teamId)||n.leagueId===g.leagueId).slice(0,6);
+  const media=(SportsState.data.videos||[]).filter(v=>v.leagueId===g.leagueId).slice(0,4);
+  const team=t=>'<div class="team56Card"><h2>'+esc(t?.name||"TEAM")+'</h2><span>'+esc(t?.short||"")+'</span><a href="team.html?id='+encodeURIComponent(t?.id||"")+'">TEAM HUB</a></div>';
+  const game=x=>'<a href="live-game.html?id='+encodeURIComponent(x.id)+'"><span>'+esc(x.status||"GAME")+'</span><b>'+esc(getTeam(x.awayTeamId)?.short||"AWY")+' @ '+esc(getTeam(x.homeTeamId)?.short||"HME")+'</b><em>'+esc(x.score||x.time||x.date||"SCHEDULED")+'</em></a>';
+  box.innerHTML='<div class="team56Hero"><small>SPORTS 56.0 • UNIVERSAL TEAM GAME HUB</small><h1>'+esc(away?.name||"AWAY")+' <strong>'+esc(g.score||"VS")+'</strong> '+esc(home?.name||"HOME")+'</h1><p>'+esc(g.status||"SCHEDULED")+' • '+esc(g.time||g.date||"")+'</p></div><div class="team56Teams">'+teams.map(team).join("")+'</div><div class="team56Grid"><section><h2>RECENT & UPCOMING</h2>'+teams.flatMap(teamGames).slice(0,8).map(game).join("")+'</section><section><h2>ROSTER</h2>'+(roster.length?roster.map(x=>'<a href="player.html?id='+encodeURIComponent(x.id)+'"><b>'+esc(x.name||"Player")+'</b><span>'+esc(x.position||"")+'</span></a>').join(""):'<p>No roster data available.</p>')+'</section><section><h2>TEAM NEWS</h2>'+(news.length?news.map(n=>'<a href="news-story.html?id='+encodeURIComponent(n.id)+'"><b>'+esc(n.title||"Sports Story")+'</b><span>'+esc(n.date||"LATEST")+'</span></a>').join(""):'<p>No team news in the current feed.</p>')+'</section><section><h2>TEAM MEDIA</h2>'+(media.length?media.map(v=>'<a href="video.html?id='+encodeURIComponent(v.id)+'"><b>'+esc(v.title||v.name||"Sports Video")+'</b><span>VIDEO</span></a>').join(""):'<p>No team media in the current feed.</p>')+'</section></div>';
+}
+
+
 // SPORTS 55.0 — UNIVERSAL SPORTS LIVE GAME EXPERIENCE
 function renderLiveGameExperience55(){
   const box=$("#liveGameExperience55");if(!box||!SportsState.ready)return;
