@@ -247,7 +247,7 @@ function leagueName(id){return SportsState.data.leagues.find(x=>x.id===id)?.name
 function setLeague(id){
   SportsState.selectedLeague=id||"all"; localStorage.setItem("crowrulesSportsLeague",SportsState.selectedLeague);
   const u=new URL(location.href); if(id&&id!=="all")u.searchParams.set("league",id);else u.searchParams.delete("league");
-  history.replaceState({}, "", u); buildShell(); render(); renderFavorites(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
+  history.replaceState({}, "", u); buildShell(); render(); renderFavorites(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch(); renderNotificationCenter(); renderActivityCenter(); renderMemberDashboard(); renderPersonalizationBar();
 }
 function renderDiscoverySearch(){
   const q=SportsState.search.trim().toLowerCase();
@@ -350,6 +350,10 @@ function buildShell(){
     const state=document.createElement("div"); state.id="sportsDataState"; state.className="sportsDataState";
     state.innerHTML='<span>SPORTS 24.0 API GATEWAY</span><b id="sportsApiStatus" class="apiStatus">API GATEWAY STATIC</b><i></i><span id="sportsApiSource">STATIC JSON</span><i></i><b id="liveEngineStatus">○ LIVE FEED READY</b><span id="liveEngineSync">WAITING FOR LIVE PROVIDER</span>';
     top.insertAdjacentElement("afterend",state);
+  }
+  if(!document.querySelector("#sportsPersonalization")){
+    const bar=document.createElement("div"); bar.id="sportsPersonalization"; bar.className="sportsPersonalization";
+    top.insertAdjacentElement("afterend",bar);
   }
   if(false){
     const state=document.createElement("div"); state.id="sportsDataState"; state.className="sportsDataState";
