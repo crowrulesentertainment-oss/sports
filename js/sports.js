@@ -9,7 +9,7 @@ const SportsState={
 };
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
-const loadJSON=async path=>{const r=await fetch(path+"?v=17.0",{cache:"no-store"});if(!r.ok)throw new Error(path+" "+r.status);return r.json();};
+const loadJSON=async path=>{const r=await fetch(path+"?v=19.0",{cache:"no-store"});if(!r.ok)throw new Error(path+" "+r.status);return r.json();};
 
 async function loadData(){
   const [leagues,teams,players,games,standings,schedule,videos,pickem]=await Promise.all([
@@ -92,7 +92,7 @@ function buildShell(){
   const top=document.querySelector(".topbar"); if(!top)return;
   if(!document.querySelector("#sportsControls")){
     const controls=document.createElement("div"); controls.id="sportsControls"; controls.className="sportsControls";
-    controls.innerHTML='<label class="srOnly" for="leagueSelect">League</label><select id="leagueSelect" aria-label="Global league selector"></select><label class="srOnly" for="sportsSearch">Search sports</label><input id="sportsSearch" type="search" placeholder="SEARCH SPORTS" autocomplete="off"><span class="accountStatus">● DATA LAYER</span>';
+    controls.innerHTML='<button class="commandButton" id="sportsCommand" type="button" aria-expanded="false">COMMAND <span>⌄</span></button><label class="srOnly" for="leagueSelect">League</label><select id="leagueSelect" aria-label="Global league selector"></select><label class="srOnly" for="sportsSearch">Search sports</label><input id="sportsSearch" type="search" placeholder="SEARCH SPORTS" autocomplete="off"><button class="notificationButton" id="sportsNotifications" type="button" aria-label="Sports notifications">◉<b>0</b></button><span class="accountStatus"><i></i> DATA LAYER</span><div class="commandMenu" id="commandMenu"><a href="scores.html">LIVE SCORES</a><a href="schedule.html">SCHEDULE</a><a href="standings.html">STANDINGS</a><a href="rankings.html">RANKINGS</a><a href="stats.html">STATISTICS</a><a href="teams.html">TEAMS</a><a href="players.html">PLAYERS</a><a href="videos.html">MEDIA</a><a href="pickem.html">PICK ’EM</a></div>';
     top.appendChild(controls);
   }
   const select=$("#leagueSelect"); if(select){
@@ -100,6 +100,10 @@ function buildShell(){
     select.value=SportsState.selectedLeague; select.onchange=e=>setLeague(e.target.value);
   }
   const search=$("#sportsSearch"); if(search){search.value=SportsState.search; search.oninput=e=>{SportsState.search=e.target.value;render();renderDiscoverySearch()};}
+  const command=$("#sportsCommand"), menu=$("#commandMenu");
+  if(command&&menu){command.onclick=e=>{e.stopPropagation();menu.classList.toggle("open");command.setAttribute("aria-expanded",menu.classList.contains("open"))}}
+  $("#sportsNotifications")?.addEventListener("click",()=>{const n=$("#sportsNotifications");n.classList.toggle("active");n.querySelector("b").textContent=n.classList.contains("active")?"✓":"0"});
+
 }
 function render(){
   if(!SportsState.ready)return;
@@ -125,7 +129,7 @@ function render(){
   if($("#pickemData"))$("#pickemData").innerHTML=picks.map(x=>'<div class="dataRow pickRow"><b>'+esc(leagueName(x.leagueId))+'</b><span>'+esc(x.question)+'</span><span>'+esc(x.options.join(" / "))+' • '+esc(x.points)+' PTS</span></a>').join("")||'<div class="emptyState">NO PICK ’EM GAMES IN SELECTION</div>';
 }
 function clock(){if($("#clock"))$("#clock").textContent=new Date().toLocaleTimeString([], {hour12:false})+" LOCAL"}
-document.addEventListener("click",e=>{if(e.target.closest("#menu"))$("#mobileNav")?.classList.toggle("open")});
+document.addEventListener("click",e=>{if(e.target.closest("#menu"))$("#mobileNav")?.classList.toggle("open");if(!e.target.closest("#sportsCommand")&&!e.target.closest("#commandMenu"))$("#commandMenu")?.classList.remove("open")});
 
 function byId(id){return new URLSearchParams(location.search).get(id)}
 function link(path,id,label){return '<a class="detailLink" href="'+path+'?id='+encodeURIComponent(id)+'">'+esc(label)+'</a>'}
