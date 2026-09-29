@@ -9,7 +9,7 @@ const SportsState={
 };
 const $=s=>document.querySelector(s);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
-const loadJSON=async path=>{const r=await fetch(path+"?v=19.0",{cache:"no-store"});if(!r.ok)throw new Error(path+" "+r.status);return r.json();};
+const loadJSON=async path=>{const r=await fetch(path+"?v=20.0",{cache:"no-store"});if(!r.ok)throw new Error(path+" "+r.status);return r.json();};
 
 async function loadData(){
   const [leagues,teams,players,games,standings,schedule,videos,pickem]=await Promise.all([
@@ -17,7 +17,7 @@ async function loadData(){
     loadJSON("data/standings.json"),loadJSON("data/schedule.json"),loadJSON("data/videos.json"),loadJSON("data/pickem.json")
   ]);
   SportsState.data={leagues:leagues.leagues||[],teams:teams.teams||[],players:players.players||[],games:games.games||[],standings:standings.standings||[],schedule:schedule.schedule||[],videos:videos.videos||[],pickem};
-  SportsState.ready=true; buildShell(); render(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
+  SportsState.ready=true; buildShell(); render(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
 }
 function league(){return SportsState.data.leagues.find(x=>x.id===SportsState.selectedLeague)||null}
 function selected(arr){return SportsState.selectedLeague==="all"?arr:arr.filter(x=>x.leagueId===SportsState.selectedLeague)}
@@ -26,7 +26,7 @@ function leagueName(id){return SportsState.data.leagues.find(x=>x.id===id)?.name
 function setLeague(id){
   SportsState.selectedLeague=id||"all"; localStorage.setItem("crowrulesSportsLeague",SportsState.selectedLeague);
   const u=new URL(location.href); if(id&&id!=="all")u.searchParams.set("league",id);else u.searchParams.delete("league");
-  history.replaceState({}, "", u); buildShell(); render(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
+  history.replaceState({}, "", u); buildShell(); render(); renderGameDayDashboard(); renderRankings(); renderScheduleCenter(); renderScoreboardCenter(); renderStatsCenter(); renderDetail(); renderPickDetail(); renderDiscoverySearch();
 }
 function renderDiscoverySearch(){
   const q=SportsState.search.trim().toLowerCase();
@@ -104,6 +104,21 @@ function buildShell(){
   if(command&&menu){command.onclick=e=>{e.stopPropagation();menu.classList.toggle("open");command.setAttribute("aria-expanded",menu.classList.contains("open"))}}
   $("#sportsNotifications")?.addEventListener("click",()=>{const n=$("#sportsNotifications");n.classList.toggle("active");n.querySelector("b").textContent=n.classList.contains("active")?"✓":"0"});
 
+}
+function renderGameDayDashboard(){
+  const box=$("#gameDayDashboard"); if(!box||!SportsState.ready)return;
+  const games=selected(SportsState.data.games), teams=selected(SportsState.data.teams), players=selected(SportsState.data.players);
+  const active=games.filter(g=>["LIVE","IN PROGRESS","HALFTIME"].includes(String(g.status||"").toUpperCase()));
+  const upcoming=games.filter(g=>!["FINAL","LIVE","IN PROGRESS","HALFTIME"].includes(String(g.status||"").toUpperCase())).slice(0,6);
+  const leaders=players.filter(p=>p.statValue!==undefined&&p.statValue!==null&&p.statValue!=="").sort((a,b)=>(Number(b.statValue)||0)-(Number(a.statValue)||0)).slice(0,5);
+  const cards='<div class="dayMetrics"><div><strong>'+games.length+'</strong><span>GAMES</span></div><div><strong>'+active.length+'</strong><span>LIVE NOW</span></div><div><strong>'+teams.length+'</strong><span>TEAMS</span></div><div><strong>'+players.length+'</strong><span>PLAYERS</span></div></div>'+
+  '<div class="dayGrid"><div class="panel dayPanel"><div class="panelHead"><span>GAME DAY FEED</span><a href="scores.html">ALL SCORES →</a></div>'+(active.length?active.map(g=>dayGame(g,"LIVE")).join(""):upcoming.map(g=>dayGame(g,"UP NEXT")).join("")||'<div class="emptyState">NO GAME DAY EVENTS</div>')+'</div>'+
+  '<div class="panel dayPanel"><div class="panelHead"><span>TOP PERFORMERS</span><a href="players.html">ALL PLAYERS →</a></div>'+(leaders.length?leaders.map((p,i)=>'<a class="dayLeader" href="player.html?id='+encodeURIComponent(p.id)+'"><strong>#'+String(i+1).padStart(2,"0")+'</strong><b>'+esc(p.name)+'</b><span>'+esc(p.statValue)+' '+esc(p.statLabel||"")+'</span></a>').join(""):'<div class="emptyState">PLAYER DATA PENDING</div>')+'</div></div>';
+  box.innerHTML=cards;
+}
+function dayGame(g,label){
+  const a=team(g.awayTeamId),h=team(g.homeTeamId),sc=g.score||{};
+  return '<a class="dayGame" href="game.html?id='+encodeURIComponent(g.id)+'"><div><small>'+esc(leagueName(g.leagueId))+'</small><b>'+esc(a?.short||"AWY")+' <em>@</em> '+esc(h?.short||"HME")+'</b></div><span>'+esc(sc.away??"—")+' — '+esc(sc.home??"—")+'</span><i>'+esc(label)+'</i></a>';
 }
 function render(){
   if(!SportsState.ready)return;
