@@ -1,0 +1,60 @@
+{
+  "version": "3.0",
+  "status": "static-sample",
+  "players": [
+    {
+      "id": "p1",
+      "leagueId": "nfl",
+      "name": "Player One",
+      "teamId": "nfl-alpha",
+      "position": "QB",
+      "statLabel": "PASS YDS",
+      "statValue": "—"
+    },
+    {
+      "id": "p2",
+      "leagueId": "mlb",
+      "name": "Player Two",
+      "teamId": "mlb-alpha",
+      "position": "OF",
+      "statLabel": "AVG",
+      "statValue": "—"
+    },
+    {
+      "id": "p3",
+      "leagueId": "nba",
+      "name": "Player Three",
+      "teamId": "nba-alpha",
+      "position": "G",
+      "statLabel": "PTS",
+      "statValue": "—"
+    },
+    {
+      "id": "p4",
+      "leagueId": "nhl",
+      "name": "Player Four",
+      "teamId": "nhl-alpha",
+      "position": "C",
+      "statLabel": "PTS",
+      "statValue": "—"
+    },
+    {
+      "id": "p5",
+      "leagueId": "wnba",
+      "name": "Player Five",
+      "teamId": "wnba-alpha",
+      "position": "G",
+      "statLabel": "PTS",
+      "statValue": "—"
+    },
+    {
+      "id": "p6",
+      "leagueId": "mls",
+      "name": "Player Six",
+      "teamId": "mls-alpha",
+      "position": "FW",
+      "statLabel": "G",
+      "statValue": "—"
+    }
+  ]
+}
