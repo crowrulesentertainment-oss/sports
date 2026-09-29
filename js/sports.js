@@ -1,4 +1,21 @@
 
+// SPORTS 57.0 — UNIVERSAL PLAYER GAME CENTER
+function renderPlayerGameCenter57(){
+  const box=$("#playerGameCenter57");if(!box||!SportsState.ready)return;
+  const p=new URLSearchParams(location.search), gid=p.get("game"), pid=p.get("player");
+  const games=SportsState.data.games||[], players=SportsState.data.players||[];
+  const g=games.find(x=>String(x.id)===String(gid))||games[0];
+  if(!g){box.innerHTML='<div class="player57Empty"><h1>GAME NOT FOUND</h1><a href="scores.html">BACK TO SCORES</a></div>';return}
+  const participants=players.filter(x=>x.teamId===g.homeTeamId||x.teamId===g.awayTeamId);
+  const selected=participants.find(x=>String(x.id)===String(pid))||participants[0];
+  const team=getTeam(selected?.teamId), teamGames=games.filter(x=>x.homeTeamId===selected?.teamId||x.awayTeamId===selected?.teamId).slice(0,5);
+  const news=(SportsState.data.news||[]).filter(n=>n.playerId===selected?.id||n.teamId===selected?.teamId||n.leagueId===g.leagueId).slice(0,5);
+  const media=(SportsState.data.videos||[]).filter(v=>v.playerId===selected?.id||v.teamId===selected?.teamId||v.leagueId===g.leagueId).slice(0,4);
+  const playerLink=x=>'<a href="player.html?id='+encodeURIComponent(x.id)+'"><b>'+esc(x.name||"Player")+'</b><span>'+esc(x.position||"")+'</span></a>';
+  box.innerHTML='<div class="player57Hero"><small>SPORTS 57.0 • UNIVERSAL PLAYER GAME CENTER</small><h1>'+esc(selected?.name||"PLAYER")+'</h1><p>'+esc(team?.name||"TEAM")+' • '+esc(selected?.position||"PLAYER")+'</p><div class="player57Game">'+esc(getTeam(g.awayTeamId)?.short||"AWY")+' '+esc(g.score||"VS")+' '+esc(getTeam(g.homeTeamId)?.short||"HME")+' • '+esc(g.status||"GAME")+'</div></div><div class="player57Picker">'+(participants.length?participants.map(playerLink).join(""):'<p>No player data available.</p>')+'</div><div class="player57Grid"><section><h2>GAME ROLE</h2><p>'+esc(selected?.role||selected?.position||"Player participation details will appear when supplied by the data feed.")+'</p></section><section><h2>PLAYER STATS</h2><p>'+esc(selected?.stats?JSON.stringify(selected.stats):"Player statistics will appear when supplied by the data feed.")+'</p></section><section><h2>TEAM GAMES</h2>'+teamGames.map(x=>'<a href="live-game.html?id='+encodeURIComponent(x.id)+'"><b>'+esc(getTeam(x.awayTeamId)?.short||"AWY")+' @ '+esc(getTeam(x.homeTeamId)?.short||"HME")+'</b><span>'+esc(x.score||x.status||x.date||"GAME")+'</span></a>').join("")+'</section><section><h2>PLAYER NEWS</h2>'+(news.length?news.map(n=>'<a href="news-story.html?id='+encodeURIComponent(n.id)+'"><b>'+esc(n.title||"Sports Story")+'</b><span>'+esc(n.date||"LATEST")+'</span></a>').join(""):'<p>No related news in the current feed.</p>')+'</section><section><h2>PLAYER MEDIA</h2>'+(media.length?media.map(v=>'<a href="video.html?id='+encodeURIComponent(v.id)+'"><b>'+esc(v.title||v.name||"Sports Video")+'</b><span>VIDEO</span></a>').join(""):'<p>No related media in the current feed.</p>')+'</section></div>';
+}
+
+
 // SPORTS 56.0 — UNIVERSAL TEAM GAME HUB
 function renderTeamGameHub56(){
   const box=$("#teamGameHub56");if(!box||!SportsState.ready)return;
