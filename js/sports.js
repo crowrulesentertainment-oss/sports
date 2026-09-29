@@ -1,4 +1,24 @@
 
+/* SPORTS 82.0 — UNIVERSAL SPORTS MUSEUM EXHIBIT ENGINE */
+function renderMuseumExhibit82(){
+ const box=$("#museumExhibit82");if(!box||!SportsState.ready)return;
+ const d=SportsState.data,players=d.players||[],teams=d.teams||[],games=d.games||[],records=d.records||[],awards=d.awards||d.honors||[],mom=d.iconic_moments||d.iconicMoments||d.moments||[],photos=d.photos||d.images||d.photo_archive||[],videos=d.videos||d.media||[],hof=d.hall_of_fame||d.hallOfFame||d.legends||[];
+ const q=new URLSearchParams(location.search),id=q.get("id")||"",type=(q.get("type")||"PLAYER").toUpperCase();
+ const pool=type==="TEAM"?teams:type==="GAME"?games:type==="MOMENT"?mom:type==="RECORD"?records:type==="HALL_OF_FAME"?hof:players;
+ const e=pool.find(x=>String(x.id)===String(id))||pool[0];
+ if(!e){box.innerHTML='<div class="me82Empty"><h1>MUSEUM EXHIBIT ENGINE</h1><p>No connected exhibit is available yet.</p><a href="museum.html">RETURN TO MUSEUM</a></div>';return}
+ const eid=String(e.id),name=e.name||e.fullName||e.title||e.record||e.short||"Museum Exhibit";
+ const owned=x=>String(x.playerId||x.teamId||x.entityId||x.momentId||x.gameId||x.recordId)===eid;
+ const image=e.image||e.imageUrl||e.photo||e.photoUrl||e.logo||"";
+ const relatedRecords=records.filter(owned).slice(0,12),relatedAwards=awards.filter(owned).slice(0,12),relatedMoments=mom.filter(owned).slice(0,12);
+ const relatedPhotos=photos.filter(x=>owned(x)||String(x.playerId||x.teamId||x.momentId||x.gameId)===eid).slice(0,8);
+ const relatedVideos=videos.filter(x=>owned(x)||String(x.playerId||x.teamId||x.momentId||x.gameId)===eid).slice(0,8);
+ const gamesFor=games.filter(x=>owned(x)||String(x.playerId||x.teamId||x.entityId)===eid).slice(0,8);
+ const timeline=[...relatedAwards.map(x=>({k:"HONOR",t:x.title||x.name||"Honor",d:x.year||x.season||"CONNECTED"})),...relatedRecords.map(x=>({k:"RECORD",t:x.title||x.name||x.record||"Record",d:x.year||x.season||x.value||"CONNECTED"})),...relatedMoments.map(x=>({k:"MOMENT",t:x.title||x.name||"Iconic Moment",d:x.year||x.date||"CONNECTED"}))].slice(0,16);
+ box.innerHTML='<section class="me82Hero">'+(image?'<div class="me82Portrait"><img src="'+esc(image)+'" alt="'+esc(name)+'"></div>':'')+'<div><small>SPORTS 82.0 • UNIVERSAL MUSEUM EXHIBIT ENGINE</small><h1>'+esc(name)+'</h1><p>'+esc(type)+' • '+esc(e.leagueName||e.league||e.year||e.season||"SPORTS HISTORY")+'</p></div></section><section class="me82Stats"><article><b>'+relatedRecords.length+'</b><small>RECORDS</small></article><article><b>'+relatedAwards.length+'</b><small>HONORS</small></article><article><b>'+relatedMoments.length+'</b><small>MOMENTS</small></article><article><b>'+gamesFor.length+'</b><small>GAMES</small></article></section><div class="me82Columns"><section class="me82Panel"><h2>THE EXHIBIT</h2><p>'+esc(e.biography||e.description||e.story||e.summary||"This exhibit is connected to the CrowRules Sports historical data layer.")+'</p><div class="me82Facts"><b>'+esc(e.position||e.role||e.status||"ARCHIVE")+'</b><span>'+esc(e.teamName||e.team||"")+'</span><span>'+esc(e.year||e.season||e.inductionYear||"")+'</span></div></section><section class="me82Panel"><h2>HISTORICAL TIMELINE</h2><div class="me82Timeline">'+(timeline.map(x=>'<div><span>'+esc(x.k)+'</span><b>'+esc(x.t)+'</b><small>'+esc(x.d)+'</small></div>').join("")||'<p>No connected timeline entries yet.</p>')+'</div></section></div><section class="me82Panel"><h2>CONNECTED PHOTOGRAPHS</h2><div class="me82Photos">'+(relatedPhotos.map(x=>'<a href="'+esc(x.image||x.imageUrl||"#")+'" target="_blank" rel="noopener"><img src="'+esc(x.image||x.imageUrl||"")+'" alt="'+esc(x.title||name)+'" loading="lazy"></a>').join("")||'<p>No exhibit photographs are connected yet.</p>')+'</div></section><section class="me82Panel"><h2>CONNECTED VIDEO & MEDIA</h2><div class="me82Media">'+(relatedVideos.map(x=>'<a href="'+esc(x.url||x.videoUrl||x.youtubeUrl||"#")+'" target="_blank" rel="noopener">'+esc(x.title||x.name||"MEDIA")+'</a>').join("")||'<p>No exhibit media is connected yet.</p>')+'</div></section><nav class="me82Links"><a href="museum.html">MUSEUM</a><a href="legacy.html">LEGACY</a><a href="milestones.html?id='+encodeURIComponent(eid)+'&type='+encodeURIComponent(type)+'">MILESTONES</a><a href="awards.html?id='+encodeURIComponent(eid)+'">AWARDS</a><a href="history.html">HISTORY</a></nav>';
+}
+
+
 /* SPORTS 81.0 — UNIVERSAL SPORTS DIGITAL MUSEUM */
 function renderDigitalMuseum81(){
  const box=$("#digitalMuseum81");if(!box||!SportsState.ready)return;
