@@ -1,4 +1,17 @@
 
+// SPORTS 41.0 — UNIVERSAL SPORTS NEWS HUB
+function renderNewsHub41(){
+  const box=$("#sportsNewsHub");if(!box||!SportsState.ready)return;
+  const f=Favorites.get(), saved=NewsWatchlist.get(), leagueIds=new Set(f.leagues||[]), teamIds=new Set(f.teams||[]), playerIds=new Set(f.players||[]);
+  const all=SportsState.data.news||[];
+  const selected=all.filter(n=>SportsState.selectedLeague==="all"||n.leagueId===SportsState.selectedLeague);
+  const personal=selected.filter(n=>leagueIds.has(n.leagueId)||teamIds.has(n.teamId)||playerIds.has(n.playerId));
+  const categories=[...new Set(all.map(n=>String(n.category||"SPORTS").toUpperCase()))];
+  const card=n=>'<a class="hub41Card" href="news-story.html?id='+encodeURIComponent(n.id||"")+'"><span>'+esc(n.category||"SPORTS")+'</span><h3>'+esc(n.title||"Sports Story")+'</h3><p>'+esc(n.summary||"Sports story")+'</p><em>'+esc(n.date||"LATEST")+'</em></a>';
+  box.innerHTML='<div class="hub41Hero"><div><small>SPORTS 41.0 • NEWS COMMAND CENTER</small><h1>SPORTS NEWS HUB</h1><p>One destination for discovery, personalized coverage, saved stories and connected Sports data.</p></div><a href="sports-profile.html">PROFILE</a></div><div class="hub41Actions"><a href="news.html">DISCOVER</a><a href="personalized-news.html">PERSONALIZED</a><a href="news-watchlist.html">WATCHLIST • '+saved.length+'</a><a href="home.html">SPORTS HOME</a></div><div class="hub41Metrics"><div><b>'+selected.length+'</b><span>SELECTED STORIES</span></div><div><b>'+personal.length+'</b><span>PERSONAL STORIES</span></div><div><b>'+saved.length+'</b><span>SAVED</span></div><div><b>'+categories.length+'</b><span>CATEGORIES</span></div></div><div class="hub41Section"><h2>PERSONALIZED COVERAGE</h2><div class="hub41Grid">'+(personal.length?personal.slice(0,6).map(card).join(""):'<p class="hub41Empty">Follow teams, players or leagues to personalize your News Hub.</p>')+'</div></div><div class="hub41Section"><h2>LATEST SELECTED-LEAGUE STORIES</h2><div class="hub41Grid">'+(selected.length?selected.slice(0,9).map(card).join(""):'<p class="hub41Empty">No stories available for this selection.</p>')+'</div></div>';
+}
+
+
 // SPORTS 40.0 — UNIVERSAL NEWS WATCHLIST & ALERTS
 const NewsWatchlist={
   key:"crowrulesSportsNewsWatchlist",
