@@ -92,3 +92,7 @@
 
 /* SPORTS 23.0 — LIVE ENGINE */
 #liveEngineStatus.liveConnected{color:#38d39f;text-shadow:0 0 9px rgba(56,211,159,.45)}#liveEngineSync{color:#7b879d}.sportsDataState{min-height:34px}
+
+/* SPORTS 24.0 — API GATEWAY */
+.apiStatus{color:var(--cyan)!important}.api-live{color:#38d39f!important}.api-error{color:#ff6b7a!important}.api-ready{color:#ffd166!important}
+#sportsApiSource{color:#7b879d}
