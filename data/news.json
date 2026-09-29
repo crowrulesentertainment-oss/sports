@@ -1,0 +1,38 @@
+{
+  "version": "1.0",
+  "status": "static-sample",
+  "news": [
+    {
+      "id": "n1",
+      "leagueId": "nfl",
+      "category": "LEAGUE",
+      "title": "NFL Coverage Center Ready",
+      "summary": "CrowRules Sports is prepared for connected league headlines and stories.",
+      "date": "LATEST"
+    },
+    {
+      "id": "n2",
+      "leagueId": "nba",
+      "category": "LEAGUE",
+      "title": "NBA Coverage Center Ready",
+      "summary": "NBA stories can flow into the personalized Sports experience.",
+      "date": "LATEST"
+    },
+    {
+      "id": "n3",
+      "leagueId": "mlb",
+      "category": "LEAGUE",
+      "title": "MLB Coverage Center Ready",
+      "summary": "MLB news is ready to connect to the universal Sports feed.",
+      "date": "LATEST"
+    },
+    {
+      "id": "n4",
+      "leagueId": "nhl",
+      "category": "LEAGUE",
+      "title": "NHL Coverage Center Ready",
+      "summary": "NHL stories can be connected through the universal data layer.",
+      "date": "LATEST"
+    }
+  ]
+}
