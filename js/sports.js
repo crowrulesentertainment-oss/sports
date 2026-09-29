@@ -1,4 +1,20 @@
 
+// SPORTS 68.0 — UNIVERSAL SPORTS COMPARISON ENGINE
+function renderComparisonEngine68(){
+ const box=$("#comparisonEngine68");if(!box||!SportsState.ready)return;
+ const d=SportsState.data, teams=d.teams||[], players=d.players||[], stats=d.statistics||d.stats||[], records=d.records||[];
+ const q=new URLSearchParams(location.search), a=q.get("a")||"", b=q.get("b")||"";
+ const entities=[...players.map(x=>({id:x.id,name:x.name||x.fullName||x.id,type:"PLAYER"})),...teams.map(x=>({id:x.id,name:x.name||x.fullName||x.id,type:"TEAM"}))];
+ const A=entities.find(x=>String(x.id)===String(a)),B=entities.find(x=>String(x.id)===String(b));
+ const metrics=[...new Set(stats.map(x=>x.metric||x.stat).filter(Boolean))].slice(0,40);
+ const value=(e,m)=>{if(!e)return"—";const rows=stats.filter(x=>String(x.playerId||x.teamId||x.entityId)===String(e.id)&&(x.metric||x.stat)===m);return rows[0]?.value??rows[0]?.total??rows[0]?.average??"—"};
+ const recordCount=e=>e?records.filter(x=>String(x.playerId||x.teamId||x.entityId)===String(e.id)).length:0;
+ const options=sel=>'<option value="">SELECT '+sel+'</option>'+entities.map(x=>'<option value="'+esc(x.id)+'" '+(String(x.id)===String(sel==="A"?a:b)?"selected":"")+'>'+esc(x.name)+' • '+x.type+'</option>').join("");
+ const rows=metrics.map(m=>'<tr><th>'+esc(m)+'</th><td>'+esc(value(A,m))+'</td><td>'+esc(value(B,m))+'</td></tr>').join("");
+ box.innerHTML='<div class="cmp68Hero"><small>SPORTS 68.0 • UNIVERSAL SPORTS COMPARISON ENGINE</small><h1>COMPARE SPORTS</h1><p>PLAYERS • TEAMS • METRICS • RECORDS • HISTORY</p></div><form class="cmp68Pick" id="compareForm68"><select name="a">'+options("A")+'</select><select name="b">'+options("B")+'</select><button>COMPARE</button></form><div class="cmp68Cards"><article><small>SUBJECT A</small><h2>'+esc(A?.name||"SELECT AN ENTITY")+'</h2><span>'+esc(A?.type||"—")+'</span><b>'+recordCount(A)+'</b><em>RECORDS</em></article><article><small>SUBJECT B</small><h2>'+esc(B?.name||"SELECT AN ENTITY")+'</h2><span>'+esc(B?.type||"—")+'</span><b>'+recordCount(B)+'</b><em>RECORDS</em></article></div><section class="cmp68Panel"><h2>STATISTICAL COMPARISON</h2><div class="cmp68TableWrap">'+(A||B?'<table><thead><tr><th>METRIC</th><th>'+esc(A?.name||"A")+'</th><th>'+esc(B?.name||"B")+'</th></tr></thead><tbody>'+(rows||'<tr><td colspan="3">No connected statistics.</td></tr>')+'</tbody></table>':'<div class="cmp68Empty"><h3>COMPARISON READY</h3><p>Select two players or teams to compare connected statistics.</p></div>')+'</div></section><div class="cmp68Links"><a href="stats-explorer.html">STATISTICS</a><a href="leaders.html">LEADERS</a><a href="records.html">RECORDS</a><a href="history.html">HISTORY</a></div>';
+}
+
+
 // SPORTS 67.0 — UNIVERSAL SPORTS STATISTICS EXPLORER
 function renderStatsExplorer67(){
  const box=$("#statsExplorer67");if(!box||!SportsState.ready)return;
