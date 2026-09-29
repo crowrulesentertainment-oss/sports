@@ -1,4 +1,19 @@
 
+// SPORTS 55.0 — UNIVERSAL SPORTS LIVE GAME EXPERIENCE
+function renderLiveGameExperience55(){
+  const box=$("#liveGameExperience55");if(!box||!SportsState.ready)return;
+  const params=new URLSearchParams(location.search), id=params.get("id");
+  const games=SportsState.data.games||[], g=games.find(x=>String(x.id)===String(id))||games.find(x=>["LIVE","IN PROGRESS","HALFTIME"].includes(String(x.status||"").toUpperCase()));
+  if(!g){box.innerHTML='<div class="live55Empty"><h1>GAME NOT FOUND</h1><p>Select a game from Scores or Game Day.</p><a href="scores.html">BACK TO SCORES</a></div>';return}
+  const away=getTeam(g.awayTeamId), home=getTeam(g.homeTeamId), live=["LIVE","IN PROGRESS","HALFTIME"].includes(String(g.status||"").toUpperCase());
+  const news=(SportsState.data.news||[]).filter(n=>n.leagueId===g.leagueId).slice(0,4), media=(SportsState.data.videos||[]).filter(v=>v.leagueId===g.leagueId).slice(0,4);
+  const players=(SportsState.data.players||[]).filter(p=>p.teamId===g.homeTeamId||p.teamId===g.awayTeamId).slice(0,6);
+  const teamName=t=>t?.name||t?.short||"TEAM";
+  const links=arr=>arr.map(n=>'<a href="news-story.html?id='+encodeURIComponent(n.id)+'"><span>'+esc(n.category||"NEWS")+'</span><b>'+esc(n.title||"Sports Story")+'</b></a>').join("");
+  box.innerHTML='<div class="live55Hero"><small>SPORTS 55.0 • LIVE GAME EXPERIENCE</small><div class="live55Status">'+(live?"● LIVE":"GAME CENTER")+'</div><h1>'+esc(teamName(away))+' <strong>'+esc(g.score||"VS")+'</strong> '+esc(teamName(home))+'</h1><p>'+esc(g.status||"SCHEDULED")+' • '+esc(g.time||g.date||"")+'</p></div><div class="live55Actions"><a href="game.html?id='+encodeURIComponent(g.id)+'">GAME DETAILS</a><a href="scores.html">SCORES</a><a href="game-day.html">GAME DAY</a></div><div class="live55Grid"><section><h2>GAME TIMELINE</h2><div class="live55Timeline">'+(g.events||g.timeline||[]).map(e=>'<div><b>'+esc(e.time||e.clock||"")+'</b><span>'+esc(e.text||e.description||e.event||"Game event")+'</span></div>').join("")||'<p>Live event timeline will appear when the connected live feed provides events.</p>'+'</div></section><section><h2>KEY PLAYERS</h2>'+(players.length?players.map(p=>'<a href="player.html?id='+encodeURIComponent(p.id)+'"><b>'+esc(p.name||"Player")+'</b><span>'+esc(p.position||"")+'</span></a>').join(""):'<p>No player data available for this game.</p>')+'</section><section><h2>RELATED NEWS</h2>'+(news.length?links(news):'<p>No related stories in the current feed.</p>')+'</section><section><h2>RELATED MEDIA</h2>'+(media.length?media.map(v=>'<a href="video.html?id='+encodeURIComponent(v.id)+'"><b>'+esc(v.title||v.name||"Sports Video")+'</b><span>VIDEO</span></a>').join(""):'<p>No related media in the current feed.</p>')+'</section></div>';
+}
+
+
 // SPORTS 54.0 — UNIVERSAL SPORTS GAME DAY COMMAND CENTER
 function renderGameDayCommandCenter54(){
   const box=$("#gameDayCommand54");if(!box||!SportsState.ready)return;
