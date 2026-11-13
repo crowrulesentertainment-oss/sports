@@ -55,7 +55,7 @@ The currently verified sports-specific tables are:
 - `public.cr_sports_events` — published events, teams, scores, status, venue and source URL
 - `public.cr_sports_stories` — published sports articles and editorial content
 
-The public site reads only published event and story records. The Sports Admin writes to these existing tables under the current RLS policies. No replacement sports database was created.
+The public site reads only published event and story records through a separate anonymous Supabase client. Narrow SELECT policies permit `anon` to read only rows marked `is_published = true` or `status = 'published'`; column-level grants expose only public display fields and exclude event notes and audit timestamps. The existing authenticated Universal Admin policy remains in place for writes. The Sports Admin writes to these existing tables under the current RLS policies. No replacement sports database was created.
 
 ## Live sports API status
 
