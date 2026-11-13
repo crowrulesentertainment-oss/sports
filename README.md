@@ -1,71 +1,84 @@
-# CrowRules Sports — Front-End Demo
+# CrowRules Sports
 
-A cinematic, multi-page sports hub built with HTML, CSS, and vanilla JavaScript.
+CrowRules Sports is the sports media and fan-engagement division of CrowRules Entertainment, built in Tacoma, Washington. The website is a responsive multi-page HTML/CSS/vanilla-JavaScript experience with a cinematic raven identity and professional sports-broadcast layout.
 
-## Run it
+## Local preview
 
-1. Extract the ZIP.
-2. Open `index.html` in a modern browser, or serve the folder with any static web server (recommended for consistent local behavior).
-3. No build step, package manager, API key, or framework is required.
-
-For example, if Python is installed:
+Serve the repository root with any static server:
 
 ```bash
 python -m http.server 8080
 ```
 
-Then visit `http://localhost:8080` from the folder containing `index.html`.
+Open `http://localhost:8080`.
 
-## Pages
+## Public pages
 
-- `index.html` — cinematic homepage and demo live board
-- `scores.html` — broadcast-style scores and game center with working search, sport filters, and status sorting
-- `news.html` — CrowRules Sports Desk editorial concept cards with search and category filters
-- `watchlist.html` — personal My Sports dashboard for locally saved favorite divisions
-- `sports.html` — all sport categories
-- `sport.html?sport=nfl` — sport detail pages driven by query parameter (`nfl`, `nba`, `mlb`, `nhl`, `soccer`, `ncaaf`, `ncaab`, `golf`, `tennis`, `motorsports`, `boxing`, `wwe`, `aew`, `ufc`)
-- `pickem.html` — free picks, demo private leagues, and special-event bracket challenge
-- `podcasts.html` — CrowRules Podcasting integration-ready show/episode shelf
-- `stats.html` — demo leaders and stat cards
-- `account.html` — demo sign-in / profile experience
-- `about.html` — network mission and integration status
+- `index.html` — sports headquarters and verified events feed
+- `sports.html` — all-sports directory (major, minor and adaptive)
+- `minor-sports.html` — minor and emerging sports
+- `high-school.html` — high school athletics and youth privacy safeguards
+- `college.html` — NCAA, NAIA, NJCAA and community college coverage
+- `scores.html` — published event scoreboard, search and status filters
+- `standings.html` — standings data landing page
+- `rankings.html` — rankings data landing page
+- `stats.html` — statistics and athlete leaders landing page
+- `pickem.html` — free-to-play, non-monetary predictions
+- `videos.html` — authorized video and original-programming hub
+- `news.html` — published CrowRules Sports Desk stories
+- `teams.html` — team discovery directory
+- `calendar.html` — published sports events
+- `pnw.html` — Tacoma / Pacific Northwest sports hub
+- `account.html` — shared CrowRules Supabase Auth sign-in and registration
+- `watchlist.html` — personal team follows
+- `podcasts.html` — CrowRules Sports audio / Podcasting connection landing page
+- `about.html` — network mission and data promise
+- `sport.html?sport=nfl` — retained legacy sport detail page
+
+## Admin
+
+`admin/index.html` is the dedicated Sports Admin workspace. It uses the shared CrowRules Universal Admin authentication helper and the existing `cr_admins` authorization table. It currently manages the existing `cr_sports_events` and `cr_sports_stories` tables. Supabase Row Level Security remains the authority for every database operation.
 
 ## Architecture
 
-- `css/styles.css` — shared responsive design system, cinematic visual treatment, reusable page layouts
-- `js/data.js` — centralized demo data catalog (sports, games, stats, podcasts, editorial concepts, challenges)
-- `js/app.js` — shared navigation, rendering, account/local-storage helpers, page bootstrapping
-- Each HTML file is a lightweight page shell with a shared header/footer and page-specific mount point.
+- `css/platform.css` — new responsive cinematic raven / sports broadcast design system
+- `js/platform.js` — shared multi-page rendering, Supabase reads, shared Auth, team follows, Pick'em interactions and page behaviors
+- `css/styles.css`, `js/app.js`, `js/data.js` — retained legacy front-end implementation and demo components
+- `assets/stadium.svg` — retained legacy visual asset
 
-## Important data status
+## Existing Supabase connection
 
-This package is **demo-first**. Scores, schedules, teams, standings, stat leaders, picks, podcast episodes, and event cards are illustrative sample content and must not be treated as current or official. No live sports API is connected. No real authentication, secure private leagues, cross-device synchronization, payment system, or podcast backend connection is implemented.
+The public pages load the shared CrowRules browser configuration from the main CrowRules Entertainment site. It uses the Supabase project `cevylpnoexugwgygvtgu`, its public publishable key, and the shared browser storage key `sb-cevylpnoexugwgygvtgu-auth-token`. No service-role or secret key is included in public code.
 
-### Local persistence
+The currently verified sports-specific tables are:
 
-Demo account profile, submitted picks, leagues created in the browser, and favorite divisions in My Sports are stored in `localStorage` on that browser. This is not secure authentication or a real multi-user database. Clearing browser data removes the saved demo state. A league marked “private” is only a local demonstration and is not actually access-controlled.
+- `public.cr_sports_events` — published events, teams, scores, status, venue and source URL
+- `public.cr_sports_stories` — published sports articles and editorial content
 
-## v2 additions
+The public site reads only published event and story records. The Sports Admin writes to these existing tables under the current RLS policies. No replacement sports database was created.
 
-- Scores board search across teams, league, status, and period.
-- Sort games with live/upcoming/final priorities.
-- Sports Desk page with category filters and story search. Story cards clearly identify themselves as editorial concepts rather than published/current news.
-- My Sports watchlist to add/remove favorite divisions, saved in localStorage.
+## Live sports API status
 
-## Suggested live integration roadmap
+The website includes an optional secure feed adapter: define `window.CROWRULES_SPORTS_FEED_URL` before `js/platform.js` and have that endpoint return JSON with an `events` array. The feed endpoint must be hosted server-side (for example, a Supabase Edge Function or other protected backend) and must keep provider credentials off the browser.
 
-1. **Sports data adapter:** choose licensed providers and map their responses into the shape in `js/data.js`; handle rate limits, caching, attribution, delays, and provider outages.
-2. **Backend:** add an API/serverless layer and database for accounts, league membership, picks, scoring rules, audit history, and leaderboard calculations. Never put privileged API keys in client-side JavaScript.
-3. **Authentication:** use a real identity provider and server-side authorization for private leagues.
-4. **CrowRules Podcasting:** connect the actual published-show/episode feed or Supabase tables, including public-safe read policies. The current page shows sample episodes only.
-5. **Live updates:** use polling or provider-supported streaming with “last updated” timestamps and visible stale-data/error states.
-6. **Legal/product review:** confirm data licensing, logos, trademarks, contest rules, age restrictions, and any applicable sweepstakes/gambling regulations before launch.
+**A licensed third-party sports provider has not yet been configured.** The repository currently reads CrowRules-published events from Supabase. Scores, standings, rankings and athlete statistics are not fabricated or labeled live when no verified feed exists. Choose a provider, confirm licensing/attribution, and configure the secure server-side endpoint before enabling third-party live data.
 
-## Customization
+## Feature status and integrity
 
-Edit `js/data.js` to change demo sports, teams, scores, stats, podcast cards, and challenges. Update colors and typography tokens at the top of `css/styles.css`. Add a page by copying an existing HTML shell and registering a renderer in `js/app.js`.
+- Supabase public event and story reads: connected to existing tables, subject to existing RLS and Data API grants.
+- Shared CrowRules authentication: uses the existing Supabase Auth session storage key.
+- Sports Admin: shared Universal Admin authorization; event and story management.
+- Team follows and Pick'em selections: browser-local at this stage; not cross-device or server-authoritative.
+- Standings, rankings and athlete statistics: require a licensed feed and are intentionally shown as unavailable until connected.
+- Videos: use authorized embeds or rights-holder submissions only; no unlicensed game broadcasts.
+- High school coverage: student media and personal information require appropriate school/guardian permission and moderation.
+- Pick'em: free-to-play predictions only; no wagering, paid entry, odds or cash prizes.
 
+## Future integration work
 
-## v3: League standings
-
-The standings page provides locally filterable illustrative tables for NFL, NBA, MLB, NHL, and soccer. Search, group filters, sort order, and selected league are browser-side interactions. All records are demo examples, not current or official standings; no licensed live standings API is connected.
+1. Select and license a sports-data provider covering professional, college, high school and minor sports.
+2. Build a protected server-side feed adapter and caching strategy.
+3. Extend the existing database with reviewed, RLS-protected team, league, athlete, standings, rankings and Pick'em modules only when the schemas and policies are agreed.
+4. Add cross-device member follows, prediction history, leaderboards and CrowPoints rules.
+5. Connect the public-safe CrowRules Podcasting and video catalog feeds.
+6. Add official source attribution, timestamps, stale-feed warnings and provider outage states.
