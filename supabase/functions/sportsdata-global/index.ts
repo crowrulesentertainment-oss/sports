@@ -3,6 +3,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 const API_BASE = "https://global.sportsdata.io";
+const ALLOWED_HEADERS = "apikey, authorization, x-client-info, content-type, x-retry-count, traceparent, tracestate, baggage";
 const ALLOWED_ORIGINS = new Set([
   "https://crowrulesentertainment-oss.github.io",
   "http://localhost:4173",
@@ -20,7 +21,7 @@ function json(body: unknown, status = 200, origin = "") {
       "cache-control": "no-store",
       "access-control-allow-origin": origin,
       "access-control-allow-methods": "GET, OPTIONS",
-      "access-control-allow-headers": "apikey, content-type, x-client-info, authorization",
+      "access-control-allow-headers": ALLOWED_HEADERS,
       "vary": "Origin",
       "x-content-type-options": "nosniff",
     },
@@ -51,13 +52,13 @@ Deno.serve(async (req: Request) => {
     return new Response(null, { status: 204, headers: {
       "access-control-allow-origin": origin,
       "access-control-allow-methods": "GET, OPTIONS",
-      "access-control-allow-headers": "apikey, content-type, x-client-info, authorization",
+      "access-control-allow-headers": ALLOWED_HEADERS,
       "access-control-max-age": "86400",
       "vary": "Origin",
     }});
   }
+  if (!ALLOWED_ORIGINS.has(origin)) return json({ error: "origin_not_allowed" }, 403, "");
   if (req.method !== "GET") return json({ error: "method_not_allowed" }, 405, origin);
-  if (!ALLOWED_ORIGINS.has(origin)) return json({ error: "origin_not_allowed" }, 403, origin);
   const ip = req.headers.get("cf-connecting-ip") || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   if (rateLimited(ip)) return json({ error: "rate_limited", retryAfterSeconds: 60 }, 429, origin);
 
