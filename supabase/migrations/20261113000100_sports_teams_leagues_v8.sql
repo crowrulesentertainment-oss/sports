@@ -76,8 +76,9 @@ drop policy if exists cr_sports_league_teams_public_read_published on public.cr_
 create policy cr_sports_league_teams_public_read_published on public.cr_sports_league_teams for select to anon,authenticated using(is_active=true and exists(select 1 from public.cr_sports_teams t where t.id=team_id and t.is_active=true and t.is_published=true) and exists(select 1 from public.cr_sports_leagues l where l.id=league_id and l.is_active=true and l.is_published=true));
 drop policy if exists cr_sports_league_teams_universal_admin_manage on public.cr_sports_league_teams;
 create policy cr_sports_league_teams_universal_admin_manage on public.cr_sports_league_teams for all to authenticated using((select private.cr_universal_admin_check())) with check((select private.cr_universal_admin_check()));
-grant select on public.cr_sports_teams,public.cr_sports_leagues,public.cr_sports_league_teams to anon,authenticated;
-grant insert,update,delete on public.cr_sports_teams,public.cr_sports_leagues,public.cr_sports_league_teams to authenticated;
+revoke all privileges on table public.cr_sports_teams,public.cr_sports_leagues,public.cr_sports_league_teams from anon,authenticated;
+grant select on table public.cr_sports_teams,public.cr_sports_leagues,public.cr_sports_league_teams to anon,authenticated;
+grant insert,update,delete on table public.cr_sports_teams,public.cr_sports_leagues,public.cr_sports_league_teams to authenticated;
 comment on table public.cr_sports_teams is 'Independent CrowRules Sports team directory; public rows require active and published flags.';
 comment on table public.cr_sports_leagues is 'Independent CrowRules Sports league and competition directory; public rows require active and published flags.';
 comment on table public.cr_sports_league_teams is 'Season-specific many-to-many team participation in leagues.';
