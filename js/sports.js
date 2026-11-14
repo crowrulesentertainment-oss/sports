@@ -89,7 +89,6 @@ async function moderateReport(id,next){const {error}=await client.from("cr_sport
 client.auth.onAuthStateChange((event)=>{if(event==="SIGNED_OUT"){user=null;auth();}});
 boot().catch(e=>{root.innerHTML='<div class="notice">Moderation dashboard could not load: '+safe(e.message)+'</div>';});
 }
-\n
 function initSportsAdminCenter(){
 const root=$("#sports-admin-center"),safe=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const client=window.supabase?.createClient("https://cevylpnoexugwgygvtgu.supabase.co","sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-");
@@ -116,7 +115,6 @@ box.querySelectorAll("[data-toggle]").forEach(b=>b.onclick=async()=>{const patch
 client.auth.onAuthStateChange((event)=>{if(event==="SIGNED_OUT"){user=null;auth();}});
 boot().catch(e=>{root.innerHTML='<div class="notice">Admin Center could not initialize: '+safe(e.message)+'</div>';});
 }
-\n
 function initSportsAnalytics(){
 const root=$("#sports-analytics"),safe=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const client=window.supabase?.createClient("https://cevylpnoexugwgygvtgu.supabase.co","sb_publishable_AdfM5y6RqvF3tbvEVzDZSg_JuGTQLD-");
