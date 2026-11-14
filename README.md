@@ -2,6 +2,11 @@
 
 CrowRules Sports is the sports media and fan-engagement division of CrowRules Entertainment, built in Tacoma, Washington. The website is a responsive multi-page HTML/CSS/vanilla-JavaScript experience with a cinematic raven identity and professional sports-broadcast layout.
 
+
+## V2 sitewide experience
+
+The `v2-sitewide` release adds a shared cinematic broadcast design layer and universal interactions across all public pages. See [V2-RELEASE-NOTES.md](V2-RELEASE-NOTES.md). V2 adds responsive quick navigation, a keyboard-accessible site search (Ctrl/⌘ + K), active-page navigation, scroll progress, skip-to-content support, and reduced-motion/accessibility refinements. Existing data and security behavior remains unchanged.
+
 ## Local preview
 
 Serve the repository root with any static server:

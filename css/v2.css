@@ -1,0 +1,56 @@
+/* CrowRules Sports V2 — global design layer */
+:root{--cr2-bg:#070a10;--cr2-panel:#101a25;--cr2-panel2:#162432;--cr2-line:rgba(194,211,226,.14);--cr2-text:#f5f7fa;--cr2-muted:#a6b4c3;--cr2-red:#c7474d;--cr2-gold:#d7bd83;--cr2-glow:0 18px 55px rgba(0,0,0,.32)}
+html{scroll-behavior:smooth;scroll-padding-top:100px}
+body[data-page]{background:radial-gradient(ellipse at 82% -12%,rgba(51,79,101,.28),transparent 38%),linear-gradient(180deg,#080c13 0%,#070a10 58%,#090e15 100%);color:var(--cr2-text);overflow-x:hidden}
+body[data-page]::selection{background:rgba(215,189,131,.32);color:#fff}
+body[data-page] a:focus-visible,body[data-page] button:focus-visible,body[data-page] input:focus-visible,body[data-page] select:focus-visible{outline:2px solid var(--cr2-gold);outline-offset:3px}
+.cr2-skip{position:fixed;top:8px;left:8px;z-index:1000;transform:translateY(-150%);background:#f5f7fa;color:#101820;padding:10px 14px;border-radius:7px;font-weight:800;font-size:12px}.cr2-skip:focus{transform:translateY(0)}
+.cr2-progress{position:fixed;inset:0 auto auto 0;height:3px;width:0;background:linear-gradient(90deg,var(--cr2-red),var(--cr2-gold));z-index:200;box-shadow:0 0 12px rgba(215,189,131,.45);pointer-events:none}
+body[data-page] .header{background:rgba(6,10,16,.92);border-bottom:1px solid var(--cr2-line);box-shadow:0 8px 28px rgba(0,0,0,.18);backdrop-filter:blur(22px) saturate(145%)}
+body[data-page] .topline{height:3px;background:linear-gradient(90deg,#b83c43 0 22%,#f4f5f7 22% 23%,#d7bd83 23% 27%,#18222d 27% 100%)}
+body[data-page] .brand b{letter-spacing:1.8px;text-shadow:0 2px 18px rgba(215,189,131,.12)}
+body[data-page] .brand b::before{content:"♜";display:inline-grid;place-items:center;width:29px;height:29px;margin-right:9px;border:1px solid rgba(215,189,131,.42);border-radius:8px;color:var(--cr2-gold);font-size:17px;vertical-align:middle;background:linear-gradient(145deg,#1b2a38,#0b1119)}
+body[data-page] .nav nav a{transition:background .18s ease,color .18s ease,transform .18s ease;border-radius:5px}
+body[data-page] .nav nav a:hover{background:rgba(255,255,255,.07);color:#fff;transform:translateY(-1px)}
+body[data-page] .nav nav a.active{background:rgba(199,71,77,.13);box-shadow:inset 0 -2px var(--cr2-red);color:#fff}
+.cr2-search-trigger{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;padding:8px 11px;border:1px solid var(--cr2-line);border-radius:7px;background:linear-gradient(145deg,#172433,#0d151e);color:#e9eff5;font-size:10px;font-weight:800;cursor:pointer}
+.cr2-search-trigger kbd{padding:2px 5px;border:1px solid #ffffff24;border-radius:4px;color:#a9b7c5;font:9px monospace}
+body[data-page] .hero{min-height:570px;background:#080d14}
+body[data-page] .hero-bg{background-image:linear-gradient(90deg,rgba(4,7,12,.97) 0%,rgba(5,10,17,.84) 39%,rgba(5,10,17,.32) 72%,rgba(5,10,17,.55) 100%),linear-gradient(0deg,#070a10 0%,transparent 48%),url("https://shop.munichravens.com/cdn/shop/articles/munich_ravens_quer3.jpg?v=1746606457");background-position:center,center,72% 42%;filter:saturate(.82)}
+body[data-page] .hero-inner{padding-top:76px;padding-bottom:76px}
+body[data-page] .hero h1{letter-spacing:-1.2px;text-shadow:0 6px 28px rgba(0,0,0,.35)}
+body[data-page] .hero p{font-size:clamp(13px,1.2vw,15px);line-height:1.8;color:#d0d8e1}
+body[data-page] .btn{border-color:rgba(206,221,235,.23);transition:transform .18s ease,border-color .18s ease,filter .18s ease}
+body[data-page] .btn:hover{transform:translateY(-2px);border-color:rgba(215,189,131,.65);filter:brightness(1.08)}
+body[data-page] .btn.red{box-shadow:0 8px 24px rgba(176,48,57,.2)}
+body[data-page] .section{position:relative}
+body[data-page] .sectionhead h2{letter-spacing:.25px}
+body[data-page] .sectionhead p{max-width:760px;line-height:1.8}
+body[data-page] .sport,body[data-page] .feature,body[data-page] .event,body[data-page] .story,body[data-page] .pick,body[data-page] .panel,body[data-page] .team{border-color:var(--cr2-line);background:linear-gradient(145deg,rgba(25,39,53,.94),rgba(11,18,27,.97));box-shadow:0 5px 22px rgba(0,0,0,.12);transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+body[data-page] .sport:hover,body[data-page] .feature:hover,body[data-page] .team:hover{transform:translateY(-3px);border-color:rgba(215,189,131,.45);box-shadow:var(--cr2-glow)}
+body[data-page] .sport span{filter:drop-shadow(0 4px 9px rgba(0,0,0,.3))}
+body[data-page] .filters input,body[data-page] .filters select,body[data-page] .search,body[data-page] .panel input{border-color:var(--cr2-line);background:#0a111a}
+body[data-page] .empty{border-color:rgba(215,189,131,.24);background:linear-gradient(145deg,rgba(20,32,44,.7),rgba(10,16,24,.6))}
+body[data-page] .pnw{background:radial-gradient(ellipse at 85% 50%,rgba(39,72,94,.36),transparent 50%),linear-gradient(90deg,#0b141e,#101d29);border-color:var(--cr2-line)}
+body[data-page] footer{background:linear-gradient(180deg,#090e15,#06090e);border-top-color:var(--cr2-line)}
+body[data-page] .footgrid b{letter-spacing:.7px}
+.cr2-bottomnav{display:none}
+.cr2-search-overlay{position:fixed;inset:0;z-index:500;display:none;align-items:flex-start;justify-content:center;padding:13vh 18px 24px;background:rgba(2,5,9,.78);backdrop-filter:blur(12px)}
+.cr2-search-overlay.open{display:flex}
+.cr2-search-dialog{width:min(650px,100%);max-height:72vh;overflow:hidden;border:1px solid rgba(215,189,131,.38);border-radius:15px;background:linear-gradient(145deg,#142130,#080e16);box-shadow:0 28px 100px #000}
+.cr2-search-head{display:flex;gap:10px;padding:14px;border-bottom:1px solid var(--cr2-line)}
+.cr2-search-head input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:#fff;font-size:16px}
+.cr2-search-head button{border:1px solid var(--cr2-line);border-radius:6px;background:#1a2a39;color:#dce5ed;padding:6px 9px;cursor:pointer}
+.cr2-search-hint{padding:9px 15px;color:#8fa1b3;font-size:9px;border-bottom:1px solid var(--cr2-line)}
+.cr2-search-results{padding:8px;overflow:auto;max-height:54vh}
+.cr2-search-results a{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:8px;color:#e9eff5;font-size:12px}
+.cr2-search-results a:hover,.cr2-search-results a:focus{background:rgba(255,255,255,.08);outline:0}
+.cr2-search-results small{display:block;color:#91a2b3;font-size:9px;margin-top:2px}
+.cr2-search-empty{padding:24px;color:#9aaabd;text-align:center;font-size:11px}
+.cr2-utility{display:flex;align-items:center;gap:12px;padding:7px max(18px,calc((100vw - 1280px)/2));background:#0b121b;border-bottom:1px solid rgba(194,211,226,.08);color:#9eacbb;font-size:9px;letter-spacing:.6px}
+.cr2-utility strong{color:var(--cr2-gold);font-size:9px;letter-spacing:1.2px}
+.cr2-utility a{color:#d3dce5}
+.cr2-utility .cr2-spacer{flex:1}
+@media(max-width:850px){body[data-page] .hero{min-height:500px}body[data-page] .nav{gap:8px}.cr2-search-trigger{padding:8px}.cr2-search-trigger span,.cr2-search-trigger kbd{display:none}.cr2-bottomnav{position:fixed;display:grid;grid-template-columns:repeat(4,1fr);gap:3px;left:10px;right:10px;bottom:calc(9px + env(safe-area-inset-bottom));z-index:150;padding:7px;border:1px solid rgba(215,189,131,.28);border-radius:13px;background:rgba(8,14,22,.94);box-shadow:0 12px 38px rgba(0,0,0,.55);backdrop-filter:blur(18px)}.cr2-bottomnav a{display:grid;justify-items:center;gap:2px;padding:5px 2px;border-radius:7px;color:#aebbc8;font-size:8px;font-weight:800}.cr2-bottomnav a span{font-size:17px}.cr2-bottomnav a.active{color:#f4d99e;background:rgba(215,189,131,.1)}body[data-page] footer{padding-bottom:105px}}
+@media(max-width:600px){body[data-page] .hero{min-height:460px}body[data-page] .hero h1{font-size:clamp(48px,14vw,64px)}body[data-page] .hero-inner{padding-top:58px;padding-bottom:58px}.cr2-utility{padding:7px 13px}.cr2-utility .cr2-hide-mobile{display:none}.cr2-search-overlay{padding:8vh 10px 20px}.cr2-search-dialog{border-radius:12px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}body[data-page] *,body[data-page] *::before,body[data-page] *::after{transition:none!important;animation:none!important}}
