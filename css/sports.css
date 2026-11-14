@@ -36,3 +36,26 @@
 .mod-buttons{display:flex;gap:8px;flex-wrap:wrap}
 .mod-footnote{margin-top:22px;font-size:12px}
 @media(max-width:600px){.mod-stats{grid-template-columns:1fr 1fr}.mod-card{padding:12px}}
+
+/* CrowRules Sports Admin Center */
+.sc-head,.sc-list-head{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.sc-head{padding:20px;background:#10151e;border:1px solid var(--line)}
+.sc-head h2{font:900 34px 'Barlow Condensed';margin:4px 0}
+.sc-tabs{display:flex;gap:8px;overflow-x:auto;padding:16px 0}
+.sc-tabs button,.sc-record-actions button{background:#151b25;color:#ddd;border:1px solid var(--line);padding:10px 13px;cursor:pointer;white-space:nowrap}
+.sc-tabs button.selected{background:#681b25;border-color:#b52a3c;color:#fff}
+.sc-workspace{display:grid;grid-template-columns:minmax(260px,.85fr) minmax(0,1.5fr);gap:16px;align-items:start}
+.sc-form-panel,.sc-list-panel{background:var(--panel);border:1px solid var(--line);padding:17px;min-width:0}
+.sc-form-panel h3,.sc-list-head h3{font:800 24px 'Barlow Condensed';margin:5px 0 14px}
+.sc-form-panel label{display:block;color:#c5c9d0;font-size:12px;margin:12px 0 5px}
+.sc-form-panel input:not([type=checkbox]),.sc-form-panel textarea{width:100%;background:#090d14;border:1px solid #303949;color:#fff;padding:10px;border-radius:3px}
+.sc-form-panel input[type=checkbox]{margin-right:7px}
+.sc-form-panel button{margin-top:14px}
+.sc-records{display:grid;gap:9px;margin-top:14px}
+.sc-record{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#0c1119;border:1px solid var(--line);padding:12px}
+.sc-record b{overflow-wrap:anywhere}
+.sc-record p{font-size:12px;color:var(--muted);margin:5px 0}
+.sc-state{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:.08em}
+.sc-record-actions button{font-size:10px}
+.sc-note{font-size:12px;margin-top:18px}
+@media(max-width:800px){.sc-workspace{grid-template-columns:1fr}.sc-record{align-items:flex-start;flex-direction:column}.sc-record-actions button{white-space:normal}}
