@@ -20,8 +20,8 @@ Deno.serve(async(req:Request)=>{
  const db=createClient(url,anon,{global:{headers:{Authorization:authorization}},auth:{persistSession:false,autoRefreshToken:false}});
  const {data:user,error:userError}=await db.auth.getUser();
  if(userError||!user.user)return out({error:"invalid_user_session"},401,origin);
- let body:{action?:string;dueOnly?:boolean};try{body=await req.json()}catch{return out({error:"invalid_json"},400,origin)}
- if(!["status","run"].includes(body.action||""))return out({error:"unsupported_action"},400,origin);
+ let body:{action?:string;dueOnly?:boolean;feedFilter?:string|null;sportFilter?:string|null;sport?:string;feed?:string;endpoint?:string;parameters?:Record<string,unknown>};try{body=await req.json()}catch{return out({error:"invalid_json"},400,origin)}
+ if(!["status","run","validate"].includes(body.action||""))return out({error:"unsupported_action"},400,origin);
  const {data:jobs,error:jobError}=await db.from("cr_sports_sync_jobs").select("id,sport,feed,endpoint,parameters,is_enabled,interval_seconds,schedule_enabled,next_run_at,consecutive_failures").order("sport").order("feed");
  if(jobError)return out({error:"admin_access_required_or_sync_schema_missing"},403,origin);
  const configuredMode=(Deno.env.get("SPORTSDATAIO_DATA_MODE")||"").toLowerCase();
@@ -30,11 +30,26 @@ Deno.serve(async(req:Request)=>{
  const production=configuredMode==="production"&&!!key;
  const providerReady=trialReady||production;
  const dataMode=trialReady?"FREE_TRIAL_DEMO":"PRODUCTION";
+ if(body.action==="validate"){
+  const sport=String(body.sport||""),feed=String(body.feed||""),endpoint=String(body.endpoint||"");
+  if(!(SPORTS as readonly string[]).includes(sport)||!FEEDS.has(feed)||!ENDPOINT.test(endpoint)||endpoint.includes(".."))return out({ok:false,error:"invalid_endpoint_configuration",message:"Choose a supported sport/feed and enter a valid documented endpoint path."},400,origin);
+  if(!providerReady)return out({ok:false,error:"provider_not_configured",message:"Configure the SportsDataIO Free Trial key and SPORTSDATAIO_DATA_MODE=trial in Supabase Edge Function secrets before testing."},409,origin);
+  const q=new URLSearchParams(),p=body.parameters&&typeof body.parameters==="object"?body.parameters:{};
+  for(const [k,v] of Object.entries(p)){if(!PARAMS.has(k)||v===null||v===undefined)continue;const value=String(v);if(value.length>48||!/^[A-Za-z0-9._-]+$/.test(value)||(k==="date"&&!/^\d{4}-\d{2}-\d{2}$/.test(value)))return out({ok:false,error:"invalid_parameter",message:"Invalid provider parameter: "+k},400,origin);q.set(k,value)}
+  try{
+   const providerUrl="https://api.sportsdata.io/v3/"+sport+"/"+feed+"/json/"+endpoint+(q.size?"?"+q.toString():"");
+   const response=await fetch(providerUrl,{headers:{"Ocp-Apim-Subscription-Key":key,"Accept":"application/json"},signal:AbortSignal.timeout(15000)});
+   if(!response.ok){const status=response.status;return out({ok:false,error:"provider_request_failed",providerStatus:status,message:status===401||status===403?"The Free Trial key or this sport/feed endpoint is not authorized.":status===404?"Endpoint not found for this sport/feed. Check the exact documented endpoint.":status===429?"SportsDataIO trial call limit reached.":"SportsDataIO returned HTTP "+status+"."},status===429?429:200,origin)}
+   const payload=await response.json(),rows=Array.isArray(payload)?payload:[payload],sample=rows.find((v:any)=>v&&typeof v==="object")||{};
+   const normalized=feed==="scores"?normalizeGames(payload,sport as typeof SPORTS[number]):null;
+   return out({ok:true,message:"Provider accepted the endpoint request. No response data was saved and no scores were imported.",sport,feed,endpoint,dataMode:trialReady?"FREE_TRIAL_DEMO":"PRODUCTION",recordCount:rows.length,normalizableCount:normalized?.games.length??null,rejectedCount:normalized?.rejected??null,sampleFields:Object.keys(sample).slice(0,30),responseType:Array.isArray(payload)?"array":typeof payload},200,origin);
+  }catch(e){return out({ok:false,error:"provider_unavailable",message:e instanceof Error?e.message:"Provider request failed."},502,origin)}
+ }
  if(body.action==="status"){
   const {data:runs}=await db.from("cr_sports_sync_runs").select("id,job_id,status,data_mode,records_received,records_normalized,records_rejected,error_code,error_message,started_at,finished_at").order("started_at",{ascending:false}).limit(25);
   return out({ok:true,enabledJobs:(jobs||[]).filter(j=>j.is_enabled).length,jobs:jobs||[],recentRuns:runs||[],productionReady:production,trialReady,dataMode:trialReady?"FREE_TRIAL_DEMO":production?"PRODUCTION":"NOT_CONFIGURED",schedulerReady:false,normalizationReady:true},200,origin);
  }
- const now=Date.now(),enabled=(jobs||[]).filter(j=>j.is_enabled&&(!body.dueOnly||(j.schedule_enabled&&(!j.next_run_at||new Date(j.next_run_at).getTime()<=now))));
+ const now=Date.now(),enabled=(jobs||[]).filter(j=>j.is_enabled&&(!body.feedFilter||j.feed===body.feedFilter)&&(!body.sportFilter||j.sport===body.sportFilter)&&(!body.dueOnly||(j.schedule_enabled&&(!j.next_run_at||new Date(j.next_run_at).getTime()<=now))));
  if(!enabled.length)return out({ok:true,processed:0,message:body.dueOnly?"No scheduled jobs are due.":"No sync jobs are enabled.",schedulerReady:false},200,origin);
  if(!providerReady){
   let auditFailed=false;
