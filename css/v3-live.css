@@ -1,0 +1,33 @@
+/* CrowRules Sports V3 — live broadcast experience */
+:root{--cr3-live:#ff4655;--cr3-ice:#dce7f1;--cr3-gold:#e2c88e}
+.cr3-ribbon{display:flex;align-items:center;gap:12px;min-height:42px;padding:8px max(18px,calc((100vw - 1280px)/2));background:linear-gradient(90deg,#210d13,#101a25 55%,#0a1119);border-bottom:1px solid #ffffff18;color:#b7c4d1;font-size:9px;letter-spacing:.8px}
+.cr3-live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--cr3-live);box-shadow:0 0 0 4px #ff465522;animation:cr3-pulse 1.8s infinite}
+.cr3-ribbon strong{color:#fff;letter-spacing:1.3px}.cr3-ribbon .cr3-status{margin-left:auto;color:#9eacba;text-align:right}
+.cr3-hub{padding:28px 0 42px;background:radial-gradient(ellipse at 50% 0,#26384a66,transparent 65%),linear-gradient(180deg,#0a111a,#070b11);border-bottom:1px solid #ffffff18}
+.cr3-inner{width:min(1280px,calc(100% - 38px));margin:auto}
+.cr3-heading{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:18px}
+.cr3-kicker{color:var(--cr3-gold);font-size:9px;font-weight:900;letter-spacing:2px}.cr3-heading h2{margin:4px 0 0;font:900 clamp(28px,4vw,44px)/.95 "Barlow Condensed",sans-serif;letter-spacing:.2px}.cr3-heading p{margin:7px 0 0;color:#9cabb9;font-size:11px}
+.cr3-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:14px 0 18px}
+.cr3-controls input,.cr3-controls select{min-height:38px;min-width:140px;padding:8px 11px;border:1px solid #ffffff24;border-radius:7px;background:#0b141e;color:#edf3f8;font:11px "DM Sans",sans-serif}
+.cr3-controls input{flex:1;min-width:180px}.cr3-controls button{min-height:36px;padding:8px 13px;border:1px solid #ffffff24;border-radius:7px;background:#1a2a39;color:#fff;font-size:10px;font-weight:800;cursor:pointer}
+.cr3-controls button[aria-pressed=true]{border-color:#e2c88e88;background:#e2c88e18;color:#f5dca5}
+.cr3-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.cr3-game{position:relative;min-width:0;padding:15px;border:1px solid #ffffff1c;border-radius:10px;background:linear-gradient(145deg,#172635,#0b131d);box-shadow:0 8px 25px #0003;overflow:hidden}
+.cr3-game.is-live{border-color:#ff465566;background:linear-gradient(145deg,#291820,#101722)}
+.cr3-game-top{display:flex;justify-content:space-between;align-items:center;gap:8px;color:#aab8c6;font-size:9px;letter-spacing:.5px}
+.cr3-live-label{display:inline-flex;align-items:center;gap:7px;color:#ff7781;font-size:9px;font-weight:900;letter-spacing:1px}
+.cr3-game-teams{display:grid;gap:9px;margin:16px 0 12px}
+.cr3-teamrow{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;font-size:13px;font-weight:800;color:#f3f6f9}
+.cr3-teamrow small{display:block;margin-top:2px;color:#8797a7;font-size:8px;font-weight:600}
+.cr3-score{font:900 24px/.9 "Barlow Condensed",sans-serif;color:#fff;font-variant-numeric:tabular-nums}
+.cr3-game-foot{display:flex;justify-content:space-between;gap:8px;padding-top:10px;border-top:1px solid #ffffff16;color:#95a5b5;font-size:9px}
+.cr3-game details{margin-top:10px;color:#aab8c6;font-size:10px}.cr3-game summary{cursor:pointer;color:#d6bd83;font-weight:800}
+.cr3-game details p{line-height:1.6}.cr3-game a{color:#f0d69e;text-decoration:underline}
+.cr3-empty{grid-column:1/-1;padding:28px;text-align:center;border:1px dashed #ffffff30;border-radius:10px;background:#111b26;color:#aab8c6;font-size:11px}
+.cr3-empty strong{display:block;color:#f3f6f9;font:800 22px "Barlow Condensed";margin-bottom:5px}
+.cr3-footnote{margin-top:13px;color:#8292a2;font-size:9px;line-height:1.6}
+.cr3-error{color:#ff9ca3!important}
+@keyframes cr3-pulse{0%,100%{opacity:1;box-shadow:0 0 0 4px #ff465522}50%{opacity:.55;box-shadow:0 0 0 7px #ff46550c}}
+@media(max-width:900px){.cr3-board{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.cr3-inner{width:calc(100% - 26px)}.cr3-ribbon{padding:8px 13px;font-size:8px}.cr3-ribbon .cr3-status{max-width:46%;font-size:8px}.cr3-hub{padding:22px 0 30px}.cr3-heading{align-items:start;flex-direction:column}.cr3-board{grid-template-columns:1fr}.cr3-controls input{flex-basis:100%}.cr3-game{padding:14px}}
+@media(prefers-reduced-motion:reduce){.cr3-live-dot{animation:none}}
