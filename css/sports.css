@@ -7,3 +7,14 @@
 .grid .tile:nth-child(5){background:linear-gradient(0deg,#090b10f2,#090b1055),url('https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=900&q=80') center/cover}
 .grid .tile:nth-child(6){background:linear-gradient(0deg,#090b10f2,#090b1055),url('https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?auto=format&fit=crop&w=900&q=80') center/cover}
 .grid .tile:nth-child(7){background:linear-gradient(0deg,#090b10f2,#090b1055),url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=900&q=80') center/cover}
+
+/* Authenticated Supabase Fan Zone */
+.chat-auth{max-width:520px;margin:20px auto;padding:30px;background:var(--panel);border:1px solid var(--line)}
+.chat-auth h2{font:900 38px 'Barlow Condensed';margin:8px 0}
+.chat-auth label{display:block;color:var(--gold);font-size:11px;margin:13px 0 5px}
+.chat-auth input{width:100%;padding:12px;background:#070a0f;color:white;border:1px solid var(--line)}
+.chat-auth-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.chat-topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#10151e;border:1px solid var(--line);margin-bottom:10px}
+.chat-topbar b{display:block;font-size:13px}
+.chat-report{background:none;border:1px solid #ffffff33;color:#d9a6a6;font-size:9px;padding:4px 8px;cursor:pointer}
+.chat-compose .muted{font-size:10px}
