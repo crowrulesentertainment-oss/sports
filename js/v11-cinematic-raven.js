@@ -22,3 +22,6 @@ function install(){const body=document.body,main=$("main"),hero=$(".hero",main||
 function start(){if(install())return;const ob=new MutationObserver(()=>{if(install())ob.disconnect()});ob.observe(document.documentElement,{childList:true,subtree:true})}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();
+
+// V12 loader: keep sync status and helpers consistent across every V11 page.
+(()=>{"use strict";const add=(tag,attrs)=>{const n=document.createElement(tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);document.head.append(n)};if(!document.querySelector('link[href="css/v12-auto-sync.css"]'))add("link",{rel:"stylesheet",href:"css/v12-auto-sync.css"});if(!document.querySelector('script[src="js/v12-auto-sync.js"]'))add("script",{src:"js/v12-auto-sync.js",defer:""});})();
