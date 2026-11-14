@@ -19,21 +19,29 @@ Deno.serve(async(req:Request)=>{
  const db=createClient(url,anon,{global:{headers:{Authorization:authorization}},auth:{persistSession:false,autoRefreshToken:false}});
  const {data:user,error:userError}=await db.auth.getUser();
  if(userError||!user.user)return out({error:"invalid_user_session"},401,origin);
- let body:{action?:string};try{body=await req.json()}catch{return out({error:"invalid_json"},400,origin)}
+ let body:{action?:string;dueOnly?:boolean};try{body=await req.json()}catch{return out({error:"invalid_json"},400,origin)}
  if(!["status","run"].includes(body.action||""))return out({error:"unsupported_action"},400,origin);
- const {data:jobs,error:jobError}=await db.from("cr_sports_sync_jobs").select("id,sport,feed,endpoint,parameters,is_enabled,interval_seconds").order("sport").order("feed");
+ const {data:jobs,error:jobError}=await db.from("cr_sports_sync_jobs").select("id,sport,feed,endpoint,parameters,is_enabled,interval_seconds,schedule_enabled,next_run_at,consecutive_failures").order("sport").order("feed");
  if(jobError)return out({error:"admin_access_required_or_sync_schema_missing"},403,origin);
  if(body.action==="status"){
   const {data:runs}=await db.from("cr_sports_sync_runs").select("id,job_id,status,data_mode,records_received,error_code,error_message,started_at,finished_at").order("started_at",{ascending:false}).limit(25);
-  return out({ok:true,enabledJobs:(jobs||[]).filter(j=>j.is_enabled).length,jobs:jobs||[],recentRuns:runs||[],productionReady:Deno.env.get("SPORTSDATAIO_DATA_MODE")==="production"&&!!Deno.env.get("SPORTSDATAIO_API_KEY")},200,origin)
+  return out({ok:true,enabledJobs:(jobs||[]).filter(j=>j.is_enabled).length,jobs:jobs||[],recentRuns:runs||[],productionReady:Deno.env.get("SPORTSDATAIO_DATA_MODE")==="production"&&!!Deno.env.get("SPORTSDATAIO_API_KEY"),schedulerReady:false},200,origin)
  }
+ const dueOnly=body.dueOnly===true,nowMs=Date.now();
+ const enabled=(jobs||[]).filter(j=>j.is_enabled&&(!dueOnly||(j.schedule_enabled&&(!j.next_run_at||new Date(j.next_run_at).getTime()<=nowMs))));
+ if(!enabled.length)return out({ok:true,processed:0,message:dueOnly?"No scheduled jobs are due.":"No sync jobs are enabled.",schedulerReady:false},200,origin);
  const key=Deno.env.get("SPORTSDATAIO_API_KEY")||"",production=Deno.env.get("SPORTSDATAIO_DATA_MODE")==="production";
  if(!production||!key){
-  const {error}=await db.from("cr_sports_sync_runs").insert({status:"blocked",data_mode:"FREE_TRIAL_BLOCKED",triggered_by:user.user.id,error_code:"PRODUCTION_FEED_NOT_CONFIGURED",error_message:"Free Trial responses are scrambled and excluded from production synchronization.",details:{enabled_jobs:(jobs||[]).filter(j=>j.is_enabled).length,provider:"SportsDataIO"}});
-  if(error)return out({error:"admin_access_required_or_audit_write_failed"},403,origin);
-  return out({ok:false,blocked:true,trialDataBlocked:true,error:"production_feed_not_configured",message:"No provider calls were made. Configure a licensed production entitlement and server-side secrets before enabling sync."},409,origin)
+  let auditFailed=false;
+  for(const job of enabled){
+   const attemptedAt=new Date().toISOString(),nextRun=job.schedule_enabled?new Date(nowMs+Math.max(300,Number(job.interval_seconds)||900)*1000).toISOString():null;
+   const {error}=await db.from("cr_sports_sync_runs").insert({job_id:job.id,status:"blocked",data_mode:"FREE_TRIAL_BLOCKED",triggered_by:user.user.id,error_code:"PRODUCTION_FEED_NOT_CONFIGURED",error_message:"Free Trial responses are scrambled and excluded from production synchronization.",details:{sport:job.sport,feed:job.feed,provider:"SportsDataIO",provider_calls:0}});
+   if(error)auditFailed=true;
+   await db.from("cr_sports_sync_jobs").update({last_attempt_at:attemptedAt,last_status:"blocked",next_run_at:nextRun}).eq("id",job.id);
+  }
+  if(auditFailed)return out({error:"admin_access_required_or_audit_write_failed"},403,origin);
+  return out({ok:false,blocked:true,trialDataBlocked:true,error:"production_feed_not_configured",processed:0,blockedJobs:enabled.length,message:"No provider calls were made. Free Trial data remains blocked; scheduled jobs were recorded as blocked and deferred to their next interval."},409,origin)
  }
- const enabled=(jobs||[]).filter(j=>j.is_enabled);if(!enabled.length)return out({ok:true,message:"No sync jobs are enabled.",processed:0},200,origin);
  let processed=0,failed=0;
  for(const job of enabled){
   const started=new Date().toISOString();
@@ -51,8 +59,9 @@ Deno.serve(async(req:Request)=>{
    const {error:snapshotError}=await db.from("cr_sports_provider_snapshots").upsert({sport:job.sport,feed:job.feed,endpoint:job.endpoint,payload,data_mode:"PRODUCTION",retrieved_at:started,source_hash:hash},{onConflict:"sport,feed,endpoint"});
    if(snapshotError)throw Error("Private provider snapshot write failed.");
    await db.from("cr_sports_sync_runs").update({status:"success",records_received:Array.isArray(payload)?payload.length:1,finished_at:new Date().toISOString(),details:{sport:job.sport,feed:job.feed,endpoint:job.endpoint}}).eq("id",run.id);
-   await db.from("cr_sports_sync_jobs").update({last_started_at:started,last_completed_at:new Date().toISOString(),last_status:"success"}).eq("id",job.id);processed++
-  }catch(e){const message=e instanceof Error?e.message:"Unknown sync error";await db.from("cr_sports_sync_runs").update({status:"error",error_code:"SYNC_FAILED",error_message:message,finished_at:new Date().toISOString()}).eq("id",run.id);await db.from("cr_sports_sync_jobs").update({last_started_at:started,last_completed_at:new Date().toISOString(),last_status:"error"}).eq("id",job.id);failed++}
+   await db.from("cr_sports_sync_jobs").update({last_started_at:started,last_attempt_at:started,last_completed_at:new Date().toISOString(),last_status:"success",consecutive_failures:0,last_error_at:null,next_run_at:job.schedule_enabled?new Date(Date.now()+Math.max(300,Number(job.interval_seconds)||900)*1000).toISOString():null}).eq("id",job.id);processed++
+  }catch(e){const message=e instanceof Error?e.message:"Unknown sync error";await db.from("cr_sports_sync_runs").update({status:"error",error_code:"SYNC_FAILED",error_message:message,finished_at:new Date().toISOString()}).eq("id",run.id);const failures=Math.min(100,Number(job.consecutive_failures||0)+1),backoffSeconds=Math.min(86400,300*Math.pow(2,Math.min(failures-1,8)));
+   await db.from("cr_sports_sync_jobs").update({last_started_at:started,last_attempt_at:started,last_completed_at:new Date().toISOString(),last_status:"error",consecutive_failures:failures,last_error_at:new Date().toISOString(),next_run_at:job.schedule_enabled?new Date(Date.now()+backoffSeconds*1000).toISOString():null}).eq("id",job.id);failed++}
  }
  return out({ok:failed===0,processed,failed,publicPublishing:false,message:"Provider payloads remain private. Reviewed sport-specific normalizers are required before publication to scores, schedules, standings or statistics."},failed?207:200,origin)
 });
