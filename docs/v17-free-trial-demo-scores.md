@@ -23,8 +23,9 @@ V17 does not add a timer. Admin-triggered sync works first; unattended scheduled
 ## Rollout
 1. Review and merge this PR.
 2. Apply the V16 migration if it has not already been applied.
-3. Deploy the updated `sportsdata-sync` Edge Function with JWT verification enabled.
-4. Add the Free Trial key as the server-side `SPORTSDATAIO_API_KEY` secret and set `SPORTSDATAIO_DATA_MODE=trial`.
-5. Configure documented scores endpoints for each sport and run a manual sync.
-6. Confirm the public scoreboard labels imported events as Free Trial demo data.
-7. Add secure unattended scheduling in a later milestone.
+3. Apply `20261114070000_sports_trial_demo_mode_v17.sql` to permit the explicit demo data mode in the private audit/snapshot tables.
+4. Deploy the updated `sportsdata-sync` Edge Function with JWT verification enabled.
+5. Add the Free Trial key as the server-side `SPORTSDATAIO_API_KEY` secret and set `SPORTSDATAIO_DATA_MODE=trial`.
+6. Configure documented scores endpoints for each sport and run a manual sync.
+7. Confirm the public scoreboard labels imported events as Free Trial demo data.
+8. Add secure unattended scheduling in a later milestone.
