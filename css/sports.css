@@ -18,3 +18,21 @@
 .chat-topbar b{display:block;font-size:13px}
 .chat-report{background:none;border:1px solid #ffffff33;color:#d9a6a6;font-size:9px;padding:4px 8px;cursor:pointer}
 .chat-compose .muted{font-size:10px}
+
+/* CrowRules Sports moderation desk */
+.mod-top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:18px;background:#10151e;border:1px solid var(--line)}
+.mod-top h2,.mod-heading{font:900 30px 'Barlow Condensed';margin:5px 0}
+.mod-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}
+.mod-stat{background:var(--panel);border:1px solid var(--line);padding:16px}
+.mod-stat b{display:block;font:900 34px 'Barlow Condensed';color:var(--gold)}
+.mod-stat span,.mod-meta{font-size:11px;color:var(--muted)}
+.mod-actions{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin:14px 0}
+.mod-heading{margin:26px 0 12px}
+.mod-list{display:grid;gap:10px}
+.mod-card{background:var(--panel);border:1px solid var(--line);padding:16px}
+.mod-meta{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.mod-meta b{color:white}
+.mod-card p{line-height:1.5;overflow-wrap:anywhere}
+.mod-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.mod-footnote{margin-top:22px;font-size:12px}
+@media(max-width:600px){.mod-stats{grid-template-columns:1fr 1fr}.mod-card{padding:12px}}
