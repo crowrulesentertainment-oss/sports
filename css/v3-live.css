@@ -31,3 +31,5 @@
 @media(max-width:900px){.cr3-board{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.cr3-inner{width:calc(100% - 26px)}.cr3-ribbon{padding:8px 13px;font-size:8px}.cr3-ribbon .cr3-status{max-width:46%;font-size:8px}.cr3-hub{padding:22px 0 30px}.cr3-heading{align-items:start;flex-direction:column}.cr3-board{grid-template-columns:1fr}.cr3-controls input{flex-basis:100%}.cr3-game{padding:14px}}
 @media(prefers-reduced-motion:reduce){.cr3-live-dot{animation:none}}
+
+.cr3-demo-label{display:inline-flex;align-items:center;padding:4px 7px;border:1px solid #e2c88e88;border-radius:99px;background:#e2c88e18;color:#f2d79d;font-size:8px;font-weight:900;letter-spacing:.5px;white-space:nowrap}
