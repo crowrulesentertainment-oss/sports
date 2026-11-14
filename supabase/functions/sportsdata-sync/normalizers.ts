@@ -21,7 +21,7 @@ function nested(obj:any, paths:string[]): unknown {
   for (const path of paths) {
     let value: any = obj;
     for (const part of path.split(".")) value = value && typeof value === "object" ? get(value,[part]) : undefined;
-    if (value !== undefined && value !== null && value !== "") return value;
+    if ((typeof value === "string" || typeof value === "number") && value !== "") return value;
   }
   return undefined;
 }
