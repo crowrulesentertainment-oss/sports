@@ -71,7 +71,7 @@ alter table public.cr_sports_teams enable row level security;
 alter table public.cr_sports_leagues enable row level security;
 alter table public.cr_sports_league_teams enable row level security;
 drop policy if exists cr_sports_teams_public_read_published on public.cr_sports_teams;
-create policy cr_sports_teams_public_read_published on public.cr_sports_teams for select to anon,authenticated using(is_published=true and is_active=true);
+create policy cr_sports_teams_public_read_published on public.cr_sports_teams for select to anon using(is_published=true and is_active=true);
 drop policy if exists cr_sports_teams_universal_admin_manage on public.cr_sports_teams;
 create policy cr_sports_teams_universal_admin_manage on public.cr_sports_teams for all to authenticated using((select private.cr_universal_admin_check())) with check((select private.cr_universal_admin_check()));
 drop policy if exists cr_sports_leagues_public_read_published on public.cr_sports_leagues;
@@ -79,7 +79,7 @@ create policy cr_sports_leagues_public_read_published on public.cr_sports_league
 drop policy if exists cr_sports_leagues_universal_admin_manage on public.cr_sports_leagues;
 create policy cr_sports_leagues_universal_admin_manage on public.cr_sports_leagues for all to authenticated using((select private.cr_universal_admin_check())) with check((select private.cr_universal_admin_check()));
 drop policy if exists cr_sports_league_teams_public_read_published on public.cr_sports_league_teams;
-create policy cr_sports_league_teams_public_read_published on public.cr_sports_league_teams for select to anon,authenticated using(is_active=true and exists(select 1 from public.cr_sports_teams t where t.id=team_id and t.is_active=true and t.is_published=true) and exists(select 1 from public.cr_sports_leagues l where l.id=league_id and l.is_active=true and l.is_published=true));
+create policy cr_sports_league_teams_public_read_published on public.cr_sports_league_teams for select to anon using(is_active=true and exists(select 1 from public.cr_sports_teams t where t.id=team_id and t.is_active=true and t.is_published=true) and exists(select 1 from public.cr_sports_leagues l where l.id=league_id and l.is_active=true and l.is_published=true));
 drop policy if exists cr_sports_league_teams_universal_admin_manage on public.cr_sports_league_teams;
 create policy cr_sports_league_teams_universal_admin_manage on public.cr_sports_league_teams for all to authenticated using((select private.cr_universal_admin_check())) with check((select private.cr_universal_admin_check()));
 revoke all privileges on table public.cr_sports_teams,public.cr_sports_leagues,public.cr_sports_league_teams from anon,authenticated;
