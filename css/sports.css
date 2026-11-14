@@ -74,3 +74,7 @@
 .sa-row{padding:10px 0;border-bottom:1px solid var(--line)}.sa-row b,.sa-row small{display:block;overflow-wrap:anywhere}.sa-row small{font-size:10px;color:var(--muted);margin-top:3px}
 .sa-health-item{font-size:11px;padding:10px;margin:7px 0;background:#d4ae6510;border-left:2px solid var(--gold);overflow-wrap:anywhere}
 @media(max-width:800px){.sa-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.sa-grid{grid-template-columns:1fr}}
+
+/* Sports Data Integration Center */
+.si-banner{padding:16px;border:1px solid var(--gold);background:#d4ae6510;margin:16px 0}.si-banner b{font:800 18px 'Barlow Condensed';color:var(--gold)}.si-banner p{font-size:12px;color:var(--muted);margin:6px 0 0;line-height:1.6}
+.si-step{padding:11px 0;border-bottom:1px solid var(--line)}.si-step b{font-size:12px;color:var(--gold)}.si-step p{font-size:11px;color:var(--muted);margin:4px 0 0;line-height:1.5}
