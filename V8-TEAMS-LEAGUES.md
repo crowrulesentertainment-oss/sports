@@ -8,6 +8,7 @@ Adds:
 - `cr_sports_leagues`: independent league/competition profiles and publication controls.
 - `cr_sports_league_teams`: many-to-many team participation by season, division and conference.
 - Nullable `home_team_id`, `away_team_id`, and `league_id` foreign keys on `cr_sports_events`.
+- Existing Sports Admin event editor now includes managed home team, away team and league selectors; linked names also synchronize into legacy text fields for older integrations.
 
 Existing event team/league text fields and all event/story records are preserved. Existing events are backfilled into directory records and linked where matching source values exist.
 
