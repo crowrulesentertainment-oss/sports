@@ -1,0 +1,35 @@
+/* CrowRules Sports V4 — SportsDataIO Global API game center */
+.cr4-desk{margin:0;padding:26px 0 34px;background:radial-gradient(ellipse at 15% 0,#6b1d2b55,transparent 50%),linear-gradient(135deg,#0c141e,#080d14 70%);border-block:1px solid #ffffff1c;color:#eef3f7}
+.cr4-wrap{width:min(1280px,calc(100% - 38px));margin:auto}
+.cr4-top{display:flex;justify-content:space-between;align-items:end;gap:18px;margin-bottom:18px}
+.cr4-eyebrow{color:#e2c88e;font-size:9px;font-weight:900;letter-spacing:2px}
+.cr4-top h2{margin:5px 0 0;font:900 clamp(28px,4vw,42px)/.95 "Barlow Condensed",sans-serif}
+.cr4-top p{margin:7px 0 0;color:#9eacba;font-size:11px;line-height:1.6}
+.cr4-live-status{font-size:9px;color:#aebdca;text-align:right}
+.cr4-live-status strong{color:#e2c88e}
+.cr4-controls{display:grid;grid-template-columns:1.1fr 1.4fr 1fr 1fr auto;gap:8px;margin:16px 0}
+.cr4-controls select,.cr4-controls input,.cr4-controls button{width:100%;min-width:0;min-height:40px;padding:8px 10px;border:1px solid #ffffff27;border-radius:7px;background:#101b27;color:#f4f7fa;font:11px "DM Sans",sans-serif}
+.cr4-controls button{cursor:pointer;background:#8e2432;border-color:#b94652;font-weight:900}
+.cr4-modes{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 14px}
+.cr4-modes button{border:1px solid #ffffff26;border-radius:20px;background:#121e2a;color:#c4d0db;padding:7px 13px;font-size:9px;font-weight:900;cursor:pointer}
+.cr4-modes button[aria-pressed=true]{background:#a72b3b;color:white;border-color:#d25b67}
+.cr4-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.cr4-card{border:1px solid #ffffff20;border-radius:10px;background:linear-gradient(145deg,#1b2a39,#0d151e);padding:14px;min-width:0}
+.cr4-card.live{border-color:#e34b5c88;background:linear-gradient(145deg,#341a23,#101923)}
+.cr4-cardhead,.cr4-cardfoot{display:flex;justify-content:space-between;gap:10px;align-items:center;color:#9eafbd;font-size:9px}
+.cr4-state{color:#ff7b87;font-size:9px;font-weight:900;letter-spacing:1px}
+.cr4-teams{display:grid;gap:10px;margin:16px 0}
+.cr4-team{display:flex;justify-content:space-between;align-items:center;gap:10px;color:#f5f7f9;font-size:12px;font-weight:800}
+.cr4-score{font:900 25px/.9 "Barlow Condensed",sans-serif;font-variant-numeric:tabular-nums}
+.cr4-detail{margin-top:9px;padding-top:9px;border-top:1px solid #ffffff16;color:#9eafbd;font-size:9px;line-height:1.6}
+.cr4-periods{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.cr4-period{padding:3px 6px;border-radius:4px;background:#ffffff0c}
+.cr4-empty{padding:28px;border:1px dashed #ffffff36;border-radius:10px;text-align:center;color:#aebdca;font-size:11px;line-height:1.7;grid-column:1/-1}
+.cr4-empty strong{display:block;color:#fff;font:800 21px "Barlow Condensed";margin-bottom:5px}
+.cr4-note{margin-top:12px;color:#8495a4;font-size:9px;line-height:1.7}
+.cr4-error{color:#ff9ba4}
+.cr4-banner{padding:8px 14px;background:#111c27;border-bottom:1px solid #ffffff17;color:#aab8c6;font-size:9px;letter-spacing:.5px;display:flex;justify-content:center;gap:10px;align-items:center}
+.cr4-banner a{color:#e2c88e;font-weight:900;text-decoration:none}
+@media(max-width:900px){.cr4-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cr4-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.cr4-controls button{grid-column:span 2}}
+@media(max-width:600px){.cr4-wrap{width:calc(100% - 26px)}.cr4-desk{padding:20px 0 26px}.cr4-top{align-items:start;flex-direction:column}.cr4-live-status{text-align:left}.cr4-controls{grid-template-columns:1fr 1fr}.cr4-controls button{grid-column:span 2}.cr4-grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.cr4-card{scroll-behavior:auto}}
