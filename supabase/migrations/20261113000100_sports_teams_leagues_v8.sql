@@ -27,6 +27,12 @@ create table if not exists public.cr_sports_leagues (
   created_at timestamptz not null default now(), updated_at timestamptz not null default now(),
   constraint cr_sports_leagues_external_ref_unique unique (external_provider, external_id)
 );
+alter table public.cr_sports_teams
+  add constraint cr_sports_teams_logo_url_http_check check (logo_url is null or logo_url ~* '^https?://'),
+  add constraint cr_sports_teams_website_url_http_check check (website_url is null or website_url ~* '^https?://');
+alter table public.cr_sports_leagues
+  add constraint cr_sports_leagues_logo_url_http_check check (logo_url is null or logo_url ~* '^https?://'),
+  add constraint cr_sports_leagues_website_url_http_check check (website_url is null or website_url ~* '^https?://');
 create table if not exists public.cr_sports_league_teams (
   id uuid primary key default gen_random_uuid(),
   league_id uuid not null references public.cr_sports_leagues(id) on delete cascade,
