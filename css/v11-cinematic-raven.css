@@ -1,0 +1,92 @@
+/* V11 · CrowRules Sports cinematic raven design system */
+:root{--v11-ink:#05070b;--v11-panel:#0c1119;--v11-panel2:#131b26;--v11-red:#b8202b;--v11-red2:#ed3946;--v11-gold:#d5b875;--v11-white:#f7f5f0;--v11-muted:#a6a9b0;--v11-line:rgba(255,255,255,.11);--v11-max:1380px}
+html{scroll-behavior:smooth}body.cr-v2{background:radial-gradient(ellipse at 78% -12%,rgba(103,25,33,.22),transparent 36%),linear-gradient(180deg,#05070b,#090c12 56%,#05070b);color:var(--v11-white);font-family:Inter,"DM Sans",Arial,sans-serif}
+body.cr-v2:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.14;background-image:linear-gradient(115deg,transparent 0 48%,rgba(255,255,255,.025) 49%,transparent 50%),radial-gradient(rgba(255,255,255,.18) .6px,transparent .8px);background-size:100% 100%,5px 5px}
+body.cr-v2 .header{background:rgba(4,6,10,.94);border-bottom:1px solid rgba(213,184,117,.22);box-shadow:0 14px 40px #0008}
+body.cr-v2 .topline{height:3px;background:linear-gradient(90deg,#8f1520 0 24%,#d5b875 24% 26%,#f4f1e9 26% 27%,#080a0f 27%)}
+body.cr-v2 .nav{width:min(var(--v11-max),calc(100% - 48px));height:78px;gap:20px}
+body.cr-v2 .brand{display:flex;align-items:center;gap:11px;min-width:190px}
+body.cr-v2 .brand:before{content:"";display:block;width:42px;height:42px;flex:0 0 42px;background:url("../assets/raven-mark.svg") center/contain no-repeat;filter:drop-shadow(0 0 12px #d5b87555)}
+body.cr-v2 .brand b{font:900 23px/1 "Barlow Condensed",sans-serif;letter-spacing:2px;color:#fff}
+body.cr-v2 .brand b:before{content:none}
+body.cr-v2 .brand i{color:var(--v11-red2)}
+body.cr-v2 .brand small{font-size:8px;letter-spacing:2.3px;color:#9da2aa}
+body.cr-v2 .nav nav{gap:3px;justify-content:center}
+body.cr-v2 .nav nav a{font-size:9px;letter-spacing:.7px;padding:9px 8px;color:#c2c3c7}
+body.cr-v2 .nav nav a.active{color:#fff;background:linear-gradient(180deg,#b8202b22,#b8202b08);box-shadow:inset 0 -2px var(--v11-red2)}
+body.cr-v2 .nav>.btn{border:1px solid #d5b87566;background:linear-gradient(135deg,#201b15,#0b0d11);color:#f4dfad;padding:10px 16px}
+body.cr-v2 .nav button{border:1px solid #d5b87555;background:#11151c;color:#fff;border-radius:6px}
+body.cr-v2 .cr2-utility{background:#090c11;border-bottom:1px solid #ffffff0c;color:#8e929a;letter-spacing:1.1px;font-size:8px;padding-top:9px;padding-bottom:9px}
+body.cr-v2 .cr2-utility strong{color:var(--v11-red2);letter-spacing:2px}
+body.cr-v2 .ticker{background:#0a0d12;border-bottom:1px solid #ffffff12;padding:9px max(22px,calc((100vw - var(--v11-max))/2));font-size:8px;letter-spacing:1.2px;text-transform:uppercase;color:#a8a9ad}
+body.cr-v2 .ticker b{color:var(--v11-gold)}
+body.cr-v2 #dataStatus{color:#bfc2c8}
+body.cr-v2 .hero{min-height:650px;border-bottom:1px solid #d5b87535;background:#07090d;isolation:isolate}
+body.cr-v2 .hero-bg{background-image:linear-gradient(90deg,rgba(3,5,8,.97) 0%,rgba(3,5,8,.83) 36%,rgba(3,5,8,.25) 73%,rgba(3,5,8,.58) 100%),linear-gradient(0deg,#05070b 0%,transparent 45%),var(--v11-hero-image);background-position:center,center,center 42%;background-size:cover;background-repeat:no-repeat;filter:saturate(.75) contrast(1.08);transform:scale(1.015)}
+body.cr-v2 .hero:after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:linear-gradient(115deg,transparent 0 58%,rgba(184,32,43,.10) 58.1%,transparent 75%),linear-gradient(0deg,rgba(5,7,11,.45),transparent 30%)}
+body.cr-v2 .hero-inner{z-index:2;width:min(var(--v11-max),calc(100% - 56px));padding:100px 0 96px}
+body.cr-v2 .hero-inner>small{display:inline-flex;align-items:center;gap:10px;color:var(--v11-gold);font-size:9px;letter-spacing:3px}
+body.cr-v2 .hero-inner>small:before{content:"";width:28px;height:1px;background:var(--v11-red2)}
+body.cr-v2 .hero h1{font-size:clamp(64px,9.4vw,126px);line-height:.79;letter-spacing:-1.5px;margin:27px 0 24px;text-shadow:0 12px 40px #000c;max-width:900px}
+body.cr-v2 .hero h1 em{color:#f0c6c1;text-shadow:0 0 36px #b8202b55}
+body.cr-v2 .hero p{max-width:600px;color:#d1d0cc;font-size:14px;line-height:1.9}
+body.cr-v2 .hero .btn{padding:13px 19px;border-radius:2px;letter-spacing:1.2px;font-size:9px}
+body.cr-v2 .hero .btn.red{background:linear-gradient(115deg,#d12b38,#85141e);box-shadow:0 12px 35px #b8202b40}
+body.cr-v2 .hero .btn.glass{border:1px solid #ffffff55;background:#080a0d88}
+body.cr-v2 .hero .meta{gap:26px;margin-top:34px;color:#d4d0c8;font-size:11px;letter-spacing:2px}
+body.cr-v2 .hero .meta b{font-weight:800}
+body.cr-v2 .hero .raven{font-size:0;right:5%;bottom:8%;width:min(25vw,310px);height:min(25vw,310px);background:url("../assets/raven-mark.svg") center/contain no-repeat;opacity:.14;filter:drop-shadow(0 0 30px #d5b875);z-index:1}
+body.cr-v2 .section{padding:76px 0}
+body.cr-v2 .section.dark{background:linear-gradient(180deg,#090d13,#0c1119);border-block:1px solid #ffffff10}
+body.cr-v2 .sectionhead{margin-bottom:30px}
+body.cr-v2 .sectionhead small{color:var(--v11-red2);letter-spacing:3px;font-size:8px}
+body.cr-v2 .sectionhead h2{font:900 clamp(38px,5vw,62px)/.92 "Barlow Condensed",sans-serif;letter-spacing:.4px;text-transform:uppercase}
+body.cr-v2 .sectionhead p{color:#a8abb2;max-width:740px;line-height:1.8;font-size:11px}
+body.cr-v2 .sport,body.cr-v2 .feature,body.cr-v2 .event,body.cr-v2 .story,body.cr-v2 .pick,body.cr-v2 .panel,body.cr-v2 .team{border:1px solid #ffffff14;border-radius:3px;background:linear-gradient(145deg,#171d26,#0a0e14);box-shadow:0 12px 34px #0004}
+body.cr-v2 .sport:hover,body.cr-v2 .feature:hover,body.cr-v2 .team:hover{border-color:#d5b87588;box-shadow:0 18px 50px #0009;transform:translateY(-4px)}
+body.cr-v2 .sport{min-height:145px;padding:19px}
+body.cr-v2 .sport span{font-size:26px}
+body.cr-v2 .sport b,body.cr-v2 .feature h3{font:800 22px "Barlow Condensed",sans-serif;letter-spacing:.4px}
+body.cr-v2 .sport small{color:#a7a8ac;line-height:1.6}
+body.cr-v2 .feature{padding:22px;min-height:180px;position:relative;overflow:hidden}
+body.cr-v2 .feature:after{content:"";position:absolute;right:-26px;bottom:-38px;width:120px;height:120px;background:url("../assets/raven-mark.svg") center/contain no-repeat;opacity:.06;pointer-events:none}
+body.cr-v2 .feature> b{color:var(--v11-gold)}
+body.cr-v2 .feature small{color:#e5bd74;letter-spacing:1.4px}
+body.cr-v2 .pnw{position:relative;overflow:hidden;background:linear-gradient(90deg,#090d13ed,#10151ce8),url("https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=2000&q=85") center/cover;border-block:1px solid #d5b87533}
+body.cr-v2 .pnw h2{font:900 clamp(48px,7vw,78px)/.88 "Barlow Condensed",sans-serif}
+body.cr-v2 .pnw p{max-width:600px;color:#c1c2c5}
+body.cr-v2 .filters input,body.cr-v2 .filters select,body.cr-v2 .search,body.cr-v2 .panel input,body.cr-v2 .cr9-form input,body.cr-v2 .cr9-form select{border:1px solid #ffffff22;border-radius:2px;background:#090d13;color:#f4f1e9;padding:12px}
+body.cr-v2 .empty{border:1px dashed #d5b87555;border-radius:3px;background:linear-gradient(145deg,#171b22,#0b0e13);padding:34px}
+body.cr-v2 .empty b{color:var(--v11-gold)}
+body.cr-v2 .safety{border:1px solid #d5b87555;border-radius:2px;background:#d5b8750b}
+body.cr-v2 footer{background:#040609;border-top:1px solid #d5b87535}
+body.cr-v2 .footgrid b{color:var(--v11-gold);letter-spacing:1.8px}
+body.cr-v2 .copyright{border-color:#ffffff14}
+body.cr-v2 .cr9-desk{background:linear-gradient(180deg,#080b10,#0e1219);border-block:1px solid #d5b87544}
+body.cr-v2 .cr9-wrap{max-width:var(--v11-max)}
+body.cr-v2 .cr9-wrap h2{font:900 clamp(38px,5vw,62px)/.95 "Barlow Condensed",sans-serif;letter-spacing:1px}
+body.cr-v2 .cr9-grid button,body.cr-v2 .cr9-form button{border-radius:2px;letter-spacing:.7px}
+body.cr-v2 .cr9-grid button.selected,body.cr-v2 .cr9-grid button:hover{border-color:#e4bd77;background:#321419}
+body.cr-v2 .cr9-form{border:1px solid #ffffff14;border-radius:2px;background:#111720}
+.v11-scene-rail{display:grid;grid-template-columns:1.35fr 1fr 1fr;gap:3px;background:#05070b;padding:3px;position:relative;z-index:3}
+.v11-scene{min-height:170px;position:relative;overflow:hidden;background:#111 center/cover no-repeat}
+.v11-scene:before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#05070bf2,transparent 75%),linear-gradient(90deg,#05070b44,transparent)}
+.v11-scene:after{content:"";position:absolute;inset:0;border:1px solid #d5b87525;pointer-events:none}
+.v11-scene span{position:absolute;left:22px;bottom:18px;z-index:1;font:800 21px "Barlow Condensed",sans-serif;letter-spacing:1.5px;text-transform:uppercase}
+.v11-scene small{display:block;color:#d5b875;font:700 8px "DM Sans",sans-serif;letter-spacing:2px;margin-bottom:4px}
+.v11-scene:nth-child(1){background-image:url("https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=85")}
+.v11-scene:nth-child(2){background-image:url("https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=900&q=85")}
+.v11-scene:nth-child(3){background-image:url("https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=900&q=85")}
+.v11-scene-rail:not(.v11-home-rail) .v11-scene{min-height:118px}
+.v11-scene-rail:not(.v11-home-rail) .v11-scene span{font-size:16px;left:16px;bottom:13px}
+.v11-section-kicker{color:var(--v11-red2);font-size:8px;font-weight:900;letter-spacing:2.5px}
+.v11-raven-stamp{display:inline-flex;align-items:center;gap:8px;color:#d5b875;font-size:8px;font-weight:900;letter-spacing:2px}
+.v11-raven-stamp:before{content:"";width:19px;height:19px;background:url("../assets/raven-mark.svg") center/contain no-repeat}
+body.cr-v2 .cr2-bottomnav{background:rgba(5,7,11,.96);border:1px solid #d5b87555;border-radius:3px}
+body.cr-v2 .cr2-bottomnav a.active{color:#f0c77c;background:#b8202b1c}
+body.cr-v2 .cr2-search-dialog{border:1px solid #d5b87566;border-radius:3px;background:linear-gradient(145deg,#151a22,#07090d)}
+body.cr-v2 .cr2-search-trigger{border-radius:2px;border-color:#d5b87555;background:#111720}
+@media(max-width:1050px){body.cr-v2 .nav{gap:10px}body.cr-v2 .brand{min-width:170px}body.cr-v2 .nav nav a{font-size:8px;padding:8px 5px}}
+@media(max-width:850px){body.cr-v2 .nav{width:calc(100% - 28px);height:68px}body.cr-v2 .brand b{font-size:20px}body.cr-v2 .nav nav{top:68px;background:#080b10;border-bottom:1px solid #d5b87544;max-height:75vh;overflow:auto}body.cr-v2 .nav nav a{font-size:10px;padding:10px 9px}body.cr-v2 .hero{min-height:540px}body.cr-v2 .hero-inner{width:calc(100% - 34px);padding:76px 0}body.cr-v2 .hero h1{font-size:clamp(58px,12vw,90px)}}
+@media(max-width:600px){body.cr-v2 .hero{min-height:490px}body.cr-v2 .hero-inner{padding:64px 0}body.cr-v2 .hero h1{font-size:clamp(54px,14vw,74px);letter-spacing:-.5px}body.cr-v2 .hero p{font-size:12px;max-width:94%}body.cr-v2 .hero .meta{gap:12px;font-size:9px;letter-spacing:1px;flex-wrap:wrap}body.cr-v2 .section{padding:52px 0}.v11-scene-rail{grid-template-columns:1fr 1fr}.v11-scene:nth-child(1){grid-column:1/-1}.v11-scene{min-height:130px}.v11-scene-rail:not(.v11-home-rail) .v11-scene{min-height:100px}.v11-scene span{left:13px;bottom:12px;font-size:17px}.v11-scene small{font-size:7px}}
+@media(prefers-reduced-motion:reduce){body.cr-v2 *,body.cr-v2 *:before,body.cr-v2 *:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
