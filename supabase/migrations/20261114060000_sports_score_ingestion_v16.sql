@@ -4,7 +4,7 @@
 alter table public.cr_sports_sync_jobs
   add column if not exists schedule_enabled boolean not null default false,
   add column if not exists next_run_at timestamptz,
-  add column if not exists consecutive_failures integer not null default 0,
+  add column if not exists consecutive_failures integer not null default 0 check (consecutive_failures between 0 and 100),
   add column if not exists last_error_at timestamptz,
   add column if not exists last_attempt_at timestamptz;
 create index if not exists cr_sports_sync_jobs_due_idx
