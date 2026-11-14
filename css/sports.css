@@ -59,3 +59,18 @@
 .sc-record-actions button{font-size:10px}
 .sc-note{font-size:12px;margin-top:18px}
 @media(max-width:800px){.sc-workspace{grid-template-columns:1fr}.sc-record{align-items:flex-start;flex-direction:column}.sc-record-actions button{white-space:normal}}
+
+/* CrowRules Sports Data & Analytics Center */
+.sa-controls{display:flex;gap:8px;flex-wrap:wrap}.sa-updated{font-size:11px;margin:12px 0}
+.sa-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0}
+.sa-metric{background:var(--panel);border:1px solid var(--line);padding:15px;min-width:0}
+.sa-metric span,.sa-metric small{display:block;color:var(--muted);font-size:10px}
+.sa-metric b{display:block;font:900 34px 'Barlow Condensed';color:var(--gold);margin:4px 0}
+.sa-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.sa-grid>.sc-list-panel{min-width:0}
+.sa-grid h3{font:800 24px 'Barlow Condensed';margin:5px 0 14px}
+.sa-bar-row{display:grid;grid-template-columns:minmax(90px,1fr) minmax(70px,2fr) 28px;gap:9px;align-items:center;margin:12px 0;font-size:11px}
+.sa-track{height:9px;background:#252c37;border-radius:8px;overflow:hidden}.sa-track i{display:block;height:100%;background:linear-gradient(90deg,var(--red),var(--gold));border-radius:8px}
+.sa-coverage-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:11px}.sa-coverage-row span{color:var(--muted)}
+.sa-row{padding:10px 0;border-bottom:1px solid var(--line)}.sa-row b,.sa-row small{display:block;overflow-wrap:anywhere}.sa-row small{font-size:10px;color:var(--muted);margin-top:3px}
+.sa-health-item{font-size:11px;padding:10px;margin:7px 0;background:#d4ae6510;border-left:2px solid var(--gold);overflow-wrap:anywhere}
+@media(max-width:800px){.sa-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.sa-grid{grid-template-columns:1fr}}
