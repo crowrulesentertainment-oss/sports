@@ -25,6 +25,6 @@ function paint(){
 }
 document.addEventListener("click",e=>{const b=e.target.closest("[data-team-action]");if(!b)return;const n=b.dataset.team;if(b.dataset.teamAction==="add")follow(n);else unfollow(n)});
 function banner(){if(document.querySelector(".cr5-sitebar"))return;const main=$("main");if(!main)return;const bar=document.createElement("div");bar.className="cr5-sitebar";bar.innerHTML='<span>V5 · YOUR SPORTS, YOUR WAY</span><a href="watchlist.html">MY SPORTS <b>'+getFavs().length+'</b> ↗</a>';main.prepend(bar)}
-function start(){banner();paint();window.addEventListener("storage",e=>{if(e.key==="crs_favs"){banner();paint()}})}
+function start(){banner();paint();const mount=$("#watchlistMount");if(mount){new MutationObserver(()=>{if(!mount.querySelector(".cr5-dashboard"))paint()}).observe(mount,{childList:true})}window.addEventListener("storage",e=>{if(e.key==="crs_favs"){banner();paint()}})}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start);else start();
 })();
