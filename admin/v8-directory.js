@@ -25,12 +25,13 @@ const addNav=(id,label,fn)=>{const b=document.createElement("button");b.classNam
 const entry=addNav("v8-teams-entry","TEAMS DIRECTORY",()=>open("teams"));
 const entry2=addNav("v8-leagues-entry","LEAGUES MANAGEMENT",()=>open("leagues"));
 const entry3=addNav("v8-memberships-entry","LEAGUE MEMBERSHIPS",()=>open("memberships"));
-function open(next){mode=next;section.classList.add("v8-active");$("overview").hidden=true;$("records").hidden=true;if($("v7-center"))$("v7-center").classList.remove("v7-active");[entry,entry2,entry3].forEach(x=>x.classList.remove("active"));({teams:entry,leagues:entry2,memberships:entry3}[next]).classList.add("active");render();}
+function open(next){mode=next;section.classList.add("v8-active");const oldV7=$("v7-open");if(oldV7)oldV7.classList.remove("active");document.querySelectorAll("#nav button").forEach(x=>x.classList.remove("active"));$("overview").hidden=true;$("records").hidden=true;if($("v7-center"))$("v7-center").classList.remove("v7-active");[entry,entry2,entry3].forEach(x=>x.classList.remove("active"));({teams:entry,leagues:entry2,memberships:entry3}[next]).classList.add("active");render();}
 function back(){section.classList.remove("v8-active");[entry,entry2,entry3].forEach(x=>x.classList.remove("active"));$("overview").hidden=false;$("records").hidden=true;}
 section.querySelectorAll("[data-v8-mode]").forEach(b=>b.onclick=()=>{mode=b.dataset.v8Mode;render()});
 $("v8-back").onclick=back;$("v8-refresh").onclick=refresh;$("v8-add").onclick=()=>form(null);$("v8-cancel").onclick=()=>$("v8-modal").classList.remove("open");$("v8-search").oninput=render;
 $("v8-form").onsubmit=save;
 section.querySelector("#v8-body").onclick=async e=>{const b=e.target.closest("[data-edit],[data-delete]");if(!b)return;const row=rows[Number(b.dataset.edit??b.dataset.delete)];if(b.hasAttribute("data-edit"))form(row);else await remove(row)};
+document.addEventListener("click",e=>{if(e.target.closest("#v7-open")||e.target.closest("#nav button")){section.classList.remove("v8-active");[entry,entry2,entry3].forEach(x=>x.classList.remove("active"));}});
 return true;
 }
 async function refresh(){const client=db();if(!client){$("v8-note").textContent="Universal Admin Supabase client is unavailable.";return;}
