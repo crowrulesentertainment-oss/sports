@@ -35,7 +35,7 @@ Deno.serve(async(req:Request)=>{
   if(!(SPORTS as readonly string[]).includes(sport)||!FEEDS.has(feed)||!ENDPOINT.test(endpoint)||endpoint.includes(".."))return out({ok:false,error:"invalid_endpoint_configuration",message:"Choose a supported sport/feed and enter a valid documented endpoint path."},400,origin);
   if(!providerReady)return out({ok:false,error:"provider_not_configured",message:"Configure the SportsDataIO Free Trial key and SPORTSDATAIO_DATA_MODE=trial in Supabase Edge Function secrets before testing."},409,origin);
   const q=new URLSearchParams(),p=body.parameters&&typeof body.parameters==="object"?body.parameters:{};
-  for(const [k,v] of Object.entries(p)){if(!PARAMS.has(k)||v===null||v===undefined)continue;const value=String(v);if(value.length>48||!/^[A-Za-z0-9._-]+$/.test(value)||(k==="date"&&!/^\\d{4}-\\d{2}-\\d{2}$/.test(value)))return out({ok:false,error:"invalid_parameter",message:"Invalid provider parameter: "+k},400,origin);q.set(k,value)}
+  for(const [k,v] of Object.entries(p)){if(!PARAMS.has(k)||v===null||v===undefined)continue;const value=String(v);if(value.length>48||!/^[A-Za-z0-9._-]+$/.test(value)||(k==="date"&&!/^\d{4}-\d{2}-\d{2}$/.test(value)))return out({ok:false,error:"invalid_parameter",message:"Invalid provider parameter: "+k},400,origin);q.set(k,value)}
   try{
    const providerUrl="https://api.sportsdata.io/v3/"+sport+"/"+feed+"/json/"+endpoint+(q.size?"?"+q.toString():"");
    const response=await fetch(providerUrl,{headers:{"Ocp-Apim-Subscription-Key":key,"Accept":"application/json"},signal:AbortSignal.timeout(15000)});
